@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:id="@id/textView_exp_content_view_username" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="USERNAME" style="@style/TextBaseStylePinkContent3" />
+    <EditText android:id="@id/editText_exp_content_view_exp" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="經驗調整： -100,000 至 100,000" android:digits="1234567890-" android:inputType="phone" style="@style/EditTextStandardSingleLinePeach" />
+</LinearLayout>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="chatroom_background" format="reference" />
+    <attr name="chatroom_bubble_background" format="reference" />
+    <attr name="chatroom_reply_color" format="reference|color" />
+
+    <attr name="civ_border_color" format="color" />
+    <attr name="civ_border_overlay" format="boolean" />
+    <attr name="civ_border_width" format="dimension" />
+    <attr name="civ_fill_color" format="color" />
+
+    <attr name="custom_background_color" format="reference|color" />
+    <attr name="custom_background_color_dark" format="reference|color" />
+    <attr name="custom_text_black_color" format="reference|color" />
+    <attr name="custom_text_black_color_dark" format="reference|color" />
+    <attr name="custom_text_black_color_light" format="reference|color" />
+    <attr name="custom_transparent_white" format="reference|color" />
+
+    <attr name="exp_angle" format="float" />
+    <attr name="exp_border_color" format="color" />
+    <attr name="exp_border_color_dark" format="color" />
+    <attr name="exp_border_width" format="dimension" />
+    <attr name="exp_fill_color" format="color" />
+    <attr name="exp_fill_color_dark" format="color" />
+    <attr name="exp_fill_color_light" format="color" />
+    <attr name="exp_fill_width" format="dimension" />
+
+    <attr name="highlightColor" format="reference|color" />
+    <attr name="textColorError" format="reference|color" />
+
+    <attr name="riv_border_color" format="color" />
+    <attr name="riv_border_width" format="dimension" />
+    <attr name="riv_corner_radius" format="dimension" />
+    <attr name="riv_corner_radius_bottom_left" format="dimension" />
+    <attr name="riv_corner_radius_bottom_right" format="dimension" />
+    <attr name="riv_corner_radius_top_left" format="dimension" />
+    <attr name="riv_corner_radius_top_right" format="dimension" />
+    <attr name="riv_mutate_background" format="boolean" />
+    <attr name="riv_oval" format="boolean" />
+    <attr name="riv_tile_mode">
+        <enum name="clamp" value="0" />
+        <enum name="repeat" value="1" />
+        <enum name="mirror" value="2" />
+    </attr>
+    <attr name="riv_tile_mode_x">
+        <enum name="clamp" value="0" />
+        <enum name="repeat" value="1" />
+        <enum name="mirror" value="2" />
+    </attr>
+    <attr name="riv_tile_mode_y">
+        <enum name="clamp" value="0" />
+        <enum name="repeat" value="1" />
+        <enum name="mirror" value="2" />
+    </attr>
+
+    <attr name="scv_animation_duration" format="integer" />
+    <attr name="scv_animation_enabled" format="boolean" />
+    <attr name="scv_background_color" format="reference|color" />
+    <attr name="scv_crop_enabled" format="boolean" />
+    <attr name="scv_crop_mode">
+        <enum name="fit_image" value="0" />
+        <enum name="ratio_4_3" value="1" />
+        <enum name="ratio_3_4" value="2" />
+        <enum name="square" value="3" />
+        <enum name="ratio_16_9" value="4" />
+        <enum name="ratio_9_16" value="5" />
+        <enum name="free" value="6" />
+        <enum name="custom" value="7" />
+        <enum name="circle" value="8" />
+        <enum name="circle_square" value="9" />
+    </attr>
+    <attr name="scv_frame_color" format="reference|color" />
+    <attr name="scv_frame_stroke_weight" format="dimension" />
+    <attr name="scv_guide_color" format="reference|color" />
+    <attr name="scv_guide_show_mode">
+        <enum name="show_always" value="1" />
+        <enum name="show_on_touch" value="2" />
+        <enum name="not_show" value="3" />
+    </attr>
+    <attr name="scv_guide_stroke_weight" format="dimension" />
+    <attr name="scv_handle_color" format="reference|color" />
+    <attr name="scv_handle_shadow_enabled" format="boolean" />
+    <attr name="scv_handle_show_mode">
+        <enum name="show_always" value="1" />
+        <enum name="show_on_touch" value="2" />
+        <enum name="not_show" value="3" />
+    </attr>
+    <attr name="scv_handle_size" format="dimension" />
+    <attr name="scv_img_src" format="reference" />
+    <attr name="scv_initial_frame_scale" format="float" />
+    <attr name="scv_min_frame_size" format="dimension" />
+    <attr name="scv_overlay_color" format="reference|color" />
+    <attr name="scv_touch_padding" format="dimension" />
+
+    <attr name="showCircle" format="boolean" />
+    <attr name="showHandles">
+        <enum name="changing" value="0" />
+        <enum name="always" value="1" />
+        <enum name="never" value="2" />
+    </attr>
+    <attr name="showThirds" format="boolean" />
+</resources>

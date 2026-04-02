@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple android:color="@color/colorPrimaryDark"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/size_button_filter_corner_radius" />
+            <stroke android:width="@dimen/size_button_filter_stroke_width" android:color="@color/filter_button_stroke" />
+            <solid android:color="@color/filter_button_futari" />
+            <size android:height="@dimen/size_button_tag_height" />
+            <padding android:left="@dimen/size_button_filter_padding_left" android:top="@dimen/size_button_filter_padding_top" android:right="@dimen/size_button_filter_padding_right" android:bottom="@dimen/size_button_filter_padding_bottom" />
+        </shape>
+    </item>
+</ripple>

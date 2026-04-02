@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <ImageView android:id="@id/imageView_support_us_paypal_recycler_view_cell" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail" android:layout_marginRight="@dimen/padding_2" android:src="@drawable/placeholder_avatar_2" style="@style/ImageViewBaseStyleCenterCrop" />
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:id="@id/textView_support_us_paypal_recycler_view_cell_title" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/title_support_us" style="@style/TextBaseStyleGrayDarkTitle3" />
+            <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_2">
+                <TextView android:id="@id/textView_support_us_paypal_recycler_view_cell_price_unit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_1" android:text="@string/support_us_paypal_price_unit" style="@style/TextBaseStylePinkTitle3" />
+                <TextView android:id="@id/textView_support_us_paypal_recycler_view_cell_price" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="1.00" style="@style/TextBaseStylePinkTitle3" />
+            </LinearLayout>
+            <TextView android:id="@id/textView_support_us_paypal_recycler_view_cell_description" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_1" android:text="@string/support_us_paypal_description_default" style="@style/TextBaseStyleGrayContent3" />
+        </LinearLayout>
+    </LinearLayout>
+    <include layout="@layout/layout_separator" />
+</LinearLayout>

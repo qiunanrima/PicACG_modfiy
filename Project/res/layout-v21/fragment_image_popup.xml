@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@id/relativeLayout_image_popup_container" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/imageView_image_popup_large_image" android:layout_width="fill_parent" android:layout_height="fill_parent" style="@style/ImageViewBaseStyleFitCenter" />
+    <ImageButton android:id="@id/imageButton_image_popup_close_popup" android:background="@color/transparent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:src="@drawable/icon_cross" android:layout_alignParentTop="true" android:layout_alignParentRight="true" />
+</RelativeLayout>

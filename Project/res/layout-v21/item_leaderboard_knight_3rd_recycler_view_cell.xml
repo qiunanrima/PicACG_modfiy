@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="horizontal" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <FrameLayout android:background="@color/colorPrimaryDark" android:layout_width="@dimen/size_leaderboard_order_width" android:layout_height="fill_parent">
+            <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <ImageView android:id="@id/imageView_leaderboard_knight_order_recycler_view_cell_order" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:src="@drawable/leaderboard_icon_top_3" style="@style/ImageViewBaseStyleFitCenter" />
+                <TextView android:textStyle="bold" android:gravity="center" android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_order" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="3" style="@style/TextBaseStylesWhiteTitle1" />
+            </LinearLayout>
+            <FrameLayout android:layout_gravity="bottom" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="@dimen/padding_2" />
+        </FrameLayout>
+        <FrameLayout android:id="@id/frameLayout_comment_recycler_view_cell_user_thumb" android:clipChildren="false" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail" android:layout_margin="@dimen/padding_2">
+            <de.hdodenhof.circleimageview.CircleImageView android:layout_gravity="center" android:id="@id/imageView_leaderboard_knight_order_recycler_view_cell_avatar" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail" android:src="@drawable/placeholder_avatar_2" app:civ_border_color="@color/colorPrimary" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" />
+            <ImageView android:layout_gravity="center" android:id="@id/imageView_leaderboard_knight_order_recycler_view_cell_user_thumb_verified" android:visibility="gone" android:layout_width="@dimen/size_image_character_icon" android:layout_height="@dimen/size_image_character_icon" android:src="@drawable/verified_icon_fill" style="@style/ImageViewBaseStyleFitCenter" />
+        </FrameLayout>
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_2">
+            <TextView android:textStyle="bold" android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_name" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="騎士大名" style="@style/TextBaseStyleGrayDarkContent1" />
+            <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_1">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lv." style="@style/TextBaseStylePinkContent2" />
+                <TextView android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_level" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="@dimen/text_min_width_size_level" android:text="100" style="@style/TextBaseStylePinkContent2" />
+                <TextView android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="服務器君的錯" style="@style/TextBaseStylePinkContent2" />
+            </LinearLayout>
+            <TextView android:textStyle="bold" android:gravity="center_vertical" android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_comic" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="1000" android:drawableLeft="@drawable/icon_comic" android:drawablePadding="@dimen/padding_2" style="@style/TextBaseStyleGrayTitle3" />
+        </LinearLayout>
+    </LinearLayout>
+    <include layout="@layout/layout_separator" />
+</LinearLayout>

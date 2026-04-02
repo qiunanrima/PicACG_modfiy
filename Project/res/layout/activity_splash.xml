@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:background="@color/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:id="@id/activity_splash" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <com.picacomic.fregata.utils.views.SquareImageView android:layout_width="fill_parent" android:layout_height="wrap_content" android:src="@drawable/icon_256" style="@style/ImageViewBaseStyleFitCenter" />
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_splash_error" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:textColor="@color/black" android:gravity="center" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="@string/splash_error" />
+            <Button android:id="@id/button_splash_error" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="@string/splash_retry" />
+        </LinearLayout>
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_splash_options" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <Button android:id="@id/button_splash_server1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="@string/splash_server_1" />
+            <TextView android:textColor="@color/black" android:gravity="center" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="@string/splash_remark" />
+            <Button android:id="@id/button_splash_server2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="@string/splash_server_2" />
+            <Button android:id="@id/button_splash_server3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="@string/splash_server_3" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

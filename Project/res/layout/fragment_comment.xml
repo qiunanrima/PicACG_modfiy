@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@color/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comment_input_bar" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true">
+        <FrameLayout android:background="@color/gray" android:layout_width="fill_parent" android:layout_height="1.0dip" />
+        <LinearLayout android:orientation="horizontal" android:background="@color/background" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layoutDirection="rtl">
+            <Button android:gravity="center" android:layout_gravity="center_vertical" android:id="@id/button_comment_cancel_reply" android:padding="@dimen/padding_2" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="@dimen/size_message_bar_button_height" android:minWidth="24.0dip" android:minHeight="16.0dip" android:text="@string/comment_reply_cancel" style="@style/ButtonTransparentBgPinkContent2" />
+            <Button android:layout_gravity="center_vertical" android:id="@id/button_comment_post" android:layout_width="wrap_content" android:layout_height="@dimen/size_message_bar_button_height" android:text="@string/comment_send" style="@style/ButtonSmallRoundPink" />
+            <EditText android:gravity="center|left" android:layout_gravity="center_vertical" android:id="@id/editText_comment_input_field" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/comment_edit_hint" android:maxLines="4" android:maxLength="100" style="@style/TextBaseStyleGrayDarkContent1" />
+        </LinearLayout>
+    </LinearLayout>
+    <androidx.coordinatorlayout.widget.CoordinatorLayout android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_above="@id/linearLayout_comment_input_bar">
+        <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <androidx.appcompat.widget.Toolbar android:id="@id/toolbar" android:layout_width="fill_parent" android:layout_height="?actionBarSize" app:layout_scrollFlags="enterAlways|scroll" app:popupTheme="@style/ThemeOverlay.AppCompat.Light" style="@style/AppTheme.PopupOverlay" />
+            <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_comment_page" android:background="@color/background" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="?actionBarSize">
+                <TextView android:gravity="center" android:layout_gravity="center" android:paddingLeft="@dimen/padding_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comment_jump_page_title" style="@style/TextBaseStyleGrayDarkContent2" />
+                <EditText android:gravity="center|right" android:layout_gravity="center|right" android:id="@id/editText_comment_current_page" android:background="@color/transparent" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="fill_parent" android:minWidth="40.0dip" android:text="1" android:digits="\ 1234567890" android:inputType="phone" android:imeOptions="actionDone" style="@style/EditTextStandardSingleLinePeach" />
+                <TextView android:gravity="center" android:layout_gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="/" style="@style/TextBaseStyleGrayDarkContent2" />
+                <TextView android:layout_gravity="center" android:id="@id/textView_comment_total_page" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1" style="@style/TextBaseStyleGrayDarkContent2" />
+            </LinearLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+        <androidx.recyclerview.widget.RecyclerView android:id="@id/recyclerView_comments" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comment_no_comment" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_centerInParent="true">
+        <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <androidx.legacy.widget.Space android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0" />
+            <ImageView android:layout_gravity="center_horizontal" android:id="@id/imageView_comment_empty" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="3.0" style="@style/ImageViewBaseStyleFitCenter" />
+            <androidx.legacy.widget.Space android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0" />
+        </LinearLayout>
+        <TextView android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comment_no_reply" style="@style/TextBaseStyleGrayDarkContent1" />
+    </LinearLayout>
+</RelativeLayout>

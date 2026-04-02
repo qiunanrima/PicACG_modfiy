@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:clipChildren="false" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small" xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <de.hdodenhof.circleimageview.CircleImageView android:id="@id/imageView_chatroom_recycler_view_cell_avatar" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small" android:src="@drawable/placeholder_avatar" app:civ_border_color="@color/colorPrimary" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" app:civ_fill_color="@color/colorPrimaryLight" />
+    <ImageView android:layout_gravity="center" android:id="@id/imageView_chatroom_recycler_view_cell_verified" android:visibility="gone" android:layout_width="@dimen/size_image_character_small_icon" android:layout_height="@dimen/size_image_character_small_icon" android:src="@drawable/verified_icon" style="@style/ImageViewBaseStyleFitCenter" />
+</FrameLayout>

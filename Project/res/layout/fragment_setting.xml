@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@id/coordinatorLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/backgroundDark">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@id/appbar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@id/toolbar"
+            style="@style/AppTheme.PopupOverlay"
+            android:layout_width="fill_parent"
+            android:layout_height="?actionBarSize"
+            app:layout_collapseMode="parallax"
+            app:layout_scrollFlags="enterAlways|scroll"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TextBaseStyleGrayDarkContent2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/padding_2"
+                android:layout_marginTop="@dimen/padding_2"
+                android:padding="@dimen/padding_2"
+                android:text="@string/setting_comic_viewer_title" />
+
+            <include layout="@layout/layout_separator_full" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/background"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_comic_viewer_screen_orientation" />
+
+                    <TextView
+                        android:id="@id/textView_setting_screen_orientation"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_comic_viewer_screen_orientation" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_comic_viewer_scroll_direction" />
+
+                    <TextView
+                        android:id="@id/textView_setting_scroll_direction"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_comic_viewer_scroll_direction" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_comic_viewer_auto_paging_interval" />
+
+                    <TextView
+                        android:id="@id/textView_setting_auto_paging_interval"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/comic_viewer_setting_panel_auto_paging" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/padding_3"
+                    android:paddingTop="@dimen/padding_1_5"
+                    android:paddingRight="@dimen/padding_3"
+                    android:paddingBottom="@dimen/padding_1_5">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_comic_viewer_night_mode" />
+
+                    <ToggleButton
+                        android:id="@id/toggleButton_setting_night_mode"
+                        android:layout_width="46.0dip"
+                        android:layout_height="40.0dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/toggle_button_peach"
+                        android:gravity="center_vertical"
+                        android:text=""
+                        android:textOff=""
+                        android:textOn="" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/padding_3"
+                    android:paddingTop="@dimen/padding_1_5"
+                    android:paddingRight="@dimen/padding_3"
+                    android:paddingBottom="@dimen/padding_1_5">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_comic_viewer_volume_paging_control" />
+
+                    <ToggleButton
+                        android:id="@id/toggleButton_setting_volume_paging_control"
+                        android:layout_width="46.0dip"
+                        android:layout_height="40.0dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/toggle_button_peach"
+                        android:gravity="center_vertical"
+                        android:text=""
+                        android:textOff=""
+                        android:textOn="" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_comic_viewer_image_quality" />
+
+                    <TextView
+                        android:id="@id/textView_setting_image_quality"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_comic_viewer_image_quality" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <include layout="@layout/layout_separator_full" />
+
+            <TextView
+                style="@style/TextBaseStyleGrayDarkContent2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/padding_2"
+                android:layout_marginTop="@dimen/padding_2"
+                android:padding="@dimen/padding_2"
+                android:text="@string/setting_testing_title" />
+
+            <include layout="@layout/layout_separator_full" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/background"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/padding_3"
+                    android:paddingTop="@dimen/padding_1_5"
+                    android:paddingRight="@dimen/padding_3"
+                    android:paddingBottom="@dimen/padding_1_5">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_comic_viewer_testing_version" />
+
+                    <ToggleButton
+                        android:id="@id/toggleButton_setting_comic_viewer_testing_version"
+                        android:layout_width="46.0dip"
+                        android:layout_height="40.0dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/toggle_button_peach"
+                        android:gravity="center_vertical"
+                        android:text=""
+                        android:textOff=""
+                        android:textOn="" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_chatroom_title" />
+
+                    <TextView
+                        android:id="@id/textView_setting_chatroom_service"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_chatroom_open" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <include layout="@layout/layout_separator_full" />
+
+            <TextView
+                style="@style/TextBaseStyleGrayDarkContent2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/padding_2"
+                android:layout_marginTop="@dimen/padding_2"
+                android:padding="@dimen/padding_2"
+                android:text="@string/setting_other_title" />
+
+            <include layout="@layout/layout_separator_full" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/background"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/padding_3"
+                    android:paddingTop="@dimen/padding_1_5"
+                    android:paddingRight="@dimen/padding_3"
+                    android:paddingBottom="@dimen/padding_1_5">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_performance_enhancement" />
+
+                    <ToggleButton
+                        android:id="@id/toggleButton_setting_performance_enhancement"
+                        android:layout_width="46.0dip"
+                        android:layout_height="40.0dip"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/toggle_button_peach"
+                        android:gravity="center_vertical"
+                        android:text=""
+                        android:textOff=""
+                        android:textOn="" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_theme_color" />
+
+                    <TextView
+                        android:id="@id/textView_setting_theme_color"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/theme_color_white" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/alert_continue_download_comic_title" />
+
+                    <TextView
+                        android:id="@id/textView_setting_continue_download_comic"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_chatroom_open" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        android:id="@id/textView_setting_apk_version_title"
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_version_title" />
+
+                    <TextView
+                        android:id="@id/textView_setting_apk_version"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/title_apk_version" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        android:id="@id/textView_setting_cache_title"
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_cache_title" />
+
+                    <TextView
+                        android:id="@id/textView_setting_cache"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_cache" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_faq_title" />
+
+                    <TextView
+                        android:id="@id/textView_setting_faq"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_faq" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        android:id="@id/textView_setting_pin_title"
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_pin_title" />
+
+                    <TextView
+                        android:id="@id/textView_setting_pin"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_password" />
+                </RelativeLayout>
+
+                <include layout="@layout/layout_separator" />
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding_3">
+
+                    <TextView
+                        android:id="@id/textView_setting_password_title"
+                        style="@style/TextBaseStyleGrayDarkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:text="@string/setting_password_title" />
+
+                    <TextView
+                        android:id="@id/textView_setting_password"
+                        style="@style/TextBaseStylePinkContent1Bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:drawableRight="@drawable/icon_more"
+                        android:drawablePadding="@dimen/padding_2"
+                        android:gravity="center_vertical"
+                        android:text="@string/setting_password" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <include layout="@layout/layout_separator_full" />
+
+            <Button
+                android:id="@id/button_setting_logout"
+                style="@style/TextBaseStylesWhiteTitle2"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/padding_2"
+                android:layout_marginBottom="@dimen/padding_4"
+                android:background="@color/peach"
+                android:text="@string/setting_logout" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

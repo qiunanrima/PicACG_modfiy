@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_list_recycler_view_cell_container" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content" android:foreground="@drawable/ripple_bg"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <com.picacomic.fregata.utils.views.ComicThumbImageView android:id="@id/imageView_comic_list_recycler_view_cell_image" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail_height" android:layout_marginRight="@dimen/padding_2" android:src="@mipmap/ic_launcher" style="@style/ImageViewBaseStyleCenterCrop" />
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_list_recycler_view_cell_filter" android:visibility="gone" android:layout_width="@dimen/size_comic_list_filter_width" android:layout_height="@dimen/size_image_thumbnail_height" android:layout_alignParentRight="true">
+            <FrameLayout android:id="@id/frameLayout_comic_list_recycler_view_cell_filter_forbidden" android:background="@color/pinkDark" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1.0">
+                <TextView android:id="@id/textView_comic_list_recycler_view_cell_filter_forbidden" android:text="@string/comic_list_filter_forbidden" style="@style/TextViewComicListFilterStyle" />
+            </FrameLayout>
+            <FrameLayout android:id="@id/frameLayout_comic_list_recycler_view_cell_filter_non_chinese" android:background="@color/green" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1.0">
+                <TextView android:id="@id/textView_comic_list_recycler_view_cell_filter_non_chinese" android:text="@string/comic_list_filter_non_chinese" style="@style/TextViewComicListFilterStyle" />
+            </FrameLayout>
+            <FrameLayout android:id="@id/frameLayout_comic_list_recycler_view_cell_filter_bl" android:background="@color/blue" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1.0">
+                <TextView android:id="@id/textView_comic_list_recycler_view_cell_filter_bl" android:text="@string/comic_list_filter_bl" style="@style/TextViewComicListFilterStyle" />
+            </FrameLayout>
+        </LinearLayout>
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_list_recycler_view_cell_content" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="@dimen/size_image_thumbnail_height" android:layout_toLeftOf="@id/linearLayout_comic_list_recycler_view_cell_filter" android:layout_toRightOf="@id/imageView_comic_list_recycler_view_cell_image">
+            <TextView android:textStyle="bold" android:gravity="center_vertical" android:id="@id/textView_comic_list_recycler_view_cell_name" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/padding_2" android:text="Comic Title" style="@style/TextBaseStyleGrayDarkContent1" />
+            <TextView android:gravity="center_vertical" android:id="@id/textView_comic_list_recycler_view_cell_author" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/padding_2" android:text="Comic Author" style="@style/TextBaseStylePinkContent2" />
+            <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/padding_2">
+                <TextView android:gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_list_category_title" style="@style/TextBaseStyleGrayContent2" />
+                <TextView android:gravity="center_vertical" android:id="@id/textView_comic_list_recycler_view_cell_category" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Comic Category" style="@style/TextBaseStyleGrayContent2" />
+            </LinearLayout>
+            <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <ImageView android:layout_width="@dimen/size_image_list_like_icon" android:layout_height="@dimen/size_image_list_like_icon" android:layout_marginRight="@dimen/padding_2" android:src="@drawable/icon_bookmark_on" style="@style/ImageViewBaseStyleFitCenter" />
+                <TextView android:gravity="center_vertical" android:layout_gravity="center_vertical" android:id="@id/textView_comic_list_recycler_view_cell_like_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" style="@style/TextBaseStyleGrayContent1" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+    <include layout="@layout/layout_separator" />
+</LinearLayout>

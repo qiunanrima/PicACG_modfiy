@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/background" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <FrameLayout android:background="@color/colorAccent" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <ImageView android:layout_gravity="center" android:id="@id/imageView_leaderboard_knight_order_recycler_view_cell_order" android:layout_width="@dimen/size_image_thumbnail_leaderboard_1st_circle" android:layout_height="@dimen/size_image_thumbnail_leaderboard_1st_circle" android:src="@drawable/leaderboard_icon_top_1_2" style="@style/ImageViewBaseStyleFitCenter" />
+        <TextView android:textStyle="bold" android:gravity="center" android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_order" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="1" style="@style/TextBaseStylesWhiteTitle1" />
+        <de.hdodenhof.circleimageview.CircleImageView android:layout_gravity="center" android:id="@id/imageView_leaderboard_knight_order_recycler_view_cell_avatar" android:layout_width="@dimen/size_image_thumbnail_leaderboard_1st" android:layout_height="@dimen/size_image_thumbnail_leaderboard_1st" android:src="@drawable/placeholder_avatar_2" android:layout_weight="4.0" app:civ_border_color="@color/orange" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" />
+        <ImageView android:layout_gravity="center" android:id="@id/imageView_leaderboard_knight_order_recycler_view_cell_user_thumb_verified" android:visibility="gone" android:layout_width="@dimen/size_image_thumbnail_leaderboard_1st_character_icon" android:layout_height="@dimen/size_image_thumbnail_leaderboard_1st_character_icon" android:src="@drawable/verified_icon_fill" style="@style/ImageViewBaseStyleFitCenter" />
+    </FrameLayout>
+    <LinearLayout android:layout_gravity="center_horizontal" android:orientation="vertical" android:background="@color/orange" android:paddingTop="@dimen/padding_2" android:paddingBottom="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <TextView android:textStyle="bold" android:gravity="center" android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_name" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="騎士大名" style="@style/TextBaseStylesWhiteTitle1" />
+        <LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_1">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lv." style="@style/TextBaseStylesWhiteContent2" />
+            <TextView android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_level" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="@dimen/text_min_width_size_level" android:text="100" style="@style/TextBaseStylesWhiteContent2" />
+            <TextView android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="服務器君的錯" style="@style/TextBaseStylesWhiteContent2" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <TextView android:textStyle="bold" android:gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/leaderboard_knight_uploaded_comic_total" style="@style/TextBaseStylePinkTitle3" />
+        <TextView android:textStyle="bold" android:gravity="center_vertical" android:id="@id/textView_leaderboard_knight_order_recycler_view_cell_comic" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="1000" android:drawableLeft="@drawable/icon_comic" android:drawablePadding="@dimen/padding_2" style="@style/TextBaseStyleGrayTitle3" />
+    </LinearLayout>
+    <include layout="@layout/layout_separator" />
+</LinearLayout>

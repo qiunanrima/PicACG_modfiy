@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_dialog_announcement_alert" android:background="@drawable/dialog_announcement_bg" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_7">
+        <ScrollView android:id="@id/scrollView_dialog_announcement" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1000.0">
+            <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <ImageView android:id="@id/imageView_dialog_announcement_image" android:layout_width="fill_parent" android:layout_height="wrap_content" android:src="@drawable/placeholder_avatar_2" style="@style/ImageViewBaseStyleFitCenter" />
+                <TextView android:gravity="center" android:id="@id/textView_dialog_announcement_title" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Testing 123 Title" android:textAlignment="center" style="@style/TextBaseStylePinkTitle3" />
+                <TextView android:gravity="center" android:id="@id/textView_dialog_announcement_timestamp" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="2016-07-10" android:textAlignment="center" style="@style/TextBaseStyleGrayContent3" />
+                <TextView android:gravity="left" android:autoLink="all" android:id="@id/textView_dialog_announcement_message" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Test Content" android:textIsSelectable="true" style="@style/TextBaseStyleGrayDarkContent1" />
+            </LinearLayout>
+        </ScrollView>
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+            <FrameLayout android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="1.0dip" />
+            <RelativeLayout android:layout_width="fill_parent" android:layout_height="50.0dip">
+                <FrameLayout android:id="@id/frameLayout_dialog_announcement_buttons_center_line" android:background="@color/colorPrimary" android:layout_width="1.0px" android:layout_height="fill_parent" android:layout_centerInParent="true" />
+                <Button android:textSize="@dimen/textsize_title_3" android:textColor="@color/colorPrimary" android:id="@id/button_dialog_announcement_positive" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="50.0dip" android:text="@string/alert_button_do_not_show_again" android:layout_toLeftOf="@id/frameLayout_dialog_announcement_buttons_center_line" />
+                <Button android:textSize="@dimen/textsize_title_3" android:textColor="@color/colorPrimary" android:id="@id/button_dialog_announcement_negative" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="50.0dip" android:text="@string/ok" android:layout_toRightOf="@id/frameLayout_dialog_announcement_buttons_center_line" />
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+    <ImageView android:id="@id/imageView_dialog_announcement_icon_large" android:layout_width="160.0dip" android:layout_height="wrap_content" android:src="@drawable/icon_announcement" android:layout_alignParentTop="true" android:layout_alignParentRight="true" style="@style/ImageViewBaseStyleFitCenter" />
+</RelativeLayout>

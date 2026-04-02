@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:orientation="vertical" android:id="@id/frameLayout_comic_page_recycler_view_cell_container" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="60.0sp" android:gravity="center" android:layout_gravity="center" android:id="@id/textView_comic_page_recycler_view_cell_page" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    <ImageView android:layout_gravity="center" android:id="@id/imageView_comic_page_recycler_view_cell_image" android:layout_width="fill_parent" android:layout_height="fill_parent" style="@style/ImageViewBaseStyleFitCenter" />
+</FrameLayout>

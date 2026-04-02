@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="vertical" android:id="@id/relativeLayout_banner_container" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <WebView android:id="@id/webview_banner" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="fill_parent" />
+    <ImageButton android:id="@id/imageButton_banner_close" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon_cross" android:layout_alignParentLeft="true" style="@style/ImageButtonTransparentBgFitCenter" />
+    <TextView android:textColor="@color/black" android:id="@id/textView_banner_text" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+</RelativeLayout>

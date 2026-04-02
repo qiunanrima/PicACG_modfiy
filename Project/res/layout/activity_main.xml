@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@color/backgroundDark" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout android:id="@id/container" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_above="@id/linearLayout_tabbar" />
+    <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_tabbar" android:background="@color/colorPrimary" android:paddingTop="1.0dip" android:layout_width="fill_parent" android:layout_height="50.0dip" android:layout_alignParentBottom="true">
+        <ImageButton android:id="@id/button_tabbar_home" android:layout_width="0.0px" android:layout_height="fill_parent" android:src="@drawable/button_tabbar_home" android:layout_weight="1.0" style="@style/TabbarStyle" />
+        <ImageButton android:id="@id/button_tabbar_category" android:layout_width="0.0px" android:layout_height="fill_parent" android:src="@drawable/button_tabbar_category" android:layout_weight="1.0" style="@style/TabbarStyle" />
+        <ImageButton android:id="@id/button_tabbar_game" android:layout_width="0.0px" android:layout_height="fill_parent" android:src="@drawable/button_tabbar_game" android:layout_weight="1.0" style="@style/TabbarStyle" />
+        <ImageButton android:id="@id/button_tabbar_profile" android:layout_width="0.0px" android:layout_height="fill_parent" android:src="@drawable/button_tabbar_profile" android:layout_weight="1.0" style="@style/TabbarStyle" />
+        <ImageButton android:id="@id/button_tabbar_setting" android:layout_width="0.0px" android:layout_height="fill_parent" android:src="@drawable/button_tabbar_setting" android:layout_weight="1.0" style="@style/TabbarStyle" />
+    </LinearLayout>
+    <ImageButton android:id="@id/imageButton_control_exp" android:background="@color/transparent" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon_exp_gray" style="@style/ImageViewBaseStyleFitCenter" />
+    <ImageButton android:id="@id/imageButton_control_block" android:background="@color/transparent" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_1" android:src="@drawable/icon_block_gray" android:layout_toRightOf="@id/imageButton_control_exp" android:layout_alignTop="@id/imageButton_control_exp" android:layout_alignBottom="@id/imageButton_control_exp" style="@style/ImageViewBaseStyleFitCenter" />
+    <com.picacomic.fregata.utils.views.BannerWebview android:id="@id/bannerWebview" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true" />
+    <com.picacomic.fregata.utils.views.PopupWebview android:id="@id/popupWebview" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent" />
+</RelativeLayout>

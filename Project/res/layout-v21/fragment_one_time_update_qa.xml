@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@id/coordinatorLayout" android:background="?custom_background_color_dark" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <androidx.appcompat.widget.Toolbar android:id="@id/toolbar" android:layout_width="fill_parent" android:layout_height="?actionBarSize" app:layout_scrollFlags="enterAlways|scroll" app:popupTheme="@style/ThemeOverlay.AppCompat.Light" style="@style/AppTheme.PopupOverlay" />
+    </com.google.android.material.appbar.AppBarLayout>
+    <androidx.core.widget.NestedScrollView android:id="@id/scrollView" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent">
+            <androidx.legacy.widget.Space android:layout_width="wrap_content" android:layout_height="@dimen/padding_2" />
+            <include layout="@layout/layout_separator_full" />
+            <LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/padding_2" android:text="@string/forgot_password_q_and_a_title" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <EditText android:id="@id/editText_register_question_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_question_1" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <EditText android:id="@id/editText_register_answer_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_answer_1" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <EditText android:id="@id/editText_register_question_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_question_2" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <EditText android:id="@id/editText_register_answer_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_answer_2" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <EditText android:id="@id/editText_register_question_3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_question_3" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <EditText android:id="@id/editText_register_answer_3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_answer_3" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionDone" style="@style/EditTextStandardSingleLineGrayDark" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+            <include layout="@layout/layout_separator_full" />
+            <androidx.legacy.widget.Space android:layout_width="wrap_content" android:layout_height="@dimen/padding_2" />
+            <Button android:id="@id/button_update" android:background="@color/colorPrimaryDark" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:text="@string/update" style="@style/TextBaseStylesWhiteTitle2" />
+            <androidx.legacy.widget.Space android:layout_width="wrap_content" android:layout_height="@dimen/padding_4" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

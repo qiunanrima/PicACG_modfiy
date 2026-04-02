@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_chatroom_container" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <FrameLayout android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1"
+      xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+        <LinearLayout android:layout_gravity="right" android:orientation="horizontal" android:clipChildren="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layoutDirection="rtl">
+            <include layout="@layout/layout_chatroom_avatar" />
+            <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_2">
+                <include layout="@layout/layout_chatroom_name_and_title" />
+                <LinearLayout android:orientation="vertical" android:background="@drawable/bubble_r_9" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_chatroom_recycler_view_cell_reply_container" android:background="@color/background" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
+                        <TextView android:textStyle="bold" android:id="@id/textView_chatroom_recycler_view_cell_reply_name" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Name" android:singleLine="true" style="@style/TextBaseStyleGrayDarkTimestamp1" />
+                        <TextView android:id="@id/textView_chatroom_recycler_view_cell_reply_message" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reply Message" android:maxLines="2" style="@style/TextBaseStyleGrayDarkContent3" />
+                    </LinearLayout>
+                    <TextView android:id="@id/textView_chatroom_recycler_view_cell_at" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="message" android:textIsSelectable="true" style="@style/TextBaseStylePinkContent3" />
+                    <TextView android:id="@id/textView_chatroom_recycler_view_cell_message" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="message" android:textIsSelectable="true" style="@style/TextBaseStylePinkDarkContent2" />
+                    <TextView android:layout_gravity="left" android:id="@id/textView_chatroom_recycler_view_cell_timestamp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="10:34" style="@style/TextBaseStyleGrayTimestamp2" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

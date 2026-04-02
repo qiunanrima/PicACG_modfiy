@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_dialog_faq_alert" android:background="@drawable/dialog_faq_bg" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="@dimen/padding_7"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textStyle="bold" android:gravity="center" android:id="@id/textView_dialog_chatroom_setting_title" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_4" android:text="@string/chatroom_setting_title" android:textAlignment="center" style="@style/TextBaseStylePinkTitle2" />
+    <FrameLayout android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="1.0dip" />
+    <include android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1000.0" layout="@layout/fragment_chatroom_setting" />
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+        <FrameLayout android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="1.0dip" />
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="50.0dip">
+            <FrameLayout android:id="@id/frameLayout_dialog_buttons_center_line" android:background="@color/colorPrimary" android:layout_width="1.0px" android:layout_height="fill_parent" android:layout_centerInParent="true" />
+            <Button android:textSize="@dimen/textsize_title_3" android:textColor="@color/colorPrimary" android:id="@id/button_dialog_positive" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="50.0dip" android:text="@string/ok" android:layout_toLeftOf="@id/frameLayout_dialog_buttons_center_line" />
+            <Button android:textSize="@dimen/textsize_title_3" android:textColor="@color/colorPrimary" android:id="@id/button_dialog_negative" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="50.0dip" android:text="@string/cancel" android:layout_toRightOf="@id/frameLayout_dialog_buttons_center_line" />
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>

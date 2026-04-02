@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:icon="@drawable/ic_delete_forever_black_36dp" android:id="@id/action_clear_recent" android:orderInCategory="100" android:title="@string/action_clear_recent" app:showAsAction="always" />
+    <item android:icon="@drawable/ic_get_app_black_36dp" android:id="@id/action_download" android:orderInCategory="50" android:title="@string/download" app:showAsAction="always" />
+</menu>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_chatroom_container" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="horizontal" android:clipChildren="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1"
+      xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+        <include layout="@layout/layout_chatroom_avatar" />
+        <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2">
+            <include layout="@layout/layout_chatroom_name_and_title" />
+            <LinearLayout android:orientation="vertical" android:background="@drawable/bubble_9" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                <ImageView android:id="@id/imageView_chatroom_recycler_view_cell_image" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" style="@style/ImageViewBaseStyleFitCenter" />
+                <TextView android:layout_gravity="right" android:id="@id/textView_chatroom_recycler_view_cell_timestamp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="10:34" style="@style/TextBaseStyleGrayTimestamp2" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

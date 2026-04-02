@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <FrameLayout android:id="@id/notification_avatar" android:clipChildren="false" android:layout_width="@dimen/size_image_character_small_icon" android:layout_height="@dimen/size_image_character_small_icon">
+            <de.hdodenhof.circleimageview.CircleImageView android:layout_gravity="center" android:id="@id/imageView_chatroom_recycler_view_cell_avatar" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small" android:src="@drawable/placeholder_avatar" app:civ_border_color="@color/colorPrimary" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" app:civ_fill_color="@color/colorPrimaryLight" />
+            <ImageView android:layout_gravity="center" android:id="@id/imageView_chatroom_recycler_view_cell_verified" android:visibility="gone" android:layout_width="@dimen/size_image_character_small_icon" android:layout_height="@dimen/size_image_character_small_icon" android:src="@drawable/verified_icon" style="@style/ImageViewBaseStyleFitCenter" />
+        </FrameLayout>
+        <ImageView android:id="@id/imageView_notification_image" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small" android:layout_margin="@dimen/padding_2" android:layout_alignParentRight="true" android:layout_centerVertical="true" style="@style/ImageViewBaseStyleCenterCrop" />
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_2" android:layout_toLeftOf="@id/imageView_notification_image" android:layout_toRightOf="@id/notification_avatar" android:layout_centerVertical="true">
+            <TextView android:id="@id/textView_notification_content" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="content" style="@style/TextBaseStyleGrayDarkContent1" />
+            <TextView android:id="@id/textView_notification_timestamp" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:text="time" style="@style/TextBaseStyleGrayTimestamp1" />
+        </LinearLayout>
+    </RelativeLayout>
+    <include layout="@layout/layout_separator_full" />
+</LinearLayout>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="alert_dialog_photo_chooser">
+        <item>相機拍照</item>
+        <item>選擇照片</item>
+    </string-array>
+    <string-array name="avatar">
+        <item>綠Cap</item>
+        <item>西瓜</item>
+        <item>豬</item>
+        <item>內富</item>
+        <item>滑雞</item>
+        <item>污</item>
+        <item>去框</item>
+        <item>其他</item>
+    </string-array>
+    <string-array name="block_time">
+        <item>0分鐘</item>
+        <item>1分鐘</item>
+        <item>5分鐘</item>
+        <item>15分鐘</item>
+        <item>30分鐘</item>
+        <item>60分鐘</item>
+        <item>180分鐘</item>
+        <item>1天</item>
+        <item>3天</item>
+        <item>7天</item>
+    </string-array>
+    <string-array name="chat_default">
+        <item>等待下一個版本吧</item>
+        <item>請先查看垃圾郵件有沒有喔</item>
+        <item>沒有的話，請登出，按重發郵件</item>
+        <item>有王冠的是官方認證</item>
+        <item>我沒有閃退喔</item>
+        <item>宣群者被禁言，屢勸不改者，禁言時間會越來越長</item>
+        <item>被禁言是不會知道，你可以看到自己在發言，但別人是看不到的。</item>
+        <item>舊版本的東西都不可以轉移到新版本的</item>
+        <item>"嗶咔官方群：
+537280193
+481678687
+252325650
+542081136"</item>
+    </string-array>
+    <string-array name="comment_options">
+        <item>舉報留言</item>
+    </string-array>
+    <string-array name="comment_options_advance">
+        <item>舉報留言</item>
+        <item>@string/comment_tool_dirty</item>
+        <item>@string/comment_tool_top</item>
+        <item>@string/comment_tool_hide</item>
+    </string-array>
+    <string-array name="faq_answer">
+        <item>正在開發中</item>
+        <item>請到垃圾桶找找。注意：QQ郵箱的話不會收到的</item>
+        <item>沒有認證不可以評論本子，或者日後更新的新功能</item>
+        <item>等級不到2是不能評論本子的</item>
+        <item>列表上方五彩六色的按鈕是用來封印本子的</item>
+        <item>點星星收藏，心心是讚好</item>
+        <item>可到【設定】開啟【改善閃退測試版】及【改善速度】試試看。</item>
+        <item>也許你需要使用VPN</item>
+    </string-array>
+    <string-array name="faq_question">
+        <item>為什麼找不到下載？</item>
+        <item>為什麼收不到確認郵件？</item>
+        <item>認證帳號有什麼用的？</item>
+        <item>等級有什麼用？</item>
+        <item>為什麼有些本子封印了？</item>
+        <item>怎樣收藏本子？</item>
+        <item>經常閃退怎麼辦？</item>
+        <item>加載不了本子怎麼辦？</item>
+    </string-array>
+    <string-array name="register_genders">
+        <item>@string/gender_m</item>
+        <item>@string/gender_f</item>
+        <item>@string/gender_bot</item>
+    </string-array>
+    <string-array name="setting_options_image_qualities">
+        <item>原圖</item>
+        <item>低</item>
+        <item>中</item>
+        <item>高</item>
+    </string-array>
+    <string-array name="setting_options_image_qualities_server">
+        <item>original</item>
+        <item>low</item>
+        <item>medium</item>
+        <item>high</item>
+    </string-array>
+    <string-array name="setting_options_screen_orientations">
+        <item>垂直閱讀</item>
+        <item>横向閱讀</item>
+    </string-array>
+    <string-array name="setting_options_scroll_directions">
+        <item>上下翻頁</item>
+        <item>左右翻頁</item>
+    </string-array>
+    <string-array name="setting_theme_colors">
+        <item>@string/theme_color_white</item>
+        <item>@string/theme_color_dark</item>
+    </string-array>
+    <string-array name="sorting_advanced">
+        <item>@string/sorting_dd</item>
+        <item>@string/sorting_da</item>
+        <item>@string/sorting_ld</item>
+        <item>@string/sorting_vd</item>
+    </string-array>
+    <string-array name="sorting_favourite">
+        <item>@string/sorting_dd</item>
+        <item>@string/sorting_da</item>
+    </string-array>
+    <string-array name="support_us_paypal_prices">
+        <item>1.00</item>
+        <item>5.00</item>
+        <item>10.00</item>
+        <item>50.00</item>
+        <item>100.00</item>
+        <item>1000.00</item>
+    </string-array>
+    <string-array name="support_us_paypal_titles">
+        <item>拯救一只嗶咔騎士</item>
+        <item>拯救一只嗶咔團長</item>
+        <item>拯救騎士團</item>
+        <item>拯救嗶咔娘</item>
+        <item>拯救團長們</item>
+        <item>拯救嗶咔騎士團長們</item>
+    </string-array>
+    <string-array name="toggle">
+        <item>開啟－ON</item>
+        <item>關閉－OFF</item>
+    </string-array>
+</resources>

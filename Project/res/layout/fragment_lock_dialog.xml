@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:background="@color/black" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <TextView android:textStyle="bold" android:gravity="center" android:layout_gravity="center" android:id="@id/textView_lock_title" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/lock_dialog_title" style="@style/TextBaseStyleBlueTitle1" />
+        <LinearLayout android:layout_gravity="center_horizontal" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_4">
+            <EditText android:gravity="center" android:layout_gravity="center" android:id="@id/editText_lock_pin_1" android:background="@drawable/edittext_lock_bg" android:layout_width="@dimen/size_lock_password_box" android:layout_height="@dimen/size_lock_password_box" android:layout_margin="@dimen/padding_2" android:digits="\ 1234567890" android:inputType="phone" style="@style/TextBaseStyleBlueTitle1" />
+            <EditText android:gravity="center" android:layout_gravity="center" android:id="@id/editText_lock_pin_2" android:background="@drawable/edittext_lock_bg" android:layout_width="@dimen/size_lock_password_box" android:layout_height="@dimen/size_lock_password_box" android:layout_margin="@dimen/padding_2" android:digits="\ 1234567890" android:inputType="phone" style="@style/TextBaseStyleBlueTitle1" />
+            <EditText android:gravity="center" android:layout_gravity="center" android:id="@id/editText_lock_pin_3" android:background="@drawable/edittext_lock_bg" android:layout_width="@dimen/size_lock_password_box" android:layout_height="@dimen/size_lock_password_box" android:layout_margin="@dimen/padding_2" android:digits="\ 1234567890" android:inputType="phone" style="@style/TextBaseStyleBlueTitle1" />
+            <EditText android:gravity="center" android:layout_gravity="center" android:id="@id/editText_lock_pin_4" android:background="@drawable/edittext_lock_bg" android:layout_width="@dimen/size_lock_password_box" android:layout_height="@dimen/size_lock_password_box" android:layout_margin="@dimen/padding_2" android:digits="\ 1234567890" android:inputType="phone" style="@style/TextBaseStyleBlueTitle1" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

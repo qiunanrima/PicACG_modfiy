@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:foreground="@drawable/ripple_bg"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
+        <TextView android:id="@id/textView_apk_version_list_recycler_view_cell_version_prefix" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/apk_version_prefix" style="@style/TextBaseStylePinkTitle3" />
+        <TextView android:id="@id/textView_apk_version_list_recycler_view_cell_version" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextBaseStylePinkTitle3" />
+    </LinearLayout>
+    <TextView android:id="@id/textView_apk_version_list_recycler_view_cell_content" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:maxLines="3" style="@style/TextBaseStyleGrayDarkContent2" />
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
+        <TextView android:id="@id/textView_apk_version_list_recycler_view_cell_timestamp_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_detail_update_time_title" style="@style/TextBaseStyleGrayContent3" />
+        <TextView android:id="@id/textView_apk_version_list_recycler_view_cell_timestamp" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextBaseStyleGrayContent3" />
+    </LinearLayout>
+    <include layout="@layout/layout_separator_full" />
+</LinearLayout>

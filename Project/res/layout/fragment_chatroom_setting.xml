@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView android:background="@color/backgroundDark" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/title_profile" style="@style/TextBaseStyleGrayDarkContent2" />
+        <include layout="@layout/layout_separator_full" />
+        <LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_3_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_3_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:id="@id/textView_chatroom_setting_profile" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/title_profile" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <TextView android:gravity="center_vertical" android:id="@id/textView_chatroom_setting_profile_update" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/update" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+            </RelativeLayout>
+        </LinearLayout>
+        <include layout="@layout/layout_separator_full" />
+        <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/chatroom_setting_basic_title" style="@style/TextBaseStyleGrayDarkContent2" />
+        <include layout="@layout/layout_separator_full" />
+        <LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_night_mode" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_chatroom_setting_night_mode" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+            <include layout="@layout/layout_separator" />
+            <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_timestamp" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_chatroom_setting_show_timestamp" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+            <include layout="@layout/layout_separator" />
+            <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_hide_all_avatar" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_chatroom_setting_hide_all_avatar" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+            <include layout="@layout/layout_separator" />
+            <RelativeLayout android:orientation="horizontal" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_fix_image_size" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_chatroom_setting_fix_image_size" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+            <include layout="@layout/layout_separator" />
+            <LinearLayout android:orientation="horizontal" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_3_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_3_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_max_message_size" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <EditText android:gravity="center|right" android:layout_gravity="center|right" android:id="@id/editText_chatroom_setting_max_message_size" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_3" android:text="100" android:hint="1 - 999" android:maxLength="3" android:digits="\ 0123456789" android:inputType="phone" style="@style/EditTextStandardSingleLinePeachSetting" />
+            </LinearLayout>
+            <include layout="@layout/layout_separator" />
+            <LinearLayout android:orientation="horizontal" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_3_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_3_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_message_color_reverse" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <EditText android:gravity="center|right" android:layout_gravity="center|right" android:id="@id/editText_chatroom_setting_message_color_reverse" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_3" android:text="70" android:hint="0 - 100" android:maxLength="3" android:digits="\ 0123456789" android:inputType="phone" style="@style/EditTextStandardSingleLinePeachSetting" />
+            </LinearLayout>
+        </LinearLayout>
+        <include layout="@layout/layout_separator_full" />
+        <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/chatroom_setting_speech_title" style="@style/TextBaseStyleGrayDarkContent2" />
+        <include layout="@layout/layout_separator_full" />
+        <LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <RelativeLayout android:orientation="horizontal" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_speech" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_chatroom_setting_speech" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+            <include layout="@layout/layout_separator" />
+            <RelativeLayout android:orientation="horizontal" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_speech_with_name" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_chatroom_setting_speech_with_name" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+            <include layout="@layout/layout_separator" />
+            <RelativeLayout android:orientation="horizontal" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_3_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_3_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_speech_language" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <TextView android:gravity="center_vertical" android:id="@id/textView_chatroom_setting_speech_language" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_speech_language_chinese" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+            </RelativeLayout>
+        </LinearLayout>
+        <include layout="@layout/layout_separator_full" />
+        <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/chatroom_setting_blacklist" style="@style/TextBaseStyleGrayDarkContent2" />
+        <include layout="@layout/layout_separator_full" />
+        <LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_3_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_3_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <TextView android:id="@id/textView_chatroom_setting_blacklist" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_blacklist" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                <TextView android:gravity="center_vertical" android:id="@id/textView_chatroom_setting_blacklist_update" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_blacklist_update" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+            </RelativeLayout>
+        </LinearLayout>
+        <include layout="@layout/layout_separator_full" />
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_chatroom_setting_advance" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/chatroom_setting_advance_title" style="@style/TextBaseStyleGrayDarkContent2" />
+            <include layout="@layout/layout_separator_full" />
+            <LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <LinearLayout android:orientation="horizontal" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_3_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_3_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_ads_interval" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <EditText android:gravity="center|right" android:layout_gravity="center|right" android:id="@id/editText_chatroom_setting_ads_interval" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_3" android:text="50" android:hint="0 - 999" android:maxLength="3" android:digits="\ 0123456789" android:inputType="phone" style="@style/EditTextStandardSingleLinePeachSetting" />
+                </LinearLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_3_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_3_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_setting_control_panel" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_chatroom_setting_control_panel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/on" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <EditText android:id="@id/editText_chatroom_setting_custom_avatar" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1_5" style="@style/EditTextStandardSingleLinePeachSetting" />
+            </LinearLayout>
+            <include layout="@layout/layout_separator_full" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

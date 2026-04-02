@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@id/coordinatorLayout" android:background="?custom_background_color_dark" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <androidx.appcompat.widget.Toolbar android:id="@id/toolbar" android:layout_width="fill_parent" android:layout_height="?actionBarSize" app:layout_collapseMode="parallax" app:layout_scrollFlags="enterAlways|scroll" app:popupTheme="@style/ThemeOverlay.AppCompat.Light" style="@style/AppTheme.PopupOverlay" />
+    </com.google.android.material.appbar.AppBarLayout>
+    <androidx.core.widget.NestedScrollView android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/setting_comic_viewer_title" style="@style/TextBaseStyleGrayDarkContent2" />
+            <include layout="@layout/layout_separator_full" />
+            <LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_screen_orientation" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_screen_orientation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_screen_orientation" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_scroll_direction" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_scroll_direction" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_scroll_direction" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_auto_paging_interval" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_auto_paging_interval" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_auto_paging" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_night_mode" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_setting_night_mode" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_volume_paging_control" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_setting_volume_paging_control" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_image_quality" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_image_quality" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_image_quality" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+            </LinearLayout>
+            <include layout="@layout/layout_separator_full" />
+            <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/setting_testing_title" style="@style/TextBaseStyleGrayDarkContent2" />
+            <include layout="@layout/layout_separator_full" />
+            <LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_comic_viewer_testing_version" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_setting_comic_viewer_testing_version" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+                </RelativeLayout>
+                <RelativeLayout android:padding="@dimen/padding_3" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_chatroom_title" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_chatroom_service" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_chatroom_open" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+            </LinearLayout>
+            <include layout="@layout/layout_separator_full" />
+            <TextView android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:text="@string/setting_other_title" style="@style/TextBaseStyleGrayDarkContent2" />
+            <include layout="@layout/layout_separator_full" />
+            <LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <RelativeLayout android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_1_5" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_1_5" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_performance_enhancement" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <ToggleButton android:gravity="center_vertical" android:id="@id/toggleButton_setting_performance_enhancement" android:background="@drawable/toggle_button_peach" android:layout_width="46.0dip" android:layout_height="40.0dip" android:textOn="" android:textOff="" android:text="" android:layout_alignParentRight="true" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_theme_color" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_theme_color" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/theme_color_white" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/alert_continue_download_comic_title" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_continue_download_comic" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_chatroom_open" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:id="@id/textView_setting_apk_version_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_version_title" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_apk_version" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/title_apk_version" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:id="@id/textView_setting_cache_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_cache_title" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_cache" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_cache" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_faq_title" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_faq" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_faq" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:id="@id/textView_setting_pin_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_pin_title" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_pin" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_password" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <RelativeLayout android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:id="@id/textView_setting_password_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_password_title" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1Bold" />
+                    <TextView android:gravity="center_vertical" android:id="@id/textView_setting_password" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setting_password" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" style="@style/TextBaseStylePinkContent1Bold" />
+                </RelativeLayout>
+            </LinearLayout>
+            <include layout="@layout/layout_separator_full" />
+            <Button android:id="@id/button_setting_logout" android:background="@color/peach" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_4" android:text="@string/setting_logout" style="@style/TextBaseStylesWhiteTitle2" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

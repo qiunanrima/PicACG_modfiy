@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:gravity="center" android:layout_gravity="center_horizontal" android:id="@id/textView_set_user_title_content_view_name" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="稱號" style="@style/TextBaseStylePinkTitle2" />
+    <EditText android:gravity="center" android:layout_gravity="center_horizontal" android:id="@id/editText_set_user_title_content_view_title" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="輸入【 20字 內 】的稱號給他" style="@style/TextBaseStylePeachTitle2" />
+</LinearLayout>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_announcement_cell" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <ImageView android:id="@id/imageView_announcement_icon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:src="@mipmap/register_name" android:layout_centerVertical="true" style="@style/ImageViewBaseStyleFitCenter" />
+        <TextView android:id="@id/textView_announcement_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toRightOf="@id/imageView_announcement_icon" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1" />
+        <TextView android:gravity="center_vertical" android:id="@id/textView_announcement_view_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/more" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayContent2" />
+    </RelativeLayout>
+    <include layout="@layout/layout_separator" />
+    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_announcement_content" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    <include layout="@layout/layout_separator" />
+</LinearLayout>

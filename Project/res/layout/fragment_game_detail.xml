@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@id/coordinatorLayout" android:layout_width="fill_parent" android:layout_height="fill_parent"
+      xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+        <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <com.google.android.material.appbar.CollapsingToolbarLayout android:id="@id/collapsingToolbarLayout" android:layout_width="fill_parent" android:layout_height="fill_parent" app:contentScrim="?colorPrimary" app:expandedTitleMarginEnd="64.0dip" app:expandedTitleMarginStart="48.0dip" app:layout_scrollFlags="exitUntilCollapsed|scroll">
+                <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_collapseMode="parallax">
+                    <androidx.appcompat.widget.Toolbar android:id="@id/toolbar" android:layout_width="fill_parent" android:layout_height="?actionBarSize" app:layout_collapseMode="pin" app:popupTheme="@style/ThemeOverlay.AppCompat.Light" style="@style/AppTheme.PopupOverlay" />
+                    <FrameLayout android:id="@id/frameLayout_game_detail_banner" android:layout_width="fill_parent" android:layout_height="200.0dip">
+                        <ImageView android:id="@id/imageView_game_detail_banner" android:layout_width="fill_parent" android:layout_height="fill_parent" android:src="@drawable/splash_bg_1" app:layout_collapseMode="parallax" style="@style/ImageViewBaseStyleCenterCrop" />
+                        <ImageButton android:layout_gravity="center" android:id="@id/imageButton_game_detail_play" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon_video_play" style="@style/ImageButtonTransparentBgFitCenter" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+        <androidx.core.widget.NestedScrollView android:id="@id/nestedScrollView_game_detail" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <RelativeLayout android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <ImageView android:id="@id/imageView_game_detail_icon" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail" android:layout_margin="@dimen/padding_1" style="@style/ImageViewBaseStyleFitCenter" />
+                    <ImageButton android:id="@id/imageButton_game_detail_gift" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon_gift_off" android:layout_alignParentRight="true" style="@style/ImageButtonTransparentBgFitCenter" />
+                    <TextView android:id="@id/textView_game_detail_title" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="Game Title" android:layout_toLeftOf="@id/imageButton_game_detail_gift" android:layout_toRightOf="@id/imageView_game_detail_icon" android:textIsSelectable="true" style="@style/TextBaseStyleGrayDarkContent1" />
+                    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_game_detail_detail" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_toRightOf="@id/imageView_game_detail_icon" android:layout_below="@id/textView_game_detail_title">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                            <ImageView android:id="@id/imageView_game_detail_recommend" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:src="@drawable/icon_game_recommend" style="@style/ImageViewBaseStyleFitCenter" />
+                            <ImageView android:id="@id/imageView_game_detail_adult" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:src="@drawable/icon_adult" style="@style/ImageViewBaseStyleFitCenter" />
+                            <ImageView android:id="@id/imageView_game_detail_android" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:src="@drawable/icon_game_android" style="@style/ImageViewBaseStyleFitCenter" />
+                            <ImageView android:id="@id/imageView_game_detail_ios" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:src="@drawable/icon_game_ios" style="@style/ImageViewBaseStyleFitCenter" />
+                        </LinearLayout>
+                        <TextView android:id="@id/textView_game_detail_publisher" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="Publisher" style="@style/TextBaseStyleGrayContent2" />
+                        <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
+                            <TextView android:id="@id/textView_game_detail_size" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="size" style="@style/TextBaseStyleGrayContent2" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_1" android:text="@string/game_detail_description_size" style="@style/TextBaseStyleGrayContent2" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_1" android:layout_marginRight="@dimen/padding_1" android:text="@string/game_detail_description_separator" style="@style/TextBaseStyleGrayContent2" />
+                            <TextView android:id="@id/textView_game_detail_downloaded" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" style="@style/TextBaseStyleGrayContent2" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_1" android:text="@string/game_detail_description_downloaded" style="@style/TextBaseStyleGrayContent2" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </RelativeLayout>
+                <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
+                    <Button android:id="@id/button_game_detail_download" android:layout_width="0.0px" android:layout_height="wrap_content" android:text="@string/download" android:layout_weight="3.0" style="@style/ButtonRoundPink" />
+                    <FrameLayout android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="2.0">
+                        <ImageButton android:layout_gravity="center" android:id="@id/imageButton_game_detail_comment" android:layout_width="@dimen/size_button_round_pink_height" android:layout_height="@dimen/size_button_round_pink_height" android:src="@drawable/icon_comment" style="@style/ImageButtonTransparentBgFitCenter" />
+                        <LinearLayout android:layout_gravity="center|top" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                            <FrameLayout android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0" />
+                            <FrameLayout android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0">
+                                <TextView android:textSize="@dimen/textsize_timestamp_2" android:textColor="@color/white" android:gravity="center" android:layout_gravity="center|left|top" android:id="@id/textView_game_detail_comment_count" android:background="@drawable/text_count_bg" android:paddingLeft="@dimen/padding_2" android:paddingTop="1.0dip" android:paddingRight="@dimen/padding_2" android:paddingBottom="1.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:text="0" />
+                            </FrameLayout>
+                        </LinearLayout>
+                    </FrameLayout>
+                    <FrameLayout android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="2.0">
+                        <ImageButton android:layout_gravity="center" android:id="@id/imageButton_game_detail_like" android:layout_width="@dimen/size_button_round_pink_height" android:layout_height="@dimen/size_button_round_pink_height" android:src="@drawable/icon_bookmark_off" style="@style/ImageButtonTransparentBgFitCenter" />
+                        <LinearLayout android:layout_gravity="center|top" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                            <FrameLayout android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0" />
+                            <FrameLayout android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0">
+                                <TextView android:textSize="@dimen/textsize_timestamp_2" android:textColor="@color/white" android:gravity="center" android:layout_gravity="center|left|top" android:id="@id/textView_game_detail_like_count" android:background="@drawable/text_count_bg" android:paddingLeft="@dimen/padding_2" android:paddingTop="1.0dip" android:paddingRight="@dimen/padding_2" android:paddingBottom="1.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:text="0" />
+                            </FrameLayout>
+                        </LinearLayout>
+                    </FrameLayout>
+                </LinearLayout>
+                <com.picacomic.fregata.utils.views.SnapRecyclerView android:id="@id/recyclerView_game_detail_screenshots" android:layout_width="fill_parent" android:layout_height="200.0dip" />
+                <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
+                    <TextView android:textStyle="bold" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/game_detail_latest_version_title" style="@style/TextBaseStylePinkContent1" />
+                    <TextView android:textStyle="bold" android:id="@id/textView_game_detail_version_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1.0.0" style="@style/TextBaseStylePinkContent1" />
+                </LinearLayout>
+                <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
+                    <ImageButton android:id="@id/imageButton_game_detail_version_description_height_control" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon_collapse" android:layout_alignParentRight="true" style="@style/ImageButtonTransparentBgFitCenter" />
+                    <TextView android:autoLink="all" android:id="@id/textView_game_detail_version_description" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Latest Update Description" android:layout_toLeftOf="@id/imageButton_game_detail_version_description_height_control" android:textIsSelectable="true" style="@style/TextBaseStyleGrayDarkContent2" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+                <TextView android:textStyle="bold" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:text="@string/game_detail_description_title" style="@style/TextBaseStylePinkContent1" />
+                <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
+                    <ImageButton android:id="@id/imageButton_game_detail_description_height_control" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon_collapse" android:layout_alignParentRight="true" style="@style/ImageButtonTransparentBgFitCenter" />
+                    <TextView android:autoLink="all" android:id="@id/textView_game_detail_description" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Game Description" android:layout_toLeftOf="@id/imageButton_game_detail_description_height_control" android:textIsSelectable="true" style="@style/TextBaseStyleGrayDarkContent2" />
+                </RelativeLayout>
+                <include layout="@layout/layout_separator" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+        <RelativeLayout android:id="@id/relativeLayout_game_detail_popup" android:background="@color/black_transparent_30" android:visibility="gone" android:clickable="true" android:layout_width="fill_parent" android:layout_height="fill_parent">
+            <androidx.viewpager.widget.ViewPager android:id="@id/viewPager_game_detail_screenShot" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent" />
+            <VideoView android:id="@id/videoView_game_detail" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_centerInParent="true" />
+            <ImageButton android:id="@id/imageButton_game_detail_close_popup" android:background="@color/transparent" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:src="@drawable/icon_cross" android:layout_alignParentTop="true" android:layout_alignParentRight="true" />
+        </RelativeLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

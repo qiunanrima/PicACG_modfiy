@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@id/relativeLayout_comic_viewer_toolbar" android:background="@color/black_transparent_30" android:layout_width="fill_parent" android:layout_height="?actionBarSize"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageButton android:id="@id/imageButton_comic_viewer_back" android:layout_width="wrap_content" android:layout_height="fill_parent" android:src="@drawable/ic_action_navigation_arrow_back" android:scaleType="fitCenter" android:adjustViewBounds="true" style="@style/ButtonTransparentBgWhiteContent3" />
+    <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_comic_viewer_toolbar_buttons" android:layout_width="wrap_content" android:layout_height="fill_parent" android:layout_alignParentRight="true">
+        <Button android:id="@id/button_comic_viewer_download" android:visibility="gone" android:layout_width="@dimen/width_comic_viewer_setting_panel" android:layout_height="fill_parent" android:text="@string/comic_viewer_setting_panel_download" android:drawableTop="@drawable/ic_action_editor_vertical_align_bottom" style="@style/ButtonTransparentBgWhiteContent3" />
+        <Button android:id="@id/button_comic_viewer_share" android:visibility="gone" android:layout_width="@dimen/width_comic_viewer_setting_panel" android:layout_height="fill_parent" android:text="@string/comic_viewer_setting_panel_share" android:drawableTop="@drawable/ic_action_social_share" style="@style/ButtonTransparentBgWhiteContent3" />
+        <Button android:id="@id/button_comic_viewer_hint" android:layout_width="@dimen/width_comic_viewer_setting_panel" android:layout_height="fill_parent" android:text="@string/comic_viewer_setting_panel_hint" android:drawableTop="@drawable/ic_action_action_help" style="@style/ButtonTransparentBgWhiteContent3" />
+    </LinearLayout>
+    <TextView android:textSize="@dimen/textsize_title_3" android:textColor="@color/colorPrimary" android:ellipsize="end" android:gravity="center|left" android:id="@id/textView_comic_viewer_title" android:layout_width="fill_parent" android:layout_height="fill_parent" android:text="Comic Title" android:maxLines="2" android:layout_toLeftOf="@id/linearLayout_comic_viewer_toolbar_buttons" android:layout_toRightOf="@id/imageButton_comic_viewer_back" />
+</RelativeLayout>

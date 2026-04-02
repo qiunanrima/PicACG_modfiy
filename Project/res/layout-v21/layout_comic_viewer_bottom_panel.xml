@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_viewer_bottom_panel" android:background="@color/black_transparent_30" android:paddingTop="@dimen/padding_1" android:paddingBottom="@dimen/padding_1" android:clickable="true" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_comic_viewer_vertical_paging_scrollbar" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_above="@id/linearLayout_comic_viewer_bottom_panel">
+        <TextView android:gravity="center" android:layout_gravity="center" android:id="@id/textView_comic_viewer_vertical_page" android:layout_width="0.0px" android:layout_height="wrap_content" android:text="" android:layout_weight="1.0" android:textAlignment="center" style="@style/ButtonTransparentBgWhiteContent3" />
+        <SeekBar android:id="@id/seekBar_comic_viewer_vertical_page" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="5.0" style="@style/ButtonTransparentBgWhiteContent3" />
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <LinearLayout android:layout_gravity="center_vertical" android:orientation="horizontal" android:id="@id/linearLayout_comic_viewer_horizontal_paging_scrollbar" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+            <TextView android:gravity="center" android:layout_gravity="center" android:id="@id/textView_comic_viewer_horizontal_page" android:layout_width="0.0px" android:layout_height="wrap_content" android:text="" android:layout_weight="1.0" android:textAlignment="center" style="@style/ButtonTransparentBgWhiteContent3" />
+            <SeekBar android:id="@id/seekBar_comic_viewer_horizontal_page" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="4.0" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_comic_viewer_bottom_buttons" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0">
+            <Button android:id="@id/button_comic_viewer_screen_orientation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_screen_orientation" android:drawableTop="@drawable/ic_action_device_screen_rotation" android:layout_weight="1.0" style="@style/ButtonTransparentBgWhiteContent3" />
+            <Button android:id="@id/button_comic_viewer_scroll_orientation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_scroll_orientation" android:drawableTop="@drawable/ic_action_flip" android:layout_weight="1.0" style="@style/ButtonTransparentBgWhiteContent3" />
+            <Button android:id="@id/button_comic_viewer_auto_paging" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_auto_paging" android:drawableTop="@drawable/ic_action_flipa" android:layout_weight="1.0" style="@style/ButtonTransparentBgWhiteContent3" />
+            <Button android:id="@id/button_comic_viewer_two_page_view_mode" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_two_page" android:drawableTop="@drawable/ic_action_double" android:layout_weight="1.0" style="@style/ButtonTransparentBgWhiteContent3" />
+            <Button android:id="@id/button_comic_viewer_setting" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_setting" android:drawableTop="@drawable/ic_action_action_settings" android:layout_weight="1.0" style="@style/ButtonTransparentBgWhiteContent3" />
+            <Button android:id="@id/button_comic_viewer_hide" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_hide" android:drawableTop="@drawable/menu_down" android:layout_weight="1.0" style="@style/ButtonTransparentBgWhiteContent3" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

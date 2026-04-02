@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:background="@color/backgroundDark" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <TextView android:gravity="center" android:background="@color/background" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:text="@string/support_us_game_title" style="@style/TextBaseStylePinkContent2" />
+        <ImageView android:layout_gravity="center_horizontal" android:id="@id/imageView_support_us_game" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:foreground="@drawable/ripple_bg" android:src="@drawable/cat_game" style="@style/ImageViewBaseStyleFitCenter" />
+        <TextView android:gravity="center" android:background="@color/background" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_2" android:text="@string/support_us_ads_title" style="@style/TextBaseStylePinkContent2" />
+        <WebView android:id="@id/webView_support_us_ads" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

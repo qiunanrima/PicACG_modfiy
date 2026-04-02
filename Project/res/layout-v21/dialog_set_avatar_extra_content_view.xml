@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:gravity="center" android:layout_gravity="center_horizontal" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="頭框號碼" style="@style/TextBaseStylePinkTitle2" />
+    <EditText android:gravity="center" android:layout_gravity="center_horizontal" android:id="@id/editText_set_avatar_extra_content_view_exp" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="輸入個號碼就好了" android:digits="\ 1234567890" android:inputType="phone" style="@style/EditTextStandardSingleLinePeachSetting" />
+</LinearLayout>

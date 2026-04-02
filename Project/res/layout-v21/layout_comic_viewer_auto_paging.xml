@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_viewer_dialog_auto_paging" android:background="@color/black_transparent_30" android:visibility="visible" android:layout_width="240.0dip" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="@dimen/textsize_content_1" android:textColor="@color/white" android:gravity="center" android:id="@id/textView_comic_viewer_dialog_auto_paging_title" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_auto_paging" />
+    <SeekBar android:id="@id/seekBar_comic_viewer_dialog_auto_paging" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:max="100" />
+    <Button android:textSize="@dimen/textsize_content_2" android:textColor="@color/white" android:id="@id/button_comic_viewer_dialog_auto_paging_start" android:background="@color/transparent" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_auto_start" />
+    <TextView android:textSize="@dimen/textsize_content_2" android:textStyle="italic" android:textColor="@color/colorPrimary" android:gravity="center" android:id="@id/textView_comic_viewer_dialog_auto_paging_hint" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/comic_viewer_toast_auto_paging_hint" />
+</LinearLayout>

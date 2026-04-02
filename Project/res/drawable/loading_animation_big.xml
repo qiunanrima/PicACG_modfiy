@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list android:id="@id/loading_animation_big" android:oneshot="false"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:duration="100" android:drawable="@drawable/loading_1_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_2_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_3_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_4_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_5_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_6_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_7_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_8_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_9_big" />
+    <item android:duration="100" android:drawable="@drawable/loading_10_big" />
+</animation-list>

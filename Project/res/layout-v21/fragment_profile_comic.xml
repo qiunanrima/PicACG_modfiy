@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView android:background="?custom_background_color_dark" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_profile_comic_downloaded" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_3" />
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_profile_comic_recent_view" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_3" />
+        <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_profile_comic_bookmarked" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_3" android:layout_marginBottom="@dimen/padding_2" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

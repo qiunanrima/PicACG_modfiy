@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="horizontal" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <FrameLayout android:clipChildren="false" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small">
+        <de.hdodenhof.circleimageview.CircleImageView android:id="@id/imageView_chatroom_recycler_view_cell_avatar" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small" android:src="@drawable/placeholder_ads" app:civ_border_color="@color/colorPrimary" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" app:civ_fill_color="@color/colorPrimaryLight" />
+        <ImageView android:layout_gravity="center" android:id="@id/imageView_chatroom_recycler_view_cell_verified" android:visibility="visible" android:layout_width="@dimen/size_image_character_small_icon" android:layout_height="@dimen/size_image_character_small_icon" android:src="@drawable/verified_icon_fill" style="@style/ImageViewBaseStyleFitCenter" />
+    </FrameLayout>
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2">
+        <TextView android:id="@id/textView_chatroom_recycler_view_cell_title" android:background="@drawable/chat_title_bg" android:paddingLeft="@dimen/padding_2" android:paddingRight="@dimen/padding_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_title_default" style="@style/TextBaseStyleGrayDarkContent3" />
+        <TextView android:id="@id/textView_chatroom_recycler_view_cell_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/chatroom_ads_bot" style="@style/TextBaseStyleGrayDarkContent3" />
+        <LinearLayout android:orientation="vertical" android:background="?chatroom_bubble_background" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <com.picacomic.fregata.utils.views.ChatroomWebview android:id="@id/webView_chatroom_recycler_view_cell_ads" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+            <TextView android:layout_gravity="right" android:id="@id/textView_chatroom_recycler_view_cell_timestamp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:text="10:34" style="@style/TextBaseStyleGrayTimestamp2" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:id="@id/textView_anonymous_chat_cell_message" android:background="@drawable/bubble_9" android:paddingLeft="@dimen/padding_5" android:paddingTop="@dimen/padding_2" android:paddingRight="@dimen/padding_2" android:paddingBottom="@dimen/padding_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true" style="@style/TextBaseStyleGrayDarkContent3" />
+</RelativeLayout>

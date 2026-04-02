@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_weight="1.0"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.picacomic.fregata.utils.views.ComicThumbImageView android:id="@id/imageView_single_image_text_view_image" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/ImageViewBaseStyleCenterCrop" />
+    <TextView android:id="@id/textView_single_image_text_view_title" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextBaseStyleGrayContent3" />
+</LinearLayout>

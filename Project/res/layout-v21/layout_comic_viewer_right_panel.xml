@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_viewer_right_panel" android:background="@color/black_transparent_30" android:paddingTop="@dimen/padding_3" android:paddingBottom="@dimen/padding_3" android:clickable="true" android:layout_width="@dimen/width_comic_viewer_setting_panel" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <Button android:id="@id/button_comic_viewer_select_episode" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_select_episode" android:drawableTop="@drawable/ic_action_choose" style="@style/ButtonTransparentBgWhiteContent3" />
+    <Button android:id="@id/button_comic_viewer_night_mode" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_night_mode" android:drawableTop="@drawable/ic_action_night" style="@style/ButtonTransparentBgWhiteContent3" />
+    <Button android:id="@id/button_comic_viewer_comment" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_comment" android:drawableTop="@drawable/ic_action_communication_chat" style="@style/ButtonTransparentBgWhiteContent3" />
+</LinearLayout>

@@ -1,0 +1,86 @@
+# IDE 和编辑器
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.code-workspace
+.classpath
+.project
+.settings/
+
+# Gradle 和构建相关
+.gradle/
+app/.gradle/
+build/
+app/build/
+/*/build/
+gradle-app.setting
+.gradletasknamecache
+build.log
+
+# 生成的构建文件
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.jar
+*.war
+*.aar
+
+# 本地配置文件
+local.properties
+gradle.properties
+*.jks
+*.keystore
+*.local.properties
+keystore/
+
+# Lint 输出
+lint-results*.xml
+lint-results.html
+
+# CMake 构建
+cmake-build-*/
+obj/
+
+# Python 相关
+__pycache__/
+*.py[cod]
+*.so
+*$py.class
+.Python
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+.directory
+desktop.ini
+
+# IDE 临时文件
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+.tmp/
+
+# 编辑器备份和补丁
+*.patch
+*.diff
+*.orig
+*.bak
+
+# Android Emulator 和开发工具
+.android/
+captures/
+*.log
+
+# Copilot 和其他开发工具
+.claude/
+
+# 其他临时文件
+*.class
+node_modules/
+

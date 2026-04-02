@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <solid android:color="@color/colorPrimary" />
+            <corners android:bottomLeftRadius="@dimen/size_dialog_corner_radius" android:bottomRightRadius="@dimen/size_dialog_corner_radius" />
+        </shape>
+    </item>
+    <item android:left="@dimen/size_dialog_stroke_width" android:right="@dimen/size_dialog_stroke_width" android:bottom="@dimen/size_dialog_stroke_width">
+        <shape>
+            <solid android:color="?custom_background_color" />
+            <corners android:bottomLeftRadius="@dimen/size_dialog_corner_radius_inner" android:bottomRightRadius="@dimen/size_dialog_corner_radius_inner" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="?custom_background_color_dark" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_6" android:layout_marginTop="@dimen/padding_1" android:layout_marginRight="@dimen/padding_1" android:layout_marginBottom="@dimen/padding_1">
+        <FrameLayout android:id="@id/frameLayout_comment_reply_recycler_view_cell_user_thumb" android:clipChildren="false" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small">
+            <de.hdodenhof.circleimageview.CircleImageView android:layout_gravity="center" android:id="@id/imageView_comment_reply_recycler_view_cell_user_thumb" android:layout_width="@dimen/size_image_thumbnail_small" android:layout_height="@dimen/size_image_thumbnail_small" android:src="@drawable/placeholder_avatar_2" app:civ_border_color="@color/colorPrimary" app:civ_border_width="2.0dip" />
+            <ImageView android:layout_gravity="center" android:id="@id/imageView_comment_reply_recycler_view_cell_user_thumb_verified" android:visibility="gone" android:layout_width="@dimen/size_image_character_small_icon" android:layout_height="@dimen/size_image_character_small_icon" android:src="@drawable/verified_icon_fill" style="@style/ImageViewBaseStyleFitCenter" />
+        </FrameLayout>
+        <LinearLayout android:orientation="vertical" android:paddingLeft="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_toRightOf="@id/frameLayout_comment_reply_recycler_view_cell_user_thumb">
+            <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <ImageView android:id="@id/imageView_comment_recycler_view_cell_option" android:layout_width="@dimen/size_option" android:layout_height="@dimen/size_option" android:src="@drawable/icon_option" android:layout_alignParentRight="true" style="@style/ImageViewBaseStyleFitCenter" />
+                <TextView android:textStyle="bold" android:id="@id/textView_comment_reply_recycler_view_cell_username" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_toLeftOf="@id/imageView_comment_recycler_view_cell_option" style="@style/TextBaseStyleGrayDarkContent2" />
+            </RelativeLayout>
+            <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <Button android:id="@id/button_comment_reply_recycler_view_cell_hide" android:background="@color/transparent" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="20.0dip" android:text="@string/comic_viewer_setting_panel_hide" android:layout_alignParentRight="true" style="@style/TextBaseStyleBlueContent1" />
+                <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lv." style="@style/TextBaseStylePinkContent3" />
+                    <TextView android:id="@id/textView_comment_reply_recycler_view_cell_level" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="@dimen/text_min_width_size_level" android:text="1" style="@style/TextBaseStylePinkContent3" />
+                    <TextView android:id="@id/textView_comment_reply_recycler_view_cell_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="服務器君的錯" style="@style/TextBaseStylePinkContent3" />
+                </LinearLayout>
+            </RelativeLayout>
+            <TextView android:id="@id/textView_comment_reply_recycler_view_cell_content" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextBaseStyleGrayDarkContent2" />
+        </LinearLayout>
+    </RelativeLayout>
+    <RelativeLayout android:paddingLeft="@dimen/padding_6" android:paddingRight="@dimen/padding_1" android:paddingBottom="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="\#" style="@style/TextBaseStyleGrayContent3" />
+            <TextView android:id="@id/textView_comment_reply_recycler_view_cell_floor" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="\#" style="@style/TextBaseStyleGrayContent3" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" / " style="@style/TextBaseStyleGrayContent3" />
+            <TextView android:id="@id/textView_comment_reply_recycler_view_cell_created_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="YY-MM-DD HH:MM" style="@style/TextBaseStyleGrayContent3" />
+        </LinearLayout>
+        <TextView android:gravity="center" android:id="@id/textView_comment_reply_recycler_view_cell_like_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="@dimen/text_min_width_size_reply" android:text="0" android:layout_alignParentRight="true" style="@style/TextBaseStyleGrayContent3" />
+        <ImageView android:id="@id/imageView_comment_reply_recycler_view_cell_like_icon" android:layout_width="@dimen/size_image_reply_icon" android:layout_height="@dimen/size_image_reply_icon" android:src="@drawable/icon_comment_like" android:layout_toLeftOf="@id/textView_comment_reply_recycler_view_cell_like_count" style="@style/ImageViewBaseStyleFitCenter" />
+    </RelativeLayout>
+    <include layout="@layout/layout_separator" />
+</LinearLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_news_cell" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <ImageView android:id="@id/imageView_news_icon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:src="@mipmap/register_name" android:layout_centerVertical="true" style="@style/ImageViewBaseStyleFitCenter" />
+        <TextView android:id="@id/textView_news_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toRightOf="@id/imageView_news_icon" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1" />
+        <ImageView android:id="@id/imageView_news_view_more" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:src="@drawable/icon_more" android:layout_alignParentRight="true" android:layout_centerVertical="true" style="@style/ImageViewBaseStyleFitCenter" />
+        <TextView android:id="@id/textView_news_view_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/more" android:layout_toLeftOf="@id/imageView_news_view_more" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayContent2" />
+    </RelativeLayout>
+    <include layout="@layout/layout_separator" />
+    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_news_content" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    <include layout="@layout/layout_separator" />
+</LinearLayout>

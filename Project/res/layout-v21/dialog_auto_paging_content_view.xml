@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="@dimen/textsize_content_1" android:textColor="@color/colorPrimary" android:gravity="center" android:id="@id/textView_setting_dialog_auto_paging_title" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_5" android:minWidth="200.0dip" android:text="@string/setting_comic_viewer_auto_paging_title_sample" />
+    <SeekBar android:id="@id/seekBar_setting_dialog_auto_paging" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:max="100" />
+</LinearLayout>

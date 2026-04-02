@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:orientation="vertical" android:id="@id/relativeLayout_image_popup_container" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:id="@id/profile_popup" android:background="@drawable/dialog_round_bg" android:fitsSystemWindows="true" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_4" app:layout_collapseMode="parallax">
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <TextView android:gravity="center" android:id="@id/textView_profile_popup_add_friend" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_1" android:layout_marginRight="@dimen/padding_3" android:text="@string/profile_punch_in" android:drawableTop="@drawable/icon_punch_in" android:layout_alignParentRight="true" style="@style/TextBaseStylesWhiteContent2" />
+            <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_profile_content" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <TextView android:textSize="@dimen/textsize_content_2" android:textStyle="bold" android:textColor="@color/red" android:id="@id/textView_profile_popup_function" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:text="功能" android:layout_alignParentRight="true" />
+                    <LinearLayout android:gravity="center" android:layout_gravity="center" android:orientation="horizontal" android:id="@id/linearLayout_profile_popup_level" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:layout_centerHorizontal="true">
+                        <TextView android:gravity="center" android:id="@id/textView_profile_popup_level_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/level" style="@style/TextBaseStyleGrayDarkTitle2" />
+                        <TextView android:gravity="center" android:id="@id/textView_profile_popup_level" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1" style="@style/TextBaseStyleGrayDarkTitle2" />
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_profile_popup_admin_function" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_below="@id/linearLayout_profile_popup_level">
+                        <TextView android:textSize="@dimen/textsize_content_2" android:textStyle="bold" android:textColor="@color/red" android:gravity="center" android:layout_gravity="center" android:id="@id/textView_profile_popup_block" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:text="@string/profile_popup_block" android:layout_weight="1.0" />
+                        <TextView android:textSize="@dimen/textsize_content_2" android:textStyle="bold" android:textColor="@color/red" android:gravity="center" android:layout_gravity="center" android:id="@id/textView_profile_popup_woo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:text="@string/profile_popup_woo" android:layout_weight="1.0" />
+                        <TextView android:textSize="@dimen/textsize_content_2" android:textStyle="bold" android:textColor="@color/red" android:gravity="center" android:layout_gravity="center" android:id="@id/textView_profile_popup_remove_comment" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:text="@string/profile_popup_remove_comment" android:layout_weight="1.0" />
+                    </LinearLayout>
+                </RelativeLayout>
+                <FrameLayout android:layout_gravity="center" android:layout_width="@dimen/size_image_character_big_icon" android:layout_height="@dimen/size_image_character_big_icon">
+                    <de.hdodenhof.circleimageview.CircleImageView android:layout_gravity="center" android:id="@id/imageView_profile_popup_avatar" android:layout_width="@dimen/size_image_thumbnail_big" android:layout_height="@dimen/size_image_thumbnail_big" android:src="@drawable/placeholder_avatar_2" app:civ_border_color="@color/black" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" />
+                    <ImageView android:layout_gravity="center" android:id="@id/imageView_profile_popup_character" android:visibility="gone" android:layout_width="@dimen/size_image_character_big_icon" android:layout_height="@dimen/size_image_character_big_icon" android:src="@drawable/verified_icon_fill" style="@style/ImageViewBaseStyleFitCenter" />
+                </FrameLayout>
+                <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
+                    <TextView android:textStyle="bold" android:gravity="center" android:id="@id/textView_profile_popup_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="嗶卡D" android:layout_centerInParent="true" style="@style/TextBaseStyleGrayDarkContent1" />
+                </RelativeLayout>
+                <TextView android:gravity="center" android:id="@id/textView_profile_popup_title" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="嗶卡D" style="@style/TextBaseStylePinkDarkContent1" />
+                <LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&quot;" style="@style/TextBaseStyleGrayDarkContent2" />
+                    <TextView android:id="@id/textView_profile_popup_slogan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="伺服器君是一個變態" style="@style/TextBaseStyleGrayDarkContent2" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&quot;" style="@style/TextBaseStyleGrayDarkContent2" />
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+</ScrollView>
