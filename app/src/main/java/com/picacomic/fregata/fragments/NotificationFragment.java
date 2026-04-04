@@ -50,6 +50,7 @@ public class NotificationFragment extends BaseFragment implements h {
         this.binding = FragmentNotificationBinding.inflate(layoutInflater, viewGroup, false);
         this.recyclerView = this.binding.recyclerViewNotification;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

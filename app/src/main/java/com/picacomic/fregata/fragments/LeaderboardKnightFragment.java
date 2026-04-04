@@ -37,6 +37,7 @@ public class LeaderboardKnightFragment extends BaseFragment implements k {
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         this.binding = FragmentLeaderboardKnightBinding.inflate(layoutInflater, viewGroup, false);
         this.recyclerView_knight = this.binding.recyclerViewLeaderboardKnight;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

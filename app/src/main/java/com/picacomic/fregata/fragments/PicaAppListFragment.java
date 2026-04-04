@@ -45,6 +45,7 @@ public class PicaAppListFragment extends BaseFragment implements k {
         this.binding = FragmentChatroomListBinding.inflate(layoutInflater, viewGroup, false);
         this.recyclerView_list = this.binding.recyclerViewChatroomList;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

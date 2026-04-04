@@ -29,6 +29,7 @@ public class SupportUsContainerFragment extends BaseFragment {
         this.tabLayout = this.binding.tabs;
         this.toolbar = this.binding.toolbar;
         this.viewPager_tags = this.binding.viewPagerSupportUs;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

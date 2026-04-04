@@ -57,6 +57,7 @@ public class LeaderboardPopularFragment extends BaseFragment implements k {
         this.radioButton_7days = this.binding.radioButtonLeaderboardPopular7days;
         this.radioGroup_time = this.binding.radioGroupLeaderboardPopularTime;
         this.recyclerView_popular = this.binding.recyclerViewLeaderboardPopular;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

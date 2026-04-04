@@ -98,6 +98,7 @@ public class SettingFragment extends BaseFragment {
         this.toggleButton_testingVersion = this.binding.toggleButtonSettingComicViewerTestingVersion;
         this.toggleButton_volumePagingControl = this.binding.toggleButtonSettingVolumePagingControl;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

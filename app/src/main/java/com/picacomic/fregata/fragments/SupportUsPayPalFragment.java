@@ -33,6 +33,7 @@ public class SupportUsPayPalFragment extends BaseFragment implements k {
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         this.binding = FragmentSupportUsPayPalBinding.inflate(layoutInflater, viewGroup, false);
         this.recyclerView_paypal = this.binding.recyclerViewSupportUsPaypal;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

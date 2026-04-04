@@ -73,6 +73,7 @@ public class PicaAppFragment extends BaseFragment implements j {
         this.binding = FragmentPicaAppBinding.inflate(layoutInflater, viewGroup, false);
         this.linearLayoutWeb = this.binding.linearLayoutWeb;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

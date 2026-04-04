@@ -66,6 +66,7 @@ public class ProfileEditFragment extends BaseImagePickFragment {
         this.textView_email = this.binding.textViewProfileEmail;
         this.textView_name = this.binding.textViewProfileName;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

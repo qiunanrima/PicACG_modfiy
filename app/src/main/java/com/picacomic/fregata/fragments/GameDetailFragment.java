@@ -155,6 +155,7 @@ public class GameDetailFragment extends BaseFragment implements k {
         this.toolbar = this.binding.toolbar;
         this.videoView = this.binding.videoViewGameDetail;
         this.viewPager_screenShots = this.binding.viewPagerGameDetailScreenShot;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

@@ -46,6 +46,7 @@ public class ProfileComicFragment extends BaseFragment implements View.OnClickLi
         this.linearLayout_bookmarked = this.binding.linearLayoutProfileComicBookmarked;
         this.linearLayout_downloaded = this.binding.linearLayoutProfileComicDownloaded;
         this.linearLayout_recentView = this.binding.linearLayoutProfileComicRecentView;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

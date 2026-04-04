@@ -96,6 +96,7 @@ public class RegisterFragment extends BaseFragment {
         this.frameLayout_backgroundWhite = this.binding.frameLayoutRegisterBackgroundWhite;
         this.textView_birthday = this.binding.textViewRegisterBirthday;
         this.genders = getResources().getStringArray(R.array.register_genders);
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

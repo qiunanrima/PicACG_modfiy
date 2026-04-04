@@ -24,6 +24,7 @@ public class SupportUsAdsGameFragment extends BaseFragment {
         this.binding = FragmentSupportUsAdsGameBinding.inflate(layoutInflater, viewGroup, false);
         this.imageView_game = this.binding.imageViewSupportUsGame;
         this.webView_ads = this.binding.webViewSupportUsAds;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

@@ -25,6 +25,7 @@ public class SupportUsQQAlipayFragment extends BaseFragment implements View.OnCl
         this.binding = FragmentSupportUsQqalipayBinding.inflate(layoutInflater, viewGroup, false);
         this.textView_alipay = this.binding.textViewSupportUsAlipay;
         this.textView_alipayTitle = this.binding.textViewSupportUsAlipayTitle;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

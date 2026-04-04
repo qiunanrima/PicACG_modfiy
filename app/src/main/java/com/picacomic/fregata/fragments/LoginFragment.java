@@ -76,6 +76,7 @@ public class LoginFragment extends BaseFragment {
         this.editText_password = this.binding.editTextLoginPassword;
         this.imageView_logo = this.binding.imageViewLoginPicaLogo;
         this.linearLayout_loginForm = this.binding.linearLayoutLoginFragment;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

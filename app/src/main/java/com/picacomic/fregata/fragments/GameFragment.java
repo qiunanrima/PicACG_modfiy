@@ -45,6 +45,7 @@ public class GameFragment extends BaseFragment implements k {
         this.binding = FragmentGameBinding.inflate(layoutInflater, viewGroup, false);
         this.recyclerView_games = this.binding.recyclerViewGame;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

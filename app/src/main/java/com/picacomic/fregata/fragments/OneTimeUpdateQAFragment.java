@@ -47,6 +47,7 @@ public class OneTimeUpdateQAFragment extends BaseFragment implements View.OnClic
         this.editText_question_2 = this.binding.editTextRegisterQuestion2;
         this.editText_question_3 = this.binding.editTextRegisterQuestion3;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

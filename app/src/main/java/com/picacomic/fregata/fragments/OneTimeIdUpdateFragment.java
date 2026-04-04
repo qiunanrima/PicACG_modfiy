@@ -48,6 +48,7 @@ public class OneTimeIdUpdateFragment extends BaseFragment {
         this.editText_email = this.binding.editTextIdEmail;
         this.editText_username = this.binding.editTextIdUsername;
         this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 

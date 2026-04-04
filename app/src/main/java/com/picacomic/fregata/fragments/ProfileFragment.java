@@ -108,6 +108,7 @@ public class ProfileFragment extends BaseImagePickFragment {
         this.textView_punchIn = this.binding.textViewProfilePunchIn;
         this.textView_slogan = this.binding.textViewProfileSlogan;
         this.viewPager_tags = this.binding.viewPagerProfile;
+        a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 
