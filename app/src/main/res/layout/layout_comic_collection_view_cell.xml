@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_collection_view" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-        <ImageView android:id="@id/imageView_comic_collection_view_icon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:src="@mipmap/register_name" android:layout_centerVertical="true" style="@style/ImageViewBaseStyleFitCenter" />
-        <TextView android:id="@id/textView_comic_collection_view_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toRightOf="@id/imageView_comic_collection_view_icon" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayDarkContent1" />
-        <TextView android:gravity="center_vertical" android:id="@id/textView_comic_collection_view_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" android:layout_centerVertical="true" style="@style/TextBaseStyleGrayContent2" />
-    </RelativeLayout>
-    <include layout="@layout/layout_separator" />
-    <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_comic_collection_view_content" android:layout_width="fill_parent" android:layout_height="wrap_content" />
-    <include layout="@layout/layout_separator" />
-</LinearLayout>
+<androidx.cardview.widget.CardView android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_4" android:layout_marginTop="@dimen/padding_2" android:layout_marginRight="@dimen/padding_4" android:layout_marginBottom="@dimen/padding_2"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" app:cardBackgroundColor="@color/expressive_surface" app:cardCornerRadius="@dimen/size_expressive_corner_large" app:cardElevation="0.0dip" app:cardUseCompatPadding="false">
+    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_collection_view" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingLeft="@dimen/padding_5" android:paddingTop="@dimen/padding_5" android:paddingRight="@dimen/padding_5" android:paddingBottom="@dimen/padding_3">
+            <ImageView android:id="@id/imageView_comic_collection_view_icon" android:layout_width="20.0dip" android:layout_height="20.0dip" android:layout_centerVertical="true" android:background="@drawable/bg_expressive_icon_badge" android:padding="@dimen/padding_1" android:src="@drawable/icon_pager_indicator_selected" android:tint="@color/expressive_primary" style="@style/ImageViewBaseStyleFitCenter" />
+            <TextView android:id="@id/textView_comic_collection_view_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_3" android:layout_toRightOf="@id/imageView_comic_collection_view_icon" android:layout_centerVertical="true" style="@style/TextExpressiveSectionTitle" />
+            <TextView android:gravity="center" android:id="@id/textView_comic_collection_view_count" android:background="@drawable/bg_expressive_tonal_button" android:paddingLeft="@dimen/padding_3" android:paddingTop="@dimen/padding_2" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:drawableRight="@drawable/icon_more" android:drawablePadding="@dimen/padding_2" android:layout_alignParentRight="true" android:layout_centerVertical="true" style="@style/TextExpressiveSectionAction" />
+        </RelativeLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_comic_collection_view_content" android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingLeft="@dimen/padding_3" android:paddingRight="@dimen/padding_3" android:paddingBottom="@dimen/padding_4" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

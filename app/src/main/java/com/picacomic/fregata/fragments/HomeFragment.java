@@ -148,6 +148,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
         }
         BannerObject[] bannerObjectArr = {new BannerObject("banner1", "嗶咔2.0公測正式開放！", "web", "", null, null, "https://picacomic.com", null), new BannerObject("banner2", "玩機動戰隊送多麗絲／教皇抱枕", "game", "", "58296dee1cc00b5d50b1b5fe", null, null, null), new BannerObject("banner3", "一點沒露卻色氣滿滿・奈奈與薫的SM日記", "comic", "", null, "5822a5bcad7ede6546963762", null, thumbnailObjectArr[0]), new BannerObject("banner4", "拯救嗶咔・點擊廣告", "ads", "", null, null, null, null)};
         this.ps = new ArrayList<>();
+        renderAnnouncements();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -191,9 +192,13 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
                 }.getType());
                 if (list != null && list.size() > 0) {
                     this.ps.addAll(list);
-                    this.pp.setSize(this.ps.size());
+                    if (this.pp != null) {
+                        this.pp.setSize(this.ps.size());
+                    }
                     //this.textView_bannerTitle.setText(this.ps.get(0).getTitle() + " - " + this.ps.get(0).getShortDescription());
-                    this.pq.notifyDataSetChanged();
+                    if (this.pq != null) {
+                        this.pq.notifyDataSetChanged();
+                    }
                 } else {
                     dj();
                 }
@@ -311,6 +316,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
                         e.printStackTrace();
                     }
                 }
+                HomeFragment.this.renderAnnouncements();
                 HomeFragment.this.bC();
                 HomeFragment.this.bI();
             }
@@ -318,6 +324,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
             @Override // retrofit2.Callback
             public void onFailure(Call<GeneralResponse<AnnouncementsResponse>> call, Throwable th) {
                 th.printStackTrace();
+                HomeFragment.this.renderAnnouncements();
                 HomeFragment.this.bC();
                 new c(HomeFragment.this.getActivity()).dN();
                 HomeFragment.this.bI();
@@ -394,6 +401,21 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     }
 
     public void dn() {
+        if (this.linearLayout_collection_1 != null) {
+            this.linearLayout_collection_1.removeAllViews();
+        }
+        if (this.linearLayout_collection_2 != null) {
+            this.linearLayout_collection_2.removeAllViews();
+        }
+        if (this.linearLayout_collection_3 != null) {
+            this.linearLayout_collection_3.removeAllViews();
+        }
+        if (this.linearLayout_collection_4 != null) {
+            this.linearLayout_collection_4.removeAllViews();
+        }
+        if (this.linearLayout_collection_5 != null) {
+            this.linearLayout_collection_5.removeAllViews();
+        }
         if (this.pu != null) {
             for (int i = 0; i < this.pu.size(); i++) {
                 try {
@@ -415,6 +437,22 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
                 }
             }
         }
+    }
+
+    public void renderAnnouncements() {
+        if (this.linearLayout_announcements == null) {
+            return;
+        }
+        this.linearLayout_announcements.removeAllViews();
+        if (getActivity() == null || this.pt == null || this.pt.size() <= 0) {
+            this.linearLayout_announcements.setVisibility(8);
+            return;
+        }
+        this.linearLayout_announcements.setVisibility(0);
+        AnnouncementContainerView announcementContainerView = new AnnouncementContainerView(getActivity(), this.pt, 0, null, null);
+        announcementContainerView.getTextView_title().setText(R.string.title_announcement);
+        announcementContainerView.getTextView_count().setVisibility(8);
+        this.linearLayout_announcements.addView(announcementContainerView);
     }
 
     @Override // com.picacomic.fregata.a_pkg.k

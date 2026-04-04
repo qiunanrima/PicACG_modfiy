@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout android:orientation="horizontal" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content">
-        <ImageView android:layout_gravity="center_vertical" android:id="@id/imageView_announcement_cell_image" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail" style="@style/ImageViewBaseStyleCenterCrop" />
-        <LinearLayout android:orientation="vertical" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content">
-            <TextView android:id="@id/textView_announcement_cell_title" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Announcement Title" style="@style/TextBaseStyleGrayDarkContent1" />
-            <TextView android:ellipsize="end" android:id="@id/textView_announcement_cell_description" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Announcement Description" android:maxLines="3" android:lines="3" style="@style/TextBaseStyleGrayContent2" />
+<androidx.cardview.widget.CardView android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_1" android:layout_marginRight="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_2"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" app:cardBackgroundColor="@color/expressive_surface_variant" app:cardCornerRadius="@dimen/size_expressive_corner_medium" app:cardElevation="0.0dip" app:cardUseCompatPadding="false">
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:padding="@dimen/padding_3">
+        <androidx.cardview.widget.CardView android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail" app:cardBackgroundColor="@color/expressive_surface" app:cardCornerRadius="@dimen/size_expressive_corner_small" app:cardElevation="0.0dip" app:cardUseCompatPadding="false">
+            <ImageView android:layout_gravity="center_vertical" android:id="@id/imageView_announcement_cell_image" android:layout_width="fill_parent" android:layout_height="fill_parent" style="@style/ImageViewBaseStyleCenterCrop" />
+        </androidx.cardview.widget.CardView>
+        <LinearLayout android:orientation="vertical" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_3" android:layout_weight="1.0">
+            <TextView android:id="@id/textView_announcement_cell_title" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="Announcement Title" style="@style/TextExpressiveItemTitle" />
+            <TextView android:ellipsize="end" android:id="@id/textView_announcement_cell_description" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_1" android:maxLines="3" style="@style/TextExpressiveItemBody" />
         </LinearLayout>
     </LinearLayout>
-    <include layout="@layout/layout_separator" />
-</LinearLayout>
+</androidx.cardview.widget.CardView>

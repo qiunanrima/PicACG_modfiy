@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector
-  xmlns:android="http://schemas.android.com/apk/res/android">
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/size_button_tag_corner_radius" />
-            <stroke android:width="1.0dip" android:color="@color/pinkDark" />
-            <solid android:color="@color/pink" />
+            <corners android:radius="@dimen/size_expressive_corner_medium" />
+            <stroke android:width="@dimen/size_expressive_stroke_width" android:color="@color/expressive_outline_strong" />
+            <solid android:color="@color/expressive_surface_strong" />
             <size android:height="@dimen/size_button_tag_height" />
             <padding android:left="@dimen/padding_3" android:top="@dimen/padding_1" android:right="@dimen/padding_3" android:bottom="@dimen/padding_1" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/size_button_tag_corner_radius" />
-            <stroke android:width="1.0dip" android:color="@color/pinkDark" />
-            <solid android:color="@color/pinkLight" />
+            <corners android:radius="@dimen/size_expressive_corner_medium" />
+            <stroke android:width="@dimen/size_expressive_stroke_width" android:color="@color/expressive_outline" />
+            <solid android:color="@color/expressive_primary_container" />
             <size android:height="@dimen/size_button_tag_height" />
             <padding android:left="@dimen/padding_3" android:top="@dimen/padding_1" android:right="@dimen/padding_3" android:bottom="@dimen/padding_1" />
         </shape>

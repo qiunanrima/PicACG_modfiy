@@ -4,8 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,7 +17,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,14 +46,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /* JADX INFO: loaded from: classes.dex */
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity {
 
     ActivityMainBinding binding;
     public BannerWebview bannerWebview;
     ImageButton button_controlBlock;
     ImageButton button_controlExp;
-    AppCompatImageButton button_home;
-    AppCompatImageButton[] buttons_tabbar;
+    BottomNavigationView bottomNavigationView;
     Animation iA;
     Animation iB;
     Animation iC;
@@ -67,8 +68,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public boolean iM = false;
     public boolean iN = false;
 
-    LinearLayout linearLayout_tabbar;
-
     public PopupWebview popupWebview;
 
     @Override // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
@@ -81,20 +80,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         super.onCreate(bundle);
         this.binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(this.binding.getRoot());
+        applyMainChrome();
         
         this.bannerWebview = this.binding.bannerWebview;
         this.button_controlBlock = this.binding.imageButtonControlBlock;
         this.button_controlExp = this.binding.imageButtonControlExp;
-        this.button_home = (AppCompatImageButton) this.binding.buttonTabbarHome;
-        this.linearLayout_tabbar = this.binding.linearLayoutTabbar;
+        this.bottomNavigationView = this.binding.bottomNavigationMain;
         this.popupWebview = this.binding.popupWebview;
-        this.buttons_tabbar = new AppCompatImageButton[]{
-            (AppCompatImageButton) this.binding.buttonTabbarHome,
-            (AppCompatImageButton) this.binding.buttonTabbarCategory,
-            (AppCompatImageButton) this.binding.buttonTabbarGame,
-            (AppCompatImageButton) this.binding.buttonTabbarProfile,
-            (AppCompatImageButton) this.binding.buttonTabbarSetting
-        };
 
         e.j(this, (String) null);
         e.l(this, (String) null);
@@ -121,7 +113,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             @Override // android.view.animation.Animation.AnimationListener
             public void onAnimationEnd(Animation animation) {
-                MainActivity.this.linearLayout_tabbar.setVisibility(8);
+                MainActivity.this.bottomNavigationView.setVisibility(8);
             }
         });
         this.iB = AnimationUtils.loadAnimation(this, R.anim.tabbar_anim_enter);
@@ -136,7 +128,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             @Override // android.view.animation.Animation.AnimationListener
             public void onAnimationEnd(Animation animation) {
-                MainActivity.this.linearLayout_tabbar.setVisibility(0);
+                MainActivity.this.bottomNavigationView.setVisibility(0);
             }
         });
         this.iC = AnimationUtils.loadAnimation(this, R.anim.tabbar_anim_exit);
@@ -175,25 +167,45 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         bK();
     }
 
+    private void applyMainChrome() {
+        if (getWindow() == null) {
+            return;
+        }
+        int expressiveBackground = ContextCompat.getColor(this, R.color.expressive_background);
+        int expressiveOutline = ContextCompat.getColor(this, R.color.expressive_outline);
+        getWindow().setStatusBarColor(expressiveBackground);
+        getWindow().setNavigationBarColor(expressiveBackground);
+        if (Build.VERSION.SDK_INT >= 28) {
+            getWindow().setNavigationBarDividerColor(expressiveOutline);
+        }
+        if (Build.VERSION.SDK_INT >= 29) {
+            getWindow().setStatusBarContrastEnforced(false);
+            getWindow().setNavigationBarContrastEnforced(false);
+        }
+        WindowInsetsControllerCompat windowInsetsControllerCompat = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
+        windowInsetsControllerCompat.setAppearanceLightNavigationBars(true);
+    }
+
     public void t(int i) {
         bK();
         if (i == 0) {
-            if (this.linearLayout_tabbar.getVisibility() != 0) {
+            if (this.bottomNavigationView.getVisibility() != 0) {
                 if (e.x(this)) {
-                    this.linearLayout_tabbar.setVisibility(0);
+                    this.bottomNavigationView.setVisibility(0);
                     return;
                 } else {
-                    this.linearLayout_tabbar.startAnimation(this.iB);
+                    this.bottomNavigationView.startAnimation(this.iB);
                     return;
                 }
             }
             return;
         }
-        if (this.linearLayout_tabbar.getVisibility() == 0) {
+        if (this.bottomNavigationView.getVisibility() == 0) {
             if (e.x(this)) {
-                this.linearLayout_tabbar.setVisibility(8);
+                this.bottomNavigationView.setVisibility(8);
             } else {
-                this.linearLayout_tabbar.startAnimation(this.iA);
+                this.bottomNavigationView.startAnimation(this.iA);
             }
         }
     }
@@ -214,10 +226,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     public void bF() {
-        for (int i = 0; i < this.buttons_tabbar.length; i++) {
-            this.buttons_tabbar[i].setOnClickListener(this);
+        if (this.bottomNavigationView == null) {
+            return;
         }
-        this.button_home.setOnClickListener(this);
+        this.bottomNavigationView.setOnItemSelectedListener(menuItem -> {
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.navigation_home) {
+                u(0);
+                return true;
+            }
+            if (itemId == R.id.navigation_category) {
+                u(1);
+                return true;
+            }
+            if (itemId == R.id.navigation_game) {
+                u(2);
+                return true;
+            }
+            if (itemId == R.id.navigation_profile) {
+                u(3);
+                return true;
+            }
+            if (itemId == R.id.navigation_setting) {
+                u(4);
+                return true;
+            }
+            return false;
+        });
     }
 
     public void bH() {
@@ -288,33 +323,48 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     public void u(int i) {
-        if (this.buttons_tabbar != null) {
-            for (int i2 = 0; i2 < this.buttons_tabbar.length; i2++) {
-                this.buttons_tabbar[i2].setEnabled(true);
-            }
-            this.buttons_tabbar[i].setEnabled(false);
+        if (this.bottomNavigationView != null) {
+            int itemId = R.id.navigation_home;
             switch (i) {
-                case 0:
-                    getSupportFragmentManager().popBackStack();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, new HomeFragment(), HomeFragment.TAG).commit();
-                    break;
                 case 1:
-                    getSupportFragmentManager().popBackStack();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, new CategoryFragment(), CategoryFragment.TAG).commit();
+                    itemId = R.id.navigation_category;
                     break;
                 case 2:
-                    getSupportFragmentManager().popBackStack();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, new GameFragment(), GameFragment.TAG).commit();
+                    itemId = R.id.navigation_game;
                     break;
                 case 3:
-                    getSupportFragmentManager().popBackStack();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, new ProfileFragment(), ProfileFragment.TAG).commit();
+                    itemId = R.id.navigation_profile;
                     break;
                 case 4:
-                    getSupportFragmentManager().popBackStack();
-                    getSupportFragmentManager().beginTransaction().replace(R.id.container, new SettingFragment(), SettingFragment.TAG).commit();
+                    itemId = R.id.navigation_setting;
                     break;
             }
+            if (this.bottomNavigationView.getSelectedItemId() != itemId) {
+                this.bottomNavigationView.setSelectedItemId(itemId);
+                return;
+            }
+        }
+        switch (i) {
+            case 0:
+                getSupportFragmentManager().popBackStack();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, new HomeFragment(), HomeFragment.TAG).commit();
+                break;
+            case 1:
+                getSupportFragmentManager().popBackStack();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, new CategoryFragment(), CategoryFragment.TAG).commit();
+                break;
+            case 2:
+                getSupportFragmentManager().popBackStack();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, new GameFragment(), GameFragment.TAG).commit();
+                break;
+            case 3:
+                getSupportFragmentManager().popBackStack();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, new ProfileFragment(), ProfileFragment.TAG).commit();
+                break;
+            case 4:
+                getSupportFragmentManager().popBackStack();
+                getSupportFragmentManager().beginTransaction().replace(R.id.container, new SettingFragment(), SettingFragment.TAG).commit();
+                break;
         }
     }
 
@@ -497,15 +547,5 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, android.content.ComponentCallbacks
     public void onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration);
-    }
-
-    @Override // android.view.View.OnClickListener
-    public void onClick(View view) {
-        for (int i = 0; i < this.buttons_tabbar.length; i++) {
-            if (view == this.buttons_tabbar[i]) {
-                u(i);
-                return;
-            }
-        }
     }
 }
