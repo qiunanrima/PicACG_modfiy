@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:background="@color/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+<RelativeLayout android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="fill_parent"
   xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_download" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true">
         <FrameLayout android:background="@color/gray" android:layout_width="fill_parent" android:layout_height="1.0dip" />
         <TextView android:id="@id/textView_comic_download_test_broadcast_receiver" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextBaseStyleGrayDarkContent2" />
-        <LinearLayout android:orientation="horizontal" android:background="@color/background" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="horizontal" android:background="?custom_background_color" android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
             <Button android:id="@id/button_comic_download_manage" android:background="@drawable/button_episode_downloading_bg" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_1" android:text="@string/manage" android:layout_weight="1.0" style="@style/TextBaseStylesWhiteContent1" />
             <Button android:id="@id/button_comic_download_download" android:background="@drawable/button_episode_downloaded_bg" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_1" android:text="@string/download" android:layout_weight="1.0" style="@style/TextBaseStylesWhiteContent1" />
         </LinearLayout>

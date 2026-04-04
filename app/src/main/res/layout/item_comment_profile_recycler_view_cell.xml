@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:background="@color/background" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
+<LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
   xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <RelativeLayout android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
         <FrameLayout android:id="@id/frameLayout_comment_recycler_view_cell_user_thumb" android:clipChildren="false" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_announcement_cell" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content"
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_announcement_cell" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
         <ImageView android:id="@id/imageView_announcement_icon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2" android:src="@mipmap/register_name" android:layout_centerVertical="true" style="@style/ImageViewBaseStyleFitCenter" />

@@ -36,7 +36,7 @@
             </LinearLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
         <com.google.android.material.appbar.CollapsingToolbarLayout android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_scrollFlags="enterAlways|scroll">
-            <com.google.android.material.tabs.TabLayout android:layout_gravity="bottom" android:id="@id/tabs" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="?actionBarSize" android:layout_below="@id/toolbar" app:layout_collapseMode="pin" app:tabIndicatorColor="@color/colorPrimary" app:tabSelectedTextColor="@color/colorPrimary" app:tabTextColor="@color/gray" />
+            <com.google.android.material.tabs.TabLayout android:layout_gravity="bottom" android:id="@id/tabs" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="?actionBarSize" android:layout_below="@id/toolbar" app:layout_collapseMode="pin" app:tabIndicatorColor="@color/colorPrimary" app:tabSelectedTextColor="@color/colorPrimary" app:tabTextColor="@color/gray" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
     <androidx.viewpager.widget.ViewPager android:id="@id/viewPager_profile" android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_behavior="@string/appbar_scrolling_view_behavior" />

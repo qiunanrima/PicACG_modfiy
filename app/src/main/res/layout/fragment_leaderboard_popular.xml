@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+<LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="fill_parent"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <RadioGroup android:orientation="horizontal" android:id="@id/radioGroup_leaderboard_popular_time" android:background="@drawable/radio_group_segment_style_bg" android:padding="1.0px" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_1">
         <RadioButton android:id="@id/radioButton_leaderboard_popular_24hr" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/leaderboard_tab_popular_24hr" android:layout_weight="1.0" style="@style/RadioButtonSegmentStylePink" />

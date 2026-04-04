@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@id/coordinatorLayout" android:background="@color/backgroundDark" android:layout_width="fill_parent" android:layout_height="fill_parent"
+<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@id/coordinatorLayout" android:background="?custom_background_color_dark" android:layout_width="fill_parent" android:layout_height="fill_parent"
   xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
         <androidx.appcompat.widget.Toolbar android:id="@id/toolbar" android:layout_width="fill_parent" android:layout_height="?actionBarSize" app:layout_scrollFlags="enterAlways|scroll" app:popupTheme="@style/ThemeOverlay.AppCompat.Light" style="@style/AppTheme.PopupOverlay" />
     </com.google.android.material.appbar.AppBarLayout>
     <androidx.core.widget.NestedScrollView android:id="@id/scrollView" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <LinearLayout android:orientation="vertical" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="fill_parent">
             <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
                 <com.picacomic.fregata.utils.views.ComicThumbImageView android:id="@id/imageView_comic_detail_cover" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail_height" android:layout_marginRight="@dimen/padding_2" android:src="@mipmap/ic_launcher" style="@style/ImageViewBaseStyleCenterCrop" />
                 <ImageButton android:id="@id/imageButton_comic_detail_bookmark" android:layout_width="@dimen/size_button_round_pink_height" android:layout_height="@dimen/size_button_round_pink_height" android:src="@drawable/icon_like_off" android:layout_alignParentRight="true" style="@style/ImageButtonTransparentBgFitCenter" />
@@ -52,9 +52,9 @@
                     </LinearLayout>
                 </FrameLayout>
             </LinearLayout>
-            <LinearLayout android:orientation="vertical" android:background="@color/backgroundDark" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:background="?custom_background_color_dark" android:layout_width="fill_parent" android:layout_height="wrap_content">
                 <include layout="@layout/layout_separator_full" />
-                <LinearLayout android:orientation="horizontal" android:background="@color/background" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <LinearLayout android:orientation="horizontal" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content">
                     <FrameLayout android:id="@id/frameLayout_comic_detail_knight_thumb" android:clipChildren="false" android:layout_width="@dimen/size_image_thumbnail_smallest" android:layout_height="@dimen/size_image_thumbnail_smallest" android:layout_margin="@dimen/padding_2">
                         <de.hdodenhof.circleimageview.CircleImageView android:layout_gravity="center" android:id="@id/imageView_comic_detail_knight_avatar" android:layout_width="@dimen/size_image_thumbnail_smallest" android:layout_height="@dimen/size_image_thumbnail_smallest" android:src="@drawable/placeholder_avatar_2" app:civ_border_color="@color/colorPrimary" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" />
                         <ImageView android:layout_gravity="center" android:id="@id/imageView_comic_detail_knight_verified" android:visibility="gone" android:layout_width="@dimen/size_image_character_smallest_icon" android:layout_height="@dimen/size_image_character_smallest_icon" android:src="@drawable/verified_icon_fill" style="@style/ImageViewBaseStyleFitCenter" />

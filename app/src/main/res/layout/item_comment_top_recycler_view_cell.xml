@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:background="@color/background" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
+<LinearLayout android:orientation="vertical" android:background="?custom_background_color" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content"
   xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <RelativeLayout android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
         <FrameLayout android:id="@id/frameLayout_comment_recycler_view_cell_user_thumb" android:clipChildren="false" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail">
@@ -40,6 +40,6 @@
     </RelativeLayout>
     <include android:clipChildren="false" layout="@layout/layout_separator" />
     <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comment_recycler_view_cell_reply" android:background="@color/grayLight" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="wrap_content" />
-    <Button android:gravity="center" android:id="@id/button_comment_recycler_view_cell_view_more" android:background="@color/grayLight" android:padding="@dimen/padding_2" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="16.0dip" android:text="@string/comment_view_more_reply" style="@style/TextBaseStyleGrayDarkContent2" />
-    <TextView android:gravity="center" android:id="@id/textView_comment_recycler_view_cell_no_reply" android:background="@color/grayLight" android:padding="@dimen/padding_2" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/comment_no_reply" style="@style/TextBaseStyleGrayDarkContent2" />
+    <Button android:gravity="center" android:id="@id/button_comment_recycler_view_cell_view_more" android:background="?custom_background_color_dark" android:padding="@dimen/padding_2" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:minHeight="16.0dip" android:text="@string/comment_view_more_reply" style="@style/TextBaseStyleGrayDarkContent2" />
+    <TextView android:gravity="center" android:id="@id/textView_comment_recycler_view_cell_no_reply" android:background="?custom_background_color_dark" android:padding="@dimen/padding_2" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/comment_no_reply" style="@style/TextBaseStyleGrayDarkContent2" />
 </LinearLayout>

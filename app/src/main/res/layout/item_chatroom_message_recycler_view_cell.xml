@@ -5,8 +5,8 @@
         <include layout="@layout/layout_chatroom_avatar" />
         <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2">
             <include layout="@layout/layout_chatroom_name_and_title" />
-            <LinearLayout android:orientation="vertical" android:background="@drawable/bubble_9" android:layout_width="wrap_content" android:layout_height="wrap_content">
-                <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_chatroom_recycler_view_cell_reply_container" android:background="@color/pinkLight2" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
+            <LinearLayout android:orientation="vertical" android:background="?chatroom_bubble_background" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_chatroom_recycler_view_cell_reply_container" android:background="?chatroom_reply_color" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
                     <TextView android:textStyle="bold" android:id="@id/textView_chatroom_recycler_view_cell_reply_name" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Name" android:singleLine="true" style="@style/TextBaseStyleGrayDarkTimestamp1" />
                     <TextView android:id="@id/textView_chatroom_recycler_view_cell_reply_message" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reply Message" android:maxLines="2" style="@style/TextBaseStyleGrayDarkContent3" />
                 </LinearLayout>

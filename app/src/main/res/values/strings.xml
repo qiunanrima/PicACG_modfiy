@@ -31,9 +31,9 @@
     <string name="abc_shareactionprovider_share_with">Share with</string>
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
     <string name="abc_toolbar_collapse_description">Collapse</string>
-    <string name="action_clear_recent">刪除記錄</string>
-    <string name="action_comment_page">跳頁</string>
-    <string name="action_delete_comic">刪除漫畫</string>
+    <string name="action_clear_recent">删除记录</string>
+    <string name="action_comment_page">跳页</string>
+    <string name="action_delete_comic">删除漫画</string>
     <string name="action_search">Search</string>
     <string name="action_settings">Settings</string>
     <string name="action_sign_in">Sign in or register</string>
@@ -55,192 +55,192 @@
     <string name="agentweb_max_file_length_limit">The selected file can not be larger than %s MB</string>
     <string name="agentweb_tips">Note</string>
     <string name="agentweb_trickter">You have a new notice</string>
-    <string name="alert_account_not_activated">"這個帳戶還沒有被激活！
+    <string name="alert_account_not_activated">"这个账户还没有被激活！
 
-請前往你註冊的郵箱並找尋【嗶咔邀請函】（有機會在垃圾郵件中）！
+请前往你注册的邮箱并找寻【哔咔邀请函】（有机会在垃圾邮件中）！
 
-如找不到邀請函郵件，請按下方的重新發送邀請函！"</string>
+如找不到邀请函邮件，请按下方的重新发送邀请函！"</string>
     <string name="alert_action_ai_script_title">AI 模式</string>
-    <string name="alert_action_change_title">更變稱號</string>
-    <string name="alert_already_exist_email">"這個嗶咔帳號已經被註冊！
+    <string name="alert_action_change_title">更变称号</string>
+    <string name="alert_already_exist_email">"这个哔咔账号已经被注册！
 
-如果你忘記了密碼，請回上一頁按忘記密碼！"</string>
-    <string name="alert_already_exist_name">"這個匿稱已經屬於一位紳士
-請使用別的匿稱！"</string>
-    <string name="alert_anonymous_not_match">"找不到交配對象！
+如果你忘记了密码，请回上一页按忘记密码！"</string>
+    <string name="alert_already_exist_name">"这个匿称已经属于一位绅士
+请使用别的匿称！"</string>
+    <string name="alert_anonymous_not_match">"找不到交配对象！
 
-請再試一次！"</string>
-    <string name="alert_apk_verison_must_update">對不起，你必須更新版本</string>
-    <string name="alert_apk_verison_ok">官方下載</string>
-    <string name="alert_apk_verison_ok_mirror">鏡像下載</string>
-    <string name="alert_apk_version_prefix">發現更新－Ver.</string>
-    <string name="alert_block_user_content">"是否封鎖此用戶？
-封鎖後無法解鎖"</string>
-    <string name="alert_block_user_positive">封鎖</string>
-    <string name="alert_block_user_title">封鎖用戶</string>
+请再试一次！"</string>
+    <string name="alert_apk_verison_must_update">对不起，你必须更新版本</string>
+    <string name="alert_apk_verison_ok">官方下载</string>
+    <string name="alert_apk_verison_ok_mirror">镜像下载</string>
+    <string name="alert_apk_version_prefix">发现更新－Ver.</string>
+    <string name="alert_block_user_content">"是否封锁此用户？
+封锁后无法解锁"</string>
+    <string name="alert_block_user_positive">封锁</string>
+    <string name="alert_block_user_title">封锁用户</string>
     <string name="alert_bookmark_canceled">已取消收藏</string>
     <string name="alert_bookmarked">已收藏</string>
-    <string name="alert_button_do_not_show_again">不再顯示</string>
-    <string name="alert_cannot_start_with_pica">嗶咔是註冊商標，不能用的。</string>
-    <string name="alert_chat_rule">"▲只談風月，不談政事 
+    <string name="alert_button_do_not_show_again">不再显示</string>
+    <string name="alert_cannot_start_with_pica">哔咔是注册商标，不能用的。</string>
+    <string name="alert_chat_rule">"▲只谈风月，不谈政事
 
- ▲相互尊重，善意推定 
+ ▲相互尊重，善意推定
 
- ▲沒有什麼是理所當然的 
+ ▲没有什么是理所当然的
 
- ▲請愛惜嗶咔，珍惜眼前 
+ ▲请爱惜哔咔，珍惜眼前
 
- 以上四條為總綱 
+ 以上四条为总纲
 
 
 "</string>
-    <string name="alert_chat_rule_title">【嗶咔聊天測試板板規】</string>
+    <string name="alert_chat_rule_title">【哔咔聊天测试板板规】</string>
     <string name="alert_chatroom_is_not_ready">"欸...!?
 
-嗶咔聊天室還未正式開放的樣子...
-請等待下一個版本吧..."</string>
-    <string name="alert_chatroom_leave_msg">"嗚嗚嗚...
-嗚嗚...嗚...
+哔咔聊天室还未正式开放的样子...
+请等待下一个版本吧..."</string>
+    <string name="alert_chatroom_leave_msg">"呜呜呜...
+呜呜...呜...
 
-你真的要離開聊天室嗎？
+你真的要离开聊天室吗？
 
-嗚......"</string>
-    <string name="alert_chatroom_leave_title">從聊天室逃走</string>
-    <string name="alert_clear_all_recent_message">"你是否刪除所有觀看記錄，包括最後觀看話數及頁數？
+呜......"</string>
+    <string name="alert_chatroom_leave_title">从聊天室逃走</string>
+    <string name="alert_clear_all_recent_message">"你是否删除所有观看记录，包括最后观看话数及页数？
 
-確定以後就無法復原的喔！"</string>
-    <string name="alert_clear_all_recent_success">已刪除所有記錄！</string>
-    <string name="alert_clear_all_recent_title">刪除所有觀看記錄</string>
-    <string name="alert_clear_recent_message">"你是否刪除觀看記錄，包括最後觀看話數及頁數？
+确定以后就无法复原的喔！"</string>
+    <string name="alert_clear_all_recent_success">已删除所有记录！</string>
+    <string name="alert_clear_all_recent_title">删除所有观看记录</string>
+    <string name="alert_clear_recent_message">"你是否删除观看记录，包括最后观看话数及页数？
 
-確定以後就無法復原的喔！"</string>
-    <string name="alert_clear_recent_success">已刪除記錄！</string>
-    <string name="alert_clear_recent_title">刪除觀看記錄</string>
-    <string name="alert_continue_download_comic">你是否需要繼續下載還沒有完成下載的漫畫？</string>
-    <string name="alert_continue_download_comic_title">繼續下載漫畫</string>
-    <string name="alert_copied">已成功複製！</string>
-    <string name="alert_delete_downloaded_comic">"你確定要刪除這本漫畫嗎？
+确定以后就无法复原的喔！"</string>
+    <string name="alert_clear_recent_success">已删除记录！</string>
+    <string name="alert_clear_recent_title">删除观看记录</string>
+    <string name="alert_continue_download_comic">你是否需要继续下载还没有完成下载的漫画？</string>
+    <string name="alert_continue_download_comic_title">继续下载漫画</string>
+    <string name="alert_copied">已成功复制！</string>
+    <string name="alert_delete_downloaded_comic">"你确定要删除这本漫画吗？
 
-刪除內容包括所有已下載的圖片及數據。"</string>
-    <string name="alert_delete_downloaded_comic_title">刪除漫畫</string>
-    <string name="alert_dialog_select_title">請選擇</string>
-    <string name="alert_download_not_allow">此本子已暫停下載功能</string>
-    <string name="alert_download_not_allow_title">無法下載</string>
-    <string name="alert_download_not_ready">下載功能還沒弄好的樣子...？請先在線上看吧</string>
+删除内容包括所有已下载的图片及数据。"</string>
+    <string name="alert_delete_downloaded_comic_title">删除漫画</string>
+    <string name="alert_dialog_select_title">请选择</string>
+    <string name="alert_download_not_allow">此本子已暂停下载功能</string>
+    <string name="alert_download_not_allow_title">无法下载</string>
+    <string name="alert_download_not_ready">下载功能还没弄好的样子...？请先在在线看吧</string>
     <string name="alert_edit_page_is_not_ready">"嘛...
 
-小紳紳的頭像是可以修改的，但其他資料還未不開。
+小绅绅的头像是可以修改的，但其他数据还未不开。
 
-看來要等待下一個版本吧..."</string>
-    <string name="alert_edit_profile_question_error">請填寫好所有「忘記密碼」用的問題及答案！</string>
-    <string name="alert_empty_comment">偉論再怎麼少也要有1個字以上才對喵？</string>
-    <string name="alert_empty_email">請填寫好嗶咔帳號！</string>
-    <string name="alert_empty_name">請填寫好匿稱 (2-50字)！</string>
-    <string name="alert_empty_password">請填寫好密碼（8字以上！）</string>
-    <string name="alert_fake_email">"嗶咔娘認定你的是假冒電郵！！
+看来要等待下一个版本吧..."</string>
+    <string name="alert_edit_profile_question_error">请填写好所有「忘记密码」用的问题及答案！</string>
+    <string name="alert_empty_comment">伟论再怎么少也要有1个字以上才对喵？</string>
+    <string name="alert_empty_email">请填写好哔咔账号！</string>
+    <string name="alert_empty_name">请填写好匿称 (2-50字)！</string>
+    <string name="alert_empty_password">请填写好密码（8字以上！）</string>
+    <string name="alert_fake_email">"哔咔娘认定你的是假冒电邮！！
 
-請確認你的電郵地址可以收到邀請函郵件，你還有不多於十次的機會！"</string>
-    <string name="alert_forgot_password_success">一封密函已送往你的電郵地址，請跟隨指示重設密碼！</string>
-    <string name="alert_general_error">"嗶咔嗶咔被玩壞了!
+请确认你的电邮地址可以收到邀请函邮件，你还有不多于十次的机会！"</string>
+    <string name="alert_forgot_password_success">一封密函已送往你的电邮地址，请跟随指示重设密码！</string>
+    <string name="alert_general_error">"哔咔哔咔被玩坏了!
 
-這肯定不是嗶咔的問題！
-絕對不是！"</string>
-    <string name="alert_gift_not_ready">嘛...禮包功能還沒弄好的樣子...？請直接找騎士問問吧！</string>
-    <string name="alert_hide_comment">"你確定要把這個留言隱藏嗎？
+这肯定不是哔咔的问题！
+绝对不是！"</string>
+    <string name="alert_gift_not_ready">嘛...礼包功能还没弄好的样子...？请直接找骑士问问吧！</string>
+    <string name="alert_hide_comment">"你确定要把这个留言隐藏吗？
 
-留言一但被隱藏就無法復原的喔！！！！
+留言一但被隐藏就无法复原的喔！！！！
 
 "</string>
-    <string name="alert_hide_comment_title">【留言隱藏警告】</string>
-    <string name="alert_invalid_email_or_password">你輸入的帳戶資料並不正確哦，請重新輸入！</string>
-    <string name="alert_leave">"嗚嗚嗚...
-嗚嗚...嗚...
+    <string name="alert_hide_comment_title">【留言隐藏警告】</string>
+    <string name="alert_invalid_email_or_password">你输入的帐户数据并不正确哦，请重新输入！</string>
+    <string name="alert_leave">"呜呜呜...
+呜呜...呜...
 
-你真的要離開我嗎？
+你真的要离开我吗？
 
-嗚......"</string>
-    <string name="alert_level_not_high_enough_to_comment">"小紳紳的等級不夠或者沒有認證帳戶！
+呜......"</string>
+    <string name="alert_level_not_high_enough_to_comment">"小绅绅的等级不够或者没有认证账户！
 
-認證了的帳戶等級2才能留言唷～
+认证了的帐户等级2才能留言唷～
 
-你可以打嗶卡和更換頭像升等級的～"</string>
-    <string name="alert_level_up">"升級了！
+你可以打哔卡和更换头像升等级的～"</string>
+    <string name="alert_level_up">"升级了！
 
-小紳紳又長大了！"</string>
-    <string name="alert_like_canceled">已取消讚好</string>
-    <string name="alert_liked">已讚好</string>
-    <string name="alert_no_permission">對不起...我無法取得修改亮度權限...</string>
-    <string name="alert_not_chosen_birthday">"還沒有選擇出生日期唷！
+小绅绅又长大了！"</string>
+    <string name="alert_like_canceled">已取消赞好</string>
+    <string name="alert_liked">已赞好</string>
+    <string name="alert_no_permission">对不起...我无法取得修改亮度权限...</string>
+    <string name="alert_not_chosen_birthday">"还没有选择出生日期唷！
 
-生日當天會有福利給你，給我好好的選啊！"</string>
-    <string name="alert_not_enough_18">聽說...你還沒有成年...？你懂的...</string>
+生日当天会有福利给你，给我好好的选啊！"</string>
+    <string name="alert_not_enough_18">听说...你还没有成年...？你懂的...</string>
     <string name="alert_not_found">"欸...!?
 
 404 找不到"</string>
-    <string name="alert_not_same_password">密碼和確認密碼不同！</string>
-    <string name="alert_not_support_email">"我們不支授此郵箱...
+    <string name="alert_not_same_password">密码和确认密码不同！</string>
+    <string name="alert_not_support_email">"我们不支授此邮箱...
 
-QQ和163電郵君不想跟我們做朋友，所以請你用其他電郵服務商吧。例如：Gmail, Yahoo 和 Outlook"</string>
-    <string name="alert_pica_id_wrong">請填寫正確的嗶咔帳號！</string>
-    <string name="alert_pin_password_length">屏蔽密碼必須4個數字！</string>
-    <string name="alert_post_comment_too_frequent">"作為紳士，發表偉論時必須要注意優雅，不要污...
+QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商吧。例如：Gmail, Yahoo 和 Outlook"</string>
+    <string name="alert_pica_id_wrong">请填写正确的哔咔账号！</string>
+    <string name="alert_pin_password_length">屏蔽密码必须4个数字！</string>
+    <string name="alert_post_comment_too_frequent">"作为绅士，发表伟论时必须要注意优雅，不要污...
 
-（你的心中很認同，所以決定多等一會兒再發表其他偉論）"</string>
-    <string name="alert_post_reply_too_frequent">再怎麼想吐糟，也不能回得太快呢...</string>
-    <string name="alert_punch_in_success">你已經成功打嗶咔</string>
-    <string name="alert_register_success">你已經可以直接登入嗶咔！</string>
-    <string name="alert_register_success_title">註冊完成！</string>
-    <string name="alert_register_warning">"你確定這是能接收郵件的電郵地址嗎？
+（你的心中很认同，所以决定多等一会儿再发表其他伟论）"</string>
+    <string name="alert_post_reply_too_frequent">再怎么想吐糟，也不能回得太快呢...</string>
+    <string name="alert_punch_in_success">你已经成功打哔咔</string>
+    <string name="alert_register_success">你已经可以直接登入哔咔！</string>
+    <string name="alert_register_success_title">注册完成！</string>
+    <string name="alert_register_warning">"你确定这是能接收邮件的电邮地址吗？
 
-如果是假的，你有可能被嗶咔娘永久封鎖哦！"</string>
-    <string name="alert_register_warning_title">封鎖警告</string>
-    <string name="alert_remove_all_comment_content">是否刪除此用戶的所有留言？</string>
-    <string name="alert_remove_all_comment_positive">刪除</string>
-    <string name="alert_remove_all_comment_title">刪除所有留言</string>
-    <string name="alert_report_comment">"你確定要舉報這個留言嗎？
+如果是假的，你有可能被哔咔娘永久封锁哦！"</string>
+    <string name="alert_register_warning_title">封锁警告</string>
+    <string name="alert_remove_all_comment_content">是否删除此用户的所有留言？</string>
+    <string name="alert_remove_all_comment_positive">删除</string>
+    <string name="alert_remove_all_comment_title">删除所有留言</string>
+    <string name="alert_report_comment">"你确定要举报这个留言吗？
 
-留言一但舉報就無法回收的喔！！！！
+留言一但举报就无法回收的喔！！！！
 
 "</string>
-    <string name="alert_report_comment_title">【舉報留言警告】</string>
-    <string name="alert_resend_activation_email_not_ready">重新發新激活郵件功能還沒弄好的樣子...？再找找看垃圾箱或自己想法子吧？</string>
-    <string name="alert_resend_activation_success">一封密函已送往你的電郵地址(很大機會在垃圾箱，並可能要等24小時以上才收到)，請跟隨指示激活帳號！</string>
-    <string name="alert_save_image_failed">無法儲存圖片！（頭像是不能儲存的）</string>
-    <string name="alert_save_image_success">儲存圖片成功！</string>
-    <string name="alert_support_us">"擺脫伸手輪迴，從今天起做一個有用的紳士
+    <string name="alert_report_comment_title">【举报留言警告】</string>
+    <string name="alert_resend_activation_email_not_ready">重新发新激活邮件功能还没弄好的样子...？再找找看垃圾箱或自己想法子吧？</string>
+    <string name="alert_resend_activation_success">一封密函已送往你的电邮地址(很大机会在垃圾箱，并可能要等24小时以上才收到)，请跟随指示激活账号！</string>
+    <string name="alert_save_image_failed">无法储存图片！（头像是不能储存的）</string>
+    <string name="alert_save_image_success">储存图片成功！</string>
+    <string name="alert_support_us">"摆脱伸手轮回，从今天起做一个有用的绅士
 
-支援嗶咔有多種方法，總有一種適合你！"</string>
-    <string name="alert_support_us_title">【愛・嗶咔嗶咔】</string>
-    <string name="alert_time_is_not_synchronize">"你所在的時間線與我們有所不同
-請你調整一下再嘗試吧！"</string>
-    <string name="alert_title">資料錯誤</string>
+支持哔咔有多种方法，总有一种适合你！"</string>
+    <string name="alert_support_us_title">【爱・哔咔哔咔】</string>
+    <string name="alert_time_is_not_synchronize">"你所在的时间线与我们有所不同
+请你调整一下再尝试吧！"</string>
+    <string name="alert_title">数据错误</string>
     <string name="alert_too_many_requests">"吼！
 
 你的要求太多了！
 
-有問題你直接找團長吧！"</string>
-    <string name="alert_under_review">這個本子好像正在審核過程當中..？請待會再來吧！</string>
-    <string name="alert_user_not_activated_cannot_comment_or_chat">還沒有認證帳戶的小紳紳不能留言或在聊天室發言哦！</string>
-    <string name="alert_using_mobile_network">"請注意！！
+有问题你直接找团长吧！"</string>
+    <string name="alert_under_review">这个本子好像正在审核过程当中..？请待会再来吧！</string>
+    <string name="alert_user_not_activated_cannot_comment_or_chat">还没有认证账户的小绅绅不能留言或在聊天室发言哦！</string>
+    <string name="alert_using_mobile_network">"请注意！！
 
-你正在使用數據喔！！
+你正在使用数据喔！！
 
 "</string>
     <string name="alert_validation">"欸...!?
 
-為什麼呢？
-認證好像有點問題...
+为什么呢？
+认证好像有点问题...
 
-再試試看吧"</string>
-    <string name="alert_version_not_supported">你的系統版本不支援此功能......</string>
-    <string name="alert_version_not_supported_title">無法設定顏色</string>
-    <string name="anonymous_chat_exit_message">"你確定要離開聊天嗎？
+再试试看吧"</string>
+    <string name="alert_version_not_supported">你的系统版本不支持此功能......</string>
+    <string name="alert_version_not_supported_title">无法设定颜色</string>
+    <string name="anonymous_chat_exit_message">"你确定要离开聊天吗？
 
-離開後需要重新交配的。"</string>
-    <string name="anonymous_chat_exit_title">離開聊天</string>
+离开后需要重新交配的。"</string>
+    <string name="anonymous_chat_exit_title">离开聊天</string>
     <string name="anonymous_chat_match">交配</string>
-    <string name="anonymous_chat_name_hint">匿稱（1-50）</string>
-    <string name="anonymous_chat_send">發送</string>
+    <string name="anonymous_chat_name_hint">匿称（1-50）</string>
+    <string name="anonymous_chat_send">发送</string>
     <string name="apk_version_prefix">安卓版本 Ver.</string>
     <string name="app_build_version">45</string>
     <string name="app_name">PicACG</string>
@@ -250,219 +250,219 @@ QQ和163電郵君不想跟我們做朋友，所以請你用其他電郵服務商
     <string name="bookmarked">已收藏</string>
     <string name="bottom_sheet_behavior">com.google.android.material.bottomsheet.BottomSheetBehavior</string>
     <string name="cancel">取消</string>
-    <string name="category_keywords_list_title">紳士都在搜的關鍵字</string>
-    <string name="category_list_title">熱門分類</string>
-    <string name="category_tag_list_title">紳士都在看的標籤</string>
-    <string name="category_title_ads">點擊救嗶咔</string>
-    <string name="category_title_end">已完結</string>
-    <string name="category_title_game">遊戲推薦</string>
+    <string name="category_keywords_list_title">绅士都在搜的关键词</string>
+    <string name="category_list_title">热门分类</string>
+    <string name="category_tag_list_title">绅士都在看的标签</string>
+    <string name="category_title_ads">点击救哔咔</string>
+    <string name="category_title_end">已完结</string>
+    <string name="category_title_game">游戏推荐</string>
     <string name="category_title_latest">最新更新</string>
-    <string name="category_title_leaderboard">嗶咔排行榜</string>
-    <string name="category_title_least_viewed">最冷門</string>
+    <string name="category_title_leaderboard">哔咔排行榜</string>
+    <string name="category_title_least_viewed">最冷门</string>
     <string name="category_title_love_pica">@string/title_pica_app</string>
-    <string name="category_title_most_viewed">最紳士</string>
-    <string name="category_title_pica_forum">嗶咔留言版</string>
-    <string name="category_title_random">隨機本子</string>
-    <string name="category_title_support">支持嗶咔</string>
+    <string name="category_title_most_viewed">最绅士</string>
+    <string name="category_title_pica_forum">哔咔留言版</string>
+    <string name="category_title_random">随机本子</string>
+    <string name="category_title_support">支持哔咔</string>
     <string name="change_password_change">@string/setting_password</string>
-    <string name="change_password_enter_new_hint">輸入新密碼</string>
-    <string name="change_password_new_confirm_title">確認密碼</string>
-    <string name="change_password_new_title">新密碼</string>
-    <string name="change_password_show_password">顯示密碼</string>
-    <string name="change_password_success">你已經成功更新密碼！</string>
-    <string name="change_pin_cancel">取消屏蔽密碼</string>
-    <string name="change_pin_cancel_success">你已經取消屏蔽密碼</string>
-    <string name="change_pin_set_success">你已經開啟屏蔽密碼</string>
+    <string name="change_password_enter_new_hint">输入新密码</string>
+    <string name="change_password_new_confirm_title">确认密码</string>
+    <string name="change_password_new_title">新密码</string>
+    <string name="change_password_show_password">显示密码</string>
+    <string name="change_password_success">你已经成功更新密码！</string>
+    <string name="change_pin_cancel">取消屏蔽密码</string>
+    <string name="change_pin_cancel_success">你已经取消屏蔽密码</string>
+    <string name="change_pin_set_success">你已经开启屏蔽密码</string>
     <string name="character_counter_pattern">%1$d / %2$d</string>
-    <string name="chatroom_ads_bot">嗶咔廣告君</string>
+    <string name="chatroom_ads_bot">哔咔广告君</string>
     <string name="chatroom_at_me">＠我</string>
-    <string name="chatroom_connection_closed">一位紳士逃跑了，現在人數為：</string>
-    <string name="chatroom_connection_new">一位紳士加入了對話，現在人數為：</string>
-    <string name="chatroom_connection_total_user">在線人數：</string>
-    <string name="chatroom_control_image_title">發佈圖片</string>
-    <string name="chatroom_control_time_title">停止時間</string>
-    <string name="chatroom_image_cannot_save">無法儲存圖片！</string>
-    <string name="chatroom_message_placeholder">沒事就聊聊天吧！</string>
-    <string name="chatroom_no_profile">"你從來沒有進入過聊天室！
+    <string name="chatroom_connection_closed">一位绅士逃跑了，现在人数为：</string>
+    <string name="chatroom_connection_new">一位绅士加入了对话，现在人数为：</string>
+    <string name="chatroom_connection_total_user">在线人数：</string>
+    <string name="chatroom_control_image_title">发布图片</string>
+    <string name="chatroom_control_time_title">停止时间</string>
+    <string name="chatroom_image_cannot_save">无法储存图片！</string>
+    <string name="chatroom_message_placeholder">没事就聊聊天吧！</string>
+    <string name="chatroom_no_profile">"你从来没有进入过聊天室！
 
-請先到聊天室走一趟才可以打開此功能！"</string>
-    <string name="chatroom_recording">正在錄音</string>
-    <string name="chatroom_reply_me">有人回應我</string>
-    <string name="chatroom_reply_me_short">回應我</string>
-    <string name="chatroom_send_ads">發送了一個廣告</string>
-    <string name="chatroom_send_audio">發送了一段錄音</string>
-    <string name="chatroom_send_image">發送了一張圖片</string>
-    <string name="chatroom_service_send_mode_off">取消發表</string>
-    <string name="chatroom_service_send_mode_on">發表訊息</string>
-    <string name="chatroom_setting_ads_interval">廣告間隔</string>
-    <string name="chatroom_setting_advance_title">進階設定</string>
-    <string name="chatroom_setting_basic_title">一般設定</string>
-    <string name="chatroom_setting_blacklist">黑名單</string>
-    <string name="chatroom_setting_blacklist_clear">從黑名單刪除</string>
-    <string name="chatroom_setting_blacklist_clear_all">刪除全部</string>
-    <string name="chatroom_setting_blacklist_clear_error">無法刪除，如有需要，請按「刪除全部」清空整個黑名單。</string>
+请先到聊天室走一趟才可以打开此功能！"</string>
+    <string name="chatroom_recording">正在录音</string>
+    <string name="chatroom_reply_me">有人响应我</string>
+    <string name="chatroom_reply_me_short">回应我</string>
+    <string name="chatroom_send_ads">发送了一个广告</string>
+    <string name="chatroom_send_audio">发送了一段录音</string>
+    <string name="chatroom_send_image">发送了一张图片</string>
+    <string name="chatroom_service_send_mode_off">取消发表</string>
+    <string name="chatroom_service_send_mode_on">发表讯息</string>
+    <string name="chatroom_setting_ads_interval">广告间隔</string>
+    <string name="chatroom_setting_advance_title">进阶设定</string>
+    <string name="chatroom_setting_basic_title">一般设定</string>
+    <string name="chatroom_setting_blacklist">黑名单</string>
+    <string name="chatroom_setting_blacklist_clear">从黑名单删除</string>
+    <string name="chatroom_setting_blacklist_clear_all">删除全部</string>
+    <string name="chatroom_setting_blacklist_clear_error">无法删除，如有需要，请按「删除全部」清空整个黑名单。</string>
     <string name="chatroom_setting_blacklist_empty">空的</string>
     <string name="chatroom_setting_blacklist_update">修改</string>
     <string name="chatroom_setting_control_panel">控制面板</string>
-    <string name="chatroom_setting_fix_image_size">固定圖片大小</string>
-    <string name="chatroom_setting_hide_all_avatar">隱藏所有頭像</string>
-    <string name="chatroom_setting_max_message_size">最大訊息顯示數目</string>
-    <string name="chatroom_setting_message_color_reverse">文字顏色修正（0-100）</string>
-    <string name="chatroom_setting_night_mode">夜間模式</string>
-    <string name="chatroom_setting_running">聊天室正在運行中...</string>
-    <string name="chatroom_setting_speech">文字演講</string>
-    <string name="chatroom_setting_speech_language">演講語言</string>
-    <string name="chatroom_setting_speech_language_cantonese">廣東話</string>
-    <string name="chatroom_setting_speech_language_chinese">國語</string>
-    <string name="chatroom_setting_speech_language_english">英語</string>
-    <string name="chatroom_setting_speech_language_japanese">日語</string>
-    <string name="chatroom_setting_speech_title">演講設定</string>
-    <string name="chatroom_setting_speech_with_name">演講時加入名字</string>
-    <string name="chatroom_setting_timestamp">顯示時間</string>
-    <string name="chatroom_setting_title">聊天室設定</string>
-    <string name="chatroom_title_default">還未更新的萌新</string>
+    <string name="chatroom_setting_fix_image_size">固定图片大小</string>
+    <string name="chatroom_setting_hide_all_avatar">隐藏所有头像</string>
+    <string name="chatroom_setting_max_message_size">最大讯息显示数目</string>
+    <string name="chatroom_setting_message_color_reverse">文字颜色修正（0-100）</string>
+    <string name="chatroom_setting_night_mode">夜间模式</string>
+    <string name="chatroom_setting_running">聊天室正在运行中...</string>
+    <string name="chatroom_setting_speech">文字演讲</string>
+    <string name="chatroom_setting_speech_language">演讲语言</string>
+    <string name="chatroom_setting_speech_language_cantonese">广东话</string>
+    <string name="chatroom_setting_speech_language_chinese">国语</string>
+    <string name="chatroom_setting_speech_language_english">英语</string>
+    <string name="chatroom_setting_speech_language_japanese">日语</string>
+    <string name="chatroom_setting_speech_title">演讲设定</string>
+    <string name="chatroom_setting_speech_with_name">演讲时加入名字</string>
+    <string name="chatroom_setting_timestamp">显示时间</string>
+    <string name="chatroom_setting_title">聊天室设定</string>
+    <string name="chatroom_title_default">还未更新的萌新</string>
     <string name="comic">本子</string>
-    <string name="comic_detail_category_title">分類：</string>
-    <string name="comic_detail_knight_title">上傳騎士：</string>
-    <string name="comic_detail_like_title">紳士指名次數：</string>
-    <string name="comic_detail_more_episode">▼ 更多章節 ▼</string>
-    <string name="comic_detail_recommendation">看了這本子的人也在看</string>
-    <string name="comic_detail_start_read">開始閱讀</string>
-    <string name="comic_detail_title">漫畫詳細</string>
+    <string name="comic_detail_category_title">分类：</string>
+    <string name="comic_detail_knight_title">上传骑士：</string>
+    <string name="comic_detail_like_title">绅士指名次数：</string>
+    <string name="comic_detail_more_episode">▼ 更多章节 ▼</string>
+    <string name="comic_detail_recommendation">看了这本子的人也在看</string>
+    <string name="comic_detail_start_read">开始阅读</string>
+    <string name="comic_detail_title">漫画详细</string>
     <string name="comic_detail_update_time_title">更新</string>
-    <string name="comic_list_category_title">分類：</string>
+    <string name="comic_list_category_title">分类：</string>
     <string name="comic_list_filter_bl">"耽
 美"</string>
     <string name="comic_list_filter_button_bl">耽美</string>
-    <string name="comic_list_filter_button_fake_girl">偽娘</string>
-    <string name="comic_list_filter_button_forbidden">禁書</string>
+    <string name="comic_list_filter_button_fake_girl">伪娘</string>
+    <string name="comic_list_filter_button_forbidden">禁书</string>
     <string name="comic_list_filter_button_futari">扶她</string>
     <string name="comic_list_filter_button_heavy">重口</string>
     <string name="comic_list_filter_button_non_chinese">生肉</string>
-    <string name="comic_list_filter_button_pure_love">純愛</string>
+    <string name="comic_list_filter_button_pure_love">纯爱</string>
     <string name="comic_list_filter_button_webtoon">WEBTOON</string>
-    <string name="comic_list_filter_category_bl">耽美花園</string>
-    <string name="comic_list_filter_category_fake_girl">偽娘哲學</string>
-    <string name="comic_list_filter_category_forbidden">禁書目錄</string>
-    <string name="comic_list_filter_category_futari">扶他樂園</string>
-    <string name="comic_list_filter_category_heavy">重口地帶</string>
+    <string name="comic_list_filter_category_bl">耽美花园</string>
+    <string name="comic_list_filter_category_fake_girl">伪娘哲学</string>
+    <string name="comic_list_filter_category_forbidden">禁书目录</string>
+    <string name="comic_list_filter_category_futari">扶他乐园</string>
+    <string name="comic_list_filter_category_heavy">重口地带</string>
     <string name="comic_list_filter_category_non_chinese">生肉</string>
-    <string name="comic_list_filter_category_pure_love">純愛</string>
+    <string name="comic_list_filter_category_pure_love">纯爱</string>
     <string name="comic_list_filter_category_webtoon">WEBTOON</string>
     <string name="comic_list_filter_forbidden">"禁
-書"</string>
+书"</string>
     <string name="comic_list_filter_non_chinese">"生
 肉"</string>
     <string name="comic_list_filtered_title">〖已被封印的本子〗</string>
     <string name="comic_title_ended">(完)</string>
-    <string name="comic_viewer_first_episode">沒有更上的章節了，返回吧!</string>
-    <string name="comic_viewer_no_more_episode">沒有更多的章節了，返回吧!</string>
-    <string name="comic_viewer_setting_panel_auto_paging">自動翻頁</string>
-    <string name="comic_viewer_setting_panel_auto_start">開始</string>
-    <string name="comic_viewer_setting_panel_brightness_auto">自動</string>
-    <string name="comic_viewer_setting_panel_brightness_manual">自動</string>
+    <string name="comic_viewer_first_episode">没有更上的章节了，返回吧!</string>
+    <string name="comic_viewer_no_more_episode">没有更多的章节了，返回吧!</string>
+    <string name="comic_viewer_setting_panel_auto_paging">自动翻页</string>
+    <string name="comic_viewer_setting_panel_auto_start">开始</string>
+    <string name="comic_viewer_setting_panel_brightness_auto">自动</string>
+    <string name="comic_viewer_setting_panel_brightness_manual">自动</string>
     <string name="comic_viewer_setting_panel_brightness_title">亮度</string>
-    <string name="comic_viewer_setting_panel_comment">評論</string>
-    <string name="comic_viewer_setting_panel_download">下載</string>
-    <string name="comic_viewer_setting_panel_gesture_area">"手勢區域
+    <string name="comic_viewer_setting_panel_comment">评论</string>
+    <string name="comic_viewer_setting_panel_download">下载</string>
+    <string name="comic_viewer_setting_panel_gesture_area">"手势区域
 
-點我取消指示"</string>
-    <string name="comic_viewer_setting_panel_hide">隱藏</string>
+点我取消指示"</string>
+    <string name="comic_viewer_setting_panel_hide">隐藏</string>
     <string name="comic_viewer_setting_panel_hint">指示</string>
     <string name="comic_viewer_setting_panel_next_episode">"到
 底
 了
 !
-點
+点
 此
 看
 下
 一
 章
-節"</string>
-    <string name="comic_viewer_setting_panel_next_page">下一頁</string>
+节"</string>
+    <string name="comic_viewer_setting_panel_next_page">下一页</string>
     <string name="comic_viewer_setting_panel_next_page_vertical">"下
 一
-頁"</string>
-    <string name="comic_viewer_setting_panel_night_mode">夜間</string>
+页"</string>
+    <string name="comic_viewer_setting_panel_night_mode">夜间</string>
     <string name="comic_viewer_setting_panel_previous_episode">"到
-頂
+顶
 了
 !
-點
+点
 此
 看
 上
 一
 章
-節"</string>
+节"</string>
     <string name="comic_viewer_setting_panel_previous_page_vertical">"上
 一
-頁"</string>
+页"</string>
     <string name="comic_viewer_setting_panel_screen_orientation">屏幕方向</string>
-    <string name="comic_viewer_setting_panel_scroll_orientation">翻頁方向</string>
-    <string name="comic_viewer_setting_panel_select_episode">選集</string>
-    <string name="comic_viewer_setting_panel_setting">設置</string>
-    <string name="comic_viewer_setting_panel_setting_menu">設定</string>
+    <string name="comic_viewer_setting_panel_scroll_orientation">翻页方向</string>
+    <string name="comic_viewer_setting_panel_select_episode">选集</string>
+    <string name="comic_viewer_setting_panel_setting">设置</string>
+    <string name="comic_viewer_setting_panel_setting_menu">设定</string>
     <string name="comic_viewer_setting_panel_share">分享</string>
-    <string name="comic_viewer_setting_panel_two_page">雙頁顯示</string>
-    <string name="comic_viewer_toast_auto_paging_hint">點擊 \"設定\" 結束自動翻頁</string>
-    <string name="comic_viewer_toast_night_mode_on">夜間模式開啟</string>
-    <string name="comment">偉論</string>
-    <string name="comment_edit_hint">在這兒寫下你想發表的偉論</string>
-    <string name="comment_jump_page_title">跳頁：</string>
-    <string name="comment_no_reply">邏沒有任何回覆! 要吐糟一下嗎...?</string>
-    <string name="comment_option_title">更多選項</string>
-    <string name="comment_post">發言</string>
-    <string name="comment_profile_no_reply_comic">還沒有任何回覆！請直接去這本子的頁面回覆！</string>
-    <string name="comment_profile_no_reply_game">還沒有任何回覆！請直接去這遊戲的頁面回覆！</string>
+    <string name="comic_viewer_setting_panel_two_page">双页显示</string>
+    <string name="comic_viewer_toast_auto_paging_hint">点击 \"设定\" 结束自动翻页</string>
+    <string name="comic_viewer_toast_night_mode_on">夜间模式开启</string>
+    <string name="comment">伟论</string>
+    <string name="comment_edit_hint">在这儿写下你想发表的伟论</string>
+    <string name="comment_jump_page_title">跳页：</string>
+    <string name="comment_no_reply">逻没有任何回复! 要吐糟一下吗...?</string>
+    <string name="comment_option_title">更多选项</string>
+    <string name="comment_post">发言</string>
+    <string name="comment_profile_no_reply_comic">还没有任何回复！请直接去这本子的页面回复！</string>
+    <string name="comment_profile_no_reply_game">还没有任何回复！请直接去这游戏的页面回复！</string>
     <string name="comment_profile_view_content_prefix">＞＞【</string>
     <string name="comment_profile_view_content_suffix">】</string>
-    <string name="comment_reply">回覆</string>
-    <string name="comment_reply_cancel">放棄回覆</string>
-    <string name="comment_reply_edit_hint">在這兒寫下你對這個偉論的意見</string>
-    <string name="comment_send">發表</string>
-    <string name="comment_tool_dirty">污糟頭像</string>
-    <string name="comment_tool_hide">隱藏留言</string>
-    <string name="comment_tool_title">進階功能</string>
-    <string name="comment_tool_top">置頂留言</string>
+    <string name="comment_reply">回复</string>
+    <string name="comment_reply_cancel">放弃回复</string>
+    <string name="comment_reply_edit_hint">在这儿写下你对这个伟论的意见</string>
+    <string name="comment_send">发表</string>
+    <string name="comment_tool_dirty">污糟头像</string>
+    <string name="comment_tool_hide">隐藏留言</string>
+    <string name="comment_tool_title">进阶功能</string>
+    <string name="comment_tool_top">置顶留言</string>
     <string name="comment_top_comment_title_prefix">▲ 【</string>
-    <string name="comment_top_comment_title_suffix">樓的偉論已被置頂】 ▲</string>
-    <string name="comment_view_more_reply">▼ 點我查看更多回覆 ▼</string>
+    <string name="comment_top_comment_title_suffix">楼的伟论已被置顶】 ▲</string>
+    <string name="comment_view_more_reply">▼ 点我查看更多回复 ▼</string>
     <string name="crop__cancel">CANCEL</string>
     <string name="crop__done">DONE</string>
     <string name="crop__pick_error">No image sources available</string>
     <string name="crop__saving">Saving picture…</string>
     <string name="crop__wait">Please wait…</string>
-    <string name="define_roundedimageview" />
-    <string name="download">下載</string>
-    <string name="downloaded">已下載</string>
-    <string name="edit">編輯</string>
+    <string name="define_roundedimageview"></string>
+    <string name="download">下载</string>
+    <string name="downloaded">已下载</string>
+    <string name="edit">编辑</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
-    <string name="forgot_password_q_and_a_title">「忘記密碼」的安全問題及答案</string>
-    <string name="game_detail_description_downloaded">紳士已下載</string>
+    <string name="forgot_password_q_and_a_title">「忘记密码」的安全问题及答案</string>
+    <string name="game_detail_description_downloaded">绅士已下载</string>
     <string name="game_detail_description_separator">/</string>
     <string name="game_detail_description_size">MB</string>
-    <string name="game_detail_description_title">遊戲介紹</string>
+    <string name="game_detail_description_title">游戏介绍</string>
     <string name="game_detail_latest_version_title">最新更新 v</string>
-    <string name="gender_bot">機械人</string>
+    <string name="gender_bot">机械人</string>
     <string name="gender_f">淑女</string>
-    <string name="gender_m">紳士</string>
-    <string name="gender_unknown">不詳</string>
+    <string name="gender_m">绅士</string>
+    <string name="gender_unknown">不详</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="hide">隱藏</string>
-    <string name="leaderboard_knight_uploaded_comic_total">上傳本子總數:</string>
-    <string name="leaderboard_tab_knight">騎士榜</string>
-    <string name="leaderboard_tab_popular">最熱門</string>
-    <string name="leaderboard_tab_popular_24hr">過去 24 小時</string>
-    <string name="leaderboard_tab_popular_30days">過去 30 天</string>
-    <string name="leaderboard_tab_popular_7days">過去 7 天</string>
-    <string name="leaderboard_view_count_title_24hr">過去24小時指名次數:</string>
-    <string name="leaderboard_view_count_title_30days">過去30天指名次數:</string>
-    <string name="leaderboard_view_count_title_7days">過去7天指名次數:</string>
+    <string name="hide">隐藏</string>
+    <string name="leaderboard_knight_uploaded_comic_total">上传本子总数:</string>
+    <string name="leaderboard_tab_knight">骑士榜</string>
+    <string name="leaderboard_tab_popular">最热门</string>
+    <string name="leaderboard_tab_popular_24hr">过去 24 小时</string>
+    <string name="leaderboard_tab_popular_30days">过去 30 天</string>
+    <string name="leaderboard_tab_popular_7days">过去 7 天</string>
+    <string name="leaderboard_view_count_title_24hr">过去24小时指名次数:</string>
+    <string name="leaderboard_view_count_title_30days">过去30天指名次数:</string>
+    <string name="leaderboard_view_count_title_7days">过去7天指名次数:</string>
     <string name="level">Lv.</string>
     <string name="library_roundedimageview_author">Vince Mi</string>
     <string name="library_roundedimageview_authorWebsite">https://github.com/vinc3m1</string>
@@ -473,47 +473,47 @@ QQ和163電郵君不想跟我們做朋友，所以請你用其他電郵服務商
     <string name="library_roundedimageview_libraryWebsite">https://github.com/vinc3m1/RoundedImageView</string>
     <string name="library_roundedimageview_licenseId">apache_2_0</string>
     <string name="library_roundedimageview_repositoryLink">https://github.com/vinc3m1/RoundedImageView.git</string>
-    <string name="loading_chat">正在竉愛嗶咔...</string>
-    <string name="loading_comic_viewer">正在努力加載...</string>
-    <string name="loading_forgot_password">正在聯絡紳士界尋找你的帳戶...</string>
-    <string name="loading_general">轉啊轉啊...</string>
-    <string name="loading_get_categories">正在紳士界取得分類...</string>
-    <string name="loading_init">正在紳士界取得更新...</string>
-    <string name="loading_post_comment">正在發表你的偉論...</string>
-    <string name="loading_register">正在紳士界註冊你的戶籍...</string>
-    <string name="loading_sign_in">紳士登入中...</string>
-    <string name="lock_dialog_title">請輸入密碼</string>
-    <string name="login_email">嗶咔帳號</string>
-    <string name="login_forget_password">忘記密碼</string>
-    <string name="login_login_button">紳士登入</string>
-    <string name="login_password">密碼</string>
-    <string name="login_pica_id">嗶咔帳號</string>
-    <string name="login_register">免費注冊成為紳士</string>
-    <string name="login_resend_activation">重發激活郵件</string>
+    <string name="loading_chat">正在竉爱哔咔...</string>
+    <string name="loading_comic_viewer">正在努力加载...</string>
+    <string name="loading_forgot_password">正在联络绅士界寻找你的账户...</string>
+    <string name="loading_general">转啊转啊...</string>
+    <string name="loading_get_categories">正在绅士界取得分类...</string>
+    <string name="loading_init">正在绅士界取得更新...</string>
+    <string name="loading_post_comment">正在发表你的伟论...</string>
+    <string name="loading_register">正在绅士界注册你的户籍...</string>
+    <string name="loading_sign_in">绅士登入中...</string>
+    <string name="lock_dialog_title">请输入密码</string>
+    <string name="login_email">哔咔账号</string>
+    <string name="login_forget_password">忘记密码</string>
+    <string name="login_login_button">绅士登入</string>
+    <string name="login_password">密码</string>
+    <string name="login_pica_id">哔咔账号</string>
+    <string name="login_register">免费注册成为绅士</string>
+    <string name="login_resend_activation">重发激活邮件</string>
     <string name="manage">管理</string>
     <string name="more">更多</string>
     <string name="network_status_mobile">MOBILE</string>
-    <string name="network_status_no_network">沒有網絡</string>
+    <string name="network_status_no_network">没有网络</string>
     <string name="network_status_wifi">WIFI</string>
-    <string name="off">關</string>
-    <string name="ok">確定</string>
-    <string name="on">開</string>
-    <string name="one_time_update_content">"【注意事項】
+    <string name="off">关</string>
+    <string name="ok">确定</string>
+    <string name="on">开</string>
+    <string name="one_time_update_content">"【注意事项】
 
-你可以更新一次登入帳號（嗶咔ID）及匿稱。
-即使你只更新其中一項，也視作更新完成。
+你可以更新一次登入账号（哔咔ID）及匿称。
+即使你只更新其中一项，也视作更新完成。
 
-【注意】千萬不要使用電郵或個人資料（例如：QQ帳號，LINE帳號）作為嗶咔ID
-以減低洩漏個人資料的風險
+【注意】千万不要使用电邮或个人资料（例如：QQ账号，LINE账号）作为哔咔ID
+以减低泄漏个人资料的风险
 
-之後無法再更新！
+之后无法再更新！
 
 【2019年12月31日前】
-還未更新的用戶，有機會無法再使用原有的帳號！
+还未更新的用户，有机会无法再使用原有的账号！
 
-請三思而後更。"</string>
-    <string name="one_time_update_email">新的登入帳號（別用電郵）[ 0-9 a-z . _ ]</string>
-    <string name="one_time_update_username">新的匿稱（2-50字）</string>
+请三思而后更。"</string>
+    <string name="one_time_update_email">新的登入账号（别用电邮）[ 0-9 a-z . _ ]</string>
+    <string name="one_time_update_username">新的匿称（2-50字）</string>
     <string name="password_toggle_content_description">Toggle password visibility</string>
     <string name="path_password_eye">M12,4.5C7,4.5 2.73,7.61 1,12c1.73,4.39 6,7.5 11,7.5s9.27,-3.11 11,-7.5c-1.73,-4.39 -6,-7.5 -11,-7.5zM12,17c-2.76,0 -5,-2.24 -5,-5s2.24,-5 5,-5 5,2.24 5,5 -2.24,5 -5,5zM12,9c-1.66,0 -3,1.34 -3,3s1.34,3 3,3 3,-1.34 3,-3 -1.34,-3 -3,-3z</string>
     <string name="path_password_eye_mask_strike_through">M2,4.27 L19.73,22 L22.27,19.46 L4.54,1.73 L4.54,1 L23,1 L23,23 L1,23 L1,4.27 Z</string>
@@ -521,160 +521,160 @@ QQ和163電郵君不想跟我們做朋友，所以請你用其他電郵服務商
     <string name="path_password_strike_through">M3.27,4.27 L19.74,20.74</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."</string>
-    <string name="pica_id_error_message_1">字元太少（2-30）</string>
-    <string name="pica_id_error_message_2">. 不能在最前／最後／多於一個</string>
-    <string name="profile_edit_avatar">頭像</string>
+    <string name="pica_id_error_message_1">字符太少（2-30）</string>
+    <string name="pica_id_error_message_2">. 不能在最前／最后／多于一个</string>
+    <string name="profile_edit_avatar">头像</string>
     <string name="profile_edit_birthday">出生日期</string>
-    <string name="profile_edit_category">類別</string>
-    <string name="profile_edit_email">嗶咔帳號</string>
-    <string name="profile_edit_nickname">匿稱</string>
-    <string name="profile_edit_slogan">自我介紹</string>
-    <string name="profile_edit_update">更新介紹</string>
-    <string name="profile_edit_update_success">更新介紹成功！</string>
-    <string name="profile_popup_block">封鎖用戶</string>
-    <string name="profile_popup_remove_comment">刪除所有留言</string>
-    <string name="profile_popup_woo">污頭像</string>
-    <string name="profile_punch_in">打嗶卡</string>
+    <string name="profile_edit_category">类别</string>
+    <string name="profile_edit_email">哔咔账号</string>
+    <string name="profile_edit_nickname">匿称</string>
+    <string name="profile_edit_slogan">自我介绍</string>
+    <string name="profile_edit_update">更新介绍</string>
+    <string name="profile_edit_update_success">更新介绍成功！</string>
+    <string name="profile_popup_block">封锁用户</string>
+    <string name="profile_popup_remove_comment">删除所有留言</string>
+    <string name="profile_popup_woo">污头像</string>
+    <string name="profile_punch_in">打哔卡</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
-    <string name="quit">離開</string>
-    <string name="recent_view">最近觀看</string>
-    <string name="register_age">歲</string>
+    <string name="quit">离开</string>
+    <string name="recent_view">最近观看</string>
+    <string name="register_age">岁</string>
     <string name="register_answer_1">答案</string>
     <string name="register_answer_2">答案</string>
     <string name="register_answer_3">答案</string>
-    <string name="register_date_of_birth">出生日期（未滿18歲不能進入哦！）</string>
+    <string name="register_date_of_birth">出生日期（未满18岁不能进入哦！）</string>
     <string name="register_date_of_birth_prefix">出生日期：</string>
-    <string name="register_email">嗶咔帳號（ 0-9 a-z . _ ）</string>
-    <string name="register_gender">你認為自己屬於以下哪個類別</string>
-    <string name="register_password">密碼（8字以上！）</string>
-    <string name="register_password_confirm">確認密碼</string>
-    <string name="register_pica_id">嗶咔帳號 [ 0-9 a-z . _ ]</string>
-    <string name="register_question_1">安全問題 1（忘記密碼用）</string>
-    <string name="register_question_2">安全問題 2（忘記密碼用）</string>
-    <string name="register_question_3">安全問題 3（忘記密碼用）</string>
-    <string name="register_register_button">立即成為一位紳士</string>
-    <string name="register_username">匿稱（2-50字）</string>
-    <string name="restart_application">請重新打開應用</string>
-    <string name="search_hint">名稱／作者之類</string>
+    <string name="register_email">哔咔账号（ 0-9 a-z . _ ）</string>
+    <string name="register_gender">你认为自己属于以下哪个类别</string>
+    <string name="register_password">密码（8字以上！）</string>
+    <string name="register_password_confirm">确认密码</string>
+    <string name="register_pica_id">哔咔账号 [ 0-9 a-z . _ ]</string>
+    <string name="register_question_1">安全问题 1（忘记密码用）</string>
+    <string name="register_question_2">安全问题 2（忘记密码用）</string>
+    <string name="register_question_3">安全问题 3（忘记密码用）</string>
+    <string name="register_register_button">立即成为一位绅士</string>
+    <string name="register_username">匿称（2-50字）</string>
+    <string name="restart_application">请重新打开应用</string>
+    <string name="search_hint">名称／作者之类</string>
     <string name="search_menu_title">Search</string>
     <string name="second">秒</string>
     <string name="setting_cache">前往清除</string>
-    <string name="setting_cache_title">快取記憶</string>
-    <string name="setting_chatroom_open">開啟</string>
-    <string name="setting_chatroom_title">聊天室後台測試版（文字版）</string>
-    <string name="setting_comic_viewer_auto_paging_interval">自動翻頁間隔</string>
-    <string name="setting_comic_viewer_auto_paging_title_sample">自動翻頁 【 1.0秒 】</string>
-    <string name="setting_comic_viewer_image_quality">圖片質素</string>
-    <string name="setting_comic_viewer_night_mode">夜間模式</string>
+    <string name="setting_cache_title">快取记忆</string>
+    <string name="setting_chatroom_open">开启</string>
+    <string name="setting_chatroom_title">聊天室后台测试版（文字版）</string>
+    <string name="setting_comic_viewer_auto_paging_interval">自动翻页间隔</string>
+    <string name="setting_comic_viewer_auto_paging_title_sample">自动翻页 【 1.0秒 】</string>
+    <string name="setting_comic_viewer_image_quality">图片质素</string>
+    <string name="setting_comic_viewer_night_mode">夜间模式</string>
     <string name="setting_comic_viewer_screen_orientation">@string/comic_viewer_setting_panel_screen_orientation</string>
     <string name="setting_comic_viewer_scroll_direction">@string/comic_viewer_setting_panel_scroll_orientation</string>
-    <string name="setting_comic_viewer_testing_version">改善閃退測試版（只有直翻）</string>
-    <string name="setting_comic_viewer_title">閱讀設置</string>
-    <string name="setting_comic_viewer_volume_paging_control">音鍵翻頁</string>
-    <string name="setting_faq">打開查看</string>
-    <string name="setting_faq_title">常見問題解答（FAQ）</string>
-    <string name="setting_logout">紳士登出</string>
+    <string name="setting_comic_viewer_testing_version">改善闪退测试版（只有直翻）</string>
+    <string name="setting_comic_viewer_title">阅读设置</string>
+    <string name="setting_comic_viewer_volume_paging_control">音键翻页</string>
+    <string name="setting_faq">打开查看</string>
+    <string name="setting_faq_title">常见问题解答（FAQ）</string>
+    <string name="setting_logout">绅士注销</string>
     <string name="setting_other_title">其他</string>
-    <string name="setting_password">變更密碼</string>
-    <string name="setting_password_title">帳戶</string>
+    <string name="setting_password">变更密码</string>
+    <string name="setting_password_title">账户</string>
     <string name="setting_performance_enhancement">改善速度</string>
-    <string name="setting_pin">變更密碼</string>
-    <string name="setting_pin_off">設定密碼</string>
-    <string name="setting_pin_on">取消／更改密碼</string>
-    <string name="setting_pin_title">屏蔽密碼</string>
-    <string name="setting_pin_title_off">屏蔽密碼</string>
-    <string name="setting_pin_title_on">屏蔽密碼 (使用中)</string>
-    <string name="setting_testing_title">測試中功能</string>
-    <string name="setting_theme_color">主題顏色</string>
+    <string name="setting_pin">变更密码</string>
+    <string name="setting_pin_off">设定密码</string>
+    <string name="setting_pin_on">取消／更改密码</string>
+    <string name="setting_pin_title">屏蔽密码</string>
+    <string name="setting_pin_title_off">屏蔽密码</string>
+    <string name="setting_pin_title_on">屏蔽密码 (使用中)</string>
+    <string name="setting_testing_title">测试中功能</string>
+    <string name="setting_theme_color">主题颜色</string>
     <string name="setting_version_title">版本</string>
-    <string name="sorting_categories">分類</string>
-    <string name="sorting_da">舊到新</string>
-    <string name="sorting_dd">新到舊</string>
-    <string name="sorting_ld">最多愛心</string>
+    <string name="sorting_categories">分类</string>
+    <string name="sorting_da">旧到新</string>
+    <string name="sorting_dd">新到旧</string>
+    <string name="sorting_ld">最多爱心</string>
     <string name="sorting_title">排序方式</string>
     <string name="sorting_ua">最新更新</string>
-    <string name="sorting_vd">最多紳士指名</string>
-    <string name="splash_error">無法連接服務器，請檢查你的網路連接是否正常。</string>
-    <string name="splash_remark">如果不能連接或不能載圖，請嘗試分流【 2 】或 分流【 3 】</string>
-    <string name="splash_retry">重新連接</string>
+    <string name="sorting_vd">最多绅士指名</string>
+    <string name="splash_error">无法连接服务器，请检查你的网络连接是否正常。</string>
+    <string name="splash_remark">如果不能连接或不能载图，请尝试分流【 2 】或 分流【 3 】</string>
+    <string name="splash_retry">重新连接</string>
     <string name="splash_server_1">分流【 1 】</string>
     <string name="splash_server_2">分流【 2 】</string>
     <string name="splash_server_3">分流【 3 】</string>
     <string name="status_bar_notification_info_overflow">999+</string>
-    <string name="support_us_ads_title">▼ 拯救嗶咔，請點廣告 ▼</string>
+    <string name="support_us_ads_title">▼ 拯救哔咔，请点广告 ▼</string>
     <string name="support_us_alipay_account">18659554802</string>
-    <string name="support_us_alipay_account_title">大騎士的支援帳戶（點擊複製）</string>
-    <string name="support_us_alipay_title">▼ 拯救嗶咔，從 支付宝 出發 ▼</string>
-    <string name="support_us_game_title">▼ 拯救嗶咔，請下載嗶咔推薦遊戲 ▼</string>
-    <string name="support_us_offical_group_construction">看來官方群還在整理中...</string>
-    <string name="support_us_offical_group_warning">"【嚴正警告】
+    <string name="support_us_alipay_account_title">大骑士的支援账户（点击复制）</string>
+    <string name="support_us_alipay_title">▼ 拯救哔咔，从 支付宝 出发 ▼</string>
+    <string name="support_us_game_title">▼ 拯救哔咔，请下载哔咔推荐游戏 ▼</string>
+    <string name="support_us_offical_group_construction">看来官方群还在整理中...</string>
+    <string name="support_us_offical_group_warning">"【严正警告】
 
-使用問題 或 功能查詢，請先看FAQ 或 到聊天室找老紳士了解！"</string>
-    <string name="support_us_offical_groups_chat">"嗶咔嗶咔交易群① 290627005
+使用问题 或 功能查询，请先看FAQ 或 到聊天室找老绅士了解！"</string>
+    <string name="support_us_offical_groups_chat">"哔咔哔咔交易群① 290627005
 
-嗶咔嗶咔交流群② 481678687
+哔咔哔咔交流群② 481678687
 
-嗶咔嗶咔交易群③ 252325650
+哔咔哔咔交易群③ 252325650
 
-嗶咔嗶咔交易群④ 535860450"</string>
-    <string name="support_us_offical_groups_chat_title">▼ 加入嗶咔，從聊天開始 ▼</string>
-    <string name="support_us_offical_groups_game">"嗶咔遊樂場① 537280193
+哔咔哔咔交易群④ 535860450"</string>
+    <string name="support_us_offical_groups_chat_title">▼ 加入哔咔，从聊天开始 ▼</string>
+    <string name="support_us_offical_groups_game">"哔咔游乐场① 537280193
 
-嗶咔遊樂場② 583484690
+哔咔游乐场② 583484690
 
-嗶咔遊樂場③ 319605640
+哔咔游乐场③ 319605640
 
-嗶咔遊樂場④ 573226683"</string>
-    <string name="support_us_offical_groups_game_title">▼ 加入嗶咔，從遊戲開始 ▼</string>
-    <string name="support_us_offical_groups_line_title">▼ 加入嗶咔，從LINE開始 ▼</string>
-    <string name="support_us_offical_line">"嗶咔騎士團
+哔咔游乐场④ 573226683"</string>
+    <string name="support_us_offical_groups_game_title">▼ 加入哔咔，从游戏开始 ▼</string>
+    <string name="support_us_offical_groups_line_title">▼ 加入哔咔，从LINE开始 ▼</string>
+    <string name="support_us_offical_line">"哔咔骑士团
 http://line.me/R/ti/g/tnO77QckoO"</string>
-    <string name="support_us_offical_line_at">"嗶咔嗶咔漫畫（官方號）
+    <string name="support_us_offical_line_at">"哔咔哔咔漫画（官方号）
 http://line.me/ti/p/%40ztj0743u"</string>
-    <string name="support_us_paypal_description_default">（＊暫時沒有任何回饋，請保留PayPal的交易編號作未來回饋之用）</string>
+    <string name="support_us_paypal_description_default">（＊暂时没有任何回馈，请保留PayPal的交易编号作未来回馈之用）</string>
     <string name="support_us_paypal_price_unit">US$</string>
-    <string name="support_us_qq_title">▼ 拯救嗶咔，從 QQ 出發 ▼</string>
-    <string name="support_us_tab_ads">廣告 / 遊戲</string>
-    <string name="support_us_tab_group">加入嗶咔官方群</string>
+    <string name="support_us_qq_title">▼ 拯救哔咔，从 QQ 出发 ▼</string>
+    <string name="support_us_tab_ads">广告 / 游戏</string>
+    <string name="support_us_tab_group">加入哔咔官方群</string>
     <string name="support_us_tab_paypal">PayPal</string>
     <string name="support_us_tab_qq">QQ / 支付宝</string>
-    <string name="theme_color_dark">迷紅黑</string>
-    <string name="theme_color_white">粉紅白</string>
-    <string name="time_format_minute_before">分鐘前</string>
+    <string name="theme_color_dark">迷红黑</string>
+    <string name="theme_color_white">粉红白</string>
+    <string name="time_format_minute_before">分钟前</string>
     <string name="time_format_second_before">秒前</string>
     <string name="time_format_today">今天</string>
     <string name="time_format_yesterday">昨天</string>
     <string name="title_activity_comic_viewer">ComicViewerActivity</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_announcement">嗶咔公告</string>
-    <string name="title_apk_version">更新日誌</string>
-    <string name="title_category">分類</string>
-    <string name="title_chatroom">嗶咔聊天室</string>
-    <string name="title_comic_detail_default">漫畫介紹</string>
-    <string name="title_comment">偉論</string>
-    <string name="title_exp">修改經驗值</string>
-    <string name="title_game_detail">遊戲介紹</string>
-    <string name="title_game_list">遊戲區</string>
-    <string name="title_home">主頁</string>
-    <string name="title_leaderboard">嗶咔排行榜</string>
+    <string name="title_announcement">哔咔公告</string>
+    <string name="title_apk_version">更新日志</string>
+    <string name="title_category">分类</string>
+    <string name="title_chatroom">哔咔聊天室</string>
+    <string name="title_comic_detail_default">漫画介绍</string>
+    <string name="title_comment">伟论</string>
+    <string name="title_exp">修改经验值</string>
+    <string name="title_game_detail">游戏介绍</string>
+    <string name="title_game_list">游戏区</string>
+    <string name="title_home">主页</string>
+    <string name="title_leaderboard">哔咔排行榜</string>
     <string name="title_notification">通知</string>
-    <string name="title_one_time_update">一次性用戶資料更新</string>
-    <string name="title_pica_app">嗶咔小程式</string>
+    <string name="title_one_time_update">一次性用户数据更新</string>
+    <string name="title_pica_app">哔咔小程序</string>
     <string name="title_profile">我的</string>
-    <string name="title_profile_edit">編輯我的</string>
+    <string name="title_profile_edit">编辑我的</string>
     <string name="title_search">搜索：</string>
-    <string name="title_setting">嗶咔設定</string>
-    <string name="title_support_us">支持嗶咔</string>
-    <string name="toast_block_user_failed">封鎖用戶失敗，請重試</string>
-    <string name="toast_block_user_success">封鎖用戶成功！</string>
-    <string name="toast_chatroom_private_no_at">你還未＠人</string>
+    <string name="title_setting">哔咔设定</string>
+    <string name="title_support_us">支持哔咔</string>
+    <string name="toast_block_user_failed">封锁用户失败，请重试</string>
+    <string name="toast_block_user_success">封锁用户成功！</string>
+    <string name="toast_chatroom_private_no_at">你还未＠人</string>
     <string name="toast_comic_list_filter_filtered_suffix">】已被封印</string>
     <string name="toast_comic_list_filter_prefix">【</string>
     <string name="toast_comic_list_filter_unfiltered_suffix">】已解封</string>
-    <string name="toast_comment_top_failed">無法置訂回覆的留言！</string>
-    <string name="toast_remove_all_comment_failed">刪除失敗，請重試</string>
-    <string name="toast_remove_all_comment_success">已刪除此用戶的所有留言</string>
+    <string name="toast_comment_top_failed">无法置订回复的留言！</string>
+    <string name="toast_remove_all_comment_failed">删除失败，请重试</string>
+    <string name="toast_remove_all_comment_success">已删除此用户的所有留言</string>
     <string name="update">更新</string>
 </resources>
