@@ -12,6 +12,9 @@ android {
         versionName '2.2.1.3.3.4'
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
+        ndk {
+            abiFilters "armeabi-v7a"  // 只保留 32 位
+        }
     }
 
     buildTypes {
