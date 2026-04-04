@@ -3,7 +3,7 @@ name: Alpha Build
 on:
   push:
     branches:
-      - master
+      - forbuild
 
 jobs:
   build-alpha:
