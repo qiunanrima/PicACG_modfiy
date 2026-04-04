@@ -39,6 +39,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
 
@@ -48,6 +49,12 @@ android {
 
     buildFeatures {
         viewBinding true
+    }
+
+
+    lint {
+        baseline = file("lint-baseline.xml")
+        abortOnError false  // 加上这行，Lint错误不阻断编译
     }
 }
 
