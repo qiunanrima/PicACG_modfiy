@@ -226,6 +226,10 @@ public class ComicViewerActivity extends BaseActivity implements d {
         this.verticalSeekBar_brightness = this.binding.layoutLeftPanel.verticalSeekBarComicViewerBrightness;
 
         setSupportActionBar(this.binding.layoutToolbar.toolbar);
+        this.binding.layoutToolbar.toolbar.setTitle("");
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
         if (bundle == null) {
             if (e.w(this)) {
                 getSupportFragmentManager().beginTransaction().add(R.id.container, new ComicViewerListFragment(), ComicViewerListFragment.TAG).commit();
