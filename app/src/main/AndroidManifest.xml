@@ -57,7 +57,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_comic_viewer"
             android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.PicACG" />
+            android:theme="@style/AppTheme" />
         <activity android:name="com.picacomic.fregata.activities.ImageCropActivity" />
         <activity android:name="com.picacomic.fregata.activities.PopupActivity" />
 
@@ -82,7 +82,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false"
             android:launchMode="standard"
-            android:theme="@style/actionActivity"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
     </application>
 </manifest>

@@ -32,18 +32,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    sourceSets {
-        main {
-            manifest.srcFile '../Project/AndroidManifest.xml'
-            java.srcDirs = [
-                '../ProjectSrc/java',
-                '../ProjectSrc/stubs'
-            ]
-            res.srcDirs = ['../Project/res']
-            assets.srcDirs = ['../Project/assets']
-            jniLibs.srcDirs = ['src/main/jniLibs']
-        }
-    }
 
     packagingOptions {
         exclude 'META-INF/*'
