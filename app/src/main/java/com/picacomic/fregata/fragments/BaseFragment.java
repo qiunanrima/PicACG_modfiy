@@ -27,13 +27,6 @@ public class BaseFragment extends Fragment implements i {
     }
 
     public void bH() {
-        if (getActivity() != null && (getActivity() instanceof MainActivity)) {
-            long jP = e.P(getActivity());
-            f.D(TAG, "Last Time = " + jP + " Current Time = " + System.currentTimeMillis() + " Diff = " + (System.currentTimeMillis() - jP));
-            if (System.currentTimeMillis() - jP > 7200000) {
-                ((MainActivity) getActivity()).G(a.dS());
-            }
-        }
         if ((this instanceof ComicDetailFragment) || (this instanceof GameDetailFragment)) {
             if (getActivity() == null || !(getActivity() instanceof MainActivity)) {
                 return;

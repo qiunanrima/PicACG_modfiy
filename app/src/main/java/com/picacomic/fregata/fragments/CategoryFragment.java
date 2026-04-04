@@ -343,10 +343,6 @@ public class CategoryFragment extends BaseFragment implements k {
             int size = this.kD.size() + 0;
             switch (i) {
                 case 0:
-                    if (getActivity() != null && (getActivity() instanceof MainActivity)) {
-                        ((MainActivity) getActivity()).bW();
-                        break;
-                    }
                     break;
                 case 1:
                     getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, new LeaderboardContainerFragment(), LeaderboardContainerFragment.TAG).addToBackStack(LeaderboardContainerFragment.TAG).commit();

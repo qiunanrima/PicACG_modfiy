@@ -213,22 +213,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         this.bannerWebview.show(str);
     }
 
-    public void bW() {
-        if (this.popupWebview == null) {
-            this.popupWebview = new PopupWebview(this);
-        }
-        this.popupWebview.setVisibility(0);
-        this.popupWebview.show();
-    }
-
-    public void G(String str) {
-        if (this.popupWebview == null) {
-            this.popupWebview = new PopupWebview(this);
-        }
-        this.popupWebview.setVisibility(0);
-        this.popupWebview.show(str);
-    }
-
     public void bF() {
         for (int i = 0; i < this.buttons_tabbar.length; i++) {
             this.buttons_tabbar[i].setOnClickListener(this);

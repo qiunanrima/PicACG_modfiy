@@ -69,7 +69,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     ArrayList<BannerObject> ps;
     ArrayList<AnnouncementObject> pt;
     ArrayList<CollectionObject> pu;
-    AnnouncementContainerView pv;
+    
     int pw;
     String px;
 
@@ -148,18 +148,6 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
         }
         BannerObject[] bannerObjectArr = {new BannerObject("banner1", "嗶咔2.0公測正式開放！", "web", "", null, null, "https://picacomic.com", null), new BannerObject("banner2", "玩機動戰隊送多麗絲／教皇抱枕", "game", "", "58296dee1cc00b5d50b1b5fe", null, null, null), new BannerObject("banner3", "一點沒露卻色氣滿滿・奈奈與薫的SM日記", "comic", "", null, "5822a5bcad7ede6546963762", null, thumbnailObjectArr[0]), new BannerObject("banner4", "拯救嗶咔・點擊廣告", "ads", "", null, null, null, null)};
         this.ps = new ArrayList<>();
-        this.pv = new AnnouncementContainerView(getActivity(), null, 1000, this, new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.HomeFragment.3
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-                FragmentTransaction fragmentTransactionBeginTransaction = HomeFragment.this.getFragmentManager().beginTransaction();
-                if (HomeFragment.this.getContext() != null && e.x(HomeFragment.this.getContext())) {
-                    fragmentTransactionBeginTransaction.setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit);
-                }
-                fragmentTransactionBeginTransaction.replace(R.id.container, new AnnouncementListFragment(), AnnouncementListFragment.TAG).addToBackStack(AnnouncementListFragment.TAG).commit();
-            }
-        });
-        this.pv.getTextView_title().setText(R.string.title_announcement);
-        this.linearLayout_announcements.addView(this.pv);
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -192,15 +180,6 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
             return;
         }
         ((MainActivity) getActivity()).t(0);
-        if (this.pt != null && this.pt.size() > 0 && getActivity() != null && !e.I(getActivity()).equals(this.pt.get(0).getAnnouncementId())) {
-            this.px = this.pt.get(0).getAnnouncementId();
-            AlertDialogCenter.showAnnouncementAlertDialog(getContext(), g.b(this.pt.get(0).getThumb()), this.pt.get(0).getTitle(), this.pt.get(0).getContent(), this.pt.get(0).getCreatedAt(), new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.HomeFragment.5
-                @Override // android.view.View.OnClickListener
-                public void onClick(View view) {
-                    e.p(HomeFragment.this.getContext(), HomeFragment.this.pt.get(0).getAnnouncementId());
-                }
-            });
-        }
         bI();
         dk();
         dj();
@@ -231,18 +210,6 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     @Override // com.picacomic.fregata.fragments.BaseFragment
     public void bI() {
         super.bI();
-        if (this.pt != null && this.pt.size() > 0 && this.pv != null) {
-            this.pv.dL();
-            this.pv.b(this.pt);
-            if (getActivity() != null && !e.I(getActivity()).equals(this.pt.get(0).getAnnouncementId()) && (this.px == null || !this.px.equalsIgnoreCase(this.pt.get(0).getAnnouncementId()))) {
-                AlertDialogCenter.showAnnouncementAlertDialog(getContext(), g.b(this.pt.get(0).getThumb()), this.pt.get(0).getTitle(), this.pt.get(0).getContent(), this.pt.get(0).getCreatedAt(), new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.HomeFragment.7
-                    @Override // android.view.View.OnClickListener
-                    public void onClick(View view) {
-                        e.p(HomeFragment.this.getContext(), HomeFragment.this.pt.get(0).getAnnouncementId());
-                    }
-                });
-            }
-        }
         try {
             if (this.menu == null || !e.ak(getContext())) {
                 return;
@@ -411,10 +378,6 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
 
     @Override // android.view.View.OnClickListener
     public void onClick(View view) {
-        if (((Integer) view.getTag()).intValue() / 1000 == 1) {
-            AnnouncementObject announcementObject = this.pt.get(((Integer) view.getTag()).intValue() % 1000);
-            AlertDialogCenter.showAnnouncementAlertDialog(view.getContext(), g.b(announcementObject.getThumb()), announcementObject.getTitle(), announcementObject.getContent(), announcementObject.getCreatedAt(), null);
-        }
         if (((Integer) view.getTag()).intValue() / 10000 == 1) {
             int iIntValue = ((Integer) view.getTag()).intValue() - 10000;
             getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicDetailFragment.a(new ComicListObject(this.pu.get(iIntValue / 10).getComics().get(iIntValue % 10).getComicId() + "")), ComicDetailFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();

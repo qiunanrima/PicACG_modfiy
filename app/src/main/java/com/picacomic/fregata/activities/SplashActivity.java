@@ -86,7 +86,7 @@ public class SplashActivity extends BaseActivity implements View.OnClickListener
                     if (response.body().getMessage() == null || response.body().getMessage().length() <= 1 || SplashActivity.this == null) {
                         return;
                     }
-                    AlertDialogCenter.showAnnouncementAlertDialog(SplashActivity.this, null, null, response.body().getMessage(), null, null);
+                    //AlertDialogCenter.showAnnouncementAlertDialog(SplashActivity.this, null, null, response.body().getMessage(), null, null);
                     return;
                 }
                 int i2 = i - 1;
