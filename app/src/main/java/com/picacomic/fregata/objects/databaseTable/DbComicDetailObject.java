@@ -1,14 +1,14 @@
 package com.picacomic.fregata.objects.databaseTable;
 
 import com.google.gson.Gson;
-import com.orm.d;
+import com.orm.SugarRecord;
 import com.picacomic.fregata.objects.ComicDetailObject;
 import com.picacomic.fregata.objects.CreatorObject;
 import com.picacomic.fregata.objects.ThumbnailObject;
 import java.util.ArrayList;
 
 /* JADX INFO: loaded from: classes.dex */
-public class DbComicDetailObject extends d {
+public class DbComicDetailObject extends SugarRecord{
     String author;
     String categories;
     String chineseTeam;

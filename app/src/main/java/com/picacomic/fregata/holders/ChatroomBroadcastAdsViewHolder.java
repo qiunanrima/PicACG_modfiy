@@ -5,8 +5,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemChatroomAdsRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.a;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -15,37 +14,30 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ChatroomBroadcastAdsViewHolder extends RecyclerView.ViewHolder {
     public static final String TAG = ChatroomMessageViewHolder.class.getSimpleName();
 
-    @BindView(R.id.linearLayout_chatroom_container)
+    ItemChatroomAdsRecyclerViewCellBinding binding;
     public LinearLayout container;
-
-    @BindView(R.id.imageView_chatroom_recycler_view_cell_avatar)
     public CircleImageView imageView_avatar;
-
-    @BindView(R.id.imageView_chatroom_recycler_view_cell_image)
     public ImageView imageView_image;
-
-    @BindView(R.id.imageView_chatroom_recycler_view_cell_verified)
     public ImageView imageView_verified;
     a jn;
-
-    @BindView(R.id.textView_chatroom_recycler_view_cell_level)
     public TextView textView_level;
-
-    @BindView(R.id.textView_chatroom_recycler_view_cell_message)
     public TextView textView_message;
-
-    @BindView(R.id.textView_chatroom_recycler_view_cell_name)
     public TextView textView_name;
-
-    @BindView(R.id.textView_chatroom_recycler_view_cell_timestamp)
     public TextView textView_timestamp;
-
-    @BindView(R.id.textView_chatroom_recycler_view_cell_title)
     public TextView textView_title;
 
     public ChatroomBroadcastAdsViewHolder(View view, a aVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemChatroomAdsRecyclerViewCellBinding.bind(view);
+        this.container = view.findViewById(R.id.linearLayout_chatroom_container);
+        this.imageView_avatar = view.findViewById(R.id.imageView_chatroom_recycler_view_cell_avatar);
+        this.imageView_image = view.findViewById(R.id.imageView_chatroom_recycler_view_cell_image);
+        this.imageView_verified = view.findViewById(R.id.imageView_chatroom_recycler_view_cell_verified);
+        this.textView_level = view.findViewById(R.id.textView_chatroom_recycler_view_cell_level);
+        this.textView_message = view.findViewById(R.id.textView_chatroom_recycler_view_cell_message);
+        this.textView_name = view.findViewById(R.id.textView_chatroom_recycler_view_cell_name);
+        this.textView_timestamp = view.findViewById(R.id.textView_chatroom_recycler_view_cell_timestamp);
+        this.textView_title = view.findViewById(R.id.textView_chatroom_recycler_view_cell_title);
         this.jn = aVar;
         this.textView_name.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.holders.ChatroomBroadcastAdsViewHolder.1
             @Override // android.view.View.OnClickListener

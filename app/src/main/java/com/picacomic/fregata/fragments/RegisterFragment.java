@@ -16,9 +16,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import butterknife.BindArray;
-import butterknife.BindView;
-import butterknife.BindViews;
+import com.picacomic.fregata.databinding.FragmentRegisterBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.g;
 import com.picacomic.fregata.activities.MainActivity;
@@ -45,46 +43,20 @@ public class RegisterFragment extends BaseFragment {
     public static final String TAG = "RegisterFragment";
     String birthday;
 
-    @BindView(R.id.button_register_register_button)
+    FragmentRegisterBinding binding;
     Button button_register;
-
-    @BindViews({R.id.button_register_gender_m, R.id.button_register_gender_f, R.id.button_register_gender_bot})
     AppCompatButton[] buttons_gender;
-
-    @BindView(R.id.editText_register_answer_1)
     EditText editText_answer_1;
-
-    @BindView(R.id.editText_register_answer_2)
     EditText editText_answer_2;
-
-    @BindView(R.id.editText_register_answer_3)
     EditText editText_answer_3;
-
-    @BindView(R.id.editText_register_email)
     EditText editText_email;
-
-    @BindView(R.id.editText_register_password)
     EditText editText_password;
-
-    @BindView(R.id.editText_register_password_confirm)
     EditText editText_passwordConfirm;
-
-    @BindView(R.id.editText_register_question_1)
     EditText editText_question_1;
-
-    @BindView(R.id.editText_register_question_2)
     EditText editText_question_2;
-
-    @BindView(R.id.editText_register_question_3)
     EditText editText_question_3;
-
-    @BindView(R.id.editText_register_username)
     EditText editText_username;
-
-    @BindView(R.id.frameLayout_register_background_white)
     FrameLayout frameLayout_backgroundWhite;
-
-    @BindArray(R.array.register_genders)
     String[] genders;
     Animation iE;
     Call<GeneralResponse<SignInResponse>> pU;
@@ -98,7 +70,6 @@ public class RegisterFragment extends BaseFragment {
     private int rn;
     Call<RegisterResponse> ro;
 
-    @BindView(R.id.textView_register_birthday)
     TextView textView_birthday;
 
     static /* synthetic */ int c(RegisterFragment registerFragment) {
@@ -109,9 +80,23 @@ public class RegisterFragment extends BaseFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_register, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentRegisterBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_register = this.binding.buttonRegisterRegisterButton;
+        this.buttons_gender = new AppCompatButton[]{this.binding.buttonRegisterGenderM, this.binding.buttonRegisterGenderF, this.binding.buttonRegisterGenderBot};
+        this.editText_answer_1 = this.binding.editTextRegisterAnswer1;
+        this.editText_answer_2 = this.binding.editTextRegisterAnswer2;
+        this.editText_answer_3 = this.binding.editTextRegisterAnswer3;
+        this.editText_email = this.binding.editTextRegisterEmail;
+        this.editText_password = this.binding.editTextRegisterPassword;
+        this.editText_passwordConfirm = this.binding.editTextRegisterPasswordConfirm;
+        this.editText_question_1 = this.binding.editTextRegisterQuestion1;
+        this.editText_question_2 = this.binding.editTextRegisterQuestion2;
+        this.editText_question_3 = this.binding.editTextRegisterQuestion3;
+        this.editText_username = this.binding.editTextRegisterUsername;
+        this.frameLayout_backgroundWhite = this.binding.frameLayoutRegisterBackgroundWhite;
+        this.textView_birthday = this.binding.textViewRegisterBirthday;
+        this.genders = getResources().getStringArray(R.array.register_genders);
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

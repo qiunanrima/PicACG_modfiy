@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentProfileComicBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.b.d;
 import com.picacomic.fregata.c.c;
@@ -28,13 +28,9 @@ import retrofit2.Response;
 public class ProfileComicFragment extends BaseFragment implements View.OnClickListener {
     public static final String TAG = "ProfileComicFragment";
 
-    @BindView(R.id.linearLayout_profile_comic_bookmarked)
+    FragmentProfileComicBinding binding;
     LinearLayout linearLayout_bookmarked;
-
-    @BindView(R.id.linearLayout_profile_comic_downloaded)
     LinearLayout linearLayout_downloaded;
-
-    @BindView(R.id.linearLayout_profile_comic_recent_view)
     LinearLayout linearLayout_recentView;
     Call<GeneralResponse<ComicListResponse>> qF;
     ArrayList<ComicListObject> qG;
@@ -46,9 +42,11 @@ public class ProfileComicFragment extends BaseFragment implements View.OnClickLi
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_profile_comic, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentProfileComicBinding.inflate(layoutInflater, viewGroup, false);
+        this.linearLayout_bookmarked = this.binding.linearLayoutProfileComicBookmarked;
+        this.linearLayout_downloaded = this.binding.linearLayoutProfileComicDownloaded;
+        this.linearLayout_recentView = this.binding.linearLayoutProfileComicRecentView;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

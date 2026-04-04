@@ -6,8 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemCategoryRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.CategoryObject;
@@ -20,16 +19,18 @@ public class CategoryViewHolder extends RecyclerView.ViewHolder implements View.
     public static final String TAG = "CategoryViewHolder";
     Context context;
 
-    @BindView(R.id.imageView_category_recycler_view_cell_image)
+    ItemCategoryRecyclerViewCellBinding binding;
     public ImageView imageView_image;
     k je;
 
-    @BindView(R.id.textView_category_recycler_view_cell_title)
     public TextView textView_title;
 
     public CategoryViewHolder(Context context, View view, k kVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemCategoryRecyclerViewCellBinding.bind(view);
+        this.imageView_image = this.binding.imageViewCategoryRecyclerViewCellImage;
+        this.textView_title = this.binding.textViewCategoryRecyclerViewCellTitle;
+        this.context = context;
         this.je = kVar;
         view.setOnClickListener(this);
     }

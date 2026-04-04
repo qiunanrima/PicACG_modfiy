@@ -6,8 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemGameRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.GameListObject;
@@ -19,25 +18,23 @@ public class GameListViewHolder extends RecyclerView.ViewHolder implements View.
     public static final String TAG = "GameListViewHolder";
     Context context;
 
-    @BindView(R.id.imageView_game_recycler_view_cell_adult)
+    ItemGameRecyclerViewCellBinding binding;
     public ImageView imageView_adult;
-
-    @BindView(R.id.imageView_game_recycler_view_cell_banner)
     public ImageView imageView_banner;
-
-    @BindView(R.id.imageView_game_recycler_view_cell_pica_recommend)
     public ImageView imageView_recommend;
     public k je;
 
-    @BindView(R.id.textView_game_recycler_view_cell_publisher)
     public TextView textView_publisher;
-
-    @BindView(R.id.textView_game_recycler_view_cell_title)
     public TextView textView_title;
 
     public GameListViewHolder(Context context, View view, k kVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemGameRecyclerViewCellBinding.bind(view);
+        this.imageView_adult = this.binding.imageViewGameRecyclerViewCellAdult;
+        this.imageView_banner = this.binding.imageViewGameRecyclerViewCellBanner;
+        this.imageView_recommend = this.binding.imageViewGameRecyclerViewCellPicaRecommend;
+        this.textView_publisher = this.binding.textViewGameRecyclerViewCellPublisher;
+        this.textView_title = this.binding.textViewGameRecyclerViewCellTitle;
         this.context = context;
         this.je = kVar;
         view.setOnClickListener(this);

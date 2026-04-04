@@ -8,8 +8,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemComicListRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.b;
 import com.picacomic.fregata.objects.ComicListObject;
@@ -21,57 +20,46 @@ public class ComicListViewHolder extends RecyclerView.ViewHolder implements View
     public static final String TAG = "ComicListViewHolder";
     Context context;
 
-    @BindView(R.id.frameLayout_comic_list_recycler_view_cell_filter_bl)
+    ItemComicListRecyclerViewCellBinding binding;
     public FrameLayout frameLayout_bl;
-
-    @BindView(R.id.frameLayout_comic_list_recycler_view_cell_filter_forbidden)
     public FrameLayout frameLayout_forbidden;
-
-    @BindView(R.id.frameLayout_comic_list_recycler_view_cell_filter_non_chinese)
     public FrameLayout frameLayout_nonChinese;
-
-    @BindView(R.id.imageView_comic_list_recycler_view_cell_image)
     public ImageView imageView_image;
-
-    @BindView(R.id.linearLayout_comic_list_recycler_view_cell_container)
     public LinearLayout linearLayout_container;
-
-    @BindView(R.id.linearLayout_comic_list_recycler_view_cell_content)
     public LinearLayout linearLayout_content;
-
-    @BindView(R.id.linearLayout_comic_list_recycler_view_cell_filter)
     public LinearLayout linearLayout_filter;
     b sD;
     int targetHeight;
     int targetWidth;
-
-    @BindView(R.id.textView_comic_list_recycler_view_cell_author)
     public TextView textView_author;
-
-    @BindView(R.id.textView_comic_list_recycler_view_cell_filter_bl)
     public TextView textView_bl;
-
-    @BindView(R.id.textView_comic_list_recycler_view_cell_category)
     public TextView textView_category;
-
-    @BindView(R.id.textView_comic_list_recycler_view_cell_filter_forbidden)
     public TextView textView_forbidden;
-
-    @BindView(R.id.textView_comic_list_recycler_view_cell_like_count)
     public TextView textView_likeCount;
-
-    @BindView(R.id.textView_comic_list_recycler_view_cell_name)
     public TextView textView_name;
-
-    @BindView(R.id.textView_comic_list_recycler_view_cell_filter_non_chinese)
     public TextView textView_nonChinese;
 
     public ComicListViewHolder(Context context, View view, b bVar) {
         super(view);
+        this.binding = ItemComicListRecyclerViewCellBinding.bind(view);
+        this.frameLayout_bl = this.binding.frameLayoutComicListRecyclerViewCellFilterBl;
+        this.frameLayout_forbidden = this.binding.frameLayoutComicListRecyclerViewCellFilterForbidden;
+        this.frameLayout_nonChinese = this.binding.frameLayoutComicListRecyclerViewCellFilterNonChinese;
+        this.imageView_image = this.binding.imageViewComicListRecyclerViewCellImage;
+        this.linearLayout_container = this.binding.linearLayoutComicListRecyclerViewCellContainer;
+        this.linearLayout_content = this.binding.linearLayoutComicListRecyclerViewCellContent;
+        this.linearLayout_filter = this.binding.linearLayoutComicListRecyclerViewCellFilter;
+        this.textView_author = this.binding.textViewComicListRecyclerViewCellAuthor;
+        this.textView_bl = this.binding.textViewComicListRecyclerViewCellFilterBl;
+        this.textView_category = this.binding.textViewComicListRecyclerViewCellCategory;
+        this.textView_forbidden = this.binding.textViewComicListRecyclerViewCellFilterForbidden;
+        this.textView_likeCount = this.binding.textViewComicListRecyclerViewCellLikeCount;
+        this.textView_name = this.binding.textViewComicListRecyclerViewCellName;
+        this.textView_nonChinese = this.binding.textViewComicListRecyclerViewCellFilterNonChinese;
+
         this.targetWidth = 80;
         this.targetHeight = 120;
         this.context = context;
-        ButterKnife.bind(this, view);
         this.sD = bVar;
         this.imageView_image.setOnClickListener(this);
         view.setOnClickListener(this);

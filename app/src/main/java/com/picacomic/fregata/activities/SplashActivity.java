@@ -7,8 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ActivitySplashBinding;
 import com.picacomic.fregata.MyApplication;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.objects.responses.WakaInitResponse;
@@ -30,30 +29,28 @@ public class SplashActivity extends BaseActivity implements View.OnClickListener
         androidx.appcompat.app.AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
-    @BindView(R.id.button_splash_error)
+    ActivitySplashBinding binding;
     Button button_error;
-
-    @BindView(R.id.button_splash_server1)
     Button button_server1;
-
-    @BindView(R.id.button_splash_server2)
     Button button_server2;
-
-    @BindView(R.id.button_splash_server3)
     Button button_server3;
     Call<WakaInitResponse> iW;
-
-    @BindView(R.id.linearLayout_splash_error)
     LinearLayout linearLayout_error;
-
-    @BindView(R.id.linearLayout_splash_options)
     LinearLayout linearLayout_options;
 
     @Override // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.activity_splash);
-        ButterKnife.bind(this);
+        this.binding = ActivitySplashBinding.inflate(getLayoutInflater());
+        setContentView(this.binding.getRoot());
+        
+        this.button_error = this.binding.buttonSplashError;
+        this.button_server1 = this.binding.buttonSplashServer1;
+        this.button_server2 = this.binding.buttonSplashServer2;
+        this.button_server3 = this.binding.buttonSplashServer3;
+        this.linearLayout_error = this.binding.linearLayoutSplashError;
+        this.linearLayout_options = this.binding.linearLayoutSplashOptions;
+
         w(3);
         this.button_server1.setOnClickListener(this);
         this.button_server2.setOnClickListener(this);

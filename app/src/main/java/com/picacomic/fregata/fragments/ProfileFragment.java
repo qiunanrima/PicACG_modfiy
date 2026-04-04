@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentProfileBinding;
 import com.google.gson.Gson;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
@@ -42,48 +42,24 @@ import retrofit2.Response;
 public class ProfileFragment extends BaseImagePickFragment {
     public static final String TAG = "ProfileFragment";
 
-    @BindView(R.id.button_profile_edit)
+    FragmentProfileBinding binding;
     Button button_edit;
-
-    @BindView(R.id.expCircleView_profile)
     ExpCircleView expCircleView;
-
-    @BindView(R.id.imageView_profile_avatar)
     CircleImageView imageView_avatar;
-
-    @BindView(R.id.imageView_profile_avatar_blur)
     ImageView imageView_avatarBlur;
-
-    @BindView(R.id.imageView_profile_character)
     ImageView imageView_character;
-
-    @BindView(R.id.imageView_profile_verified)
     ImageView imageView_verified;
     UserProfileObject jW;
     Call<GeneralResponse<UserProfileResponse>> jX;
     ProfileFragmentPagerAdapter qR;
     Call<GeneralResponse<PunchInResponse>> qS;
     CountDownTimer qT;
-
-    @BindView(R.id.tabs)
     TabLayout tabLayout;
-
-    @BindView(R.id.textView_profile_honor)
     TextView textView_honor;
-
-    @BindView(R.id.textView_profile_level)
     TextView textView_level;
-
-    @BindView(R.id.textView_profile_name)
     TextView textView_name;
-
-    @BindView(R.id.textView_profile_punch_in)
     TextView textView_punchIn;
-
-    @BindView(R.id.textView_profile_slogan)
     TextView textView_slogan;
-
-    @BindView(R.id.viewPager_profile)
     ViewPager viewPager_tags;
     float qU = 180.0f;
     int gridSize = 1;
@@ -118,9 +94,21 @@ public class ProfileFragment extends BaseImagePickFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_profile, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentProfileBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_edit = this.binding.buttonProfileEdit;
+        this.expCircleView = this.binding.expCircleViewProfile;
+        this.imageView_avatar = this.binding.imageViewProfileAvatar;
+        this.imageView_avatarBlur = this.binding.imageViewProfileAvatarBlur;
+        this.imageView_character = this.binding.imageViewProfileCharacter;
+        this.imageView_verified = this.binding.imageViewProfileVerified;
+        this.tabLayout = this.binding.tabs;
+        this.textView_honor = this.binding.textViewProfileHonor;
+        this.textView_level = this.binding.textViewProfileLevel;
+        this.textView_name = this.binding.textViewProfileName;
+        this.textView_punchIn = this.binding.textViewProfilePunchIn;
+        this.textView_slogan = this.binding.textViewProfileSlogan;
+        this.viewPager_tags = this.binding.viewPagerProfile;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

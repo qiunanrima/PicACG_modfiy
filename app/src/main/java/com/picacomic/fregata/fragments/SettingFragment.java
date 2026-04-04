@@ -18,7 +18,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentSettingBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.BaseActivity;
 import com.picacomic.fregata.activities.LoginActivity;
@@ -34,8 +34,28 @@ import java.text.DecimalFormat;
 public class SettingFragment extends BaseFragment {
     public static final String TAG = "SettingFragment";
 
-    @BindView(R.id.button_setting_logout)
+    FragmentSettingBinding binding;
     Button button_logout;
+    TextView textView_apkVersion;
+    TextView textView_apkVersionTitle;
+    TextView textView_autoPagingInterval;
+    TextView textView_cache;
+    TextView textView_cacheTitle;
+    TextView textView_chatroomService;
+    TextView textView_continueDownloadComic;
+    TextView textView_faq;
+    TextView textView_imageQuality;
+    TextView textView_password;
+    TextView textView_pin;
+    TextView textView_pinTitle;
+    TextView textView_screenOrientation;
+    TextView textView_scrollDirection;
+    TextView textView_themeColor;
+    ToggleButton toggleButton_nightMode;
+    ToggleButton toggleButton_performanceEnhancement;
+    ToggleButton toggleButton_testingVersion;
+    ToggleButton toggleButton_volumePagingControl;
+    Toolbar toolbar;
     int hM;
     String[] rA;
     int rB;
@@ -45,66 +65,6 @@ public class SettingFragment extends BaseFragment {
     int rx;
     String[] ry;
     int rz;
-
-    @BindView(R.id.textView_setting_apk_version)
-    TextView textView_apkVersion;
-
-    @BindView(R.id.textView_setting_apk_version_title)
-    TextView textView_apkVersionTitle;
-
-    @BindView(R.id.textView_setting_auto_paging_interval)
-    TextView textView_autoPagingInterval;
-
-    @BindView(R.id.textView_setting_cache)
-    TextView textView_cache;
-
-    @BindView(R.id.textView_setting_cache_title)
-    TextView textView_cacheTitle;
-
-    @BindView(R.id.textView_setting_chatroom_service)
-    TextView textView_chatroomService;
-
-    @BindView(R.id.textView_setting_continue_download_comic)
-    TextView textView_continueDownloadComic;
-
-    @BindView(R.id.textView_setting_faq)
-    TextView textView_faq;
-
-    @BindView(R.id.textView_setting_image_quality)
-    TextView textView_imageQuality;
-
-    @BindView(R.id.textView_setting_password)
-    TextView textView_password;
-
-    @BindView(R.id.textView_setting_pin)
-    TextView textView_pin;
-
-    @BindView(R.id.textView_setting_pin_title)
-    TextView textView_pinTitle;
-
-    @BindView(R.id.textView_setting_screen_orientation)
-    TextView textView_screenOrientation;
-
-    @BindView(R.id.textView_setting_scroll_direction)
-    TextView textView_scrollDirection;
-
-    @BindView(R.id.textView_setting_theme_color)
-    TextView textView_themeColor;
-
-    @BindView(R.id.toggleButton_setting_night_mode)
-    ToggleButton toggleButton_nightMode;
-
-    @BindView(R.id.toggleButton_setting_performance_enhancement)
-    ToggleButton toggleButton_performanceEnhancement;
-
-    @BindView(R.id.toggleButton_setting_comic_viewer_testing_version)
-    ToggleButton toggleButton_testingVersion;
-
-    @BindView(R.id.toggleButton_setting_volume_paging_control)
-    ToggleButton toggleButton_volumePagingControl;
-
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
 
     public int F(boolean z) {
         return z ? 0 : 1;
@@ -116,9 +76,29 @@ public class SettingFragment extends BaseFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_setting, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentSettingBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_logout = this.binding.buttonSettingLogout;
+        this.textView_apkVersion = this.binding.textViewSettingApkVersion;
+        this.textView_apkVersionTitle = this.binding.textViewSettingApkVersionTitle;
+        this.textView_autoPagingInterval = this.binding.textViewSettingAutoPagingInterval;
+        this.textView_cache = this.binding.textViewSettingCache;
+        this.textView_cacheTitle = this.binding.textViewSettingCacheTitle;
+        this.textView_chatroomService = this.binding.textViewSettingChatroomService;
+        this.textView_continueDownloadComic = this.binding.textViewSettingContinueDownloadComic;
+        this.textView_faq = this.binding.textViewSettingFaq;
+        this.textView_imageQuality = this.binding.textViewSettingImageQuality;
+        this.textView_password = this.binding.textViewSettingPassword;
+        this.textView_pin = this.binding.textViewSettingPin;
+        this.textView_pinTitle = this.binding.textViewSettingPinTitle;
+        this.textView_screenOrientation = this.binding.textViewSettingScreenOrientation;
+        this.textView_scrollDirection = this.binding.textViewSettingScrollDirection;
+        this.textView_themeColor = this.binding.textViewSettingThemeColor;
+        this.toggleButton_nightMode = this.binding.toggleButtonSettingNightMode;
+        this.toggleButton_performanceEnhancement = this.binding.toggleButtonSettingPerformanceEnhancement;
+        this.toggleButton_testingVersion = this.binding.toggleButtonSettingComicViewerTestingVersion;
+        this.toggleButton_volumePagingControl = this.binding.toggleButtonSettingVolumePagingControl;
+        this.toolbar = this.binding.toolbar;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentOneTimeUpdateQaBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.b.c;
@@ -25,36 +25,29 @@ import retrofit2.Response;
 public class OneTimeUpdateQAFragment extends BaseFragment implements View.OnClickListener {
     public static final String TAG = "OneTimeUpdateQAFragment";
 
-    @BindView(R.id.button_update)
+    FragmentOneTimeUpdateQaBinding binding;
     Button button_update;
-
-    @BindView(R.id.editText_register_answer_1)
     EditText editText_answer_1;
-
-    @BindView(R.id.editText_register_answer_2)
     EditText editText_answer_2;
-
-    @BindView(R.id.editText_register_answer_3)
     EditText editText_answer_3;
-
-    @BindView(R.id.editText_register_question_1)
     EditText editText_question_1;
-
-    @BindView(R.id.editText_register_question_2)
     EditText editText_question_2;
-
-    @BindView(R.id.editText_register_question_3)
     EditText editText_question_3;
     Call<GeneralResponse> qr;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_one_time_update_qa, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentOneTimeUpdateQaBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_update = this.binding.buttonUpdate;
+        this.editText_answer_1 = this.binding.editTextRegisterAnswer1;
+        this.editText_answer_2 = this.binding.editTextRegisterAnswer2;
+        this.editText_answer_3 = this.binding.editTextRegisterAnswer3;
+        this.editText_question_1 = this.binding.editTextRegisterQuestion1;
+        this.editText_question_2 = this.binding.editTextRegisterQuestion2;
+        this.editText_question_3 = this.binding.editTextRegisterQuestion3;
+        this.toolbar = this.binding.toolbar;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

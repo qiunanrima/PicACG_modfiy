@@ -4,8 +4,6 @@ import android.content.Context;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.i;
 import com.picacomic.fregata.activities.BaseActivity;
@@ -18,7 +16,6 @@ import com.picacomic.fregata.utils.f;
 /* JADX INFO: loaded from: classes.dex */
 public class BaseFragment extends Fragment implements i {
     public static final String TAG = "BaseFragment";
-    private Unbinder kq;
 
     public void bI() {
     }
@@ -51,7 +48,6 @@ public class BaseFragment extends Fragment implements i {
     }
 
     public void a(View view) {
-        this.kq = ButterKnife.bind(this, view);
         init();
         ca();
         bH();
@@ -77,11 +73,6 @@ public class BaseFragment extends Fragment implements i {
     @Override // androidx.fragment.app.Fragment
     public void onDestroyView() {
         super.onDestroyView();
-        if (this.kq != null) {
-            this.kq.unbind();
-        } else {
-            f.D(TAG, "unbinder = null");
-        }
     }
 
     @Override // com.picacomic.fregata.a_pkg.i

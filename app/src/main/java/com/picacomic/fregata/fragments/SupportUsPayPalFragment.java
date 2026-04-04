@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentSupportUsPayPalBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.adapters.SupportUsPayPalRecyclerViewAdapter;
@@ -26,14 +26,14 @@ public class SupportUsPayPalFragment extends BaseFragment implements k {
     String[] rU;
     String[] rV;
 
-    @BindView(R.id.recyclerView_support_us_paypal)
+    FragmentSupportUsPayPalBinding binding;
     RecyclerView recyclerView_paypal;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_support_us_pay_pal, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentSupportUsPayPalBinding.inflate(layoutInflater, viewGroup, false);
+        this.recyclerView_paypal = this.binding.recyclerViewSupportUsPaypal;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

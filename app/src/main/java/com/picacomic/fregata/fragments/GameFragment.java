@@ -9,7 +9,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentGameBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.activities.MainActivity;
@@ -36,17 +36,16 @@ public class GameFragment extends BaseFragment implements k {
     GameListRecyclerViewAdapter pj;
     ArrayList<GameListObject> pk;
 
-    @BindView(R.id.recyclerView_game)
+    FragmentGameBinding binding;
     RecyclerView recyclerView_games;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_game, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentGameBinding.inflate(layoutInflater, viewGroup, false);
+        this.recyclerView_games = this.binding.recyclerViewGame;
+        this.toolbar = this.binding.toolbar;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

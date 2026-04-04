@@ -9,8 +9,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.view.LayoutInflater;
+import com.picacomic.fregata.databinding.LayoutPopupWebviewBinding;
 import com.just.agentweb.AgentWeb;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.utils.e;
@@ -21,21 +21,13 @@ public class PopupWebview extends RelativeLayout {
     CountDownTimer countDownTimer;
     String defaultUrl;
 
-    @BindView(R.id.imageButton_popup_close)
+    LayoutPopupWebviewBinding binding;
     ImageButton imageButton_close;
-
-    @BindView(R.id.linearLayout_web)
     LinearLayout linearLayout_web;
     AgentWeb mAgentWeb;
     Context mContext;
-
-    @BindView(R.id.relativeLayout_popup_container)
     RelativeLayout relativeLayout_container;
-
-    @BindView(R.id.textView_popup_text)
     TextView textView_text;
-
-    @BindView(R.id.webview_popup)
     WebView webView_banner;
 
     public PopupWebview(Context context) {
@@ -58,8 +50,12 @@ public class PopupWebview extends RelativeLayout {
 
     public void init(Context context) {
         this.mContext = context;
-        inflate(context, R.layout.layout_popup_webview, this);
-        ButterKnife.bind(this);
+        this.binding = LayoutPopupWebviewBinding.inflate(LayoutInflater.from(context), this, true);
+        this.imageButton_close = this.binding.imageButtonPopupClose;
+        this.linearLayout_web = this.binding.linearLayoutWeb;
+        this.relativeLayout_container = this.binding.relativeLayoutPopupContainer;
+        this.textView_text = this.binding.textViewPopupText;
+        this.webView_banner = this.binding.webviewPopup;
         g.k(this.webView_banner);
         this.webView_banner.loadUrl(this.defaultUrl);
         this.imageButton_close.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.PopupWebview.1

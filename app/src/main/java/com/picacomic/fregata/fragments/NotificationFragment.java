@@ -7,7 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentNotificationBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.h;
 import com.picacomic.fregata.activities.MainActivity;
@@ -35,10 +35,8 @@ public class NotificationFragment extends BaseFragment implements h {
     NotificationRecyclerViewAdapter qj;
     Call<GeneralResponse<NotificationsResponse>> qk;
 
-    @BindView(R.id.recyclerView_notification)
+    FragmentNotificationBinding binding;
     RecyclerView recyclerView;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
     int totalPage;
 
@@ -49,9 +47,10 @@ public class NotificationFragment extends BaseFragment implements h {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_notification, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentNotificationBinding.inflate(layoutInflater, viewGroup, false);
+        this.recyclerView = this.binding.recyclerViewNotification;
+        this.toolbar = this.binding.toolbar;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

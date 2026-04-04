@@ -25,7 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentComicDetailBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.b;
 import com.picacomic.fregata.a_pkg.k;
@@ -62,42 +62,20 @@ import retrofit2.Response;
 public class ComicDetailFragment extends BaseFragment implements k {
     public static final String TAG = "ComicDetailFragment";
 
-    @BindView(R.id.button_comic_detail_more_episode)
+    FragmentComicDetailBinding binding;
     Button button_moreEpisode;
-
-    @BindView(R.id.button_comic_detail_start_read)
     Button button_startRead;
-
-    @BindView(R.id.coordinatorLayout)
     CoordinatorLayout coordinatorLayout;
     int episodeTotal;
     ArrayList<ComicEpisodeObject> ig;
-
-    @BindView(R.id.imageButton_comic_detail_bookmark)
     ImageButton imageButton_bookmark;
-
-    @BindView(R.id.imageButton_comic_detail_comment)
     ImageButton imageButton_comment;
-
-    @BindView(R.id.imageButton_comic_detail_description_height_control)
     ImageButton imageButton_descriptionHeightControl;
-
-    @BindView(R.id.imageButton_comic_detail_like)
     ImageButton imageButton_like;
-
-    @BindView(R.id.imageButton_comic_detail_tag_height_control)
     ImageButton imageButton_tagHeightControl;
-
-    @BindView(R.id.imageView_comic_detail_cover)
     ImageView imageView_cover;
-
-    @BindView(R.id.imageView_comic_detail_knight_avatar)
     ImageView imageView_knightAvatar;
-
-    @BindView(R.id.imageView_comic_detail_knight_verified)
     ImageView imageView_knightVerified;
-
-    @BindView(R.id.linearLayout_comic_detail_tags)
     LinearLayout linearLayout_tags;
     TransitionDrawable mS;
     TransitionDrawable mT;
@@ -110,8 +88,6 @@ public class ComicDetailFragment extends BaseFragment implements k {
     Call<GeneralResponse<ComicRandomListResponse>> nc;
     EpisodeRecyclerViewAdapter nd;
     ComicRecommendationRecyclerViewAdapter ne;
-
-    @BindView(R.id.scrollView)
     NestedScrollView nestedScrollView;
     ArrayList<ComicListObject> nf;
     Button[] ng;
@@ -119,46 +95,20 @@ public class ComicDetailFragment extends BaseFragment implements k {
     int nm;
     private ComicListObject nn;
     private ComicDetailObject np;
-
-    @BindView(R.id.recyclerView_comic_detail_episode)
     RecyclerView recyclerView_episode;
-
-    @BindView(R.id.recyclerView_recommendation)
     RecyclerView recyclerView_recommendation;
     int targetHeight;
     int targetWidth;
-
-    @BindView(R.id.textView_comic_detail_author)
     TextView textView_author;
-
-    @BindView(R.id.textView_comic_detail_category)
     TextView textView_categories;
-
-    @BindView(R.id.textView_comic_detail_comment_count)
     TextView textView_commentCount;
-
-    @BindView(R.id.textView_comic_detail_description)
     TextView textView_description;
-
-    @BindView(R.id.textView_comic_detail_knight)
     TextView textView_knight;
-
-    @BindView(R.id.textView_comic_detail_like_count)
     TextView textView_likeCount;
-
-    @BindView(R.id.textView_comic_detail_timestamp)
     TextView textView_timestamp;
-
-    @BindView(R.id.textView_comic_detail_title)
     TextView textView_title;
-
-    @BindView(R.id.textView_comic_detail_translate)
     TextView textView_translate;
-
-    @BindView(R.id.textView_comic_detail_view_count)
     TextView textView_viewCount;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
     boolean kE = false;
     boolean nh = false;
@@ -186,10 +136,36 @@ public class ComicDetailFragment extends BaseFragment implements k {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_comic_detail, viewGroup, false);
+        this.binding = FragmentComicDetailBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_moreEpisode = this.binding.buttonComicDetailMoreEpisode;
+        this.button_startRead = this.binding.buttonComicDetailStartRead;
+        this.coordinatorLayout = this.binding.coordinatorLayout;
+        this.imageButton_bookmark = this.binding.imageButtonComicDetailBookmark;
+        this.imageButton_comment = this.binding.imageButtonComicDetailComment;
+        this.imageButton_descriptionHeightControl = this.binding.imageButtonComicDetailDescriptionHeightControl;
+        this.imageButton_like = this.binding.imageButtonComicDetailLike;
+        this.imageButton_tagHeightControl = this.binding.imageButtonComicDetailTagHeightControl;
+        this.imageView_cover = this.binding.imageViewComicDetailCover;
+        this.imageView_knightAvatar = this.binding.imageViewComicDetailKnightAvatar;
+        this.imageView_knightVerified = this.binding.imageViewComicDetailKnightVerified;
+        this.linearLayout_tags = this.binding.linearLayoutComicDetailTags;
+        this.nestedScrollView = this.binding.scrollView;
+        this.recyclerView_episode = this.binding.recyclerViewComicDetailEpisode;
+        this.recyclerView_recommendation = this.binding.recyclerViewRecommendation;
+        this.textView_author = this.binding.textViewComicDetailAuthor;
+        this.textView_categories = this.binding.textViewComicDetailCategory;
+        this.textView_commentCount = this.binding.textViewComicDetailCommentCount;
+        this.textView_description = this.binding.textViewComicDetailDescription;
+        this.textView_knight = this.binding.textViewComicDetailKnight;
+        this.textView_likeCount = this.binding.textViewComicDetailLikeCount;
+        this.textView_timestamp = this.binding.textViewComicDetailTimestamp;
+        this.textView_title = this.binding.textViewComicDetailTitle;
+        this.textView_translate = this.binding.textViewComicDetailTranslate;
+        this.textView_viewCount = this.binding.textViewComicDetailViewCount;
+        this.toolbar = this.binding.toolbar;
         setHasOptionsMenu(true);
-        a(viewInflate);
-        return viewInflate;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.Fragment

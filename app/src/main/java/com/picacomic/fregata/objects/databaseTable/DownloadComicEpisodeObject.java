@@ -1,10 +1,10 @@
 package com.picacomic.fregata.objects.databaseTable;
 
-import com.orm.d;
+import com.orm.SugarRecord;
 import com.picacomic.fregata.objects.ComicEpisodeObject;
 
 /* JADX INFO: loaded from: classes.dex */
-public class DownloadComicEpisodeObject extends d {
+public class DownloadComicEpisodeObject extends SugarRecord {
     String comicId;
     String episodeId;
     int episodeOrder;

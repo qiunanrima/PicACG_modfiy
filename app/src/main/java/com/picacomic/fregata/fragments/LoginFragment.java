@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentLoginBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.b.c;
@@ -46,28 +46,14 @@ import retrofit2.Response;
 public class LoginFragment extends BaseFragment {
     public static final String TAG = "LoginFragment";
 
-    @BindView(R.id.button_login_forget_password)
+    FragmentLoginBinding binding;
     Button button_forgotPassword;
-
-    @BindView(R.id.button_login_login_button)
     Button button_login;
-
-    @BindView(R.id.button_login_register)
     Button button_register;
-
-    @BindView(R.id.button_login_resend_activation)
     Button button_resendActivation;
-
-    @BindView(R.id.editText_login_email)
     EditText editText_email;
-
-    @BindView(R.id.editText_login_password)
     EditText editText_password;
-
-    @BindView(R.id.imageView_login_pica_logo)
     ImageView imageView_logo;
-
-    @BindView(R.id.linearLayout_login_fragment)
     LinearLayout linearLayout_loginForm;
     EditText pT;
     Call<GeneralResponse<SignInResponse>> pU;
@@ -81,9 +67,16 @@ public class LoginFragment extends BaseFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_login, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentLoginBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_forgotPassword = this.binding.buttonLoginForgetPassword;
+        this.button_login = this.binding.buttonLoginLoginButton;
+        this.button_register = this.binding.buttonLoginRegister;
+        this.button_resendActivation = this.binding.buttonLoginResendActivation;
+        this.editText_email = this.binding.editTextLoginEmail;
+        this.editText_password = this.binding.editTextLoginPassword;
+        this.imageView_logo = this.binding.imageViewLoginPicaLogo;
+        this.linearLayout_loginForm = this.binding.linearLayoutLoginFragment;
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.Fragment

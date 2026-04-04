@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.ListAdapter;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentComicViewerListBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.c;
 import com.picacomic.fregata.a_pkg.d;
@@ -30,7 +30,7 @@ public class ComicViewerListFragment extends BaseFragment implements c {
     ArrayList<ComicPageObject> f4if;
     LinearLayoutManager jQ;
 
-    @BindView(R.id.listView_comic_viewer)
+    FragmentComicViewerListBinding binding;
     ZoomableListView listView_comic_viewer;
     d nV;
     a ob;
@@ -44,12 +44,13 @@ public class ComicViewerListFragment extends BaseFragment implements c {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_comic_viewer_list, viewGroup, false);
+        this.binding = FragmentComicViewerListBinding.inflate(layoutInflater, viewGroup, false);
+        this.listView_comic_viewer = this.binding.listViewComicViewer;
         if (getActivity() instanceof ComicViewerActivity) {
             this.nV = cX();
-            a(viewInflate);
+            a(this.binding.getRoot());
         }
-        return viewInflate;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -91,7 +92,9 @@ public class ComicViewerListFragment extends BaseFragment implements c {
                 if (this.oc != 0 && this.od > 1) {
                     ComicViewerListFragment.this.currentPage = (this.oc + this.od) - 1;
                 }
-                ComicViewerListFragment.this.nV.r(ComicViewerListFragment.this.currentPage);
+                if (ComicViewerListFragment.this.nV != null) {
+                    ComicViewerListFragment.this.nV.r(ComicViewerListFragment.this.currentPage);
+                }
                 f.D(ComicViewerListFragment.TAG, "Current Page = " + ComicViewerListFragment.this.currentPage);
             }
         });

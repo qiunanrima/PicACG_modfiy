@@ -8,7 +8,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentApkVersionListBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.activities.MainActivity;
@@ -35,10 +35,8 @@ public class ApkVersionListFragment extends BaseFragment implements k {
     Call<GeneralResponse<ApplicationsResponse>> kn;
     int page;
 
-    @BindView(R.id.recyclerView_apk_version_list)
+    FragmentApkVersionListBinding binding;
     RecyclerView recyclerView_apkVersions;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
     int totalPage;
 
@@ -50,9 +48,11 @@ public class ApkVersionListFragment extends BaseFragment implements k {
     @Override // androidx.fragment.app.Fragment
     @Nullable
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_apk_version_list, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentApkVersionListBinding.inflate(layoutInflater, viewGroup, false);
+        this.recyclerView_apkVersions = this.binding.recyclerViewApkVersionList;
+        this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

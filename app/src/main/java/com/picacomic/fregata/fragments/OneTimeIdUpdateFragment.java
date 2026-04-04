@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentOneTimeIdUpdateBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.b.c;
@@ -31,27 +31,24 @@ import retrofit2.Response;
 public class OneTimeIdUpdateFragment extends BaseFragment {
     public static final String TAG = "OneTimeIdUpdateFragment";
 
-    @BindView(R.id.button_id_update)
+    FragmentOneTimeIdUpdateBinding binding;
     Button button_update;
-
-    @BindView(R.id.editText_id_email)
     EditText editText_email;
-
-    @BindView(R.id.editText_id_username)
     EditText editText_username;
     UserProfileObject jW;
     Call<GeneralResponse<UserProfileResponse>> jX;
     Call<GeneralResponse> qn;
     boolean qo;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_one_time_id_update, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentOneTimeIdUpdateBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_update = this.binding.buttonIdUpdate;
+        this.editText_email = this.binding.editTextIdEmail;
+        this.editText_username = this.binding.editTextIdUsername;
+        this.toolbar = this.binding.toolbar;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

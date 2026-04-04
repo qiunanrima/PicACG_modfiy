@@ -2,11 +2,6 @@ package com.picacomic.fregata.fragments;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,8 +15,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.BindViews;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
@@ -30,6 +30,7 @@ import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.adapters.ComicListRecyclerViewAdapter;
 import com.picacomic.fregata.b.d;
 import com.picacomic.fregata.c.c;
+import com.picacomic.fregata.databinding.FragmentComicListBinding;
 import com.picacomic.fregata.objects.CategoryObject;
 import com.picacomic.fregata.objects.ComicListObject;
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject;
@@ -43,8 +44,10 @@ import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
 import com.picacomic.fregata.utils.views.AlertDialogCenter;
 import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,22 +59,15 @@ public class ComicListFragment extends BaseFragment implements View.OnClickListe
     public static final int[] nz = {R.drawable.button_filter_forbidden_bg, R.drawable.button_filter_japanese_bg, R.drawable.button_filter_bl_bg, R.drawable.button_filter_heavy_bg, R.drawable.button_filter_pure_love_bg, R.drawable.button_filter_fake_girl_bg, R.drawable.button_filter_futari_bg, R.drawable.button_filter_webtoon_bg};
     private String author;
 
-    @BindViews({R.id.button_comic_list_filter_forbidden, R.id.button_comic_list_filter_japanese, R.id.button_comic_list_filter_bl, R.id.button_comic_list_filter_heavy, R.id.button_comic_list_filter_pure_love, R.id.button_comic_list_filter_fake_girl, R.id.button_comic_list_filter_futari, R.id.button_comic_list_filter_webtoon})
+    FragmentComicListBinding binding;
     public Button[] buttons_filters;
-
-    @BindView(R.id.coordinatorLayout)
     CoordinatorLayout coordinatorLayout;
     private String creatorId;
     private String creatorName;
 
-    @BindView(R.id.editText_comic_list_current_page)
     EditText editText_currentPage;
-
-    @BindView(R.id.frameLayout_comic_list_no_comics)
     FrameLayout frameLayout_noComics;
     int hP;
-
-    @BindView(R.id.imageView_comic_list_empty)
     ImageView imageView_empty;
     boolean kE;
     Call<GeneralResponse<ComicListResponse>> nB;
@@ -92,14 +88,9 @@ public class ComicListFragment extends BaseFragment implements View.OnClickListe
     boolean nQ;
     int page;
 
-    @BindView(R.id.recyclerView_comic_list)
     RecyclerView recyclerView_comicList;
     private String tags;
-
-    @BindView(R.id.textView_comic_list_total_page)
     TextView textView_totalPage;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
     int totalPage;
     public boolean[] nA = {false, false, false, false, false, false, false, false};
@@ -141,10 +132,18 @@ public class ComicListFragment extends BaseFragment implements View.OnClickListe
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_comic_list, viewGroup, false);
+        this.binding = FragmentComicListBinding.inflate(layoutInflater, viewGroup, false);
+        this.coordinatorLayout = this.binding.coordinatorLayout;
+        this.editText_currentPage = this.binding.editTextComicListCurrentPage;
+        this.frameLayout_noComics = this.binding.frameLayoutComicListNoComics;
+        this.imageView_empty = this.binding.imageViewComicListEmpty;
+        this.recyclerView_comicList = this.binding.recyclerViewComicList;
+        this.textView_totalPage = this.binding.textViewComicListTotalPage;
+        this.toolbar = this.binding.toolbar;
+        this.buttons_filters = new Button[]{this.binding.buttonComicListFilterForbidden, this.binding.buttonComicListFilterJapanese, this.binding.buttonComicListFilterBl, this.binding.buttonComicListFilterHeavy, this.binding.buttonComicListFilterPureLove, this.binding.buttonComicListFilterFakeGirl, this.binding.buttonComicListFilterFutari, this.binding.buttonComicListFilterWebtoon};
         setHasOptionsMenu(true);
-        a(viewInflate);
-        return viewInflate;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.Fragment
@@ -294,7 +293,7 @@ public class ComicListFragment extends BaseFragment implements View.OnClickListe
                 this.buttons_filters[i].setOnClickListener(this);
             }
         } else {
-            Toast.makeText(getActivity(), "NULL!!!", 0).show();
+            Toast.makeText(getActivity(), "NULL!!!", Toast.LENGTH_SHORT).show();
         }
         this.recyclerView_comicList.addOnScrollListener(new RecyclerView.OnScrollListener() { // from class: com.picacomic.fregata.fragments.ComicListFragment.9
             @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
@@ -435,9 +434,9 @@ public class ComicListFragment extends BaseFragment implements View.OnClickListe
         if (isAdded()) {
             if (this.nE == null || (this.nE != null && this.nE.size() == 0)) {
                 Picasso.with(getActivity()).load(R.drawable.icon_empty).into(this.imageView_empty);
-                this.frameLayout_noComics.setVisibility(0);
+                this.frameLayout_noComics.setVisibility(View.VISIBLE);
             } else {
-                this.frameLayout_noComics.setVisibility(8);
+                this.frameLayout_noComics.setVisibility(View.GONE);
             }
             if (this.nI != null && this.nI.equals("CATEGORY_RECENT_VIEW")) {
                 long jCount = DbComicViewRecordObject.count(DbComicViewRecordObject.class);

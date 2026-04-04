@@ -5,8 +5,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemSupportUsPaypalRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.fragments.SupportUsPayPalFragment;
@@ -15,25 +14,22 @@ import com.picacomic.fregata.fragments.SupportUsPayPalFragment;
 public class SupportUsPayPalViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     public static final String TAG = SupportUsPayPalFragment.class.getSimpleName();
 
-    @BindView(R.id.imageView_support_us_paypal_recycler_view_cell)
+    ItemSupportUsPaypalRecyclerViewCellBinding binding;
     public ImageView imageView_image;
     public k je;
-
-    @BindView(R.id.textView_support_us_paypal_recycler_view_cell_description)
     public TextView textView_description;
-
-    @BindView(R.id.textView_support_us_paypal_recycler_view_cell_price)
     public TextView textView_price;
-
-    @BindView(R.id.textView_support_us_paypal_recycler_view_cell_price_unit)
     public TextView textView_priceUnit;
-
-    @BindView(R.id.textView_support_us_paypal_recycler_view_cell_title)
     public TextView textView_title;
 
     public SupportUsPayPalViewHolder(View view, k kVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemSupportUsPaypalRecyclerViewCellBinding.bind(view);
+        this.imageView_image = this.binding.imageViewSupportUsPaypalRecyclerViewCell;
+        this.textView_description = this.binding.textViewSupportUsPaypalRecyclerViewCellDescription;
+        this.textView_price = this.binding.textViewSupportUsPaypalRecyclerViewCellPrice;
+        this.textView_priceUnit = this.binding.textViewSupportUsPaypalRecyclerViewCellPriceUnit;
+        this.textView_title = this.binding.textViewSupportUsPaypalRecyclerViewCellTitle;
         this.je = kVar;
         view.setOnClickListener(this);
     }

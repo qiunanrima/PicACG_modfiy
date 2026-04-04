@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentProfileEditBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.b.c;
 import com.picacomic.fregata.b.d;
@@ -28,27 +28,15 @@ import retrofit2.Response;
 public class ProfileEditFragment extends BaseImagePickFragment {
     public static final String TAG = "ProfileEditFragment";
 
-    @BindView(R.id.button_profile_update)
+    FragmentProfileEditBinding binding;
     Button button_update;
-
-    @BindView(R.id.editText_profile_slogan)
     EditText editText_slogan;
-
-    @BindView(R.id.imageView_profile_avatar)
     CircleImageView imageView_avatar;
     UserProfileObject jW;
     Call<RegisterResponse> qO;
-
-    @BindView(R.id.textView_profile_birth)
     TextView textView_birth;
-
-    @BindView(R.id.textView_profile_email)
     TextView textView_email;
-
-    @BindView(R.id.textView_profile_name)
     TextView textView_name;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
@@ -70,9 +58,15 @@ public class ProfileEditFragment extends BaseImagePickFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_profile_edit, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentProfileEditBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_update = this.binding.buttonProfileUpdate;
+        this.editText_slogan = this.binding.editTextProfileSlogan;
+        this.imageView_avatar = this.binding.imageViewProfileAvatar;
+        this.textView_birth = this.binding.textViewProfileBirth;
+        this.textView_email = this.binding.textViewProfileEmail;
+        this.textView_name = this.binding.textViewProfileName;
+        this.toolbar = this.binding.toolbar;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentLeaderboardKnightBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.adapters.LeaderboardKnightRecyclerViewAdapter;
@@ -30,14 +30,14 @@ public class LeaderboardKnightFragment extends BaseFragment implements k {
     LeaderboardKnightRecyclerViewAdapter pE;
     Call<GeneralResponse<LeaderboardKnightResponse>> pF;
 
-    @BindView(R.id.recyclerView_leaderboard_knight)
+    FragmentLeaderboardKnightBinding binding;
     RecyclerView recyclerView_knight;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_leaderboard_knight, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentLeaderboardKnightBinding.inflate(layoutInflater, viewGroup, false);
+        this.recyclerView_knight = this.binding.recyclerViewLeaderboardKnight;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment

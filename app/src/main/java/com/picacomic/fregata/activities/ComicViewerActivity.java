@@ -37,8 +37,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ActivityComicViewerBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.d;
 import com.picacomic.fregata.adapters.c;
@@ -69,80 +68,35 @@ public class ComicViewerActivity extends BaseActivity implements d {
     public static final String TAG = "ComicViewerActivity";
     public static int hq = 40;
 
-    @BindView(R.id.button_comic_viewer_auto_paging)
+    ActivityComicViewerBinding binding;
     Button button_autoPaging;
-
-    @BindView(R.id.button_comic_viewer_comment)
     Button button_comment;
-
-    @BindView(R.id.button_comic_viewer_dialog_auto_paging_start)
     Button button_dialogAutoPagingStart;
-
-    @BindView(R.id.button_comic_viewer_download)
     Button button_download;
-
-    @BindView(R.id.button_comic_viewer_hide)
     Button button_hide;
-
-    @BindView(R.id.button_comic_viewer_hint)
     Button button_hint;
-
-    @BindView(R.id.button_comic_viewer_next_episode)
     Button button_nextEpisode;
-
-    @BindView(R.id.button_comic_viewer_next_page_bottom)
     Button button_nextPageBottom;
-
-    @BindView(R.id.button_comic_viewer_next_page_right)
     Button button_nextPageRight;
-
-    @BindView(R.id.button_comic_viewer_night_mode)
     Button button_nightMode;
-
-    @BindView(R.id.button_comic_viewer_panel)
     Button button_panel;
-
-    @BindView(R.id.button_comic_viewer_panel_left_corner)
     Button button_panelLeftCorner;
-
-    @BindView(R.id.button_comic_viewer_previous_episode)
     Button button_previousEpisode;
-
-    @BindView(R.id.button_comic_viewer_previous_page)
     Button button_previousPage;
-
-    @BindView(R.id.button_comic_viewer_screen_orientation)
     Button button_screenOrientation;
-
-    @BindView(R.id.button_comic_viewer_scroll_orientation)
     Button button_scrollOrientation;
-
-    @BindView(R.id.button_comic_viewer_select_episode)
     Button button_selectEpisode;
-
-    @BindView(R.id.button_comic_viewer_setting)
     Button button_setting;
-
-    @BindView(R.id.button_comic_viewer_share)
     Button button_share;
-
-    @BindView(R.id.button_comic_viewer_two_page_view_mode)
     Button button_twoPageViewMode;
-
-    @BindView(R.id.checkBox_comic_viewer_system_brightness)
     CheckBox checkBox_brightnessSystem;
     public String comicId;
     int currentPage;
     public int episodeOrder;
     public int episodeTotal;
 
-    @BindView(R.id.frameLayout_comic_viewer_gesture_area)
     FrameLayout frameLayout_gestureArea;
-
-    @BindView(R.id.frameLayout_comic_viewer_night_mode_mask)
     FrameLayout frameLayout_nightModeMask;
-
-    @BindView(R.id.gridView_comic_viewer_dialog_select_episode)
     GridView gridView_episodeDialog;
     c hA;
     boolean hB;
@@ -187,55 +141,24 @@ public class ComicViewerActivity extends BaseActivity implements d {
     public ArrayList<ComicPageObject> f1if;
     ArrayList<ComicEpisodeObject> ig;
 
-    @BindView(R.id.imageButton_comic_viewer_back)
     ImageButton imageButton_back;
-
-    @BindView(R.id.linearLayout_comic_viewer_bottom_panel)
     LinearLayout linearLayout_bottomPanel;
-
-    @BindView(R.id.linearLayout_comic_viewer_dialog_auto_paging)
     LinearLayout linearLayout_dialogAutoPaging;
-
-    @BindView(R.id.linearLayout_comic_viewer_horizontal_paging_scrollbar)
     LinearLayout linearLayout_horizontalPagingScrollbar;
-
-    @BindView(R.id.linearLayout_comic_viewer_right_panel)
     LinearLayout linearLayout_rightPanel;
-
-    @BindView(R.id.linearLayout_comic_viewer_vertical_paging_scrollbar)
     LinearLayout linearLayout_verticalPagingScrollbar;
-
-    @BindView(R.id.relativeLayout_comic_viewer_left_panel)
     RelativeLayout relativeLayout_leftPanel;
-
-    @BindView(R.id.relativeLayout_comic_viewer_toolbar)
     RelativeLayout relativeLayout_toolbar;
 
-    @BindView(R.id.seekBar_comic_viewer_dialog_auto_paging)
     SeekBar seekBar_dialogAutoPaging;
-
-    @BindView(R.id.seekBar_comic_viewer_horizontal_page)
     SeekBar seekBar_horizontalPaging;
-
-    @BindView(R.id.seekBar_comic_viewer_vertical_page)
     SeekBar seekBar_verticalPaging;
 
-    @BindView(R.id.textView_comic_viewer_dialog_auto_paging_title)
     TextView textView_dialogAutoPagingTitle;
-
-    @BindView(R.id.textView_comic_viewer_horizontal_page)
     TextView textView_horizontalPage;
-
-    @BindView(R.id.textView_comic_viewer_page)
     TextView textView_page;
-
-    @BindView(R.id.textView_comic_viewer_title)
     TextView textView_title;
-
-    @BindView(R.id.textView_comic_viewer_vertical_page)
     TextView textView_verticalPage;
-
-    @BindView(R.id.verticalSeekBar_comic_viewer_brightness)
     VerticalSeekBar verticalSeekBar_brightness;
     String hW = "不明";
     private BroadcastReceiver ih = new BroadcastReceiver() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.1
@@ -257,9 +180,52 @@ public class ComicViewerActivity extends BaseActivity implements d {
     @Override // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.activity_comic_viewer);
-        ButterKnife.bind(this);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        this.binding = ActivityComicViewerBinding.inflate(getLayoutInflater());
+        setContentView(this.binding.getRoot());
+        
+        this.button_autoPaging = findViewById(R.id.button_comic_viewer_auto_paging);
+        this.button_comment = findViewById(R.id.button_comic_viewer_comment);
+        this.button_dialogAutoPagingStart = findViewById(R.id.button_comic_viewer_dialog_auto_paging_start);
+        this.button_download = findViewById(R.id.button_comic_viewer_download);
+        this.button_hide = findViewById(R.id.button_comic_viewer_hide);
+        this.button_hint = findViewById(R.id.button_comic_viewer_hint);
+        this.button_nextEpisode = findViewById(R.id.button_comic_viewer_next_episode);
+        this.button_nextPageBottom = findViewById(R.id.button_comic_viewer_next_page_bottom);
+        this.button_nextPageRight = findViewById(R.id.button_comic_viewer_next_page_right);
+        this.button_nightMode = findViewById(R.id.button_comic_viewer_night_mode);
+        this.button_panel = findViewById(R.id.button_comic_viewer_panel);
+        this.button_panelLeftCorner = findViewById(R.id.button_comic_viewer_panel_left_corner);
+        this.button_previousEpisode = findViewById(R.id.button_comic_viewer_previous_episode);
+        this.button_previousPage = findViewById(R.id.button_comic_viewer_previous_page);
+        this.button_screenOrientation = findViewById(R.id.button_comic_viewer_screen_orientation);
+        this.button_scrollOrientation = findViewById(R.id.button_comic_viewer_scroll_orientation);
+        this.button_selectEpisode = findViewById(R.id.button_comic_viewer_select_episode);
+        this.button_setting = findViewById(R.id.button_comic_viewer_setting);
+        this.button_share = findViewById(R.id.button_comic_viewer_share);
+        this.button_twoPageViewMode = findViewById(R.id.button_comic_viewer_two_page_view_mode);
+        this.checkBox_brightnessSystem = findViewById(R.id.checkBox_comic_viewer_system_brightness);
+        this.frameLayout_gestureArea = findViewById(R.id.frameLayout_comic_viewer_gesture_area);
+        this.frameLayout_nightModeMask = this.binding.frameLayoutComicViewerNightModeMask;
+        this.gridView_episodeDialog = this.binding.gridViewComicViewerDialogSelectEpisode;
+        this.imageButton_back = findViewById(R.id.imageButton_comic_viewer_back);
+        this.linearLayout_bottomPanel = findViewById(R.id.linearLayout_comic_viewer_bottom_panel);
+        this.linearLayout_dialogAutoPaging = findViewById(R.id.linearLayout_comic_viewer_dialog_auto_paging);
+        this.linearLayout_horizontalPagingScrollbar = findViewById(R.id.linearLayout_comic_viewer_horizontal_paging_scrollbar);
+        this.linearLayout_rightPanel = findViewById(R.id.linearLayout_comic_viewer_right_panel);
+        this.linearLayout_verticalPagingScrollbar = findViewById(R.id.linearLayout_comic_viewer_vertical_paging_scrollbar);
+        this.relativeLayout_leftPanel = findViewById(R.id.relativeLayout_comic_viewer_left_panel);
+        this.relativeLayout_toolbar = findViewById(R.id.relativeLayout_comic_viewer_toolbar);
+        this.seekBar_dialogAutoPaging = findViewById(R.id.seekBar_comic_viewer_dialog_auto_paging);
+        this.seekBar_horizontalPaging = findViewById(R.id.seekBar_comic_viewer_horizontal_page);
+        this.seekBar_verticalPaging = findViewById(R.id.seekBar_comic_viewer_vertical_page);
+        this.textView_dialogAutoPagingTitle = findViewById(R.id.textView_comic_viewer_dialog_auto_paging_title);
+        this.textView_horizontalPage = findViewById(R.id.textView_comic_viewer_horizontal_page);
+        this.textView_page = this.binding.textViewComicViewerPage;
+        this.textView_title = findViewById(R.id.textView_comic_viewer_title);
+        this.textView_verticalPage = findViewById(R.id.textView_comic_viewer_vertical_page);
+        this.verticalSeekBar_brightness = findViewById(R.id.verticalSeekBar_comic_viewer_brightness);
+
+        setSupportActionBar(findViewById(R.id.toolbar));
         if (bundle == null) {
             if (e.w(this)) {
                 getSupportFragmentManager().beginTransaction().add(R.id.container, new ComicViewerListFragment(), ComicViewerListFragment.TAG).commit();

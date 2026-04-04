@@ -24,7 +24,7 @@ import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentGameDetailBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.activities.MainActivity;
@@ -52,62 +52,24 @@ import retrofit2.Response;
 public class GameDetailFragment extends BaseFragment implements k {
     public static final String TAG = "GameDetailFragment";
 
-    @BindView(R.id.appbar)
+    FragmentGameDetailBinding binding;
     AppBarLayout appBarLayout;
-
-    @BindView(R.id.button_game_detail_download)
     Button button_download;
-
-    @BindView(R.id.collapsingToolbarLayout)
     CollapsingToolbarLayout collapsingToolbarLayout;
-
-    @BindView(R.id.frameLayout_game_detail_banner)
     FrameLayout frameLayout_banner;
-    private String gameId;
-
-    @BindView(R.id.imageButton_game_detail_close_popup)
     ImageButton imageButton_closePopup;
-
-    @BindView(R.id.imageButton_game_detail_comment)
     ImageButton imageButton_comment;
-
-    @BindView(R.id.imageButton_game_detail_description_height_control)
     ImageButton imageButton_descriptionHeightControl;
-
-    @BindView(R.id.imageButton_game_detail_gift)
     ImageButton imageButton_gift;
-
-    @BindView(R.id.imageButton_game_detail_like)
     ImageButton imageButton_like;
-
-    @BindView(R.id.imageButton_game_detail_play)
     ImageButton imageButton_playVideo;
-
-    @BindView(R.id.imageButton_game_detail_version_description_height_control)
     ImageButton imageButton_versionDescriptionHeightControl;
-
-    @BindView(R.id.imageView_game_detail_adult)
     ImageView imageView_adult;
-
-    @BindView(R.id.imageView_game_detail_android)
     ImageView imageView_android;
-
-    @BindView(R.id.imageView_game_detail_banner)
     ImageView imageView_banner;
-
-    @BindView(R.id.imageView_game_detail_icon)
     ImageView imageView_icon;
-
-    @BindView(R.id.imageView_game_detail_ios)
     ImageView imageView_ios;
-
-    @BindView(R.id.imageView_game_detail_recommend)
     ImageView imageView_recommend;
-    TransitionDrawable mT;
-    Animation mU;
-    Animation mV;
-
-    @BindView(R.id.nestedScrollView_game_detail)
     NestedScrollView nestedScrollView;
     Call<GeneralResponse<GameDetailResponse>> oS;
     Call<GeneralResponse<ActionResponse>> oT;
@@ -117,53 +79,30 @@ public class GameDetailFragment extends BaseFragment implements k {
     ArrayList<ThumbnailObject> oX;
     ThumbnailObject oY;
     private GameDetailObject oZ;
-
-    @BindView(R.id.recyclerView_game_detail_screenshots)
     SnapRecyclerView recyclerView_screenShots;
-
-    @BindView(R.id.relativeLayout_game_detail_popup)
     RelativeLayout relativeLayout_popup;
-    int screenWidth;
-
-    @BindView(R.id.textView_game_detail_comment_count)
     TextView textView_commentCount;
-
-    @BindView(R.id.textView_game_detail_description)
     TextView textView_description;
-
-    @BindView(R.id.textView_game_detail_downloaded)
     TextView textView_download;
-
-    @BindView(R.id.textView_game_detail_size)
     TextView textView_gameSize;
-
-    @BindView(R.id.textView_game_detail_like_count)
     TextView textView_likeCount;
-
-    @BindView(R.id.textView_game_detail_publisher)
     TextView textView_publisher;
-
-    @BindView(R.id.textView_game_detail_title)
     TextView textView_title;
-
-    @BindView(R.id.textView_game_detail_version_title)
     TextView textView_version;
-
-    @BindView(R.id.textView_game_detail_version_description)
     TextView textView_versionDescription;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
-
-    @BindView(R.id.videoView_game_detail)
     VideoView videoView;
-
-    @BindView(R.id.viewPager_game_detail_screenShot)
     ViewPager viewPager_screenShots;
     boolean isLiked = false;
     boolean pa = false;
     boolean nh = false;
     boolean pb = false;
+    // Missing variables for ViewBinding migration
+    String gameId;
+    Animation mU;
+    Animation mV;
+    int screenWidth;
+    TransitionDrawable mT;
 
     public static GameDetailFragment ad(String str) {
         GameDetailFragment gameDetailFragment = new GameDetailFragment();
@@ -183,9 +122,40 @@ public class GameDetailFragment extends BaseFragment implements k {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_game_detail, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentGameDetailBinding.inflate(layoutInflater, viewGroup, false);
+        this.appBarLayout = this.binding.appbar;
+        this.button_download = this.binding.buttonGameDetailDownload;
+        this.collapsingToolbarLayout = this.binding.collapsingToolbarLayout;
+        this.frameLayout_banner = this.binding.frameLayoutGameDetailBanner;
+        this.imageButton_closePopup = this.binding.imageButtonGameDetailClosePopup;
+        this.imageButton_comment = this.binding.imageButtonGameDetailComment;
+        this.imageButton_descriptionHeightControl = this.binding.imageButtonGameDetailDescriptionHeightControl;
+        this.imageButton_gift = this.binding.imageButtonGameDetailGift;
+        this.imageButton_like = this.binding.imageButtonGameDetailLike;
+        this.imageButton_playVideo = this.binding.imageButtonGameDetailPlay;
+        this.imageButton_versionDescriptionHeightControl = this.binding.imageButtonGameDetailVersionDescriptionHeightControl;
+        this.imageView_adult = this.binding.imageViewGameDetailAdult;
+        this.imageView_android = this.binding.imageViewGameDetailAndroid;
+        this.imageView_banner = this.binding.imageViewGameDetailBanner;
+        this.imageView_icon = this.binding.imageViewGameDetailIcon;
+        this.imageView_ios = this.binding.imageViewGameDetailIos;
+        this.imageView_recommend = this.binding.imageViewGameDetailRecommend;
+        this.nestedScrollView = this.binding.nestedScrollViewGameDetail;
+        this.recyclerView_screenShots = this.binding.recyclerViewGameDetailScreenshots;
+        this.relativeLayout_popup = this.binding.relativeLayoutGameDetailPopup;
+        this.textView_commentCount = this.binding.textViewGameDetailCommentCount;
+        this.textView_description = this.binding.textViewGameDetailDescription;
+        this.textView_download = this.binding.textViewGameDetailDownloaded;
+        this.textView_gameSize = this.binding.textViewGameDetailSize;
+        this.textView_likeCount = this.binding.textViewGameDetailLikeCount;
+        this.textView_publisher = this.binding.textViewGameDetailPublisher;
+        this.textView_title = this.binding.textViewGameDetailTitle;
+        this.textView_version = this.binding.textViewGameDetailVersionTitle;
+        this.textView_versionDescription = this.binding.textViewGameDetailVersionDescription;
+        this.toolbar = this.binding.toolbar;
+        this.videoView = this.binding.videoViewGameDetail;
+        this.viewPager_screenShots = this.binding.viewPagerGameDetailScreenShot;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

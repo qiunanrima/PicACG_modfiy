@@ -10,7 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentCustomPicaAppContainerBinding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
@@ -26,7 +26,7 @@ import java.util.List;
 public class CustomPicaAppContainerFragment extends BaseFragment {
     public static final String TAG = "CustomPicaAppContainerFragment";
 
-    @BindView(R.id.fab_add)
+    FragmentCustomPicaAppContainerBinding binding;
     FloatingActionButton fab_add;
     Gson gson;
     RelativeLayout.LayoutParams iI;
@@ -41,7 +41,6 @@ public class CustomPicaAppContainerFragment extends BaseFragment {
     String[] oO;
     String[] oP;
 
-    @BindView(R.id.viewPager_custom_pica_app)
     ViewPager viewPage_picaApp;
 
     @Override // com.picacomic.fregata.fragments.BaseFragment, com.picacomic.fregata.a_pkg.i
@@ -50,9 +49,11 @@ public class CustomPicaAppContainerFragment extends BaseFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_custom_pica_app_container, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentCustomPicaAppContainerBinding.inflate(layoutInflater, viewGroup, false);
+        this.fab_add = this.binding.fabAdd;
+        this.viewPage_picaApp = this.binding.viewPagerCustomPicaApp;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

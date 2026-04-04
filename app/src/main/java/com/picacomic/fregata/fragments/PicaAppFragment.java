@@ -2,7 +2,6 @@ package com.picacomic.fregata.fragments;
 
 import android.os.Build;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +9,16 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
-import butterknife.BindView;
+
+import androidx.appcompat.widget.Toolbar;
+
 import com.just.agentweb.AgentWeb;
 import com.just.agentweb.DefaultWebClient;
 import com.picacomic.fregata.MyApplication;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.j;
 import com.picacomic.fregata.activities.MainActivity;
+import com.picacomic.fregata.databinding.FragmentPicaAppBinding;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
@@ -26,14 +28,12 @@ import com.picacomic.fregata.utils.views.AlertDialogCenter;
 public class PicaAppFragment extends BaseFragment implements j {
     public static final String TAG = "PicaAppFragment";
 
-    @BindView(R.id.linearLayout_web)
+    FragmentPicaAppBinding binding;
     LinearLayout linearLayoutWeb;
     AgentWeb mAgentWeb;
     String qw;
     String qx;
     String qy;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // com.picacomic.fregata.a_pkg.j
@@ -70,9 +70,10 @@ public class PicaAppFragment extends BaseFragment implements j {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_pica_app, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentPicaAppBinding.inflate(layoutInflater, viewGroup, false);
+        this.linearLayoutWeb = this.binding.linearLayoutWeb;
+        this.toolbar = this.binding.toolbar;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -92,8 +93,12 @@ public class PicaAppFragment extends BaseFragment implements j {
     @Override // com.picacomic.fregata.fragments.BaseFragment
     public void bH() {
         super.bH();
-        this.toolbar.setVisibility(8);
-        this.mAgentWeb = AgentWeb.a(this).a(this.linearLayoutWeb, new LinearLayout.LayoutParams(-1, -1)).K().a(DefaultWebClient.OpenOtherPageWays.eq).a(new WebViewClient() { // from class: com.picacomic.fregata.fragments.PicaAppFragment.1
+        this.toolbar.setVisibility(View.GONE);
+        this.mAgentWeb = AgentWeb.with(this)
+                .setAgentWebParent(this.linearLayoutWeb, new LinearLayout.LayoutParams(-1, -1))
+                .useDefaultIndicator()
+                .setOpenOtherPageWays(DefaultWebClient.OpenOtherPageWays.ASK)
+                .setWebViewClient(new com.just.agentweb.WebViewClient(){ // from class: com.picacomic.fregata.fragments.PicaAppFragment.1
             @Override // android.webkit.WebViewClient
             public void onReceivedError(WebView webView, int i, String str, String str2) {
                 super.onReceivedError(webView, i, str, str2);
@@ -122,9 +127,13 @@ public class PicaAppFragment extends BaseFragment implements j {
                 g.A(MyApplication.by(), str);
                 return true;
             }
-        }).J().L().a(this.qx + "?token=" + e.z(getContext()) + "&secret=pb6XkQ94iBBny1WUAxY0dY5fksexw0dt");
-        this.mAgentWeb.A().n().setJavaScriptEnabled(true);
-        this.mAgentWeb.A().n().setJavaScriptCanOpenWindowsAutomatically(true);
+        }).createAgentWeb()
+                .ready()
+                .go(this.qx + "?token=" + e.z(getContext()) + "&secret=pb6XkQ94iBBny1WUAxY0dY5fksexw0dt");
+
+
+        this.mAgentWeb.getAgentWebSettings().getWebSettings().setJavaScriptEnabled(true);
+        this.mAgentWeb.getAgentWebSettings().getWebSettings().setJavaScriptCanOpenWindowsAutomatically(true);
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -154,19 +163,19 @@ public class PicaAppFragment extends BaseFragment implements j {
 
     @Override // androidx.fragment.app.Fragment
     public void onPause() {
-        this.mAgentWeb.x().onPause();
+        this.mAgentWeb.getWebLifeCycle().onPause();
         super.onPause();
     }
 
     @Override // androidx.fragment.app.Fragment
     public void onResume() {
-        this.mAgentWeb.x().onResume();
+        this.mAgentWeb.getWebLifeCycle().onResume();
         super.onResume();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment
     public void onDestroyView() {
-        this.mAgentWeb.x().onDestroy();
+        this.mAgentWeb.getWebLifeCycle().onDestroy();
         super.onDestroyView();
     }
 }

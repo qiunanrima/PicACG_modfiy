@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentLeaderboardPopularBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.adapters.LeaderboardPopularRecyclerViewAdapter;
@@ -37,19 +37,11 @@ public class LeaderboardPopularFragment extends BaseFragment implements k {
     String pL;
     boolean pM;
 
-    @BindView(R.id.radioButton_leaderboard_popular_24hr)
+    FragmentLeaderboardPopularBinding binding;
     RadioButton radioButton_24hr;
-
-    @BindView(R.id.radioButton_leaderboard_popular_30days)
     RadioButton radioButton_30days;
-
-    @BindView(R.id.radioButton_leaderboard_popular_7days)
     RadioButton radioButton_7days;
-
-    @BindView(R.id.radioGroup_leaderboard_popular_time)
     RadioGroup radioGroup_time;
-
-    @BindView(R.id.recyclerView_leaderboard_popular)
     RecyclerView recyclerView_popular;
 
     @Override // androidx.fragment.app.Fragment
@@ -59,9 +51,13 @@ public class LeaderboardPopularFragment extends BaseFragment implements k {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_leaderboard_popular, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentLeaderboardPopularBinding.inflate(layoutInflater, viewGroup, false);
+        this.radioButton_24hr = this.binding.radioButtonLeaderboardPopular24hr;
+        this.radioButton_30days = this.binding.radioButtonLeaderboardPopular30days;
+        this.radioButton_7days = this.binding.radioButtonLeaderboardPopular7days;
+        this.radioGroup_time = this.binding.radioGroupLeaderboardPopularTime;
+        this.recyclerView_popular = this.binding.recyclerViewLeaderboardPopular;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

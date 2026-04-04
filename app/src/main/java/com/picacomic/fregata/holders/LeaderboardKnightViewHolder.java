@@ -6,8 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemLeaderboardKnightOrderRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.LeaderboardKnightObject;
@@ -19,34 +18,28 @@ public class LeaderboardKnightViewHolder extends RecyclerView.ViewHolder impleme
     public static final String TAG = "LeaderboardKnightViewHolder";
     Context context;
 
-    @BindView(R.id.imageView_leaderboard_knight_order_recycler_view_cell_avatar)
+    ItemLeaderboardKnightOrderRecyclerViewCellBinding binding;
     public ImageView imageView_avatar;
-
-    @BindView(R.id.imageView_leaderboard_knight_order_recycler_view_cell_user_thumb_verified)
     public ImageView imageView_characterIcon;
-
-    @BindView(R.id.imageView_leaderboard_knight_order_recycler_view_cell_order)
     public ImageView imageView_order;
     k je;
-
-    @BindView(R.id.textView_leaderboard_knight_order_recycler_view_cell_comic)
     public TextView textView_comic;
-
-    @BindView(R.id.textView_leaderboard_knight_order_recycler_view_cell_level)
     public TextView textView_level;
-
-    @BindView(R.id.textView_leaderboard_knight_order_recycler_view_cell_name)
     public TextView textView_name;
-
-    @BindView(R.id.textView_leaderboard_knight_order_recycler_view_cell_order)
     public TextView textView_order;
-
-    @BindView(R.id.textView_leaderboard_knight_order_recycler_view_cell_title)
     public TextView textView_title;
 
     public LeaderboardKnightViewHolder(Context context, View view, k kVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemLeaderboardKnightOrderRecyclerViewCellBinding.bind(view);
+        this.imageView_avatar = this.binding.imageViewLeaderboardKnightOrderRecyclerViewCellAvatar;
+        this.imageView_characterIcon = this.binding.imageViewLeaderboardKnightOrderRecyclerViewCellUserThumbVerified;
+        this.imageView_order = this.binding.imageViewLeaderboardKnightOrderRecyclerViewCellOrder;
+        this.textView_comic = this.binding.textViewLeaderboardKnightOrderRecyclerViewCellComic;
+        this.textView_level = this.binding.textViewLeaderboardKnightOrderRecyclerViewCellLevel;
+        this.textView_name = this.binding.textViewLeaderboardKnightOrderRecyclerViewCellName;
+        this.textView_order = this.binding.textViewLeaderboardKnightOrderRecyclerViewCellOrder;
+        this.textView_title = this.binding.textViewLeaderboardKnightOrderRecyclerViewCellTitle;
         this.context = context;
         this.je = kVar;
         view.setOnClickListener(this);

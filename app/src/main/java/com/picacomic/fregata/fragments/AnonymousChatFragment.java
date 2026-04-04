@@ -12,7 +12,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentAnonymousChatBinding;
 import com.google.gson.Gson;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.adapters.AnonymousChatRecyclerViewAdapter;
@@ -25,11 +25,15 @@ import com.picacomic.fregata.objects.responses.UserProfileResponse;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.views.AlertDialogCenter;
-import io.socket.client.d;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import io.socket.emitter.Emitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,53 +42,34 @@ import retrofit2.Response;
 public class AnonymousChatFragment extends BaseFragment implements View.OnClickListener {
     public static final String TAG = "AnonymousChatFragment";
 
-    @BindView(R.id.button_anonymous_chat_match)
+    FragmentAnonymousChatBinding binding;
     Button button_match;
-
-    @BindView(R.id.button_anonymous_chat_send)
     Button button_send;
-
-    @BindView(R.id.editText_anonymous_chat_name)
     EditText editText_name;
-
-    @BindView(R.id.editText_anonymous_chat_type_space)
     EditText editText_typeSpace;
     Gson gson;
-
-    @BindView(R.id.imageButton_anonymous_chat_leave)
     ImageButton imageButton_leave;
     LinearLayoutManager jQ;
     UserProfileObject jW;
     Call<GeneralResponse<UserProfileResponse>> jX;
     AnonymousChatRecyclerViewAdapter jY;
-    private d jZ;
+    private Socket jZ;
     ArrayList<AnonymousChatDataObject> ja;
     String ka;
     String kb;
     String kc;
 
-    @BindView(R.id.linearLayout_anonymous_chat_message)
     LinearLayout linearLayout_message;
-
-    @BindView(R.id.linearLayout_anonymous_name)
     LinearLayout linearLayout_name;
-
-    @BindView(R.id.linearLayout_anonymous_type_space)
     LinearLayout linearLayout_typeSpace;
-
-    @BindView(R.id.recyclerView_anonymous_chat_messages)
     RecyclerView recyclerView;
-
-    @BindView(R.id.textView_anonymous_chat_matcher_name)
     TextView textView_matcherName;
-
-    @BindView(R.id.textView_anonymous_chat_message)
     TextView textView_message;
     public final String jU = "action";
     public final String jV = "response";
-    private io.socket.b.a.a kd = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.1
-        @Override // io.socket.b.a.a
-        public void a(Object... objArr) {
+    private Emitter.Listener kd = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.1
+        @Override // Emitter.Listener
+        public void call(Object... objArr) {
             AnonymousChatFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.1.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -93,9 +78,9 @@ public class AnonymousChatFragment extends BaseFragment implements View.OnClickL
             });
         }
     };
-    private io.socket.b.a.a ke = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.3
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener ke = new Emitter.Listener(){ // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.3
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             AnonymousChatFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.3.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -109,9 +94,9 @@ public class AnonymousChatFragment extends BaseFragment implements View.OnClickL
             });
         }
     };
-    private io.socket.b.a.a kf = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.4
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener kf = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.4
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             AnonymousChatFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.AnonymousChatFragment.4.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -131,24 +116,35 @@ public class AnonymousChatFragment extends BaseFragment implements View.OnClickL
     @Override // androidx.fragment.app.Fragment
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        io.socket.client.b.a aVar = new io.socket.client.b.a();
-        aVar.yT = new String[]{"websocket"};
+        IO.Options aVar = new IO.Options();
+        aVar.transports = new String[]{"websocket"};
         try {
-            this.jZ = io.socket.client.b.a("https://secret-chat.wakamoment.gq", aVar);
+            this.jZ = IO.socket("https://secret-chat.wakamoment.gq", aVar);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        this.jZ.a("action", this.ke);
-        this.jZ.a("response", this.kf);
-        this.jZ.a("connect", this.kd);
-        this.jZ.eJ();
+        this.jZ.on("action", this.ke);
+        this.jZ.on("response", this.kf);
+        this.jZ.on("connect", this.kd);
+        this.jZ.connect();
     }
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_anonymous_chat, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentAnonymousChatBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_match = this.binding.buttonAnonymousChatMatch;
+        this.button_send = this.binding.buttonAnonymousChatSend;
+        this.editText_name = this.binding.editTextAnonymousChatName;
+        this.editText_typeSpace = this.binding.editTextAnonymousChatTypeSpace;
+        this.imageButton_leave = this.binding.imageButtonAnonymousChatLeave;
+        this.linearLayout_message = this.binding.linearLayoutAnonymousChatMessage;
+        this.linearLayout_name = this.binding.linearLayoutAnonymousName;
+        this.linearLayout_typeSpace = this.binding.linearLayoutAnonymousTypeSpace;
+        this.recyclerView = this.binding.recyclerViewAnonymousChatMessages;
+        this.textView_matcherName = this.binding.textViewAnonymousChatMatcherName;
+        this.textView_message = this.binding.textViewAnonymousChatMessage;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -259,7 +255,7 @@ public class AnonymousChatFragment extends BaseFragment implements View.OnClickL
                 f.F(TAG, "SOCKET NULL");
             } else {
                 f.F(TAG, "NEW MATCH: " + json);
-                this.jZ.b("action", json + "");
+                this.jZ.emit("action", json + "");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -271,7 +267,7 @@ public class AnonymousChatFragment extends BaseFragment implements View.OnClickL
             return;
         }
         AnonymousChatActionDataObject anonymousChatActionDataObject = new AnonymousChatActionDataObject("SEND_MESSAGE", null, new AnonymousChatDataObject(null, this.jW.getUserId(), (this.editText_name != null ? this.editText_name.getText().toString() : "") + "", str2, str));
-        this.jZ.b("action", this.gson.toJson(anonymousChatActionDataObject, AnonymousChatActionDataObject.class));
+        this.jZ.emit("action", this.gson.toJson(anonymousChatActionDataObject, AnonymousChatActionDataObject.class));
         this.ja.add(0, anonymousChatActionDataObject.getData());
         this.jY.notifyDataSetChanged();
         this.editText_typeSpace.setText("");
@@ -281,11 +277,11 @@ public class AnonymousChatFragment extends BaseFragment implements View.OnClickL
         if (this.jW == null || this.jW.getUserId() == null) {
             return;
         }
-        this.jZ.b("action", this.gson.toJson(new AnonymousChatActionDataObject("LEAVE_MATCHING", null, new AnonymousChatDataObject(null, this.jW.getUserId(), null, null, null)), AnonymousChatActionDataObject.class));
+        this.jZ.emit("action", this.gson.toJson(new AnonymousChatActionDataObject("LEAVE_MATCHING", null, new AnonymousChatDataObject(null, this.jW.getUserId(), null, null, null)), AnonymousChatActionDataObject.class));
         if (z) {
             Toast.makeText(getActivity(), "LEAVE", 0).show();
-            this.jZ.eO();
-            this.jZ.c("action", this.ke);
+            this.jZ.disconnect();
+            this.jZ.off("action", this.ke);
         }
     }
 

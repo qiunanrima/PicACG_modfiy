@@ -5,44 +5,42 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.view.LayoutInflater;
+import com.picacomic.fregata.databinding.LayoutNewsCellBinding;
 import com.picacomic.fregata.R;
 
 /* JADX INFO: loaded from: classes.dex */
 public class NewsContainerView extends LinearLayout {
 
-    @BindView(R.id.imageView_news_icon)
+    LayoutNewsCellBinding binding;
     ImageView imageView_icon;
-
-    @BindView(R.id.imageView_news_view_more)
     ImageView imageView_viewMore;
-
-    @BindView(R.id.linearLayout_news_content)
     LinearLayout linearLayout_content;
-
-    @BindView(R.id.textView_news_view_count)
     TextView textView_count;
-
-    @BindView(R.id.textView_news_title)
     TextView textView_title;
 
     public NewsContainerView(Context context) {
         super(context);
-        inflate(context, R.layout.layout_news_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public NewsContainerView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        inflate(context, R.layout.layout_news_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public NewsContainerView(Context context, AttributeSet attributeSet, int i) {
         super(context, attributeSet, i);
-        inflate(context, R.layout.layout_news_cell, this);
-        ButterKnife.bind(this);
+        init();
+    }
+
+    private void init() {
+        this.binding = LayoutNewsCellBinding.inflate(LayoutInflater.from(getContext()), this, true);
+        this.imageView_icon = this.binding.imageViewNewsIcon;
+        this.imageView_viewMore = this.binding.imageViewNewsViewMore;
+        this.linearLayout_content = this.binding.linearLayoutNewsContent;
+        this.textView_count = this.binding.textViewNewsViewCount;
+        this.textView_title = this.binding.textViewNewsTitle;
     }
 
     public TextView getTextView_title() {

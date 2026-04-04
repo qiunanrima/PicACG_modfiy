@@ -27,18 +27,12 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-
     packagingOptions {
         exclude 'META-INF/*'
     }
 
-    lint {
-        abortOnError false
+    buildFeatures {
+        viewBinding true
     }
 }
 
@@ -53,20 +47,50 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'com.google.android.material:material:1.13.0'
     
-    /*implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.squareup.picasso:picasso:2.5.2'
-    implementation 'com.squareup.okhttp3:okhttp:3.14.9'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.14.9'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'de.hdodenhof:circleimageview:2.2.0'
+    // ===== 未混淆的核心依赖 =====
+    
+    // Gson - JSON解析库
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // OkHttp3 - HTTP客户端
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.3.2'
+    
+    
+    // Retrofit2 - REST客户端
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
+    
+    // Socket.IO - 实时通信
     implementation 'io.socket:socket.io-client:2.1.2'
+    
+    // 其他未混淆UI库
+    // Picasso - 图片加载库
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    
+    // CircleImageView - 圆形头像
+    implementation 'de.hdodenhof:circleimageview:2.2.0'
+    
+    // ===== 轻度混淆的依赖 =====
+    // Sugar ORM - 数据库ORM (80%混淆率，核心功能)
     implementation 'com.github.satyan:sugar:1.5'
-    implementation 'com.qiniu:happy-dns:2.0.1'
-    // Source: https://mvnrepository.com/artifact/com.soundcloud.android/android-crop
-    implementation 'com.soundcloud.android:android-crop:1.0.1'
+    
+    // AgentWeb - WebView浏览器 (44%混淆率，部分核心功能受影响)
     implementation 'io.github.justson:agentweb-core:v5.1.1-androidx'
-    api 'com.alipay.sdk:alipaysdk-android:+@aar'
-    // Source: https://mvnrepository.com/artifact/io.reactivex.rxjava3/rxjava
-    implementation 'io.reactivex.rxjava3:rxjava:3.1.12'*/
+    
+    // Android-crop - 图片裁剪 (14%混淆率，业务逻辑清晰)
+    //implementation 'com.soundcloud.android:android-crop:1.0.1'
+    
+    // 七牛SDK - 文件存储 (20%混淆率, API清晰)
+    implementation 'com.qiniu:happy-dns:2.0.1'
+
+    //okio - OkHttp的底层库
+    // Source: https://mvnrepository.com/artifact/com.squareup.okio/okio
+    implementation 'com.squareup.okio:okio:3.17.0'
+    
+    // 支付宝SDK
+    //api 'com.alipay.sdk:alipaysdk-android:+@aar'
+    
+    // RxJava3 - 响应式编程
+    // implementation 'io.reactivex.rxjava3:rxjava:3.1.12'
 }

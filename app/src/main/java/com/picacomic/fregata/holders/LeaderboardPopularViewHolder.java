@@ -6,8 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemLeaderboardPopularOrderRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.LeaderboardComicListObject;
@@ -19,34 +18,28 @@ public class LeaderboardPopularViewHolder extends RecyclerView.ViewHolder implem
     public static final String TAG = "LeaderboardPopularViewHolder";
     Context context;
 
-    @BindView(R.id.imageView_leaderboard_popular_order_recycler_view_cell_image)
+    ItemLeaderboardPopularOrderRecyclerViewCellBinding binding;
     public ImageView imageView_image;
-
-    @BindView(R.id.imageView_leaderboard_popular_order_recycler_view_cell_order)
     public ImageView imageView_order;
     k je;
-
-    @BindView(R.id.textView_leaderboard_popular_order_recycler_view_cell_author)
     public TextView textView_author;
-
-    @BindView(R.id.textView_leaderboard_popular_order_recycler_view_cell_category)
     public TextView textView_category;
-
-    @BindView(R.id.textView_leaderboard_popular_order_recycler_view_cell_name)
     public TextView textView_name;
-
-    @BindView(R.id.textView_leaderboard_popular_order_recycler_view_cell_order)
     public TextView textView_order;
-
-    @BindView(R.id.textView_leaderboard_popular_order_recycler_view_cell_view_count)
     public TextView textView_viewCount;
-
-    @BindView(R.id.textView_leaderboard_popular_order_recycler_view_cell_view_count_title)
     public TextView textView_viewCountTitle;
 
     public LeaderboardPopularViewHolder(Context context, View view, k kVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemLeaderboardPopularOrderRecyclerViewCellBinding.bind(view);
+        this.imageView_image = this.binding.imageViewLeaderboardPopularOrderRecyclerViewCellImage;
+        this.imageView_order = this.binding.imageViewLeaderboardPopularOrderRecyclerViewCellOrder;
+        this.textView_author = this.binding.textViewLeaderboardPopularOrderRecyclerViewCellAuthor;
+        this.textView_category = this.binding.textViewLeaderboardPopularOrderRecyclerViewCellCategory;
+        this.textView_name = this.binding.textViewLeaderboardPopularOrderRecyclerViewCellName;
+        this.textView_order = this.binding.textViewLeaderboardPopularOrderRecyclerViewCellOrder;
+        this.textView_viewCount = this.binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCount;
+        this.textView_viewCountTitle = this.binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCountTitle;
         this.context = context;
         this.je = kVar;
         view.setOnClickListener(this);

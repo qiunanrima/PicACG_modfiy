@@ -6,8 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemAnnouncementCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.AnnouncementObject;
@@ -19,19 +18,18 @@ public class AnnouncementViewHolder extends RecyclerView.ViewHolder implements V
     public static final String TAG = "AnnouncementViewHolder";
     Context context;
 
-    @BindView(R.id.imageView_announcement_cell_image)
+    ItemAnnouncementCellBinding binding;
     public ImageView imageView_image;
     k je;
-
-    @BindView(R.id.textView_announcement_cell_description)
     public TextView textView_description;
-
-    @BindView(R.id.textView_announcement_cell_title)
     public TextView textView_title;
 
     public AnnouncementViewHolder(Context context, View view, k kVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemAnnouncementCellBinding.bind(view);
+        this.imageView_image = this.binding.imageViewAnnouncementCellImage;
+        this.textView_description = this.binding.textViewAnnouncementCellDescription;
+        this.textView_title = this.binding.textViewAnnouncementCellTitle;
         this.je = kVar;
         this.context = context;
         view.setOnClickListener(this);

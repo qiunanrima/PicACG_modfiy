@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentCategoryBinding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
@@ -45,7 +45,7 @@ import retrofit2.Response;
 public class CategoryFragment extends BaseFragment implements k {
     public static final String TAG = "CategoryFragment";
 
-    @BindView(R.id.coordinatorLayout)
+    FragmentCategoryBinding binding;
     CoordinatorLayout coordinatorLayout;
     ArrayList<String> kA;
     ArrayList<String> kB;
@@ -58,37 +58,31 @@ public class CategoryFragment extends BaseFragment implements k {
     CategoryRecyclerViewAdapter kx;
     Button[] ky;
     Button[] kz;
-
-    @BindView(R.id.linearLayout_category_keywords_list)
     LinearLayout linearLayout_keywords;
-
-    @BindView(R.id.linearLayout_category_tag_list)
     LinearLayout linearLayout_tags;
-
-    @BindView(R.id.recyclerView_category)
     RecyclerView recyclerView_category;
-
-    @BindView(R.id.scrollView)
     NestedScrollView scrollView;
-
-    @BindView(R.id.searchView)
     SearchView searchView;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_category, viewGroup, false);
+        this.binding = FragmentCategoryBinding.inflate(layoutInflater, viewGroup, false);
+        this.coordinatorLayout = this.binding.coordinatorLayout;
+        this.linearLayout_keywords = this.binding.linearLayoutCategoryKeywordsList;
+        this.linearLayout_tags = this.binding.linearLayoutCategoryTagList;
+        this.recyclerView_category = this.binding.recyclerViewCategory;
+        this.scrollView = this.binding.scrollView;
+        this.searchView = this.binding.searchView;
+        this.toolbar = this.binding.toolbar;
         if (e.C(getContext()) != null && !e.C(getContext()).equalsIgnoreCase("") && (this.kC == null || (this.kC != null && this.kC.size() == 0))) {
             this.kC = (ArrayList) new Gson().fromJson(e.C(getContext()), new TypeToken<List<CategoryObject>>() { // from class: com.picacomic.fregata.fragments.CategoryFragment.1
             }.getType());
         }
         if (getActivity() != null) {
-            a(viewInflate);
+            a(this.binding.getRoot());
         }
-        return viewInflate;
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.Fragment

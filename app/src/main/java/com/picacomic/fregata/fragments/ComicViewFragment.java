@@ -9,7 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentComicViewBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.c;
 import com.picacomic.fregata.a_pkg.d;
@@ -32,7 +32,7 @@ public class ComicViewFragment extends BaseFragment implements c {
     d nV;
     ComicPageRecyclerViewAdapter nW;
 
-    @BindView(R.id.recyclerView_comic_viewer)
+    FragmentComicViewBinding binding;
     ZoomableRecyclerView recyclerView_comic_viewer;
     int nX = 0;
     boolean nY = false;
@@ -44,12 +44,13 @@ public class ComicViewFragment extends BaseFragment implements c {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_comic_view, viewGroup, false);
+        this.binding = FragmentComicViewBinding.inflate(layoutInflater, viewGroup, false);
+        this.recyclerView_comic_viewer = this.binding.recyclerViewComicViewer;
         if (getActivity() instanceof ComicViewerActivity) {
             this.nV = cX();
-            a(viewInflate);
+            a(this.binding.getRoot());
         }
-        return viewInflate;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

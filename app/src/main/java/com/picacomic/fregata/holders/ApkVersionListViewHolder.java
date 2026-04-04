@@ -5,8 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemApkVersionListRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.LatestApplicationObject;
@@ -18,19 +17,18 @@ public class ApkVersionListViewHolder extends RecyclerView.ViewHolder implements
     Context context;
     k je;
 
-    @BindView(R.id.textView_apk_version_list_recycler_view_cell_content)
+    ItemApkVersionListRecyclerViewCellBinding binding;
     public TextView textView_content;
-
-    @BindView(R.id.textView_apk_version_list_recycler_view_cell_timestamp)
     public TextView textView_timestamp;
-
-    @BindView(R.id.textView_apk_version_list_recycler_view_cell_version)
     public TextView textView_version;
 
     public ApkVersionListViewHolder(Context context, View view, k kVar) {
         super(view);
         this.context = context;
-        ButterKnife.bind(this, view);
+        this.binding = ItemApkVersionListRecyclerViewCellBinding.bind(view);
+        this.textView_content = this.binding.textViewApkVersionListRecyclerViewCellContent;
+        this.textView_timestamp = this.binding.textViewApkVersionListRecyclerViewCellTimestamp;
+        this.textView_version = this.binding.textViewApkVersionListRecyclerViewCellVersion;
         this.je = kVar;
         view.setOnClickListener(this);
     }

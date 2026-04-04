@@ -7,7 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentChatroomListBinding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
@@ -36,17 +36,17 @@ public class ChatroomListFragment extends BaseFragment implements k {
     Call<GeneralResponse<ChatroomListResponse>> kS;
     ChatroomListRecyclerViewAdapter mP;
 
-    @BindView(R.id.recyclerView_chatroom_list)
+    FragmentChatroomListBinding binding;
     RecyclerView recyclerView_list;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_chatroom_list, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentChatroomListBinding.inflate(layoutInflater, viewGroup, false);
+        this.recyclerView_list = this.binding.recyclerViewChatroomList;
+        this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

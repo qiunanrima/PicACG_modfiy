@@ -9,24 +9,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentSupportUsQqalipayBinding;
 import com.picacomic.fregata.R;
 
 /* JADX INFO: loaded from: classes.dex */
 public class SupportUsQQAlipayFragment extends BaseFragment implements View.OnClickListener {
     public static final String TAG = "SupportUsQQAlipayFragment";
 
-    @BindView(R.id.textView_support_us_alipay)
+    FragmentSupportUsQqalipayBinding binding;
     TextView textView_alipay;
-
-    @BindView(R.id.textView_support_us_alipay_title)
     TextView textView_alipayTitle;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_support_us_qqalipay, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentSupportUsQqalipayBinding.inflate(layoutInflater, viewGroup, false);
+        this.textView_alipay = this.binding.textViewSupportUsAlipay;
+        this.textView_alipayTitle = this.binding.textViewSupportUsAlipayTitle;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

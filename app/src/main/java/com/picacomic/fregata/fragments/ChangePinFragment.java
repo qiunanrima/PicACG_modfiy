@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentChangePinBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.BaseActivity;
 import com.picacomic.fregata.activities.MainActivity;
@@ -20,28 +20,26 @@ import com.picacomic.fregata.utils.e;
 public class ChangePinFragment extends BaseFragment {
     public static final String TAG = "ChangePinFragment";
 
-    @BindView(R.id.button_change_pin_cancel)
+    FragmentChangePinBinding binding;
     Button button_cancel;
-
-    @BindView(R.id.button_change_pin)
     Button button_change;
-
-    @BindView(R.id.editText_change_pin_new)
     EditText editText_pin;
-
-    @BindView(R.id.editText_change_pin_new_confirm)
     EditText editText_pinConfirm;
     boolean kK;
     boolean kL;
 
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_change_pin, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentChangePinBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_cancel = this.binding.buttonChangePinCancel;
+        this.button_change = this.binding.buttonChangePin;
+        this.editText_pin = this.binding.editTextChangePinNew;
+        this.editText_pinConfirm = this.binding.editTextChangePinNewConfirm;
+        this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

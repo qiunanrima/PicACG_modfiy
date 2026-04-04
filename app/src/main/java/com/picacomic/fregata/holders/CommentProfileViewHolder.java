@@ -7,8 +7,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemCommentProfileRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.e;
 
@@ -16,58 +15,44 @@ import com.picacomic.fregata.a_pkg.e;
 public class CommentProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     public static final String TAG = "CommentProfileViewHolder";
 
-    @BindView(R.id.button_comment_recycler_view_cell_hide)
+    ItemCommentProfileRecyclerViewCellBinding binding;
     public Button button_hide;
-
-    @BindView(R.id.button_comment_recycler_view_cell_view_more)
     public Button button_viewMore;
-
-    @BindView(R.id.imageView_comment_recycler_view_cell_like_icon)
     public ImageView imageView_likeIcon;
-
-    @BindView(R.id.imageView_comment_recycler_view_cell_user_thumb)
     public ImageView imageView_userThumb;
-
-    @BindView(R.id.imageView_comment_recycler_view_cell_user_thumb_verified)
     public ImageView imageView_userVerified;
-
-    @BindView(R.id.linearLayout_comment_recycler_view_cell_reply)
     public LinearLayout linearLayout_reply;
     e sI;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_content)
     public TextView textView_content;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_created_date)
     public TextView textView_createdDate;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_floor)
     public TextView textView_floor;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_level)
     public TextView textView_level;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_like_count)
     public TextView textView_likeCount;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_no_reply)
     public TextView textView_noReply;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_reply_count)
     public TextView textView_replyCount;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_title)
     public TextView textView_title;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_username)
     public TextView textView_username;
-
-    @BindView(R.id.textView_comment_recycler_view_cell_view_content_page)
     public TextView textView_viewContentPage;
 
     public CommentProfileViewHolder(View view, e eVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemCommentProfileRecyclerViewCellBinding.bind(view);
+        this.button_hide = this.binding.buttonCommentRecyclerViewCellHide;
+        this.button_viewMore = this.binding.buttonCommentRecyclerViewCellViewMore;
+        this.imageView_likeIcon = this.binding.imageViewCommentRecyclerViewCellLikeIcon;
+        this.imageView_userThumb = this.binding.imageViewCommentRecyclerViewCellUserThumb;
+        this.imageView_userVerified = this.binding.imageViewCommentRecyclerViewCellUserThumbVerified;
+        this.linearLayout_reply = this.binding.linearLayoutCommentRecyclerViewCellReply;
+        this.textView_content = this.binding.textViewCommentRecyclerViewCellContent;
+        this.textView_createdDate = this.binding.textViewCommentRecyclerViewCellCreatedDate;
+        this.textView_floor = this.binding.textViewCommentRecyclerViewCellFloor;
+        this.textView_level = this.binding.textViewCommentRecyclerViewCellLevel;
+        this.textView_likeCount = this.binding.textViewCommentRecyclerViewCellLikeCount;
+        this.textView_noReply = this.binding.textViewCommentRecyclerViewCellNoReply;
+        this.textView_replyCount = this.binding.textViewCommentRecyclerViewCellReplyCount;
+        this.textView_title = this.binding.textViewCommentRecyclerViewCellTitle;
+        this.textView_username = this.binding.textViewCommentRecyclerViewCellUsername;
+        this.textView_viewContentPage = this.binding.textViewCommentRecyclerViewCellViewContentPage;
         this.sI = eVar;
         view.setOnClickListener(this);
         this.button_viewMore.setOnClickListener(this);

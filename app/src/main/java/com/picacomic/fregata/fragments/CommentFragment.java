@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentCommentBinding;
 import com.google.gson.Gson;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.e;
@@ -52,34 +52,20 @@ import retrofit2.Response;
 public class CommentFragment extends BaseFragment implements e {
     public static final String TAG = "CommentFragment";
 
-    @BindView(R.id.button_comment_post)
+    FragmentCommentBinding binding;
     Button button_postComment;
-
-    @BindView(R.id.button_comment_cancel_reply)
     Button button_replyCancel;
     String comicId;
-
-    @BindView(R.id.editText_comment_current_page)
     EditText editText_currentPage;
-
-    @BindView(R.id.editText_comment_input_field)
     EditText editText_inputField;
     String gameId;
-
-    @BindView(R.id.imageView_comment_empty)
     ImageView imageView_empty;
     boolean jG;
     UserBasicObject jH;
     ArrayList<CommentWithReplyObject> jz;
     boolean kE;
-
-    @BindView(R.id.linearLayout_comment_page)
     LinearLayout linearLayout_commentPage;
-
-    @BindView(R.id.linearLayout_comment_input_bar)
     LinearLayout linearLayout_inputBar;
-
-    @BindView(R.id.linearLayout_comment_no_comment)
     LinearLayout linearLayout_noComment;
     Call<GeneralResponse<ActionResponse>> mW;
     Call<GeneralResponse<ProfileCommentsResponse>> og;
@@ -99,14 +85,8 @@ public class CommentFragment extends BaseFragment implements e {
     String ou = "";
     int ov;
     int page;
-
-    @BindView(R.id.recyclerView_comments)
     RecyclerView recyclerView_comments;
-
-    @BindView(R.id.textView_comment_total_page)
     TextView textView_totalPage;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
     int totalPage;
     String userId;
@@ -157,12 +137,23 @@ public class CommentFragment extends BaseFragment implements e {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_comment, viewGroup, false);
+        this.binding = FragmentCommentBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_postComment = this.binding.buttonCommentPost;
+        this.button_replyCancel = this.binding.buttonCommentCancelReply;
+        this.editText_currentPage = this.binding.editTextCommentCurrentPage;
+        this.editText_inputField = this.binding.editTextCommentInputField;
+        this.imageView_empty = this.binding.imageViewCommentEmpty;
+        this.linearLayout_commentPage = this.binding.linearLayoutCommentPage;
+        this.linearLayout_inputBar = this.binding.linearLayoutCommentInputBar;
+        this.linearLayout_noComment = this.binding.linearLayoutCommentNoComment;
+        this.recyclerView_comments = this.binding.recyclerViewComments;
+        this.textView_totalPage = this.binding.textViewCommentTotalPage;
+        this.toolbar = this.binding.toolbar;
         setHasOptionsMenu(true);
         if (getActivity() != null) {
-            a(viewInflate);
+            a(this.binding.getRoot());
         }
-        return viewInflate;
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.Fragment

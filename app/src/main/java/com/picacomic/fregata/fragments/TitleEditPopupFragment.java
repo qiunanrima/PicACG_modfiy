@@ -13,8 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.FragmentTitleEditPopupBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.b.c;
 import com.picacomic.fregata.b.d;
@@ -29,21 +28,13 @@ import retrofit2.Response;
 public class TitleEditPopupFragment extends DialogFragment {
     public static final String TAG = "TitleEditPopupFragment";
 
-    @BindView(R.id.button_title_edit_popup_cancel)
+    FragmentTitleEditPopupBinding binding;
     Button button_cancel;
-
-    @BindView(R.id.button_title_edit_popup_confirm)
     Button button_confirm;
-
-    @BindView(R.id.editText_title_edit_popup_new_title)
     EditText editText_newTitle;
     Call<RegisterResponse> lg;
     public String rY;
-
-    @BindView(R.id.textView_title_edit_popup_title)
     TextView textView_title;
-
-    @BindView(R.id.textView_title_edit_popup_user_id)
     TextView textView_userId;
     public String userId;
 
@@ -67,11 +58,15 @@ public class TitleEditPopupFragment extends DialogFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_title_edit_popup, viewGroup, false);
-        ButterKnife.bind(this, viewInflate);
+        this.binding = FragmentTitleEditPopupBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_cancel = this.binding.buttonTitleEditPopupCancel;
+        this.button_confirm = this.binding.buttonTitleEditPopupConfirm;
+        this.editText_newTitle = this.binding.editTextTitleEditPopupNewTitle;
+        this.textView_title = this.binding.textViewTitleEditPopupTitle;
+        this.textView_userId = this.binding.textViewTitleEditPopupUserId;
         bF();
         bI();
-        return viewInflate;
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.DialogFragment

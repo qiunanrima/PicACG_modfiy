@@ -5,8 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemComicRecommendationViewBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.b;
 import com.picacomic.fregata.objects.ComicListObject;
@@ -18,17 +17,18 @@ public class ComicRecommendationViewHolder extends RecyclerView.ViewHolder imple
     public static final String TAG = "ComicRecommendationViewHolder";
     Context context;
 
-    @BindView(R.id.imageView_recommendation)
-    ImageView imageView;
+    ItemComicRecommendationViewBinding binding;
+    public ImageView imageView;
     b jq;
     ComicListObject nn;
 
-    @BindView(R.id.textView_recommendation)
-    TextView textView;
+    public TextView textView;
 
     public ComicRecommendationViewHolder(Context context, View view, b bVar) {
         super(view);
-        ButterKnife.bind(this, view);
+        this.binding = ItemComicRecommendationViewBinding.bind(view);
+        this.imageView = this.binding.imageViewRecommendation;
+        this.textView = this.binding.textViewRecommendation;
         this.context = context;
         view.setOnClickListener(this);
         this.jq = bVar;

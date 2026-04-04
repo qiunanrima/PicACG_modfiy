@@ -24,8 +24,6 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.google.gson.Gson;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.a;
@@ -37,7 +35,12 @@ import com.picacomic.fregata.objects.UserProfileObject;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
-import io.socket.client.d;
+import com.picacomic.fregata.databinding.ServiceChatroomViewBinding;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import org.json.JSONArray;
@@ -49,57 +52,40 @@ public class ChatroomService extends Service implements View.OnClickListener, a 
     public static final String TAG = "ChatroomService";
     ArrayList<ChatBaseObject> arrayList;
 
-    @BindView(R.id.button_service_chatroom_close)
+    ServiceChatroomViewBinding binding;
     Button button_close;
-
-    @BindView(R.id.button_service_chatroom_message_mode)
     Button button_messageMode;
-
-    @BindView(R.id.button_service_chatroom_move)
     Button button_move;
-
-    @BindView(R.id.button_service_chatroom_send)
     Button button_send;
-
-    @BindView(R.id.button_service_chatroom_size_controller)
     Button button_sizeController;
-
-    @BindView(R.id.editText_service_chatroom_input)
     EditText editText_input;
+
     Handler handler;
     private int iK;
     LinearLayoutManager jQ;
     UserProfileObject jW;
-    private d jZ;
+    private Socket jZ;
     private LayoutInflater jc;
-    private io.socket.b.a.a lP;
-    private io.socket.b.a.a lQ;
-    private io.socket.b.a.a lS;
+    private Emitter.Listener lP;
+    private Emitter.Listener lQ;
+    private Emitter.Listener lS;
     ChatroomRecyclerViewAdapter le;
     CountDownTimer lh;
 
-    @BindView(R.id.recyclerView_service_chatroom)
     RecyclerView recyclerView_chat;
-
-    @BindView(R.id.relativeLayout_service_chatroom_input)
     RelativeLayout relativeLayout_input;
+
     private int screenWidth;
     private WindowManager tC;
     View tD;
     WindowManager.LayoutParams tE;
     ChatMessageObject tH;
 
-    @BindView(R.id.textView_chat_at_list)
     TextView textView_atList;
-
-    @BindView(R.id.textView_chat_reply)
     TextView textView_reply;
-
-    @BindView(R.id.textView_chat_toast_msg)
     TextView textView_toastMsg;
-
-    @BindView(R.id.textView_service_chatroom_total_user_count)
     TextView textView_totalUserCount;
+
     private int tF = ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION;
     boolean tG = false;
     String at = "";
@@ -129,12 +115,12 @@ public class ChatroomService extends Service implements View.OnClickListener, a 
 
     public ChatroomService() {
         try {
-            this.jZ = io.socket.client.b.aE("https://chat.picacomic.com");
+            this.jZ = IO.socket("https://chat.picacomic.com");
         } catch (URISyntaxException unused) {
         }
-        this.lS = new io.socket.b.a.a() { // from class: com.picacomic.fregata.services.ChatroomService.12
-            @Override // io.socket.b.a.a
-            public void a(final Object... objArr) {
+        this.lS = new Emitter.Listener() { // from class: com.picacomic.fregata.services.ChatroomService.12
+            @Override // Emitter.Listener
+            public void call(final Object... objArr) {
                 ChatroomService.this.runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.services.ChatroomService.12.1
                     @Override // java.lang.Runnable
                     public void run() {
@@ -187,9 +173,9 @@ public class ChatroomService extends Service implements View.OnClickListener, a 
                 });
             }
         };
-        this.lP = new io.socket.b.a.a() { // from class: com.picacomic.fregata.services.ChatroomService.2
-            @Override // io.socket.b.a.a
-            public void a(final Object... objArr) {
+        this.lP = new Emitter.Listener() { // from class: com.picacomic.fregata.services.ChatroomService.2
+            @Override // Emitter.Listener
+            public void call(final Object... objArr) {
                 ChatroomService.this.runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.services.ChatroomService.2.1
                     @Override // java.lang.Runnable
                     public void run() {
@@ -205,9 +191,9 @@ public class ChatroomService extends Service implements View.OnClickListener, a 
                 });
             }
         };
-        this.lQ = new io.socket.b.a.a() { // from class: com.picacomic.fregata.services.ChatroomService.3
-            @Override // io.socket.b.a.a
-            public void a(final Object... objArr) {
+        this.lQ = new Emitter.Listener() { // from class: com.picacomic.fregata.services.ChatroomService.3
+            @Override // Emitter.Listener
+            public void call(final Object... objArr) {
                 ChatroomService.this.runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.services.ChatroomService.3.1
                     @Override // java.lang.Runnable
                     public void run() {
@@ -268,10 +254,10 @@ public class ChatroomService extends Service implements View.OnClickListener, a 
         stopForeground(true);
         stopSelf();
         if (this.jZ != null) {
-            this.jZ.eO();
-            this.jZ.c("broadcast_message", this.lS);
-            this.jZ.c("new_connection", this.lP);
-            this.jZ.c("connection_close", this.lQ);
+            this.jZ.disconnect();
+            this.jZ.off("broadcast_message", this.lS);
+            this.jZ.off("new_connection", this.lP);
+            this.jZ.off("connection_close", this.lQ);
         }
         if (this.lh != null) {
             this.lh.cancel();
@@ -304,14 +290,27 @@ public class ChatroomService extends Service implements View.OnClickListener, a 
     }
 
     public void init() {
-        this.tD = this.jc.inflate(R.layout.service_chatroom_view, (ViewGroup) null);
-        ButterKnife.bind(this, this.tD);
+        this.binding = ServiceChatroomViewBinding.inflate(this.jc);
+        this.tD = this.binding.getRoot();
+        this.button_close = this.binding.buttonServiceChatroomClose;
+        this.button_messageMode = this.binding.buttonServiceChatroomMessageMode;
+        this.button_move = this.binding.buttonServiceChatroomMove;
+        this.button_send = this.binding.buttonServiceChatroomSend;
+        this.button_sizeController = this.binding.buttonServiceChatroomSizeController;
+        this.editText_input = this.binding.editTextServiceChatroomInput;
+        this.recyclerView_chat = this.binding.recyclerViewServiceChatroom;
+        this.relativeLayout_input = this.binding.relativeLayoutServiceChatroomInput;
+        this.textView_atList = this.binding.textViewChatAtList;
+        this.textView_reply = this.binding.textViewChatReply;
+        this.textView_toastMsg = this.binding.textViewChatToastMsg;
+        this.textView_totalUserCount = this.binding.textViewServiceChatroomTotalUserCount;
+        
         this.handler = new Handler();
         this.tG = false;
-        this.jZ.a("broadcast_message", this.lS);
-        this.jZ.a("new_connection", this.lP);
-        this.jZ.a("connection_close", this.lQ);
-        this.jZ.eJ();
+        this.jZ.on("broadcast_message", this.lS);
+        this.jZ.on("new_connection", this.lP);
+        this.jZ.on("connection_close", this.lQ);
+        this.jZ.connect();
         Gson gson = new Gson();
         String strB = e.B(this);
         if (strB != null) {
@@ -449,7 +448,7 @@ public class ChatroomService extends Service implements View.OnClickListener, a 
             this.editText_input.setText("");
             Gson gson = new Gson();
             ChatMessageObject chatMessageObject = new ChatMessageObject(this.jW.getUserId(), "", this.jW.getLevel(), this.jW.getEmail(), g.b(this.jW.getAvatar()), this.jW.getName(), this.jW.getTitle(), this.jW.getGender(), "android S", this.jW.getActivationDate(), this.at, this.lt, this.reply, strTrim, "", "", this.tH != null ? this.tH.getUserId() : null, 0, this.jW.isVerified(), this.jW.getCharacter(), this.jW.getCharactersStringArray(), null, null);
-            this.jZ.b("send_message", gson.toJson(chatMessageObject, ChatMessageObject.class));
+            this.jZ.emit("send_message", gson.toJson(chatMessageObject, ChatMessageObject.class));
             a(chatMessageObject.user_id, "", this.jW.getLevel(), chatMessageObject.getEmail(), chatMessageObject.avatar, chatMessageObject.getName(), chatMessageObject.getTitle(), chatMessageObject.getGender(), chatMessageObject.getPlatform(), chatMessageObject.getActivationDate(), chatMessageObject.getAt(), chatMessageObject.getReplyName(), chatMessageObject.getReply(), chatMessageObject.getMessage(), chatMessageObject.getBlockUserId(), true, chatMessageObject.isVerified(), chatMessageObject.getCharacter(), null, null);
             this.tG = false;
             D(false);

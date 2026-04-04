@@ -6,8 +6,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.view.LayoutInflater;
+import com.picacomic.fregata.databinding.LayoutComicCollectionViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.objects.ComicListObject;
 import java.util.ArrayList;
@@ -15,40 +15,30 @@ import java.util.ArrayList;
 /* JADX INFO: loaded from: classes.dex */
 public class ComicCollectionView extends LinearLayout {
 
-    @BindView(R.id.imageView_comic_collection_view_icon)
+    LayoutComicCollectionViewCellBinding binding;
     ImageView imageView_icon;
-
-    @BindView(R.id.linearLayout_comic_collection_view_content)
     LinearLayout linearLayout_content;
-
-    @BindView(R.id.textView_comic_collection_view_count)
     TextView textView_count;
-
-    @BindView(R.id.textView_comic_collection_view_title)
     TextView textView_title;
 
     public ComicCollectionView(Context context) {
         super(context);
-        inflate(context, R.layout.layout_comic_collection_view_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public ComicCollectionView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        inflate(context, R.layout.layout_comic_collection_view_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public ComicCollectionView(Context context, AttributeSet attributeSet, int i) {
         super(context, attributeSet, i);
-        inflate(context, R.layout.layout_comic_collection_view_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public ComicCollectionView(Context context, ArrayList<ComicListObject> arrayList, int i, View.OnClickListener onClickListener, View.OnClickListener onClickListener2) {
         super(context);
-        inflate(context, R.layout.layout_comic_collection_view_cell, this);
-        ButterKnife.bind(this);
+        init();
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, -2, 1.0f);
         int size = arrayList.size() > 4 ? 4 : arrayList.size();
         if (onClickListener2 != null) {
@@ -62,6 +52,14 @@ public class ComicCollectionView extends LinearLayout {
             singleImageTextView.setTag(Integer.valueOf(i2 + i));
             this.linearLayout_content.addView(singleImageTextView);
         }
+    }
+
+    private void init() {
+        this.binding = LayoutComicCollectionViewCellBinding.inflate(LayoutInflater.from(getContext()), this, true);
+        this.imageView_icon = this.binding.imageViewComicCollectionViewIcon;
+        this.linearLayout_content = this.binding.linearLayoutComicCollectionViewContent;
+        this.textView_count = this.binding.textViewComicCollectionViewCount;
+        this.textView_title = this.binding.textViewComicCollectionViewTitle;
     }
 
     public TextView getTextView_title() {

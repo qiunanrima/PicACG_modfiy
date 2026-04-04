@@ -43,7 +43,7 @@ import android.widget.ListAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentChatBinding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
@@ -76,7 +76,9 @@ import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
 import com.picacomic.fregata.utils.views.AlertDialogCenter;
 import com.squareup.picasso.Picasso;
-import io.socket.client.d;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
@@ -87,6 +89,8 @@ import java.util.TimerTask;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import io.socket.emitter.Emitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -96,65 +100,26 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     public static final String TAG = "ChatroomFragment";
     ArrayList<ChatBaseObject> arrayList;
 
-    @BindView(R.id.button_chat_channel_private)
+    FragmentChatBinding binding;
     Button button_channelPrivate;
-
-    @BindView(R.id.button_chat_channel_public)
     Button button_channelPublic;
-
-    @BindView(R.id.button_chat_control_ai_mode)
     Button button_controlAI;
-
-    @BindView(R.id.button_chat_control_change_title)
     Button button_controlChangeTitle;
-
-    @BindView(R.id.button_chat_control_hide_avatar)
     Button button_controlHideAvatar;
-
-    @BindView(R.id.button_chat_control_hide_panel_buttons)
     Button button_controlHidePanelButtons;
-
-    @BindView(R.id.button_chat_control_image)
     Button button_controlImage;
-
-    @BindView(R.id.button_chat_control_mute)
     Button button_controlMute;
-
-    @BindView(R.id.button_chat_control_time)
     Button button_controlTime;
-
-    @BindView(R.id.button_chat_popup_save_image)
     Button button_saveImage;
-
-    @BindView(R.id.button_chat_send)
     Button button_sendMessage;
-
-    @BindView(R.id.button_chat_view_profile)
     Button button_viewProfile;
-    CountDownTimer countDownTimer;
-
-    @BindView(R.id.editText_chat_textbox)
     EditText editText_textbox;
-
-    @BindView(R.id.fab_command)
     FloatingActionButton fab_command;
-
-    @BindView(R.id.frameLayout_chat_channel_indicator)
     FrameLayout frameLayout_channelIndicator;
-
-    @BindView(R.id.frameLayout_chat_online_count_background)
     FrameLayout frameLayout_chatOnlineCountBackground;
-
-    @BindView(R.id.frameLayout_chat_online_count_container)
     FrameLayout frameLayout_chatOnlineCountContainer;
-
-    @BindView(R.id.frameLayout_game_container)
     FrameLayout frameLayout_container;
-
-    @BindView(R.id.frameLayout_night_mode)
     FrameLayout frameLayout_nightMode;
-
-    @BindView(R.id.gridView_chat_emoji_list)
     GridView gridView_emojiList;
     Gson gson;
     RelativeLayout.LayoutParams iI;
@@ -162,31 +127,34 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     private int iK;
     boolean iN;
 
-    @BindView(R.id.imageButton_chat_close_popup)
+
     ImageButton imageButton_closePopup;
-
-    @BindView(R.id.imageButton_chat_hide_channel)
     ImageButton imageButton_hideChannel;
-
-    @BindView(R.id.imageButton_chat_audio)
     ImageButton imageButton_sendAudio;
-
-    @BindView(R.id.imageButton_chat_send_emoji)
     ImageButton imageButton_sendEmoji;
-
-    @BindView(R.id.imageButton_chat_send_image)
     ImageButton imageButton_sendImage;
-
-    @BindView(R.id.imageButton_chat_setting)
     ImageButton imageButton_setting;
-
-    @BindView(R.id.imageView_chat_large_image)
     ImageView imageView_largeImage;
+    LinearLayout linearLayout_chatChannel;
+    LinearLayout linearLayout_controlPanel;
+    LinearLayout linearLayout_controlPanelButtons;
+    RecyclerView recyclerView_chat;
+    RelativeLayout relativeLayout_popup;
+    TextView textView_atList;
+    TextView textView_audioPlayingTimer;
+    TextView textView_chatOnlineCount;
+    TextView textView_chatOnlineCountTitle;
+    TextView textView_reply;
+    TextView textView_toastAtMe;
+    TextView textView_toastMsg;
+    TextView textView_totalUserCount;
+    Toolbar toolbar;
     LinearLayoutManager jQ;
     UserProfileObject jW;
     Call<GeneralResponse<UserProfileResponse>> jX;
-    private d jZ;
+    private Socket jZ;
     CountDownTimer kY;
+    CountDownTimer countDownTimer;
     boolean lA;
     int lB;
     int lC;
@@ -207,15 +175,6 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     Call<RegisterResponse> lg;
     CountDownTimer lh;
     CountDownTimer li;
-
-    @BindView(R.id.linearLayout_chat_channel)
-    LinearLayout linearLayout_chatChannel;
-
-    @BindView(R.id.linearLayout_chat_control_panel)
-    LinearLayout linearLayout_controlPanel;
-
-    @BindView(R.id.linearLayout_chat_control_panel_buttons)
-    LinearLayout linearLayout_controlPanelButtons;
     CountDownTimer lj;
     CountDownTimer lk;
     Bitmap ll;
@@ -227,39 +186,6 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     boolean lx;
     boolean ly;
     boolean lz;
-
-    @BindView(R.id.recyclerView_chat)
-    RecyclerView recyclerView_chat;
-
-    @BindView(R.id.relativeLayout_chat_popup)
-    RelativeLayout relativeLayout_popup;
-
-    @BindView(R.id.textView_chat_at_list)
-    TextView textView_atList;
-
-    @BindView(R.id.textView_chat_audio_playing_timer)
-    TextView textView_audioPlayingTimer;
-
-    @BindView(R.id.textView_chat_online_count)
-    TextView textView_chatOnlineCount;
-
-    @BindView(R.id.textView_chat_online_count_title)
-    TextView textView_chatOnlineCountTitle;
-
-    @BindView(R.id.textView_chat_reply)
-    TextView textView_reply;
-
-    @BindView(R.id.textView_chat_toast_at_me)
-    TextView textView_toastAtMe;
-
-    @BindView(R.id.textView_chat_toast_msg)
-    TextView textView_toastMsg;
-
-    @BindView(R.id.textView_chat_total_user_count)
-    TextView textView_totalUserCount;
-
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
     public int kW = 100;
 
     @Deprecated
@@ -275,9 +201,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     String reply = "";
     String lu = "";
     String lv = null;
-    private io.socket.b.a.a lL = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.28
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lL = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.28
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.28.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -300,9 +226,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lM = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.29
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lM = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.29
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.29.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -354,21 +280,21 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a kd = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.30
-        @Override // io.socket.b.a.a
-        public void a(Object... objArr) {
+    private Emitter.Listener kd = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.30
+        @Override // Emitter.Listener
+        public void call(Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.30.1
                 @Override // java.lang.Runnable
                 public void run() {
                     f.D(ChatroomFragment.TAG, "Testing INIT");
-                    ChatroomFragment.this.jZ.b("init", ChatroomFragment.this.gson.toJson(ChatroomFragment.this.jW, UserProfileObject.class));
+                    ChatroomFragment.this.jZ.emit("init", ChatroomFragment.this.gson.toJson(ChatroomFragment.this.jW, UserProfileObject.class));
                 }
             });
         }
     };
-    private io.socket.b.a.a lN = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.31
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lN = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.31
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.31.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -389,9 +315,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lO = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.32
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lO = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.32
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.32.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -406,9 +332,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lP = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.33
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lP = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.33
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.33.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -422,9 +348,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lQ = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.35
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lQ = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.35
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.35.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -438,9 +364,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lR = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.36
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lR = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.36
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.36.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -460,9 +386,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lS = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.37
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lS = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.37
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.37.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -475,9 +401,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lT = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.38
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lT = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.38
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.38.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -490,9 +416,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lU = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.39
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lU = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.39
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.39.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -555,9 +481,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lV = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.40
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lV = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.40
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.40.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -570,9 +496,9 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private io.socket.b.a.a lW = new io.socket.b.a.a() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.41
-        @Override // io.socket.b.a.a
-        public void a(final Object... objArr) {
+    private Emitter.Listener lW = new Emitter.Listener() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.41
+        @Override // Emitter.Listener
+        public void call(final Object... objArr) {
             ChatroomFragment.this.getActivity().runOnUiThread(new Runnable() { // from class: com.picacomic.fregata.fragments.ChatroomFragment.41.1
                 @Override // java.lang.Runnable
                 public void run() {
@@ -604,40 +530,81 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         if (getArguments() != null) {
-            io.socket.client.b.a aVar = new io.socket.client.b.a();
-            aVar.yT = new String[]{"websocket"};
+            IO.Options aVar = new IO.Options();
+            aVar.transports = new String[]{"websocket"};
             try {
                 try {
-                    this.jZ = io.socket.client.b.a(getArguments().getString("KEY_CHATROOM_URL", "https://chat.picacomic.com"), aVar);
+                    this.jZ = IO.socket(getArguments().getString("KEY_CHATROOM_URL", "https://chat.picacomic.com"), aVar);
                 } catch (URISyntaxException unused) {
-                    this.jZ = io.socket.client.b.a("https://chat.picacomic.com", aVar);
+                    this.jZ = IO.socket("https://chat.picacomic.com", aVar);
                 }
             } catch (URISyntaxException unused2) {
             }
-            this.jZ.a("broadcast_message", this.lS);
-            this.jZ.a("broadcast_image", this.lV);
-            this.jZ.a("broadcast_audio", this.lW);
-            this.jZ.a("new_connection", this.lP);
-            this.jZ.a("connection_close", this.lQ);
-            this.jZ.a("got_private_message", this.lU);
-            this.jZ.a("change_character_icon", this.lR);
-            this.jZ.a("broadcast_ads", this.lT);
-            this.jZ.a("change_title", this.lL);
-            this.jZ.a("receive_notification", this.lO);
-            this.jZ.a("kick", this.lN);
-            this.jZ.a("set_profile", this.lM);
-            this.jZ.a("connect", this.kd);
-            this.jZ.eJ();
+            this.jZ.on("broadcast_message", this.lS);
+            this.jZ.on("broadcast_image", this.lV);
+            this.jZ.on("broadcast_audio", this.lW);
+            this.jZ.on("new_connection", this.lP);
+            this.jZ.on("connection_close", this.lQ);
+            this.jZ.on("got_private_message", this.lU);
+            this.jZ.on("change_character_icon", this.lR);
+            this.jZ.on("broadcast_ads", this.lT);
+            this.jZ.on("change_title", this.lL);
+            this.jZ.on("receive_notification", this.lO);
+            this.jZ.on("kick", this.lN);
+            this.jZ.on("set_profile", this.lM);
+            this.jZ.on("connect", this.kd);
+            this.jZ.connect();
         }
         this.kv = 2;
     }
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_chat, viewGroup, false);
-        a(viewInflate);
+        this.binding = FragmentChatBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_channelPrivate = this.binding.buttonChatChannelPrivate;
+        this.button_channelPublic = this.binding.buttonChatChannelPublic;
+        this.button_controlAI = this.binding.buttonChatControlAiMode;
+        this.button_controlChangeTitle = this.binding.buttonChatControlChangeTitle;
+        this.button_controlHideAvatar = this.binding.buttonChatControlHideAvatar;
+        this.button_controlHidePanelButtons = this.binding.buttonChatControlHidePanelButtons;
+        this.button_controlImage = this.binding.buttonChatControlImage;
+        this.button_controlMute = this.binding.buttonChatControlMute;
+        this.button_controlTime = this.binding.buttonChatControlTime;
+        this.button_saveImage = this.binding.buttonChatPopupSaveImage;
+        this.button_sendMessage = this.binding.buttonChatSend;
+        this.button_viewProfile = this.binding.buttonChatViewProfile;
+        this.editText_textbox = this.binding.editTextChatTextbox;
+        this.fab_command = this.binding.fabCommand;
+        this.frameLayout_channelIndicator = this.binding.frameLayoutChatChannelIndicator;
+        this.frameLayout_chatOnlineCountBackground = this.binding.frameLayoutChatOnlineCountBackground;
+        this.frameLayout_chatOnlineCountContainer = this.binding.frameLayoutChatOnlineCountContainer;
+        this.frameLayout_container = this.binding.frameLayoutGameContainer;
+        this.frameLayout_nightMode = this.binding.frameLayoutNightMode;
+        this.gridView_emojiList = this.binding.gridViewChatEmojiList;
+        this.imageButton_closePopup = this.binding.imageButtonChatClosePopup;
+        this.imageButton_hideChannel = this.binding.imageButtonChatHideChannel;
+        this.imageButton_sendAudio = this.binding.imageButtonChatAudio;
+        this.imageButton_sendEmoji = this.binding.imageButtonChatSendEmoji;
+        this.imageButton_sendImage = this.binding.imageButtonChatSendImage;
+        this.imageButton_setting = this.binding.imageButtonChatSetting;
+        this.imageView_largeImage = this.binding.imageViewChatLargeImage;
+        this.linearLayout_chatChannel = this.binding.linearLayoutChatChannel;
+        this.linearLayout_controlPanel = this.binding.linearLayoutChatControlPanel;
+        this.linearLayout_controlPanelButtons = this.binding.linearLayoutChatControlPanelButtons;
+        this.recyclerView_chat = this.binding.recyclerViewChat;
+        this.relativeLayout_popup = this.binding.relativeLayoutChatPopup;
+        this.textView_atList = this.binding.textViewChatAtList;
+        this.textView_audioPlayingTimer = this.binding.textViewChatAudioPlayingTimer;
+        this.textView_chatOnlineCount = this.binding.textViewChatOnlineCount;
+        this.textView_chatOnlineCountTitle = this.binding.textViewChatOnlineCountTitle;
+        this.textView_reply = this.binding.textViewChatReply;
+        this.textView_toastAtMe = this.binding.textViewChatToastAtMe;
+        this.textView_toastMsg = this.binding.textViewChatToastMsg;
+        this.textView_totalUserCount = this.binding.textViewChatTotalUserCount;
+        this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
         this.lE = new ChatroomGameFragment();
-        return viewInflate;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -682,7 +649,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             this.countDownTimer.cancel();
         }
         if (this.jW != null) {
-            this.jZ.b("send_message", this.gson.toJson(new ChatMessageObject(this.jW.getUserId(), "", this.jW.getLevel(), this.jW.getEmail(), g.b(this.jW.getAvatar()), this.jW.getName(), this.jW.getTitle(), this.jW.getGender(), "android", this.jW.getActivationDate(), this.at, this.lt, this.reply, "##server talk @" + str, "", "", this.lu, 3, this.jW.isVerified(), this.jW.getCharacter(), this.jW.getCharactersStringArray(), null, null), ChatMessageObject.class));
+            this.jZ.emit("send_message", this.gson.toJson(new ChatMessageObject(this.jW.getUserId(), "", this.jW.getLevel(), this.jW.getEmail(), g.b(this.jW.getAvatar()), this.jW.getName(), this.jW.getTitle(), this.jW.getGender(), "android", this.jW.getActivationDate(), this.at, this.lt, this.reply, "##server talk @" + str, "", "", this.lu, 3, this.jW.isVerified(), this.jW.getCharacter(), this.jW.getCharactersStringArray(), null, null), ChatMessageObject.class));
         }
         int i2 = i * 1000;
         if (i2 > 0) {
@@ -1211,7 +1178,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             this.gson = new Gson();
         }
         ChatMessageObject chatMessageObject = new ChatMessageObject(this.jW.getUserId(), "", this.jW.getLevel(), this.jW.getEmail(), g.b(this.jW.getAvatar()), this.jW.getName(), this.jW.getTitle(), this.jW.getGender(), "android", this.jW.getActivationDate(), this.at, this.lt, this.reply, str, "", "", this.lu, 3, this.jW.isVerified(), this.jW.getCharacter(), this.jW.getCharactersStringArray(), this.lq, this.lp);
-        this.jZ.b("send_message", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
+        this.jZ.emit("send_message", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
         a(chatMessageObject);
     }
 
@@ -1241,7 +1208,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             return;
         }
         chatMessageObject.setTo(this.lD);
-        this.jZ.b("send_private_message", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
+        this.jZ.emit("send_private_message", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
         a(chatMessageObject.user_id, "", this.jW.getLevel(), chatMessageObject.getEmail(), chatMessageObject.avatar, chatMessageObject.getName(), chatMessageObject.getTitle(), chatMessageObject.getGender(), chatMessageObject.getPlatform(), chatMessageObject.getActivationDate(), chatMessageObject.getAt(), chatMessageObject.getReplyName(), chatMessageObject.getReply(), chatMessageObject.getMessage(), chatMessageObject.getBlockUserId(), true, chatMessageObject.isVerified(), chatMessageObject.getCharacter(), chatMessageObject.getTo(), this.lq, this.lp);
     }
 
@@ -1262,7 +1229,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             this.gson = new Gson();
         }
         ChatMessageObject chatMessageObject = new ChatMessageObject(this.jW.getUserId(), "", this.jW.getLevel(), this.jW.getEmail(), g.b(this.jW.getAvatar()), this.jW.getName(), this.jW.getTitle(), this.jW.getGender(), "android", this.jW.getActivationDate(), this.at, this.lt, this.reply, "", str, "", this.lu, 4, this.jW.isVerified(), this.jW.getCharacter(), this.jW.getCharactersStringArray(), this.lq, this.lp);
-        this.jZ.b("send_image", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
+        this.jZ.emit("send_image", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
         c(chatMessageObject);
         cz();
         cA();
@@ -1285,7 +1252,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             this.gson = new Gson();
         }
         ChatMessageObject chatMessageObject = new ChatMessageObject(this.jW.getUserId(), "", this.jW.getLevel(), this.jW.getEmail(), g.b(this.jW.getAvatar()), this.jW.getName(), this.jW.getTitle(), this.jW.getGender(), "android", this.jW.getActivationDate(), this.at, this.lt, this.reply, "", "", str, this.lu, 5, this.jW.isVerified(), this.jW.getCharacter(), this.jW.getCharactersStringArray(), this.lq, this.lp);
-        this.jZ.b("send_audio", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
+        this.jZ.emit("send_audio", this.gson.toJson(chatMessageObject, ChatMessageObject.class));
         d(chatMessageObject);
         cz();
         cA();
@@ -1300,7 +1267,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
         if (this.gson == null) {
             this.gson = new Gson();
         }
-        this.jZ.b("system_action", this.gson.toJson(chatroomSystemAction, type));
+        this.jZ.emit("system_action", this.gson.toJson(chatroomSystemAction, type));
     }
 
     @Override // com.picacomic.fregata.fragments.BaseImagePickFragment
@@ -1336,19 +1303,19 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment
     public void onDetach() {
         super.onDetach();
-        this.jZ.eO();
-        this.jZ.c("broadcast_message", this.lS);
-        this.jZ.c("broadcast_image", this.lV);
-        this.jZ.c("broadcast_audio", this.lW);
-        this.jZ.c("new_connection", this.lP);
-        this.jZ.c("connection_close", this.lQ);
-        this.jZ.c("change_character_icon", this.lR);
-        this.jZ.c("broadcast_ads", this.lT);
-        this.jZ.c("change_title", this.lL);
-        this.jZ.c("receive_notification", this.lO);
-        this.jZ.c("kick", this.lN);
-        this.jZ.c("set_profile", this.lM);
-        this.jZ.c("connect", this.kd);
+        this.jZ.disconnect();
+        this.jZ.off("broadcast_message", this.lS);
+        this.jZ.off("broadcast_image", this.lV);
+        this.jZ.off("broadcast_audio", this.lW);
+        this.jZ.off("new_connection", this.lP);
+        this.jZ.off("connection_close", this.lQ);
+        this.jZ.off("change_character_icon", this.lR);
+        this.jZ.off("broadcast_ads", this.lT);
+        this.jZ.off("change_title", this.lL);
+        this.jZ.off("receive_notification", this.lO);
+        this.jZ.off("kick", this.lN);
+        this.jZ.off("set_profile", this.lM);
+        this.jZ.off("connect", this.kd);
         if (this.kY != null) {
             this.kY.cancel();
         }

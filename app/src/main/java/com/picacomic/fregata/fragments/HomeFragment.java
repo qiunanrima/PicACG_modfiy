@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentHomeBinding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
@@ -51,25 +51,13 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     public static final String TAG = "HomeFragment";
     Call<GeneralResponse<AnnouncementsResponse>> jP;
 
-    @BindView(R.id.linearLayout_home_announcements)
+    FragmentHomeBinding binding;
     LinearLayout linearLayout_announcements;
-
-    @BindView(R.id.linearLayout_home_collection_1)
     LinearLayout linearLayout_collection_1;
-
-    @BindView(R.id.linearLayout_home_collection_2)
     LinearLayout linearLayout_collection_2;
-
-    @BindView(R.id.linearLayout_home_collection_3)
     LinearLayout linearLayout_collection_3;
-
-    @BindView(R.id.linearLayout_home_collection_4)
     LinearLayout linearLayout_collection_4;
-
-    @BindView(R.id.linearLayout_home_collection_5)
     LinearLayout linearLayout_collection_5;
-
-    @BindView(R.id.linearLayout_home_banner_pager_indicators)
     LinearLayout linearLayout_pagerIndicators;
     Menu menu;
     int page;
@@ -85,25 +73,31 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     int pw;
     String px;
 
-    @BindView(R.id.textView_home_banner_title)
     TextView textView_bannerTitle;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
-
-    @BindView(R.id.viewPager_home_banner)
     ViewPager viewPager_banner;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_home, viewGroup, false);
+        this.binding = FragmentHomeBinding.inflate(layoutInflater, viewGroup, false);
+        this.linearLayout_announcements = this.binding.linearLayoutHomeAnnouncements;
+        this.linearLayout_collection_1 = this.binding.linearLayoutHomeCollection1;
+        this.linearLayout_collection_2 = this.binding.linearLayoutHomeCollection2;
+        this.linearLayout_collection_3 = this.binding.linearLayoutHomeCollection3;
+        this.linearLayout_collection_4 = this.binding.linearLayoutHomeCollection4;
+        this.linearLayout_collection_5 = this.binding.linearLayoutHomeCollection5;
+        this.linearLayout_pagerIndicators = this.binding.linearLayoutHomeBannerPagerIndicators;
+        this.textView_bannerTitle = this.binding.textViewHomeBannerTitle;
+        this.toolbar = this.binding.toolbar;
+        this.viewPager_banner = this.binding.viewPagerHomeBanner;
+
         if (e.E(getContext()) != null && !e.E(getContext()).equalsIgnoreCase("") && (this.pt == null || (this.pt != null && this.pt.size() == 0))) {
             this.pt = (ArrayList) new Gson().fromJson(e.E(getContext()), new TypeToken<List<AnnouncementObject>>() { // from class: com.picacomic.fregata.fragments.HomeFragment.1
             }.getType());
         }
         setHasOptionsMenu(true);
-        a(viewInflate);
-        return viewInflate;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.Fragment
@@ -276,6 +270,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
         if (this.pn != null) {
             this.pn.cancel();
         }
+        this.binding = null;
         super.onDetach();
     }
 

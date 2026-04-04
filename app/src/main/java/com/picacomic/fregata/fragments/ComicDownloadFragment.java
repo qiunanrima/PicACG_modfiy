@@ -20,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentComicDownloadBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.activities.BaseActivity;
@@ -53,10 +53,8 @@ import retrofit2.Response;
 public class ComicDownloadFragment extends BaseFragment implements k {
     public static final String TAG = "ComicDownloadFragment";
 
-    @BindView(R.id.button_comic_download_download)
+    FragmentComicDownloadBinding binding;
     Button button_download;
-
-    @BindView(R.id.button_comic_download_manage)
     Button button_manage;
     String comicId;
     int episodeTotal;
@@ -71,13 +69,8 @@ public class ComicDownloadFragment extends BaseFragment implements k {
     int nm;
     private boolean nt;
 
-    @BindView(R.id.recyclerView_comic_download_episode)
     RecyclerView recyclerView_episode;
-
-    @BindView(R.id.textView_comic_download_test_broadcast_receiver)
     TextView textView_testBroadcast;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
     boolean nk = true;
     boolean nu = false;
@@ -144,13 +137,18 @@ public class ComicDownloadFragment extends BaseFragment implements k {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_comic_download, viewGroup, false);
+        this.binding = FragmentComicDownloadBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_download = this.binding.buttonComicDownloadDownload;
+        this.button_manage = this.binding.buttonComicDownloadManage;
+        this.recyclerView_episode = this.binding.recyclerViewComicDownloadEpisode;
+        this.textView_testBroadcast = this.binding.textViewComicDownloadTestBroadcastReceiver;
+        this.toolbar = this.binding.toolbar;
         if (this.comicId == null) {
             getFragmentManager().popBackStack();
         }
         setHasOptionsMenu(true);
-        a(viewInflate);
-        return viewInflate;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.Fragment

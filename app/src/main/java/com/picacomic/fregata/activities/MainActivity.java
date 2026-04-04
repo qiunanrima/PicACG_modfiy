@@ -18,9 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.BindViews;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ActivityMainBinding;
 import com.google.gson.Gson;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.b.c;
@@ -48,19 +46,11 @@ import retrofit2.Response;
 /* JADX INFO: loaded from: classes.dex */
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
-    @BindView(R.id.bannerWebview)
+    ActivityMainBinding binding;
     public BannerWebview bannerWebview;
-
-    @BindView(R.id.imageButton_control_block)
     ImageButton button_controlBlock;
-
-    @BindView(R.id.imageButton_control_exp)
     ImageButton button_controlExp;
-
-    @BindView(R.id.button_tabbar_home)
     AppCompatImageButton button_home;
-
-    @BindViews({R.id.button_tabbar_home, R.id.button_tabbar_category, R.id.button_tabbar_game, R.id.button_tabbar_profile, R.id.button_tabbar_setting})
     AppCompatImageButton[] buttons_tabbar;
     Animation iA;
     Animation iB;
@@ -77,10 +67,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public boolean iM = false;
     public boolean iN = false;
 
-    @BindView(R.id.linearLayout_tabbar)
     LinearLayout linearLayout_tabbar;
 
-    @BindView(R.id.popupWebview)
     public PopupWebview popupWebview;
 
     @Override // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
@@ -91,8 +79,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+        this.binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(this.binding.getRoot());
+        
+        this.bannerWebview = this.binding.bannerWebview;
+        this.button_controlBlock = this.binding.imageButtonControlBlock;
+        this.button_controlExp = this.binding.imageButtonControlExp;
+        this.button_home = (AppCompatImageButton) this.binding.buttonTabbarHome;
+        this.linearLayout_tabbar = this.binding.linearLayoutTabbar;
+        this.popupWebview = this.binding.popupWebview;
+        this.buttons_tabbar = new AppCompatImageButton[]{
+            (AppCompatImageButton) this.binding.buttonTabbarHome,
+            (AppCompatImageButton) this.binding.buttonTabbarCategory,
+            (AppCompatImageButton) this.binding.buttonTabbarGame,
+            (AppCompatImageButton) this.binding.buttonTabbarProfile,
+            (AppCompatImageButton) this.binding.buttonTabbarSetting
+        };
+
         e.j(this, (String) null);
         e.l(this, (String) null);
         init();

@@ -13,8 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.FragmentProfilePopupBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.BaseActivity;
 import com.picacomic.fregata.activities.MainActivity;
@@ -38,45 +37,23 @@ import retrofit2.Response;
 public class ProfilePopupFragment extends DialogFragment {
     public static final String TAG = "ProfilePopupFragment";
 
-    @BindView(R.id.imageView_profile_popup_avatar)
+    FragmentProfilePopupBinding binding;
     ImageView imageView_avatar;
-
-    @BindView(R.id.imageView_profile_popup_character)
     ImageView imageView_character;
     UserProfileObject jW;
     Call<GeneralResponse<UserProfileResponse>> jX;
-
-    @BindView(R.id.linearLayout_profile_popup_admin_function)
     LinearLayout linearLayout_adminFunction;
     Call<GeneralResponse<UserProfileDirtyResponse>> oo;
     Call<GeneralResponse> qZ;
     Call<GeneralResponse> ra;
-
-    @BindView(R.id.textView_profile_popup_function)
     TextView textView_adminFunction;
-
-    @BindView(R.id.textView_profile_popup_block)
     TextView textView_block;
-
-    @BindView(R.id.textView_profile_popup_level)
     TextView textView_level;
-
-    @BindView(R.id.textView_profile_popup_level_title)
     TextView textView_levelTitle;
-
-    @BindView(R.id.textView_profile_popup_name)
     TextView textView_name;
-
-    @BindView(R.id.textView_profile_popup_remove_comment)
     TextView textView_removeComment;
-
-    @BindView(R.id.textView_profile_popup_slogan)
     TextView textView_slogan;
-
-    @BindView(R.id.textView_profile_popup_title)
     TextView textView_title;
-
-    @BindView(R.id.textView_profile_popup_woo)
     TextView textView_woo;
     public String userId;
 
@@ -107,8 +84,19 @@ public class ProfilePopupFragment extends DialogFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_profile_popup, viewGroup, false);
-        ButterKnife.bind(this, viewInflate);
+        this.binding = FragmentProfilePopupBinding.inflate(layoutInflater, viewGroup, false);
+        this.imageView_avatar = this.binding.imageViewProfilePopupAvatar;
+        this.imageView_character = this.binding.imageViewProfilePopupCharacter;
+        this.linearLayout_adminFunction = this.binding.linearLayoutProfilePopupAdminFunction;
+        this.textView_adminFunction = this.binding.textViewProfilePopupFunction;
+        this.textView_block = this.binding.textViewProfilePopupBlock;
+        this.textView_level = this.binding.textViewProfilePopupLevel;
+        this.textView_levelTitle = this.binding.textViewProfilePopupLevelTitle;
+        this.textView_name = this.binding.textViewProfilePopupName;
+        this.textView_removeComment = this.binding.textViewProfilePopupRemoveComment;
+        this.textView_slogan = this.binding.textViewProfilePopupSlogan;
+        this.textView_title = this.binding.textViewProfilePopupTitle;
+        this.textView_woo = this.binding.textViewProfilePopupWoo;
         this.textView_adminFunction.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfilePopupFragment.1
             @Override // android.view.View.OnClickListener
             public void onClick(View view) {
@@ -174,7 +162,7 @@ public class ProfilePopupFragment extends DialogFragment {
         } else if (this.userId != null) {
             cd();
         }
-        return viewInflate;
+        return this.binding.getRoot();
     }
 
     @Override // androidx.fragment.app.DialogFragment

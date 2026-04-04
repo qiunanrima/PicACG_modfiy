@@ -12,7 +12,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentChangePasswordBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.b.c;
@@ -28,29 +28,27 @@ import retrofit2.Response;
 public class ChangePasswordFragment extends BaseFragment {
     public static final String TAG = "ChangePasswordFragment";
 
-    @BindView(R.id.button_change_password)
+    FragmentChangePasswordBinding binding;
     Button button_changePassword;
-
-    @BindView(R.id.checkBox_change_password_show_password)
     CheckBox checkBox_showPassword;
-
-    @BindView(R.id.editText_change_password_new)
     EditText editText_password;
-
-    @BindView(R.id.editText_change_password_new_confirm)
     EditText editText_passwordConfirm;
     boolean kK;
     boolean kL;
     Call<RegisterResponse> kM;
 
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_change_password, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentChangePasswordBinding.inflate(layoutInflater, viewGroup, false);
+        this.button_changePassword = this.binding.buttonChangePassword;
+        this.checkBox_showPassword = this.binding.checkBoxChangePasswordShowPassword;
+        this.editText_password = this.binding.editTextChangePasswordNew;
+        this.editText_passwordConfirm = this.binding.editTextChangePasswordNewConfirm;
+        this.toolbar = this.binding.toolbar;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

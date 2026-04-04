@@ -40,7 +40,7 @@ public final class a implements Downloader {
             }
             cacheControlBuild = builder.build();
         }
-        Request.Builder builderUrl = new Request.Builder().url(uri.toString());
+        Request.Builder builderUrl = new Request.Builder().url(uri.toString()).header("User-Agent", "okhttp/3.8.1");
         if (cacheControlBuild != null) {
             builderUrl.cacheControl(cacheControlBuild);
         }

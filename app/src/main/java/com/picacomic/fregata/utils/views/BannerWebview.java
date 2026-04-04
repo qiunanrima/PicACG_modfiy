@@ -7,8 +7,8 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.view.LayoutInflater;
+import com.picacomic.fregata.databinding.LayoutBannerWebviewBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.g;
@@ -18,13 +18,9 @@ public class BannerWebview extends RelativeLayout {
     CountDownTimer countDownTimer;
     String defaultUrl;
 
-    @BindView(R.id.imageButton_banner_close)
+    LayoutBannerWebviewBinding binding;
     ImageButton imageButton_close;
-
-    @BindView(R.id.relativeLayout_banner_container)
     RelativeLayout relativeLayout_container;
-
-    @BindView(R.id.webview_banner)
     WebView webView_banner;
 
     public BannerWebview(Context context) {
@@ -53,8 +49,10 @@ public class BannerWebview extends RelativeLayout {
     }
 
     public void init(Context context) {
-        inflate(context, R.layout.layout_banner_webview, this);
-        ButterKnife.bind(this);
+        this.binding = LayoutBannerWebviewBinding.inflate(LayoutInflater.from(context), this, true);
+        this.imageButton_close = this.binding.imageButtonBannerClose;
+        this.relativeLayout_container = this.binding.relativeLayoutBannerContainer;
+        this.webView_banner = this.binding.webviewBanner;
         g.k(this.webView_banner);
         this.webView_banner.loadUrl(this.defaultUrl);
         this.imageButton_close.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.BannerWebview.1

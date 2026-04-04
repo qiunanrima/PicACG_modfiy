@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ImageView;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentSupportUsAdsGameBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.utils.a;
 import com.picacomic.fregata.utils.g;
@@ -15,17 +15,16 @@ import com.picacomic.fregata.utils.g;
 public class SupportUsAdsGameFragment extends BaseFragment {
     public static final String TAG = "SupportUsAdsGameFragment";
 
-    @BindView(R.id.imageView_support_us_game)
+    FragmentSupportUsAdsGameBinding binding;
     ImageView imageView_game;
-
-    @BindView(R.id.webView_support_us_ads)
     WebView webView_ads;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_support_us_ads_game, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentSupportUsAdsGameBinding.inflate(layoutInflater, viewGroup, false);
+        this.imageView_game = this.binding.imageViewSupportUsGame;
+        this.webView_ads = this.binding.webViewSupportUsAds;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

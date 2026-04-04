@@ -6,8 +6,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.view.LayoutInflater;
+import com.picacomic.fregata.databinding.LayoutAnnouncementCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.objects.AnnouncementObject;
 import java.util.ArrayList;
@@ -16,47 +16,37 @@ import java.util.ArrayList;
 public class AnnouncementContainerView extends LinearLayout {
     Context context;
 
-    @BindView(R.id.imageView_announcement_icon)
+    LayoutAnnouncementCellBinding binding;
     ImageView imageView_icon;
-
-    @BindView(R.id.linearLayout_announcement_content)
     LinearLayout linearLayout_content;
     LinearLayout.LayoutParams sf;
     View.OnClickListener sg;
     int sh;
-
-    @BindView(R.id.textView_announcement_view_count)
     TextView textView_count;
-
-    @BindView(R.id.textView_announcement_title)
     TextView textView_title;
 
     public AnnouncementContainerView(Context context) {
         super(context);
         this.sh = 0;
-        inflate(context, R.layout.layout_announcement_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public AnnouncementContainerView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         this.sh = 0;
-        inflate(context, R.layout.layout_announcement_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public AnnouncementContainerView(Context context, AttributeSet attributeSet, int i) {
         super(context, attributeSet, i);
         this.sh = 0;
-        inflate(context, R.layout.layout_announcement_cell, this);
-        ButterKnife.bind(this);
+        init();
     }
 
     public AnnouncementContainerView(Context context, ArrayList<AnnouncementObject> arrayList, int i, View.OnClickListener onClickListener, View.OnClickListener onClickListener2) {
         super(context);
         this.sh = 0;
-        inflate(context, R.layout.layout_announcement_cell, this);
-        ButterKnife.bind(this);
+        init();
         this.context = context;
         this.sg = onClickListener;
         this.sh = i;
@@ -106,5 +96,13 @@ public class AnnouncementContainerView extends LinearLayout {
 
     public void setTextView_count(TextView textView) {
         this.textView_count = textView;
+    }
+
+    private void init() {
+        this.binding = LayoutAnnouncementCellBinding.inflate(LayoutInflater.from(getContext()), this, true);
+        this.imageView_icon = this.binding.imageViewAnnouncementIcon;
+        this.linearLayout_content = this.binding.linearLayoutAnnouncementContent;
+        this.textView_count = this.binding.textViewAnnouncementViewCount;
+        this.textView_title = this.binding.textViewAnnouncementTitle;
     }
 }

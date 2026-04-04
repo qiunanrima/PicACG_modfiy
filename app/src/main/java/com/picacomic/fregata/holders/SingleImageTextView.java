@@ -5,8 +5,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import android.view.LayoutInflater;
+import com.picacomic.fregata.databinding.ItemSingleImageTextViewBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.objects.ComicListObject;
 import com.picacomic.fregata.utils.g;
@@ -16,12 +16,10 @@ import com.squareup.picasso.Picasso;
 /* JADX INFO: loaded from: classes.dex */
 public class SingleImageTextView extends LinearLayout {
 
-    @BindView(R.id.imageView_single_image_text_view_image)
+    ItemSingleImageTextViewBinding binding;
     ComicThumbImageView imageView_image;
     int targetHeight;
     int targetWidth;
-
-    @BindView(R.id.textView_single_image_text_view_title)
     TextView textView_title;
 
     public SingleImageTextView(Context context) {
@@ -46,8 +44,9 @@ public class SingleImageTextView extends LinearLayout {
         super(context);
         this.targetWidth = 80;
         this.targetHeight = 120;
-        inflate(context, R.layout.item_single_image_text_view, this);
-        ButterKnife.bind(this);
+        this.binding = ItemSingleImageTextViewBinding.inflate(LayoutInflater.from(context), this, true);
+        this.imageView_image = this.binding.imageViewSingleImageTextViewImage;
+        this.textView_title = this.binding.textViewSingleImageTextViewTitle;
         Picasso.with(context).load(g.b(comicListObject.getThumb())).resize(this.targetWidth, this.targetHeight).centerCrop().into(this.imageView_image);
         this.textView_title.setText(comicListObject.getTitle() + "");
         setOnClickListener(onClickListener);

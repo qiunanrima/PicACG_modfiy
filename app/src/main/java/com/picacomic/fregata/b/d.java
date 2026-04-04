@@ -62,7 +62,19 @@ public class d {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Response responseProceed = chain.proceed(request.newBuilder().header("api-key", "C69BAF41DA5ABD1FFEDC6D2FEA56B").header("accept", "application/vnd.picacomic.com.v1+json").header("app-channel", d.this.tx + "").header("time", str).header("nonce", strReplace).header("signature", strC).header("app-version", d.version).header("app-uuid", d.tu).header("image-quality", d.this.tw).header("app-platform", "android").header("app-build-version", d.tv).method(request.method(), request.body()).build());
+                Response responseProceed = chain.proceed(request.newBuilder()
+                        .header("api-key", "C69BAF41DA5ABD1FFEDC6D2FEA56B")
+                        .header("accept", "application/vnd.picacomic.com.v1+json")
+                        .header("app-channel", d.this.tx + "")
+                        .header("time", str).header("nonce", strReplace)
+                        .header("signature", strC)
+                        .header("app-version", d.version)
+                        .header("app-uuid", d.tu)
+                        .header("image-quality", d.this.tw)
+                        .header("app-platform", "android")
+                        .header("app-build-version", d.tv)
+                        .header("User-Agent", "okhttp/3.8.1")
+                        .method(request.method(), request.body()).build());
                 String str2 = responseProceed.headers().get("Server-Time");
                 com.picacomic.fregata.utils.f.D(d.TAG, "Server Time = " + str2);
                 try {

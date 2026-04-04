@@ -7,7 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentSupportUsContainerBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.adapters.SupportUsFragmentPagerAdapter;
@@ -18,20 +18,18 @@ public class SupportUsContainerFragment extends BaseFragment {
     public static final String TAG = "SupportUsContainerFragment";
     SupportUsFragmentPagerAdapter rO;
 
-    @BindView(R.id.tabs)
+    FragmentSupportUsContainerBinding binding;
     TabLayout tabLayout;
-
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
-
-    @BindView(R.id.viewPager_support_us)
     ViewPager viewPager_tags;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_support_us_container, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentSupportUsContainerBinding.inflate(layoutInflater, viewGroup, false);
+        this.tabLayout = this.binding.tabs;
+        this.toolbar = this.binding.toolbar;
+        this.viewPager_tags = this.binding.viewPagerSupportUs;
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

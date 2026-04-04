@@ -5,7 +5,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentChatroomContainerBinding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
@@ -34,14 +34,15 @@ public class ChatroomContainerFragment extends BaseFragment {
     Call<GeneralResponse<ChatroomListResponse>> kS;
     ChatroomFragmentPagerAdapter kT;
 
-    @BindView(R.id.viewPager_chatroom)
+    FragmentChatroomContainerBinding binding;
     ViewPager viewPager_tags;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_chatroom_container, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentChatroomContainerBinding.inflate(layoutInflater, viewGroup, false);
+        this.viewPager_tags = this.binding.viewPagerChatroom;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment

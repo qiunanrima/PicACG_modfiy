@@ -5,8 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.picacomic.fregata.databinding.ItemNotificationCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.h;
 import com.picacomic.fregata.objects.NotificationObject;
@@ -19,27 +18,24 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder implements V
     public static final String TAG = "NotificationViewHolder";
     Context context;
 
-    @BindView(R.id.imageView_chatroom_recycler_view_cell_avatar)
-    ImageView imageView_avatar;
-
-    @BindView(R.id.imageView_chatroom_recycler_view_cell_verified)
-    ImageView imageView_character;
-
-    @BindView(R.id.imageView_notification_image)
-    ImageView imageView_image;
+    ItemNotificationCellBinding binding;
+    public ImageView imageView_avatar;
+    public ImageView imageView_character;
+    public ImageView imageView_image;
     h jN;
     NotificationObject sV;
-
-    @BindView(R.id.textView_notification_content)
-    TextView textView_content;
-
-    @BindView(R.id.textView_notification_timestamp)
-    TextView textView_timestamp;
+    public TextView textView_content;
+    public TextView textView_timestamp;
 
     public NotificationViewHolder(Context context, View view, h hVar) {
         super(view);
+        this.binding = ItemNotificationCellBinding.bind(view);
+        this.imageView_avatar = view.findViewById(R.id.imageView_chatroom_recycler_view_cell_avatar);
+        this.imageView_character = view.findViewById(R.id.imageView_chatroom_recycler_view_cell_verified);
+        this.imageView_image = view.findViewById(R.id.imageView_notification_image);
+        this.textView_content = view.findViewById(R.id.textView_notification_content);
+        this.textView_timestamp = view.findViewById(R.id.textView_notification_timestamp);
         this.context = context;
-        ButterKnife.bind(this, view);
         this.jN = hVar;
         this.imageView_avatar.setOnClickListener(this);
         this.imageView_image.setOnClickListener(this);

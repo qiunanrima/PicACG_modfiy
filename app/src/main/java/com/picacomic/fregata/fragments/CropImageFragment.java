@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import butterknife.BindView;
+import com.picacomic.fregata.databinding.FragmentCropImageBinding;
 import com.isseiaoki.simplecropview.CropImageView;
 import com.isseiaoki.simplecropview.b.b;
 import com.isseiaoki.simplecropview.b.c;
@@ -24,17 +24,11 @@ import java.io.File;
 public class CropImageFragment extends BaseFragment {
     public static final String TAG = "CropImageFragment";
 
-    @BindView(R.id.imageButton_crop_image_done)
+    FragmentCropImageBinding binding;
     ImageButton imageButton_done;
-
-    @BindView(R.id.imageButton_crop_image_rotate_left)
     ImageButton imageButton_rotateLeft;
-
-    @BindView(R.id.imageButton_crop_image_rotate_right)
     ImageButton imageButton_rotateRight;
     Uri ks;
-
-    @BindView(R.id.cropImageView)
     CropImageView mCropView;
     String oD;
     Uri oE;
@@ -62,9 +56,13 @@ public class CropImageFragment extends BaseFragment {
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View viewInflate = layoutInflater.inflate(R.layout.fragment_crop_image, viewGroup, false);
-        a(viewInflate);
-        return viewInflate;
+        this.binding = FragmentCropImageBinding.inflate(layoutInflater, viewGroup, false);
+        this.imageButton_done = this.binding.imageButtonCropImageDone;
+        this.imageButton_rotateLeft = this.binding.imageButtonCropImageRotateLeft;
+        this.imageButton_rotateRight = this.binding.imageButtonCropImageRotateRight;
+        this.mCropView = this.binding.cropImageView;
+        a(this.binding.getRoot());
+        return this.binding.getRoot();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
