@@ -445,7 +445,7 @@ public class ComicDetailFragment extends BaseFragment implements k {
         }
         DbComicViewRecordObject dbComicViewRecordObjectAx = com.picacomic.fregata.utils.b.ax(this.nn.getComicId());
         if (dbComicViewRecordObjectAx != null) {
-            this.button_startRead.setText("從 " + dbComicViewRecordObjectAx.getEpisodeTitle() + "\nP." + dbComicViewRecordObjectAx.getPage() + " 開始");
+            this.button_startRead.setText("从 " + dbComicViewRecordObjectAx.getEpisodeTitle() + "\nP." + dbComicViewRecordObjectAx.getPage() + " 开始");
             this.button_startRead.setTextSize(0, getResources().getDimension(R.dimen.textsize_content_1));
         } else {
             this.button_startRead.setText(R.string.comic_detail_start_read);

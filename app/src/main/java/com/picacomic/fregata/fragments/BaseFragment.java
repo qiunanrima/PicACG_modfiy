@@ -31,7 +31,7 @@ public class BaseFragment extends Fragment implements i {
             if (getActivity() == null || !(getActivity() instanceof MainActivity)) {
                 return;
             }
-            ((MainActivity) getActivity()).F(a.getDetail());
+            //((MainActivity) getActivity()).F(a.getDetail());
             return;
         }
         if (getActivity() == null || !(getActivity() instanceof MainActivity)) {

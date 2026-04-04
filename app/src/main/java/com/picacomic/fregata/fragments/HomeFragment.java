@@ -58,7 +58,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     LinearLayout linearLayout_collection_3;
     LinearLayout linearLayout_collection_4;
     LinearLayout linearLayout_collection_5;
-    LinearLayout linearLayout_pagerIndicators;
+    //LinearLayout linearLayout_pagerIndicators;
     Menu menu;
     int page;
     Call<GeneralResponse<BannersResponse>> pn;
@@ -73,9 +73,9 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     int pw;
     String px;
 
-    TextView textView_bannerTitle;
+    //TextView textView_bannerTitle;
     Toolbar toolbar;
-    ViewPager viewPager_banner;
+    //ViewPager viewPager_banner;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
@@ -86,10 +86,10 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
         this.linearLayout_collection_3 = this.binding.linearLayoutHomeCollection3;
         this.linearLayout_collection_4 = this.binding.linearLayoutHomeCollection4;
         this.linearLayout_collection_5 = this.binding.linearLayoutHomeCollection5;
-        this.linearLayout_pagerIndicators = this.binding.linearLayoutHomeBannerPagerIndicators;
-        this.textView_bannerTitle = this.binding.textViewHomeBannerTitle;
+        //this.linearLayout_pagerIndicators = this.binding.linearLayoutHomeBannerPagerIndicators;
+        //this.textView_bannerTitle = this.binding.textViewHomeBannerTitle;
         this.toolbar = this.binding.toolbar;
-        this.viewPager_banner = this.binding.viewPagerHomeBanner;
+        //this.viewPager_banner = this.binding.viewPagerHomeBanner;
 
         if (e.E(getContext()) != null && !e.E(getContext()).equalsIgnoreCase("") && (this.pt == null || (this.pt != null && this.pt.size() == 0))) {
             this.pt = (ArrayList) new Gson().fromJson(e.E(getContext()), new TypeToken<List<AnnouncementObject>>() { // from class: com.picacomic.fregata.fragments.HomeFragment.1
@@ -138,8 +138,8 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
         this.toolbar.setTitle(R.string.title_home);
         this.pw = 0;
         this.page = 1;
-        this.viewPager_banner.getLayoutParams().height = (g.as(getActivity()) * 9) / 16;
-        this.pp = new PagerIndicator(getActivity(), this.linearLayout_pagerIndicators, 5);
+        //this.viewPager_banner.getLayoutParams().height = (g.as(getActivity()) * 9) / 16;
+        //this.pp = new PagerIndicator(getActivity(), this.linearLayout_pagerIndicators, 5);
         String[] strArr = {"dd3a46f9-1fe0-45e4-8fe9-c84950b73083.jpg", "184ad860-e20f-4517-a07b-d81c17d9620a.jpg", "b2afb775-5e89-4d1f-a8c8-9cc56873af61.jpg", "d75914f5-e0ca-4914-9ed3-afc272b3067c.jpg"};
         String[] strArr2 = {"cover.jpg", "cover.jpg", "cover.jpg", "cover.jpg"};
         ThumbnailObject[] thumbnailObjectArr = new ThumbnailObject[4];
@@ -153,9 +153,9 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     @Override // com.picacomic.fregata.fragments.BaseFragment
     public void ca() {
         super.ca();
-        this.pq = new BannerPagerAdapter(getContext(), this.ps, this);
-        this.viewPager_banner.setAdapter(this.pq);
-        this.viewPager_banner.addOnPageChangeListener(new ViewPager.OnPageChangeListener() { // from class: com.picacomic.fregata.fragments.HomeFragment.4
+        //this.pq = new BannerPagerAdapter(getContext(), this.ps, this);
+        //this.viewPager_banner.setAdapter(this.pq);
+        /*this.viewPager_banner.addOnPageChangeListener(new ViewPager.OnPageChangeListener() { // from class: com.picacomic.fregata.fragments.HomeFragment.4
             @Override // androidx.viewpager.widget.ViewPager.OnPageChangeListener
             public void onPageScrollStateChanged(int i) {
             }
@@ -170,7 +170,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
                 HomeFragment.this.textView_bannerTitle.setText(HomeFragment.this.ps.get(i).getTitle() + " - " + HomeFragment.this.ps.get(i).getShortDescription());
                 HomeFragment.this.dm();
             }
-        });
+        });'*/
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -192,7 +192,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
                 if (list != null && list.size() > 0) {
                     this.ps.addAll(list);
                     this.pp.setSize(this.ps.size());
-                    this.textView_bannerTitle.setText(this.ps.get(0).getTitle() + " - " + this.ps.get(0).getShortDescription());
+                    //this.textView_bannerTitle.setText(this.ps.get(0).getTitle() + " - " + this.ps.get(0).getShortDescription());
                     this.pq.notifyDataSetChanged();
                 } else {
                     dj();
@@ -264,10 +264,10 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
                     if (HomeFragment.this.pp != null) {
                         HomeFragment.this.pp.setSize(HomeFragment.this.ps.size());
                     }
-                    if (HomeFragment.this.textView_bannerTitle == null || HomeFragment.this.ps.size() <= 0) {
-                        return;
-                    }
-                    HomeFragment.this.textView_bannerTitle.setText(HomeFragment.this.ps.get(0).getTitle() + " - " + HomeFragment.this.ps.get(0).getShortDescription());
+                    //if (HomeFragment.this.textView_bannerTitle == null || HomeFragment.this.ps.size() <= 0) {
+                        //return;
+                    //}
+                    //HomeFragment.this.textView_bannerTitle.setText(HomeFragment.this.ps.get(0).getTitle() + " - " + HomeFragment.this.ps.get(0).getShortDescription());
                     return;
                 }
                 try {
@@ -361,11 +361,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
             public void onFinish() {
                 if (HomeFragment.this.pp != null) {
                     try {
-                        if (HomeFragment.this.pp.hasNext()) {
-                            HomeFragment.this.viewPager_banner.setCurrentItem(HomeFragment.this.pp.getCurrentIndex() + 1);
-                        } else {
-                            HomeFragment.this.viewPager_banner.setCurrentItem(0);
-                        }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
