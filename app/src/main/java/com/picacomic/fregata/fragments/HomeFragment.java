@@ -242,7 +242,12 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     }
 
     public void dj() {
-        this.pn = new d(getContext()).dO().as(e.z(getActivity()));
+        Context context = getContext();
+        if (context == null || getActivity() == null) {
+            return;
+        }
+        final Context appContext = context.getApplicationContext();
+        this.pn = new d(context).dO().as(e.z(getActivity()));
         this.pn.enqueue(new Callback<GeneralResponse<BannersResponse>>() { // from class: com.picacomic.fregata.fragments.HomeFragment.8
             @Override // retrofit2.Callback
             public void onResponse(Call<GeneralResponse<BannersResponse>> call, Response<GeneralResponse<BannersResponse>> response) {
@@ -251,7 +256,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
                     if (response.body().data == null || response.body().data.getBanners() == null) {
                         return;
                     }
-                    e.m(HomeFragment.this.getContext(), new Gson().toJson(response.body().data.getBanners()));
+                    e.m(appContext, new Gson().toJson(response.body().data.getBanners()));
                     if (HomeFragment.this.ps != null) {
                         HomeFragment.this.ps.clear();
                     } else {
@@ -286,7 +291,11 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     }
 
     public void dk() {
-        this.jP = new d(getContext()).dO().f(e.z(getActivity()), this.page);
+        Context context = getContext();
+        if (context == null || getActivity() == null) {
+            return;
+        }
+        this.jP = new d(context).dO().f(e.z(getActivity()), this.page);
         this.jP.enqueue(new Callback<GeneralResponse<AnnouncementsResponse>>() { // from class: com.picacomic.fregata.fragments.HomeFragment.9
             @Override // retrofit2.Callback
             public void onResponse(Call<GeneralResponse<AnnouncementsResponse>> call, Response<GeneralResponse<AnnouncementsResponse>> response) {
@@ -317,7 +326,11 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
     }
 
     public void dl() {
-        this.po = new d(getContext()).dO().aq(e.z(getActivity()));
+        Context context = getContext();
+        if (context == null || getActivity() == null) {
+            return;
+        }
+        this.po = new d(context).dO().aq(e.z(getActivity()));
         this.po.enqueue(new Callback<GeneralResponse<CollectionsResponse>>() { // from class: com.picacomic.fregata.fragments.HomeFragment.10
             @Override // retrofit2.Callback
             public void onResponse(Call<GeneralResponse<CollectionsResponse>> call, Response<GeneralResponse<CollectionsResponse>> response) {

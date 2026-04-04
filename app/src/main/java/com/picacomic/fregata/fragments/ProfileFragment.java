@@ -184,9 +184,37 @@ public class ProfileFragment extends BaseImagePickFragment {
         this.qT.start();
     }
 
+    private boolean dC() {
+        return isAdded() && this.binding != null && this.viewPager_tags != null && this.tabLayout != null;
+    }
+
+    private void dD(UserBasicObject userBasicObject) {
+        if (!dC()) {
+            f.D(TAG, "Skip setup pager because fragment is not attached");
+            return;
+        }
+        this.qR = new ProfileFragmentPagerAdapter(getChildFragmentManager(), userBasicObject);
+        this.viewPager_tags.setAdapter(this.qR);
+        this.tabLayout.setupWithViewPager(this.viewPager_tags);
+        TabLayout.Tab tabAt = this.tabLayout.getTabAt(0);
+        if (tabAt != null) {
+            tabAt.setText(R.string.comic);
+        }
+        if (userBasicObject != null) {
+            TabLayout.Tab tabAt2 = this.tabLayout.getTabAt(1);
+            if (tabAt2 != null) {
+                tabAt2.setText(R.string.comment);
+            }
+        }
+    }
+
     @Override // com.picacomic.fregata.fragments.BaseFragment
     public void bI() {
         super.bI();
+        if (!dC()) {
+            f.D(TAG, "Skip refresh because fragment view is gone");
+            return;
+        }
         if (this.jW != null) {
             try {
                 e.i(getContext(), new Gson().toJson(this.jW));
@@ -221,15 +249,7 @@ public class ProfileFragment extends BaseImagePickFragment {
                 this.qU = (this.jW.getExp() * 360.0f) / Z(this.jW.getLevel() + 1);
                 f.D(TAG, "Angle = " + this.qU + " next = " + Z(this.jW.getLevel()) + 1);
                 j(this.qU);
-                this.qR = new ProfileFragmentPagerAdapter(getChildFragmentManager(), new UserBasicObject(this.jW));
-                this.viewPager_tags.setAdapter(this.qR);
-                this.tabLayout.setupWithViewPager(this.viewPager_tags);
-                TabLayout.Tab tabAt = this.tabLayout.getTabAt(0);
-                this.tabLayout.getTabAt(0).setText(R.string.comic);
-                tabAt.setText(R.string.comic);
-                TabLayout.Tab tabAt2 = this.tabLayout.getTabAt(1);
-                this.tabLayout.getTabAt(1).setText(R.string.comment);
-                tabAt2.setText(R.string.comment);
+                dD(new UserBasicObject(this.jW));
                 if (this.jW.isPunched()) {
                     this.textView_punchIn.setVisibility(8);
                     return;
@@ -242,12 +262,7 @@ public class ProfileFragment extends BaseImagePickFragment {
                 return;
             }
         }
-        this.qR = new ProfileFragmentPagerAdapter(getChildFragmentManager(), null);
-        this.viewPager_tags.setAdapter(this.qR);
-        this.tabLayout.setupWithViewPager(this.viewPager_tags);
-        TabLayout.Tab tabAt3 = this.tabLayout.getTabAt(0);
-        this.tabLayout.getTabAt(0).setText(R.string.comic);
-        tabAt3.setText(R.string.comic);
+        dD(null);
     }
 
     @Override // com.picacomic.fregata.fragments.BaseImagePickFragment
@@ -262,16 +277,43 @@ public class ProfileFragment extends BaseImagePickFragment {
 
     @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment
     public void onDetach() {
+        dE();
+        super.onDetach();
+    }
+
+    @Override // androidx.fragment.app.Fragment
+    public void onDestroyView() {
+        dE();
+        this.button_edit = null;
+        this.expCircleView = null;
+        this.imageView_avatar = null;
+        this.imageView_avatarBlur = null;
+        this.imageView_character = null;
+        this.imageView_verified = null;
+        this.tabLayout = null;
+        this.textView_honor = null;
+        this.textView_level = null;
+        this.textView_name = null;
+        this.textView_punchIn = null;
+        this.textView_slogan = null;
+        this.viewPager_tags = null;
+        this.binding = null;
+        super.onDestroyView();
+    }
+
+    private void dE() {
         if (this.qT != null) {
             this.qT.cancel();
+            this.qT = null;
         }
         if (this.jX != null) {
             this.jX.cancel();
+            this.jX = null;
         }
         if (this.qS != null) {
             this.qS.cancel();
+            this.qS = null;
         }
-        super.onDetach();
     }
 
     public void dA() {
@@ -289,6 +331,9 @@ public class ProfileFragment extends BaseImagePickFragment {
         this.qS.enqueue(new Callback<GeneralResponse<PunchInResponse>>() { // from class: com.picacomic.fregata.fragments.ProfileFragment.8
             @Override // retrofit2.Callback
             public void onResponse(Call<GeneralResponse<PunchInResponse>> call, Response<GeneralResponse<PunchInResponse>> response) {
+                if (call.isCanceled() || !ProfileFragment.this.dC()) {
+                    return;
+                }
                 if (response.code() == 200) {
                     if (response.body() != null && response.body().data != null) {
                         ProfileFragment.this.dA();
@@ -306,6 +351,9 @@ public class ProfileFragment extends BaseImagePickFragment {
 
             @Override // retrofit2.Callback
             public void onFailure(Call<GeneralResponse<PunchInResponse>> call, Throwable th) {
+                if (call.isCanceled() || !ProfileFragment.this.isAdded()) {
+                    return;
+                }
                 th.printStackTrace();
                 f.aA("dismiss progress");
                 ProfileFragment.this.bC();
@@ -321,6 +369,9 @@ public class ProfileFragment extends BaseImagePickFragment {
         this.jX.enqueue(new Callback<GeneralResponse<UserProfileResponse>>() { // from class: com.picacomic.fregata.fragments.ProfileFragment.9
             @Override // retrofit2.Callback
             public void onResponse(Call<GeneralResponse<UserProfileResponse>> call, Response<GeneralResponse<UserProfileResponse>> response) {
+                if (call.isCanceled() || !ProfileFragment.this.dC()) {
+                    return;
+                }
                 if (response.code() == 200) {
                     if (response.body() != null && response.body().data != null && response.body().data.getUser() != null) {
                         ProfileFragment.this.jW = response.body().data.getUser();
@@ -342,6 +393,9 @@ public class ProfileFragment extends BaseImagePickFragment {
 
             @Override // retrofit2.Callback
             public void onFailure(Call<GeneralResponse<UserProfileResponse>> call, Throwable th) {
+                if (call.isCanceled() || !ProfileFragment.this.isAdded()) {
+                    return;
+                }
                 th.printStackTrace();
                 f.aA("dismiss progress");
                 ProfileFragment.this.bC();

@@ -17,6 +17,21 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile file('D:\\1.jks')
+            storePassword 'Sirin123456'
+            keyAlias 'Sirin'
+            keyPassword 'Sirin123456'
+        }
+        debug{
+            storeFile file('D:\\1.jks')
+            storePassword 'Sirin123456'
+            keyAlias 'Sirin'
+            keyPassword 'Sirin123456'
+        }
+    }
+
     buildTypes {
         debug {
             minifyEnabled false
