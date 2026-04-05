@@ -9,14 +9,25 @@
         <item name="android:windowEnterAnimation">@anim/design_bottom_sheet_slide_in</item>
         <item name="android:windowExitAnimation">@anim/design_bottom_sheet_slide_out</item>
     </style>
-    <style name="AppTheme" parent="@style/Theme.AppCompat.NoActionBar">
+    <style name="AppTheme" parent="@style/Theme.Material3.Light.NoActionBar">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/backgroundDark</item>
         <item name="android:textColorHint">@color/gray</item>
         <item name="android:editTextColor">@color/grayDark</item>
         <item name="android:actionMenuTextColor">@color/grayDark</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorSecondary">@color/peach</item>
+        <item name="colorTertiary">@color/blue</item>
+        <item name="colorSurface">@color/background</item>
+        <item name="colorSurfaceVariant">@color/backgroundDark</item>
+        <item name="colorOutline">@color/md3_outline</item>
         <item name="colorAccent">@color/peach</item>
         <item name="colorControlNormal">@color/gray</item>
-        <item name="colorPrimary">@color/pink</item>
-        <item name="colorPrimaryDark">@color/pinkDark</item>
+        <item name="toolbarStyle">@style/AppTheme.PopupOverlay</item>
         <item name="chatroom_background">@drawable/chat_bg_image</item>
         <item name="chatroom_bubble_background">@drawable/bubble_9</item>
         <item name="chatroom_reply_color">@color/backgroundDark</item>
@@ -28,37 +39,50 @@
         <item name="custom_transparent_white">@color/transparent_white</item>
     </style>
     <style name="AppTheme.AppBarOverlay" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
-    <style name="AppTheme.PopupOverlay" parent="@style/Widget.AppCompat.Toolbar">
+    <style name="AppTheme.PopupOverlay">
         <item name="android:background">@drawable/actionbar_background</item>
-        <item name="android:textColor">@color/colorPrimary</item>
-        <item name="titleTextColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/grayDark</item>
+        <item name="titleTextColor">@color/grayDark</item>
+        <item name="subtitleTextColor">@color/gray</item>
+        <item name="navigationIconTint">@color/grayDark</item>
+        <item name="titleMarginStart">@dimen/padding_3</item>
+        <item name="titleMarginEnd">@dimen/padding_3</item>
     </style>
     <style name="AppTheme.NoActionBar" parent="@style/AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <style name="AppTheme.Toolbar" parent="@style/Theme.AppCompat.Light">
-        <item name="android:textColor">@color/colorPrimary</item>
+    <style name="AppTheme.Toolbar" parent="@style/Theme.Material3.Light">
+        <item name="android:textColor">@color/grayDark</item>
         <item name="android:background">@drawable/actionbar_background</item>
-        <item name="titleTextColor">@color/colorPrimary</item>
+        <item name="titleTextColor">@color/grayDark</item>
         <item name="custom_background_color">@color/background</item>
         <item name="custom_background_color_dark">@color/backgroundDark</item>
     </style>
-    <style name="AppThemeBlack" parent="@style/Theme.AppCompat.NoActionBar">
+    <style name="AppThemeBlack" parent="@style/Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:navigationBarColor">@color/backgroundDark</item>
         <item name="android:textColorHint">@color/gray</item>
         <item name="android:editTextColor">@color/grayDark</item>
         <item name="android:actionMenuTextColor">@color/grayDark</item>
         <item name="colorAccent">@color/peach</item>
         <item name="colorControlNormal">@color/gray</item>
-        <item name="colorPrimary">@color/pink</item>
-        <item name="colorPrimaryDark">@color/pinkDark</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorSecondary">@color/peach</item>
+        <item name="colorTertiary">@color/blue</item>
+        <item name="colorSurface">@color/background</item>
+        <item name="colorSurfaceVariant">@color/backgroundDark</item>
+        <item name="colorOutline">@color/md3_outline</item>
+        <item name="toolbarStyle">@style/AppTheme.PopupOverlay</item>
         <item name="chatroom_background">@drawable/chat_bg_image_dark</item>
         <item name="chatroom_bubble_background">@drawable/bubble_dark_9</item>
         <item name="chatroom_reply_color">@color/background</item>
         <item name="custom_background_color">@color/backgroundDark</item>
         <item name="custom_background_color_dark">@color/background</item>
-        <item name="custom_text_black_color">@color/black</item>
-        <item name="custom_text_black_color_dark">@color/grayDark</item>
+        <item name="custom_text_black_color">@color/white</item>
+        <item name="custom_text_black_color_dark">@color/white</item>
         <item name="custom_text_black_color_light">@color/gray</item>
         <item name="custom_transparent_white">@color/transparent_white</item>
     </style>
@@ -1027,16 +1051,24 @@
         <item name="android:textSize">@dimen/textsize_title_3</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@drawable/button_round_pink_bg</item>
+        <item name="android:paddingLeft">@dimen/padding_5</item>
+        <item name="android:paddingRight">@dimen/padding_5</item>
         <item name="android:minHeight">0.0dip</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.02</item>
     </style>
     <style name="ButtonSmallRoundPink">
         <item name="android:textSize">@dimen/textsize_title_3</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@drawable/button_small_round_pink_bg</item>
+        <item name="android:paddingLeft">@dimen/padding_3</item>
+        <item name="android:paddingRight">@dimen/padding_3</item>
         <item name="android:minHeight">0.0dip</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="ButtonTransparentBgPinkContent1" parent="@style/TextBaseStylePinkContent1">
         <item name="android:background">@color/transparent</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="ButtonTransparentBgPinkContent2" parent="@style/TextBaseStylePinkContent2">
         <item name="android:background">@color/transparent</item>
@@ -1046,6 +1078,18 @@
     </style>
     <style name="ButtonTransparentBgWhiteContent3" parent="@style/TextBaseStylesWhiteContent3">
         <item name="android:background">@color/transparent</item>
+    </style>
+    <style name="ButtonFilledPrimary" parent="@style/ButtonRoundPink">
+        <item name="android:layout_width">fill_parent</item>
+    </style>
+    <style name="ButtonFilledTonal" parent="@style/ButtonRoundPink">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:background">@drawable/button_tag_bg</item>
+        <item name="android:layout_width">fill_parent</item>
+    </style>
+    <style name="ButtonTextPrimary" parent="@style/TextBaseStylePinkContent1Bold">
+        <item name="android:background">@color/transparent</item>
+        <item name="android:minHeight">48dp</item>
     </style>
     <style name="CardView" parent="@style/Base.CardView" />
     <style name="CardView.Dark" parent="@style/CardView">
@@ -1104,6 +1148,9 @@
     <style name="EditTextStandardSingleLineGrayDark" parent="@style/TextBaseStyleGrayDark">
         <item name="android:textSize">@dimen/textsize_content_1</item>
         <item name="android:singleLine">true</item>
+        <item name="android:background">@drawable/md3_input_bg</item>
+        <item name="android:paddingTop">@dimen/padding_2</item>
+        <item name="android:paddingBottom">@dimen/padding_2</item>
     </style>
     <style name="EditTextStandardSingleLinePeach" parent="@style/TextBaseStylePeach">
         <item name="android:textSize">@dimen/textsize_content_2</item>
@@ -1113,6 +1160,7 @@
         <item name="android:textSize">@dimen/textsize_title_3</item>
         <item name="android:textStyle">bold</item>
         <item name="android:singleLine">true</item>
+        <item name="android:background">@drawable/md3_input_bg</item>
     </style>
     <style name="FilterButton">
         <item name="android:textSize">@dimen/textsize_content_2</item>
@@ -1130,9 +1178,11 @@
     </style>
     <style name="ImageButtonSmallRoundBgFitCenter" parent="@style/ImageViewBaseStyleFitCenter">
         <item name="android:background">@drawable/button_small_round_pink_bg</item>
+        <item name="android:padding">@dimen/padding_2</item>
     </style>
     <style name="ImageButtonTransparentBgFitCenter" parent="@style/ImageViewBaseStyleFitCenter">
-        <item name="android:background">@color/transparent</item>
+        <item name="android:background">@drawable/ripple_bg</item>
+        <item name="android:padding">@dimen/padding_2</item>
     </style>
     <style name="ImageViewBaseStyleCenterCrop">
         <item name="android:scaleType">centerCrop</item>
@@ -1153,12 +1203,12 @@
         <item name="android:minHeight">@dimen/size_button_tag_height</item>
     </style>
     <style name="MyAlertDialogStyle" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:textColorPrimary">@color/colorPrimary</item>
+        <item name="android:textColorPrimary">@color/grayDark</item>
         <item name="android:textColorSecondary">@color/gray</item>
         <item name="android:windowBackground">@drawable/dialog_round_bg</item>
-        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/grayDark</item>
         <item name="android:textColorAlertDialogListItem">@color/grayDark</item>
-        <item name="colorAccent">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorPrimary</item>
     </style>
     <style name="MyTitleTextStyle">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
@@ -1286,8 +1336,10 @@
         <item name="android:textColor">@color/radio_button_segment_style_text_color</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/radio_button_segment_style_bg</item>
-        <item name="android:padding">@dimen/padding_2</item>
+        <item name="android:paddingTop">@dimen/padding_2</item>
+        <item name="android:paddingBottom">@dimen/padding_2</item>
         <item name="android:button">@color/transparent</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="RtlOverlay.DialogWindowTitle.AppCompat" parent="@style/Base.DialogWindowTitle.AppCompat">
         <item name="android:textAlignment">viewStart</item>
@@ -1341,27 +1393,42 @@
         <item name="android:textSize">@dimen/textsize_content_1</item>
         <item name="android:textColor">@color/button_segment_text_color</item>
         <item name="android:background">@drawable/button_segment_center_bg</item>
-        <item name="android:padding">0.0px</item>
+        <item name="android:paddingTop">@dimen/padding_2</item>
+        <item name="android:paddingBottom">@dimen/padding_2</item>
         <item name="android:layout_margin">0.0px</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="SegmentButtonLeftPinkContent1">
         <item name="android:textSize">@dimen/textsize_content_1</item>
         <item name="android:textColor">@color/button_segment_text_color</item>
         <item name="android:background">@drawable/button_segment_left_bg</item>
-        <item name="android:padding">0.0px</item>
+        <item name="android:paddingTop">@dimen/padding_2</item>
+        <item name="android:paddingBottom">@dimen/padding_2</item>
         <item name="android:layout_margin">0.0px</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="SegmentButtonRightPinkContent1">
         <item name="android:textSize">@dimen/textsize_content_1</item>
         <item name="android:textColor">@color/button_segment_text_color</item>
         <item name="android:background">@drawable/button_segment_right_bg</item>
-        <item name="android:padding">0.0px</item>
+        <item name="android:paddingTop">@dimen/padding_2</item>
+        <item name="android:paddingBottom">@dimen/padding_2</item>
         <item name="android:layout_margin">0.0px</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="TabbarStyle">
         <item name="android:background">@drawable/button_tabbar_bg</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="android:adjustViewBounds">true</item>
+        <item name="android:paddingTop">@dimen/padding_2</item>
+        <item name="android:paddingBottom">@dimen/padding_2</item>
+    </style>
+    <style name="PicaTabLayout">
+        <item name="android:background">?custom_background_color</item>
+        <item name="tabIndicatorColor">@color/colorPrimary</item>
+        <item name="tabIndicatorFullWidth">false</item>
+        <item name="tabSelectedTextColor">@color/colorPrimary</item>
+        <item name="tabTextColor">@color/gray</item>
     </style>
     <style name="TagButtonPink">
         <item name="android:textSize">@dimen/textsize_timestamp_1</item>
@@ -1489,7 +1556,7 @@
         <item name="android:textSize">@dimen/textsize_title_1</item>
     </style>
     <style name="TextBaseStyleGray">
-        <item name="android:textColor">@color/gray</item>
+        <item name="android:textColor">?custom_text_black_color_light</item>
         <item name="android:textColorHint">@color/grayLight</item>
     </style>
     <style name="TextBaseStyleGrayContent1" parent="@style/TextBaseStyleGray">
@@ -1502,7 +1569,7 @@
         <item name="android:textSize">@dimen/textsize_content_3</item>
     </style>
     <style name="TextBaseStyleGrayDark">
-        <item name="android:textColor">@color/grayDark</item>
+        <item name="android:textColor">?custom_text_black_color_dark</item>
         <item name="android:textColorHint">@color/gray</item>
     </style>
     <style name="TextBaseStyleGrayDarkContent1" parent="@style/TextBaseStyleGrayDark">

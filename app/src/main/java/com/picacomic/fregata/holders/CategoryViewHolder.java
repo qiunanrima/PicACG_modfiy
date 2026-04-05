@@ -11,12 +11,15 @@ import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.CategoryObject;
 import com.picacomic.fregata.objects.DefaultCategoryObject;
+import com.picacomic.fregata.utils.RoundedCornersTransformation;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 /* JADX INFO: loaded from: classes.dex */
 public class CategoryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     public static final String TAG = "CategoryViewHolder";
+    private static final Transformation CATEGORY_COVER_TRANSFORMATION = new RoundedCornersTransformation(32, 0);
     Context context;
 
     ItemCategoryRecyclerViewCellBinding binding;
@@ -42,12 +45,12 @@ public class CategoryViewHolder extends RecyclerView.ViewHolder implements View.
     }
 
     public void a(DefaultCategoryObject defaultCategoryObject) {
-        this.imageView_image.setImageResource(defaultCategoryObject.getThumbId());
+        Picasso.with(this.context).load(defaultCategoryObject.getThumbId()).transform(CATEGORY_COVER_TRANSFORMATION).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
         this.textView_title.setText(defaultCategoryObject.getTitle());
     }
 
     public void a(CategoryObject categoryObject) {
-        Picasso.with(this.context).load(g.b(categoryObject.getThumb())).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
+        Picasso.with(this.context).load(g.b(categoryObject.getThumb())).transform(CATEGORY_COVER_TRANSFORMATION).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
         this.textView_title.setText(categoryObject.getTitle());
     }
 }

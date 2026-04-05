@@ -7,7 +7,7 @@
         <TextView android:textStyle="bold" android:gravity="center" android:id="@id/textView_service_chatroom_total_user_count" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_toLeftOf="@id/button_service_chatroom_message_mode" android:layout_toRightOf="@id/button_service_chatroom_close" android:layout_centerInParent="true" style="@style/TextBaseStyleGrayDarkTitle2" />
         <Button android:id="@id/button_service_chatroom_move" android:background="@color/transparent" android:layout_width="wrap_content" android:layout_height="20.0dip" android:text="====== 移動 ======" android:layout_centerHorizontal="true" style="@style/TextBaseStyleGrayContent3" />
     </RelativeLayout>
-    <FrameLayout android:background="@color/colorPrimary" android:layout_width="fill_parent" android:layout_height="1.0dip" />
+    <FrameLayout android:background="@color/md3_outline_variant" android:layout_width="fill_parent" android:layout_height="1.0dip" />
     <TextView android:id="@id/textView_chat_at_list" android:background="?custom_transparent_white" android:padding="@dimen/padding_2" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextBaseStylePinkDarkContent1" />
     <TextView android:id="@id/textView_chat_reply" android:background="?custom_transparent_white" android:padding="@dimen/padding_2" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" style="@style/TextBaseStyleBlueContent1" />
     <RelativeLayout android:id="@id/relativeLayout_service_chatroom_input" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content">
