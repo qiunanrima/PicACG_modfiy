@@ -25,16 +25,12 @@ build.log
 *.ap_
 *.dex
 *.class
-*.jar
 *.war
 *.aar
 
 # 本地配置文件
-local.properties
-gradle.properties
 *.jks
 *.keystore
-*.local.properties
 keystore/
 
 # Lint 输出
