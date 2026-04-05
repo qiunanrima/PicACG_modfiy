@@ -9,6 +9,7 @@ import com.picacomic.fregata.databinding.ItemComicRecommendationViewBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.b;
 import com.picacomic.fregata.objects.ComicListObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
 
@@ -37,7 +38,7 @@ public class ComicRecommendationViewHolder extends RecyclerView.ViewHolder imple
     public void b(ComicListObject comicListObject) {
         this.nn = comicListObject;
         if (this.nn != null) {
-            Picasso.with(this.context).load(g.b(this.nn.getThumb())).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView);
+            Picasso.with(this.context).load(g.b(this.nn.getThumb())).placeholder(R.drawable.placeholder_avatar_2).transform(PicassoTransformations.CARD_COVER).into(this.imageView);
             g.a(this.context, this.textView, this.nn.getTitle(), this.nn.getPagesCount(), this.nn.isFinished());
         }
     }

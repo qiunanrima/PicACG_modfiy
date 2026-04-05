@@ -47,6 +47,7 @@ import com.picacomic.fregata.objects.responses.ComicRandomListResponse;
 import com.picacomic.fregata.objects.responses.DataClass.ComicEpisodeResponse.ComicEpisodeResponse;
 import com.picacomic.fregata.objects.responses.GeneralResponse;
 import com.picacomic.fregata.utils.FullGridLayoutManager;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
@@ -426,7 +427,7 @@ public class ComicDetailFragment extends BaseFragment implements k {
                 this.textView_title.setText(this.nn.getTitle() + "");
                 this.textView_author.setText(this.nn.getAuthor() + "");
                 this.textView_likeCount.setText(this.nn.getLikesCount() + "");
-                Picasso.with(getActivity()).load(g.b(this.nn.getThumb())).into(this.imageView_cover);
+                Picasso.with(getActivity()).load(g.b(this.nn.getThumb())).transform(PicassoTransformations.CARD_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_cover);
                 this.textView_categories.setText("");
             }
             Y(this.nn.getComicId());
@@ -487,7 +488,7 @@ public class ComicDetailFragment extends BaseFragment implements k {
         } else {
             this.imageButton_descriptionHeightControl.setVisibility(0);
         }
-        Picasso.with(getActivity()).load(g.b(this.np.getThumb())).into(this.imageView_cover);
+        Picasso.with(getActivity()).load(g.b(this.np.getThumb())).transform(PicassoTransformations.CARD_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_cover);
         String str = "";
         if (this.np.getCategories() != null) {
             String strConcat = "";

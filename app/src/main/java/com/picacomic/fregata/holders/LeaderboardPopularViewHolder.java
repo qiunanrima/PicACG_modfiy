@@ -10,6 +10,7 @@ import com.picacomic.fregata.databinding.ItemLeaderboardPopularOrderRecyclerView
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.LeaderboardComicListObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
 
@@ -53,7 +54,7 @@ public class LeaderboardPopularViewHolder extends RecyclerView.ViewHolder implem
 
     public void a(LeaderboardComicListObject leaderboardComicListObject, int i, String str) {
         this.textView_order.setText((i + 1) + "");
-        Picasso.with(this.context).load(g.b(leaderboardComicListObject.getThumb())).into(this.imageView_image);
+        Picasso.with(this.context).load(g.b(leaderboardComicListObject.getThumb())).transform(PicassoTransformations.CARD_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
         this.textView_name.setText(leaderboardComicListObject.getTitle() + "");
         this.textView_author.setText(leaderboardComicListObject.getAuthor() + "");
         this.textView_category.setText(leaderboardComicListObject.getCategories().toString());

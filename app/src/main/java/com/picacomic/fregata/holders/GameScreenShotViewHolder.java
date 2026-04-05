@@ -9,6 +9,7 @@ import com.picacomic.fregata.databinding.ItemGameDetailScreenshotRecyclerViewCel
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.ThumbnailObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
 
@@ -37,6 +38,6 @@ public class GameScreenShotViewHolder extends RecyclerView.ViewHolder implements
     }
 
     public void a(ThumbnailObject thumbnailObject) {
-        Picasso.with(this.context).load(g.b(thumbnailObject)).into(this.imageView_screenShot);
+        Picasso.with(this.context).load(g.b(thumbnailObject)).transform(PicassoTransformations.SCREENSHOT).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_screenShot);
     }
 }

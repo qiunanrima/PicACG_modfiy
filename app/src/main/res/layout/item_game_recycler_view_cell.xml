@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:background="@drawable/card_style_white_bg" android:layout_width="fill_parent" android:layout_height="wrap_content"
+<LinearLayout android:orientation="vertical" android:background="@drawable/card_style_white_bg" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_1" android:layout_marginRight="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_1"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <FrameLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
         <com.picacomic.fregata.utils.views.GameBannerImageView android:id="@id/imageView_game_recycler_view_cell_banner" android:padding="1.0px" android:layout_width="fill_parent" android:layout_height="wrap_content" android:src="@drawable/placeholder_avatar_2" style="@style/ImageViewBaseStyleCenterCrop" />
         <ImageView android:layout_gravity="center|right|top" android:id="@id/imageView_game_recycler_view_cell_adult" android:padding="2.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/icon_adult" style="@style/ImageViewBaseStyleFitCenter" />
     </FrameLayout>
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
             <TextView android:ellipsize="marquee" android:id="@id/textView_game_recycler_view_cell_title" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:singleLine="true" style="@style/TextBaseStyleGrayDarkContent2" />
             <TextView android:ellipsize="marquee" android:id="@id/textView_game_recycler_view_cell_publisher" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" style="@style/TextBaseStyleGrayContent3" />
         </LinearLayout>

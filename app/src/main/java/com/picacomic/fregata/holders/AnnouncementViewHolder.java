@@ -10,6 +10,7 @@ import com.picacomic.fregata.databinding.ItemAnnouncementCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.AnnouncementObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
 
@@ -45,7 +46,7 @@ public class AnnouncementViewHolder extends RecyclerView.ViewHolder implements V
         if (announcementObject != null) {
             this.textView_title.setText(announcementObject.getTitle() + "");
             this.textView_description.setText(announcementObject.getContent() + "");
-            Picasso.with(this.context).load(g.b(announcementObject.getThumb())).into(this.imageView_image);
+            Picasso.with(this.context).load(g.b(announcementObject.getThumb())).transform(PicassoTransformations.CARD_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
         }
     }
 }

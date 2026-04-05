@@ -9,6 +9,7 @@ import com.picacomic.fregata.databinding.ItemChatroomListCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.ChatroomListObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.squareup.picasso.Picasso;
 
 /* JADX INFO: loaded from: classes.dex */
@@ -39,7 +40,7 @@ public class ChatroomListViewHolder extends RecyclerView.ViewHolder implements V
     }
 
     public void a(ChatroomListObject chatroomListObject) {
-        Picasso.with(this.context).load(chatroomListObject.getAvatar()).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
+        Picasso.with(this.context).load(chatroomListObject.getAvatar()).placeholder(R.drawable.placeholder_avatar_2).transform(PicassoTransformations.CARD_COVER).into(this.imageView_image);
         this.textView_title.setText(chatroomListObject.getTitle() + "");
         this.textView_description.setText(chatroomListObject.getDescription() + "");
     }

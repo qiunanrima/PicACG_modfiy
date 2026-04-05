@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="wrap_content"
+<LinearLayout android:orientation="vertical" android:background="@drawable/card_style_white_bg" android:padding="@dimen/padding_2" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="wrap_content" android:layout_marginRight="@dimen/padding_2"
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <ImageView android:id="@id/imageView_recommendation" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail_height" style="@style/ImageViewBaseStyleCenterCrop" />
-    <TextView android:id="@id/textView_recommendation" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="wrap_content" android:maxLines="2" style="@style/TextBaseStyleGrayContent3" />
+    <ImageView android:id="@id/imageView_recommendation" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail_height" android:layout_marginBottom="@dimen/padding_2" style="@style/ImageViewBaseStyleCenterCrop" />
+    <TextView android:id="@id/textView_recommendation" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="wrap_content" android:maxLines="2" android:ellipsize="end" style="@style/TextBaseStyleGrayContent3" />
 </LinearLayout>

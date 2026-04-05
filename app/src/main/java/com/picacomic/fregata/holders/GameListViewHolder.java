@@ -10,6 +10,7 @@ import com.picacomic.fregata.databinding.ItemGameRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.k;
 import com.picacomic.fregata.objects.GameListObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
 
@@ -47,7 +48,7 @@ public class GameListViewHolder extends RecyclerView.ViewHolder implements View.
     }
 
     public void a(GameListObject gameListObject) {
-        Picasso.with(this.context).load(g.b(gameListObject.getIcon())).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_banner);
+        Picasso.with(this.context).load(g.b(gameListObject.getIcon())).placeholder(R.drawable.placeholder_avatar_2).transform(PicassoTransformations.LARGE_COVER).into(this.imageView_banner);
         this.textView_title.setText(gameListObject.getTitle() + "");
         this.textView_publisher.setText(gameListObject.getPublisher() + "");
         if (gameListObject.isAdult()) {

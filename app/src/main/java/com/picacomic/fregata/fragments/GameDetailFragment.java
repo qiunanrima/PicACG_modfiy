@@ -40,6 +40,7 @@ import com.picacomic.fregata.objects.responses.GeneralResponse;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.views.AlertDialogCenter;
 import com.picacomic.fregata.utils.views.SnapRecyclerView;
 import com.squareup.picasso.Picasso;
@@ -338,9 +339,9 @@ public class GameDetailFragment extends BaseFragment implements k {
             this.textView_version.setText(this.oZ.getVersion() + "");
             this.textView_versionDescription.setText(this.oZ.getUpdateContent() + "");
             this.textView_description.setText(this.oZ.getDescription() + "");
-            Picasso.with(getActivity()).load(g.b(this.oZ.getIcon())).into(this.imageView_icon);
+            Picasso.with(getActivity()).load(g.b(this.oZ.getIcon())).transform(PicassoTransformations.CARD_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_icon);
             if (this.oY != null) {
-                Picasso.with(getActivity()).load(g.b(this.oY)).into(this.imageView_banner);
+                Picasso.with(getActivity()).load(g.b(this.oY)).transform(PicassoTransformations.LARGE_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_banner);
             }
             this.oU.notifyDataSetChanged();
             this.oV.notifyDataSetChanged();

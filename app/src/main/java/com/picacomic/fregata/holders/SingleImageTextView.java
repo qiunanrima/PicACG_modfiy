@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import com.picacomic.fregata.databinding.ItemSingleImageTextViewBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.objects.ComicListObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.picacomic.fregata.utils.views.ComicThumbImageView;
 import com.squareup.picasso.Picasso;
@@ -47,7 +48,7 @@ public class SingleImageTextView extends LinearLayout {
         this.binding = ItemSingleImageTextViewBinding.inflate(LayoutInflater.from(context), this, true);
         this.imageView_image = this.binding.imageViewSingleImageTextViewImage;
         this.textView_title = this.binding.textViewSingleImageTextViewTitle;
-        Picasso.with(context).load(g.b(comicListObject.getThumb())).resize(this.targetWidth, this.targetHeight).centerCrop().into(this.imageView_image);
+        Picasso.with(context).load(g.b(comicListObject.getThumb())).resize(this.targetWidth, this.targetHeight).centerCrop().transform(PicassoTransformations.CARD_COVER).into(this.imageView_image);
         this.textView_title.setText(comicListObject.getTitle() + "");
         setOnClickListener(onClickListener);
     }

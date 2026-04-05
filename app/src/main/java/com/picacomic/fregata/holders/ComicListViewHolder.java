@@ -12,6 +12,7 @@ import com.picacomic.fregata.databinding.ItemComicListRecyclerViewCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.b;
 import com.picacomic.fregata.objects.ComicListObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
 
@@ -102,7 +103,7 @@ public class ComicListViewHolder extends RecyclerView.ViewHolder implements View
                 }
             }
         }
-        Picasso.with(this.context).load(g.b(comicListObject.getThumb())).placeholder(R.drawable.placeholder_avatar_2).resize(this.targetWidth, this.targetHeight).centerCrop().into(this.imageView_image);
+        Picasso.with(this.context).load(g.b(comicListObject.getThumb())).placeholder(R.drawable.placeholder_avatar_2).resize(this.targetWidth, this.targetHeight).centerCrop().transform(PicassoTransformations.CARD_COVER).into(this.imageView_image);
         g.a(this.context, this.textView_name, comicListObject.getTitle(), comicListObject.getPagesCount(), comicListObject.isFinished());
         String strConcat = "";
         for (int i4 = 0; i4 < comicListObject.getCategories().size(); i4++) {

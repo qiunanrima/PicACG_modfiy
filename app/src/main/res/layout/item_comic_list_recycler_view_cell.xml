@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_list_recycler_view_cell_container" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content" android:foreground="@drawable/ripple_bg"
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_list_recycler_view_cell_container" android:background="@drawable/card_style_white_bg" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_1" android:layout_marginRight="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_1" android:foreground="@drawable/ripple_bg"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <RelativeLayout android:padding="@dimen/padding_2" android:layout_width="fill_parent" android:layout_height="wrap_content">
         <com.picacomic.fregata.utils.views.ComicThumbImageView android:id="@id/imageView_comic_list_recycler_view_cell_image" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail_height" android:layout_marginRight="@dimen/padding_2" android:src="@mipmap/ic_launcher" style="@style/ImageViewBaseStyleCenterCrop" />
@@ -27,5 +27,4 @@
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
-    <include layout="@layout/layout_separator" />
 </LinearLayout>

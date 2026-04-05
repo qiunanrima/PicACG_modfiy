@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_viewer_dialog_auto_paging" android:background="@color/black_transparent_30" android:visibility="visible" android:layout_width="240.0dip" android:layout_height="wrap_content"
+<LinearLayout android:orientation="vertical" android:id="@id/linearLayout_comic_viewer_dialog_auto_paging" android:background="@drawable/md3_overlay_panel_bg" android:padding="@dimen/padding_2" android:visibility="visible" android:layout_width="240.0dip" android:layout_height="wrap_content"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <TextView android:textSize="@dimen/textsize_content_1" android:textColor="@color/white" android:gravity="center" android:id="@id/textView_comic_viewer_dialog_auto_paging_title" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/comic_viewer_setting_panel_auto_paging" />
     <SeekBar android:id="@id/seekBar_comic_viewer_dialog_auto_paging" android:padding="@dimen/padding_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1" android:max="100" />

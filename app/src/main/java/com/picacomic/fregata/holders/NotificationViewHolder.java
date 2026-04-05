@@ -9,6 +9,7 @@ import com.picacomic.fregata.databinding.ItemNotificationCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.h;
 import com.picacomic.fregata.objects.NotificationObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
@@ -56,7 +57,7 @@ public class NotificationViewHolder extends RecyclerView.ViewHolder implements V
                 Picasso.with(this.context).load(g.b(this.sV.getSender().getAvatar())).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_avatar);
             }
             if (this.sV.getCover() != null) {
-                Picasso.with(this.context).load(g.b(this.sV.getCover())).into(this.imageView_image);
+                Picasso.with(this.context).load(g.b(this.sV.getCover())).transform(PicassoTransformations.SMALL_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
                 f.F(TAG, g.b(this.sV.getCover()));
                 this.imageView_image.setVisibility(0);
             } else {

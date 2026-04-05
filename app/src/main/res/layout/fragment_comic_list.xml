@@ -3,7 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
         <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="fill_parent" android:layout_height="?actionBarSize" app:layout_collapseMode="parallax" app:layout_scrollFlags="enterAlways|scroll" app:popupTheme="@style/ThemeOverlay.AppCompat.Light" style="@style/AppTheme.PopupOverlay" />
-        <LinearLayout android:orientation="horizontal" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layoutDirection="rtl">
+        <LinearLayout android:orientation="horizontal" android:background="@drawable/card_style_white_bg" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:layout_marginRight="@dimen/padding_2" android:layout_marginBottom="@dimen/padding_1" android:layoutDirection="rtl">
             <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="fill_parent" android:layoutDirection="ltr">
                 <EditText android:gravity="center|right" android:layout_gravity="center|right" android:id="@id/editText_comic_list_current_page" android:background="@color/transparent" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="fill_parent" android:minWidth="40.0dip" android:text="1" android:digits="\ 1234567890" android:inputType="phone" android:imeOptions="actionDone" style="@style/EditTextStandardSingleLinePeach" />
                 <TextView android:gravity="center" android:layout_gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="/" style="@style/TextBaseStyleGrayDarkContent2" />
@@ -23,7 +23,7 @@
             </HorizontalScrollView>
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
-    <androidx.recyclerview.widget.RecyclerView android:id="@id/recyclerView_comic_list" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@id/recyclerView_comic_list" android:paddingTop="@dimen/padding_1" android:paddingBottom="@dimen/padding_2" android:clipToPadding="false" android:layout_width="fill_parent" android:layout_height="fill_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     <FrameLayout android:id="@id/frameLayout_comic_list_no_comics" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="fill_parent">
         <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
             <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">

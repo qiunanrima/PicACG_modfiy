@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.appbar.MaterialToolbar android:id="@id/toolbar" android:layout_width="fill_parent" android:layout_height="?actionBarSize"
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <RelativeLayout android:id="@id/relativeLayout_comic_viewer_toolbar" android:background="@color/black_transparent_30" android:layout_width="fill_parent" android:layout_height="?actionBarSize">
+    <RelativeLayout android:id="@id/relativeLayout_comic_viewer_toolbar" android:background="@drawable/md3_overlay_panel_bg" android:layout_width="fill_parent" android:layout_height="?actionBarSize" android:layout_marginLeft="@dimen/padding_2" android:layout_marginTop="@dimen/padding_2" android:layout_marginRight="@dimen/padding_2">
         <ImageButton android:id="@id/imageButton_comic_viewer_back" android:layout_width="wrap_content" android:layout_height="fill_parent" android:src="@drawable/ic_action_navigation_arrow_back" android:scaleType="fitCenter" android:adjustViewBounds="true" style="@style/ButtonTransparentBgWhiteContent3" />
         <LinearLayout android:orientation="horizontal" android:id="@id/linearLayout_comic_viewer_toolbar_buttons" android:layout_width="wrap_content" android:layout_height="fill_parent" android:layout_alignParentRight="true">
             <Button android:id="@id/button_comic_viewer_download" android:visibility="gone" android:layout_width="@dimen/width_comic_viewer_setting_panel" android:layout_height="fill_parent" android:text="@string/comic_viewer_setting_panel_download" android:drawableTop="@drawable/ic_action_editor_vertical_align_bottom" style="@style/ButtonTransparentBgWhiteContent3" />

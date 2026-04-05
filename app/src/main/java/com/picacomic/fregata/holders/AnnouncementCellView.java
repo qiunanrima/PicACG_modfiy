@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import com.picacomic.fregata.databinding.ItemAnnouncementCellBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.objects.AnnouncementObject;
+import com.picacomic.fregata.utils.PicassoTransformations;
 import com.picacomic.fregata.utils.g;
 import com.squareup.picasso.Picasso;
 
@@ -39,7 +40,7 @@ public class AnnouncementCellView extends LinearLayout {
         this.imageView_image = this.binding.imageViewAnnouncementCellImage;
         this.textView_description = this.binding.textViewAnnouncementCellDescription;
         this.textView_title = this.binding.textViewAnnouncementCellTitle;
-        Picasso.with(context).load(g.b(announcementObject.getThumb())).into(this.imageView_image);
+        Picasso.with(context).load(g.b(announcementObject.getThumb())).transform(PicassoTransformations.CARD_COVER).placeholder(R.drawable.placeholder_avatar_2).into(this.imageView_image);
         this.textView_title.setText(announcementObject.getTitle() + "");
         this.textView_description.setText(announcementObject.getContent() + "");
         setOnClickListener(onClickListener);
