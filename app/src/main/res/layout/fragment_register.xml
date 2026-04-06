@@ -1,50 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:background="?custom_background_color_dark" android:layout_width="fill_parent" android:layout_height="fill_parent"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <FrameLayout android:id="@id/frameLayout_register_background_white" android:background="@color/transparent_white" android:layout_width="fill_parent" android:layout_height="fill_parent">
-        <FrameLayout android:background="@color/transparent_white" android:layout_width="fill_parent" android:layout_height="fill_parent" />
-    </FrameLayout>
-    <Button android:id="@id/button_back_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_3" android:layout_marginTop="@dimen/padding_3" android:text="@string/backbutton" android:onClick="onBackPressed" style="@style/ButtonTransparentBgPinkContent1" />
-    <ScrollView android:padding="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_3" android:layout_marginRight="@dimen/padding_3" android:layout_above="@id/button_register_register_button" android:layout_below="@id/button_back_button">
-        <LinearLayout android:orientation="vertical" android:background="@drawable/dialog_round_bg" android:padding="@dimen/padding_4" android:layout_width="fill_parent" android:layout_height="wrap_content">
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_username" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_username" android:maxLength="50" android:drawableLeft="@mipmap/register_name" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_email" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_pica_id" android:maxLength="100" android:digits="0123456789abcdefghijklmnopqrstuvwxyz._" android:drawableLeft="@mipmap/login_mail" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_password" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_password" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:inputType="textPassword" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_password_confirm" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_password_confirm" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:inputType="textPassword" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_question_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_question_1" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_answer_1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_answer_1" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_question_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_question_2" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_answer_2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_answer_2" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_question_3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_question_3" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionNext" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <com.google.android.material.textfield.TextInputLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                <com.google.android.material.textfield.TextInputEditText android:id="@id/editText_register_answer_3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/register_answer_3" android:maxLength="100" android:drawableLeft="@mipmap/login_lock" android:drawablePadding="@dimen/padding_2" android:imeOptions="actionDone" style="@style/EditTextStandardSingleLineGrayDark" />
-            </com.google.android.material.textfield.TextInputLayout>
-            <TextView android:id="@id/textView_register_birthday" android:paddingLeft="@dimen/padding_1" android:paddingTop="@dimen/padding_5" android:paddingBottom="@dimen/padding_5" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/register_date_of_birth" android:drawableLeft="@mipmap/register_bday" android:drawablePadding="@dimen/padding_2" style="@style/TextBaseStylePinkContent1" />
-            <TextView android:paddingLeft="@dimen/padding_1" android:paddingBottom="@dimen/padding_3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/register_gender" android:drawableLeft="@mipmap/register_gender" android:drawablePadding="@dimen/padding_2" style="@style/TextBaseStyleGrayDarkContent1" />
-            <LinearLayout android:orientation="horizontal" android:background="@drawable/button_segment_container_bg" android:padding="@dimen/size_button_segment_stroke" android:layout_width="fill_parent" android:layout_height="@dimen/size_button_segment_height">
-                <androidx.appcompat.widget.AppCompatButton android:id="@id/button_register_gender_m" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0" style="@style/SegmentButtonLeftPinkContent1" />
-                <androidx.appcompat.widget.AppCompatButton android:id="@id/button_register_gender_f" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0" style="@style/SegmentButtonCenterPinkContent1" />
-                <androidx.appcompat.widget.AppCompatButton android:id="@id/button_register_gender_bot" android:layout_width="0.0px" android:layout_height="wrap_content" android:layout_weight="1.0" style="@style/SegmentButtonRightPinkContent1" />
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-    <Button android:id="@id/button_register_register_button" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_6" android:layout_marginRight="@dimen/padding_6" android:layout_marginBottom="@dimen/padding_4" android:text="@string/register_register_button" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true" style="@style/ButtonRoundPink" />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?custom_background_color_dark">
+
+    <FrameLayout
+        android:id="@+id/frameLayout_register_background_white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent_white" />
+
+    <com.picacomic.fregata.compose.views.PicaRegisterComposeView
+        android:id="@+id/composeView_register"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

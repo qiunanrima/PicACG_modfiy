@@ -6,21 +6,21 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import com.google.android.material.tabs.TabLayout;
-import androidx.viewpager.widget.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.picacomic.fregata.databinding.FragmentProfileBinding;
+import androidx.viewpager.widget.ViewPager;
+import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
+import com.picacomic.fregata.databinding.FragmentProfileBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.adapters.ProfileFragmentPagerAdapter;
 import com.picacomic.fregata.b.c;
 import com.picacomic.fregata.b.d;
+import com.picacomic.fregata.compose.views.PicaProfileComposeView;
 import com.picacomic.fregata.objects.UserBasicObject;
 import com.picacomic.fregata.objects.UserProfileObject;
 import com.picacomic.fregata.objects.responses.GeneralResponse;
@@ -38,12 +38,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/* JADX INFO: loaded from: classes.dex */
 public class ProfileFragment extends BaseImagePickFragment {
     public static final String TAG = "ProfileFragment";
-
     FragmentProfileBinding binding;
-    Button button_edit;
+    PicaProfileComposeView composeView_profile;
     ExpCircleView expCircleView;
     CircleImageView imageView_avatar;
     ImageView imageView_avatarBlur;
@@ -63,18 +61,18 @@ public class ProfileFragment extends BaseImagePickFragment {
     ViewPager viewPager_tags;
     float qU = 180.0f;
     int gridSize = 1;
-    Target qV = new Target() { // from class: com.picacomic.fregata.fragments.ProfileFragment.1
-        @Override // com.squareup.picasso.Target
+    Target qV = new Target() {
+        @Override
         public void onBitmapFailed(Drawable drawable) {
         }
 
-        @Override // com.squareup.picasso.Target
+        @Override
         public void onPrepareLoad(Drawable drawable) {
         }
 
-        @Override // com.squareup.picasso.Target
+        @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
-            if (bitmap == null || ProfileFragment.this.imageView_avatar == null || ProfileFragment.this.imageView_avatarBlur == null || ProfileFragment.this.imageView_avatarBlur == null) {
+            if (bitmap == null || ProfileFragment.this.imageView_avatar == null || ProfileFragment.this.imageView_avatarBlur == null) {
                 return;
             }
             ProfileFragment.this.imageView_avatarBlur.setImageBitmap(g.a(bitmap, 0.5f, 5));
@@ -86,33 +84,33 @@ public class ProfileFragment extends BaseImagePickFragment {
         return ((i2 * i2) - 1) * 25;
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         this.kv = 1;
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         this.binding = FragmentProfileBinding.inflate(layoutInflater, viewGroup, false);
-        this.button_edit = this.binding.buttonProfileEdit;
-        this.expCircleView = this.binding.expCircleViewProfile;
-        this.imageView_avatar = this.binding.imageViewProfileAvatar;
-        this.imageView_avatarBlur = this.binding.imageViewProfileAvatarBlur;
-        this.imageView_character = this.binding.imageViewProfileCharacter;
-        this.imageView_verified = this.binding.imageViewProfileVerified;
-        this.tabLayout = this.binding.tabs;
-        this.textView_honor = this.binding.textViewProfileHonor;
-        this.textView_level = this.binding.textViewProfileLevel;
-        this.textView_name = this.binding.textViewProfileName;
-        this.textView_punchIn = this.binding.textViewProfilePunchIn;
-        this.textView_slogan = this.binding.textViewProfileSlogan;
-        this.viewPager_tags = this.binding.viewPagerProfile;
+        this.composeView_profile = this.binding.composeViewProfile;
+        this.expCircleView = this.composeView_profile.getExpCircleView();
+        this.imageView_avatar = this.composeView_profile.getAvatarView();
+        this.imageView_avatarBlur = this.composeView_profile.getAvatarBlurView();
+        this.imageView_character = this.composeView_profile.getCharacterView();
+        this.imageView_verified = this.composeView_profile.getVerifiedView();
+        this.tabLayout = this.composeView_profile.getTabLayout();
+        this.textView_honor = this.composeView_profile.getHonorTextView();
+        this.textView_level = this.composeView_profile.getLevelTextView();
+        this.textView_name = this.composeView_profile.getNameTextView();
+        this.textView_punchIn = this.composeView_profile.getPunchInTextView();
+        this.textView_slogan = this.composeView_profile.getSloganTextView();
+        this.viewPager_tags = this.composeView_profile.getViewPager();
         a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void init() {
         super.init();
         for (int i = 2; i < 101; i++) {
@@ -120,42 +118,32 @@ public class ProfileFragment extends BaseImagePickFragment {
         }
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void ca() {
         super.ca();
-        this.button_edit.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileFragment.2
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
+        this.composeView_profile.setOnEditAction(new Runnable() {
+            @Override
+            public void run() {
                 if (ProfileFragment.this.jW != null) {
                     ProfileFragment.this.getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ProfileEditFragment.b(ProfileFragment.this.jW), ProfileEditFragment.TAG).addToBackStack(ProfileEditFragment.TAG).commit();
                 }
             }
         });
-        this.textView_punchIn.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileFragment.3
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
+        this.composeView_profile.setOnPunchInAction(new Runnable() {
+            @Override
+            public void run() {
                 ProfileFragment.this.dB();
             }
         });
-        this.imageView_avatar.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileFragment.4
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
+        this.composeView_profile.setOnAvatarAction(new Runnable() {
+            @Override
+            public void run() {
                 ProfileFragment.this.cf();
-            }
-        });
-        this.textView_name.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileFragment.5
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-            }
-        });
-        this.textView_slogan.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileFragment.6
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
             }
         });
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bH() {
         super.bH();
         this.expCircleView.setGridSize(20);
@@ -166,15 +154,15 @@ public class ProfileFragment extends BaseImagePickFragment {
     }
 
     public void j(final float f) {
-        this.qT = new CountDownTimer(1000L, 10L) { // from class: com.picacomic.fregata.fragments.ProfileFragment.7
-            @Override // android.os.CountDownTimer
+        this.qT = new CountDownTimer(1000L, 10L) {
+            @Override
             public void onTick(long j) {
                 if (ProfileFragment.this.expCircleView != null) {
                     ProfileFragment.this.expCircleView.setAngle(((1000 - j) * f) / 1000.0f);
                 }
             }
 
-            @Override // android.os.CountDownTimer
+            @Override
             public void onFinish() {
                 if (ProfileFragment.this.expCircleView != null) {
                     ProfileFragment.this.expCircleView.setAngle(f);
@@ -208,7 +196,7 @@ public class ProfileFragment extends BaseImagePickFragment {
         }
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bI() {
         super.bI();
         if (!dC()) {
@@ -234,29 +222,16 @@ public class ProfileFragment extends BaseImagePickFragment {
                 }
                 e.a((Context) getActivity(), this.jW.getLevel());
                 this.textView_level.setText(this.jW.getLevel() + " (" + this.jW.getExp() + "/" + Z(this.jW.getLevel() + 1) + ")");
-                TextView textView = this.textView_name;
-                StringBuilder sb = new StringBuilder();
-                sb.append(this.jW.getName());
-                sb.append("");
-                textView.setText(sb.toString());
+                this.textView_name.setText(this.jW.getName() + "");
                 this.textView_honor.setText(this.jW.getTitle() + "");
                 this.textView_slogan.setText(this.jW.getSlogan() + "");
-                if (this.jW.isVerified()) {
-                    this.imageView_verified.setVisibility(0);
-                } else {
-                    this.imageView_verified.setVisibility(8);
-                }
+                this.imageView_verified.setVisibility(this.jW.isVerified() ? 0 : 8);
                 this.qU = (this.jW.getExp() * 360.0f) / Z(this.jW.getLevel() + 1);
                 f.D(TAG, "Angle = " + this.qU + " next = " + Z(this.jW.getLevel()) + 1);
                 j(this.qU);
                 dD(new UserBasicObject(this.jW));
-                if (this.jW.isPunched()) {
-                    this.textView_punchIn.setVisibility(8);
-                    return;
-                } else {
-                    this.textView_punchIn.setVisibility(0);
-                    return;
-                }
+                this.textView_punchIn.setVisibility(this.jW.isPunched() ? 8 : 0);
+                return;
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
@@ -265,7 +240,7 @@ public class ProfileFragment extends BaseImagePickFragment {
         dD(null);
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseImagePickFragment
+    @Override
     public void K(String str) {
         super.K(str);
         Picasso.with(getActivity()).load(str).into(this.imageView_avatar);
@@ -275,16 +250,15 @@ public class ProfileFragment extends BaseImagePickFragment {
         }
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment
+    @Override
     public void onDetach() {
         dE();
         super.onDetach();
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onDestroyView() {
         dE();
-        this.button_edit = null;
         this.expCircleView = null;
         this.imageView_avatar = null;
         this.imageView_avatarBlur = null;
@@ -328,8 +302,8 @@ public class ProfileFragment extends BaseImagePickFragment {
         C(getResources().getString(R.string.loading_general));
         f.aA("Show Progress");
         this.qS = new d(getContext()).dO().an(e.z(getActivity()));
-        this.qS.enqueue(new Callback<GeneralResponse<PunchInResponse>>() { // from class: com.picacomic.fregata.fragments.ProfileFragment.8
-            @Override // retrofit2.Callback
+        this.qS.enqueue(new Callback<GeneralResponse<PunchInResponse>>() {
+            @Override
             public void onResponse(Call<GeneralResponse<PunchInResponse>> call, Response<GeneralResponse<PunchInResponse>> response) {
                 if (call.isCanceled() || !ProfileFragment.this.dC()) {
                     return;
@@ -349,7 +323,7 @@ public class ProfileFragment extends BaseImagePickFragment {
                 ProfileFragment.this.bC();
             }
 
-            @Override // retrofit2.Callback
+            @Override
             public void onFailure(Call<GeneralResponse<PunchInResponse>> call, Throwable th) {
                 if (call.isCanceled() || !ProfileFragment.this.isAdded()) {
                     return;
@@ -366,8 +340,8 @@ public class ProfileFragment extends BaseImagePickFragment {
         C(getResources().getString(R.string.loading_general));
         f.aA("Show Progress");
         this.jX = new d(getContext()).dO().am(e.z(getActivity()));
-        this.jX.enqueue(new Callback<GeneralResponse<UserProfileResponse>>() { // from class: com.picacomic.fregata.fragments.ProfileFragment.9
-            @Override // retrofit2.Callback
+        this.jX.enqueue(new Callback<GeneralResponse<UserProfileResponse>>() {
+            @Override
             public void onResponse(Call<GeneralResponse<UserProfileResponse>> call, Response<GeneralResponse<UserProfileResponse>> response) {
                 if (call.isCanceled() || !ProfileFragment.this.dC()) {
                     return;
@@ -391,7 +365,7 @@ public class ProfileFragment extends BaseImagePickFragment {
                 ProfileFragment.this.bC();
             }
 
-            @Override // retrofit2.Callback
+            @Override
             public void onFailure(Call<GeneralResponse<UserProfileResponse>> call, Throwable th) {
                 if (call.isCanceled() || !ProfileFragment.this.isAdded()) {
                     return;

@@ -19,6 +19,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.picacomic.fregata.databinding.ActivityMainBinding;
+import com.picacomic.fregata.compose.views.OnIntChangedListener;
+import com.picacomic.fregata.compose.views.PicaMainBottomBarComposeView;
 import com.google.gson.Gson;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.b.c;
@@ -50,8 +52,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public BannerWebview bannerWebview;
     ImageButton button_controlBlock;
     ImageButton button_controlExp;
-    AppCompatImageButton button_home;
-    AppCompatImageButton[] buttons_tabbar;
+    PicaMainBottomBarComposeView composeView_tabbar;
     Animation iA;
     Animation iB;
     Animation iC;
@@ -66,9 +67,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     long iL = 0;
     public boolean iM = false;
     public boolean iN = false;
-
-    LinearLayout linearLayout_tabbar;
-
     public PopupWebview popupWebview;
 
     @Override // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
@@ -85,16 +83,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         this.bannerWebview = this.binding.bannerWebview;
         this.button_controlBlock = this.binding.imageButtonControlBlock;
         this.button_controlExp = this.binding.imageButtonControlExp;
-        this.button_home = (AppCompatImageButton) this.binding.buttonTabbarHome;
-        this.linearLayout_tabbar = this.binding.linearLayoutTabbar;
+        this.composeView_tabbar = this.binding.composeViewMainTabbar;
         this.popupWebview = this.binding.popupWebview;
-        this.buttons_tabbar = new AppCompatImageButton[]{
-            (AppCompatImageButton) this.binding.buttonTabbarHome,
-            (AppCompatImageButton) this.binding.buttonTabbarCategory,
-            (AppCompatImageButton) this.binding.buttonTabbarGame,
-            (AppCompatImageButton) this.binding.buttonTabbarProfile,
-            (AppCompatImageButton) this.binding.buttonTabbarSetting
-        };
 
         e.j(this, (String) null);
         e.l(this, (String) null);
@@ -121,7 +111,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             @Override // android.view.animation.Animation.AnimationListener
             public void onAnimationEnd(Animation animation) {
-                MainActivity.this.linearLayout_tabbar.setVisibility(8);
+                MainActivity.this.composeView_tabbar.setVisibility(8);
             }
         });
         this.iB = AnimationUtils.loadAnimation(this, R.anim.tabbar_anim_enter);
@@ -136,7 +126,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             @Override // android.view.animation.Animation.AnimationListener
             public void onAnimationEnd(Animation animation) {
-                MainActivity.this.linearLayout_tabbar.setVisibility(0);
+                MainActivity.this.composeView_tabbar.setVisibility(0);
             }
         });
         this.iC = AnimationUtils.loadAnimation(this, R.anim.tabbar_anim_exit);
@@ -178,22 +168,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void t(int i) {
         bK();
         if (i == 0) {
-            if (this.linearLayout_tabbar.getVisibility() != 0) {
+            if (this.composeView_tabbar.getVisibility() != 0) {
                 if (e.x(this)) {
-                    this.linearLayout_tabbar.setVisibility(0);
+                    this.composeView_tabbar.setVisibility(0);
                     return;
                 } else {
-                    this.linearLayout_tabbar.startAnimation(this.iB);
+                    this.composeView_tabbar.startAnimation(this.iB);
                     return;
                 }
             }
             return;
         }
-        if (this.linearLayout_tabbar.getVisibility() == 0) {
+        if (this.composeView_tabbar.getVisibility() == 0) {
             if (e.x(this)) {
-                this.linearLayout_tabbar.setVisibility(8);
+                this.composeView_tabbar.setVisibility(8);
             } else {
-                this.linearLayout_tabbar.startAnimation(this.iA);
+                this.composeView_tabbar.startAnimation(this.iA);
             }
         }
     }
@@ -214,10 +204,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     public void bF() {
-        for (int i = 0; i < this.buttons_tabbar.length; i++) {
-            this.buttons_tabbar[i].setOnClickListener(this);
-        }
-        this.button_home.setOnClickListener(this);
+        this.composeView_tabbar.setOnTabSelectedListener(new OnIntChangedListener() { // from class: com.picacomic.fregata.activities.MainActivity.11
+            @Override // com.picacomic.fregata.compose.views.OnIntChangedListener
+            public void onChanged(int i) {
+                MainActivity.this.u(i);
+            }
+        });
     }
 
     public void bH() {
@@ -288,11 +280,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     }
 
     public void u(int i) {
-        if (this.buttons_tabbar != null) {
-            for (int i2 = 0; i2 < this.buttons_tabbar.length; i2++) {
-                this.buttons_tabbar[i2].setEnabled(true);
-            }
-            this.buttons_tabbar[i].setEnabled(false);
+        if (this.composeView_tabbar != null) {
+            this.composeView_tabbar.setSelectedIndex(i);
             switch (i) {
                 case 0:
                     getSupportFragmentManager().popBackStack();
@@ -501,11 +490,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override // android.view.View.OnClickListener
     public void onClick(View view) {
-        for (int i = 0; i < this.buttons_tabbar.length; i++) {
-            if (view == this.buttons_tabbar[i]) {
-                u(i);
-                return;
-            }
-        }
+        
     }
 }

@@ -1,44 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@id/coordinatorLayout" android:layout_width="fill_parent" android:layout_height="fill_parent"
-  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <com.google.android.material.appbar.AppBarLayout android:theme="@style/AppTheme.AppBarOverlay" android:id="@id/appbar" android:layout_width="fill_parent" android:layout_height="wrap_content">
-        <com.google.android.material.appbar.CollapsingToolbarLayout android:layout_width="fill_parent" android:layout_height="fill_parent" app:contentScrim="?colorPrimary" app:expandedTitleMarginEnd="64.0dip" app:expandedTitleMarginStart="48.0dip" app:layout_scrollFlags="exitUntilCollapsed|scroll">
-            <LinearLayout android:orientation="vertical" android:id="@id/profile" android:fitsSystemWindows="true" android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_collapseMode="parallax">
-                <FrameLayout android:background="@drawable/actionbar_background" android:layout_width="fill_parent" android:layout_height="?actionBarSize">
-                    <TextView android:textSize="@dimen/textsize_title_2" android:gravity="center" android:layout_gravity="center" android:id="@id/textView_profile_title_bar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/title_profile" style="@style/TextBaseStyleGrayDark" />
-                    <Button android:textSize="@dimen/textsize_content_1" android:textColor="@color/grayDark" android:gravity="center" android:layout_gravity="center|right" android:id="@id/button_profile_edit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/edit" style="@style/ImageButtonTransparentBgFitCenter" />
-                </FrameLayout>
-                <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
-                    <ImageView android:id="@id/imageView_profile_avatar_blur" android:visibility="visible" android:layout_width="fill_parent" android:layout_height="fill_parent" android:foreground="@color/dim" android:src="@drawable/placeholder_avatar_2" android:layout_alignBottom="@id/linearLayout_profile_content" style="@style/ImageViewBaseStyleCenterCrop" />
-                    <TextView android:gravity="center" android:id="@id/textView_profile_punch_in" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/padding_1" android:layout_marginRight="@dimen/padding_3" android:text="@string/profile_punch_in" android:drawableTop="@drawable/icon_punch_in" android:layout_alignParentRight="true" style="@style/TextBaseStylesWhiteContent2" />
-                    <LinearLayout android:orientation="vertical" android:id="@id/linearLayout_profile_content" android:layout_width="fill_parent" android:layout_height="wrap_content">
-                        <LinearLayout android:gravity="center" android:layout_gravity="center" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
-                            <TextView android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/level" style="@style/TextBaseStylesWhiteContent2" />
-                            <TextView android:gravity="center" android:id="@id/textView_profile_level" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="100" style="@style/TextBaseStylesWhiteContent2" />
-                        </LinearLayout>
-                        <FrameLayout android:layout_gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content">
-                            <ImageView android:layout_gravity="center" android:id="@id/imageView_profile_character" android:visibility="gone" android:layout_width="@dimen/size_image_profile_character_icon" android:layout_height="@dimen/size_image_profile_character_icon" android:src="@drawable/verified_icon_fill" style="@style/ImageViewBaseStyleFitCenter" />
-                            <com.picacomic.fregata.utils.views.ExpCircleView android:layout_gravity="center" android:id="@id/expCircleView_profile" android:layout_width="@dimen/size_image_profile_exp" android:layout_height="@dimen/size_image_profile_exp" app:exp_border_color="@color/grayDark" app:exp_border_color_dark="@color/black" app:exp_border_width="@dimen/size_image_profile_exp_bar_stroke_width" app:exp_fill_color="@color/colorPrimary" app:exp_fill_color_dark="@color/peach" app:exp_fill_color_light="@color/colorPrimaryLight" app:exp_fill_width="@dimen/size_image_profile_exp_bar_width" />
-                            <de.hdodenhof.circleimageview.CircleImageView android:layout_gravity="center" android:id="@id/imageView_profile_avatar" android:layout_width="@dimen/size_image_thumbnail" android:layout_height="@dimen/size_image_thumbnail" android:src="@drawable/placeholder_avatar_2" app:civ_border_color="@color/black" app:civ_border_width="@dimen/size_image_profile_exp_bar_stroke_width" />
-                        </FrameLayout>
-                        <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_1">
-                            <TextView android:textStyle="bold" android:gravity="center" android:id="@id/textView_profile_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="嗶卡D" android:layout_centerInParent="true" style="@style/TextBaseStylesWhiteContent1" />
-                            <ImageView android:id="@id/imageView_profile_verified" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/padding_2" android:src="@drawable/verified_icon" android:layout_toRightOf="@id/textView_profile_name" style="@style/ImageViewBaseStyleFitCenter" />
-                        </RelativeLayout>
-                        <TextView android:gravity="center" android:id="@id/textView_profile_honor" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="嗶卡D" style="@style/TextBaseStylePinkLightContent1" />
-                        <LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/padding_2">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&quot;" style="@style/TextBaseStylesWhiteContent2" />
-                            <TextView android:id="@id/textView_profile_slogan" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="伺服器君是一個變態" style="@style/TextBaseStylesWhiteContent2" />
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&quot;" style="@style/TextBaseStylesWhiteContent2" />
-                        </LinearLayout>
-                    </LinearLayout>
-                </RelativeLayout>
-            </LinearLayout>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-        <com.google.android.material.appbar.CollapsingToolbarLayout android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_scrollFlags="enterAlways|scroll">
-            <com.google.android.material.tabs.TabLayout style="@style/PicaTabLayout" android:layout_gravity="bottom" android:id="@id/tabs" android:background="?custom_background_color" android:layout_width="fill_parent" android:layout_height="?actionBarSize" android:layout_below="@id/toolbar" app:layout_collapseMode="pin" app:tabIndicatorColor="@color/colorPrimary" app:tabSelectedTextColor="@color/colorPrimary" app:tabTextColor="@color/gray" />
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-    <androidx.viewpager.widget.ViewPager android:id="@id/viewPager_profile" android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
-
+<com.picacomic.fregata.compose.views.PicaProfileComposeView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/composeView_profile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

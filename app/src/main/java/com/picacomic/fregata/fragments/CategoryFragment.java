@@ -2,19 +2,12 @@ package com.picacomic.fregata.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import com.picacomic.fregata.databinding.FragmentCategoryBinding;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -24,6 +17,8 @@ import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.adapters.CategoryRecyclerViewAdapter;
 import com.picacomic.fregata.b.c;
 import com.picacomic.fregata.b.d;
+import com.picacomic.fregata.compose.views.OnStringChangedListener;
+import com.picacomic.fregata.compose.views.PicaCategoryComposeView;
 import com.picacomic.fregata.objects.CategoryObject;
 import com.picacomic.fregata.objects.DefaultCategoryObject;
 import com.picacomic.fregata.objects.responses.CategoryResponse;
@@ -41,12 +36,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/* JADX INFO: loaded from: classes.dex */
 public class CategoryFragment extends BaseFragment implements k {
     public static final String TAG = "CategoryFragment";
-
     FragmentCategoryBinding binding;
-    CoordinatorLayout coordinatorLayout;
     ArrayList<String> kA;
     ArrayList<String> kB;
     ArrayList<CategoryObject> kC;
@@ -58,25 +50,16 @@ public class CategoryFragment extends BaseFragment implements k {
     CategoryRecyclerViewAdapter kx;
     Button[] ky;
     Button[] kz;
-    LinearLayout linearLayout_keywords;
-    LinearLayout linearLayout_tags;
+    PicaCategoryComposeView composeView_category;
     RecyclerView recyclerView_category;
-    NestedScrollView scrollView;
-    SearchView searchView;
-    Toolbar toolbar;
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         this.binding = FragmentCategoryBinding.inflate(layoutInflater, viewGroup, false);
-        this.coordinatorLayout = this.binding.coordinatorLayout;
-        this.linearLayout_keywords = this.binding.linearLayoutCategoryKeywordsList;
-        this.linearLayout_tags = this.binding.linearLayoutCategoryTagList;
-        this.recyclerView_category = this.binding.recyclerViewCategory;
-        this.scrollView = this.binding.scrollView;
-        this.searchView = this.binding.searchView;
-        this.toolbar = this.binding.toolbar;
-        if (e.C(getContext()) != null && !e.C(getContext()).equalsIgnoreCase("") && (this.kC == null || (this.kC != null && this.kC.size() == 0))) {
-            this.kC = (ArrayList) new Gson().fromJson(e.C(getContext()), new TypeToken<List<CategoryObject>>() { // from class: com.picacomic.fregata.fragments.CategoryFragment.1
+        this.composeView_category = this.binding.composeViewCategory;
+        this.recyclerView_category = this.composeView_category.getRecyclerView();
+        if (e.C(getContext()) != null && !e.C(getContext()).equalsIgnoreCase("") && (this.kC == null || this.kC.size() == 0)) {
+            this.kC = (ArrayList) new Gson().fromJson(e.C(getContext()), new TypeToken<List<CategoryObject>>() {
             }.getType());
         }
         if (getActivity() != null) {
@@ -85,12 +68,7 @@ public class CategoryFragment extends BaseFragment implements k {
         return this.binding.getRoot();
     }
 
-    @Override // androidx.fragment.app.Fragment
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onPause() {
         super.onPause();
         if (this.kC == null || this.kC.size() <= 0 || getContext() == null) {
@@ -99,7 +77,7 @@ public class CategoryFragment extends BaseFragment implements k {
         e.j(getContext(), new Gson().toJson(this.kC));
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void init() {
         super.init();
         f.D(TAG, "Token = " + e.z(getActivity()));
@@ -149,22 +127,16 @@ public class CategoryFragment extends BaseFragment implements k {
         }
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void ca() {
         super.ca();
-        this.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() { // from class: com.picacomic.fregata.fragments.CategoryFragment.2
-            @Override // androidx.appcompat.widget.SearchView.OnQueryTextListener
-            public boolean onQueryTextChange(String str) {
-                return false;
-            }
-
-            @Override // androidx.appcompat.widget.SearchView.OnQueryTextListener
-            public boolean onQueryTextSubmit(String str) {
+        this.composeView_category.setOnSearchSubmitListener(new OnStringChangedListener() {
+            @Override
+            public void onChanged(String str) {
                 if (str == null || str.equalsIgnoreCase("")) {
-                    return false;
+                    return;
                 }
                 CategoryFragment.this.getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a(null, str, null, null, null, null, null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
-                return false;
             }
         });
         this.recyclerView_category.setLayoutManager(new FullGridLayoutManager(getActivity(), 3));
@@ -173,10 +145,9 @@ public class CategoryFragment extends BaseFragment implements k {
         this.recyclerView_category.setNestedScrollingEnabled(false);
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bH() {
         super.bH();
-        this.toolbar.setTitle(R.string.title_category);
         if (getActivity() != null && (getActivity() instanceof MainActivity)) {
             ((MainActivity) getActivity()).t(0);
             if (e.ai(getActivity())) {
@@ -192,19 +163,23 @@ public class CategoryFragment extends BaseFragment implements k {
         if (this.kA != null && !this.kA.isEmpty()) {
             bI();
         }
-        if (this.kB == null || (this.kB != null && this.kB.size() == 0)) {
+        if (this.kB == null || this.kB.size() == 0) {
             ck();
+        } else {
+            cj();
         }
-        c(this.searchView);
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bI() {
         super.bI();
         this.kx.notifyDataSetChanged();
+        this.composeView_category.getTagsContainer().removeAllViews();
         if (this.kA == null || this.kA.size() <= 0) {
+            this.composeView_category.setTagSectionVisible(false);
             return;
         }
+        this.composeView_category.setTagSectionVisible(true);
         this.ky = new Button[this.kA.size()];
         for (int i = 0; i < this.kA.size(); i++) {
             this.ky[i] = new Button(getActivity(), null, R.style.TagButtonPink);
@@ -212,26 +187,29 @@ public class CategoryFragment extends BaseFragment implements k {
             this.ky[i].setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.button_tag_bg, getActivity().getTheme()));
             this.ky[i].setText(this.kA.get(i) + "");
             this.ky[i].setTag(this.kA.get(i));
-            this.ky[i].setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.CategoryFragment.3
-                @Override // android.view.View.OnClickListener
+            this.ky[i].setOnClickListener(new View.OnClickListener() {
+                @Override
                 public void onClick(View view) {
                     CategoryFragment.this.getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a(null, null, (String) view.getTag(), null, null, null, null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
                 }
             });
         }
-        g.a(this.linearLayout_tags, this.ky, getActivity(), (View) null);
+        g.a(this.composeView_category.getTagsContainer(), this.ky, getActivity(), (View) null);
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onViewStateRestored(Bundle bundle) {
         super.onViewStateRestored(bundle);
         cj();
     }
 
     public void cj() {
+        this.composeView_category.getKeywordsContainer().removeAllViews();
         if (this.kB == null || this.kB.size() <= 0) {
+            this.composeView_category.setKeywordSectionVisible(false);
             return;
         }
+        this.composeView_category.setKeywordSectionVisible(true);
         this.kz = new Button[this.kB.size()];
         for (int i = 0; i < this.kB.size(); i++) {
             this.kz[i] = new Button(getActivity(), null, R.style.KeywordButton);
@@ -239,43 +217,26 @@ public class CategoryFragment extends BaseFragment implements k {
             this.kz[i].setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.button_keyword_bg, getActivity().getTheme()));
             this.kz[i].setText(this.kB.get(i) + "");
             this.kz[i].setTag(this.kB.get(i));
-            this.kz[i].setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.CategoryFragment.4
-                @Override // android.view.View.OnClickListener
+            this.kz[i].setOnClickListener(new View.OnClickListener() {
+                @Override
                 public void onClick(View view) {
                     CategoryFragment.this.getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a(null, (String) view.getTag(), null, null, null, null, null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
                 }
             });
         }
-        g.a(this.linearLayout_keywords, this.kz, getActivity(), (View) null);
-    }
-
-    private void c(View view) {
-        if (view != null) {
-            if (view instanceof TextView) {
-                ((TextView) view).setTextColor(ViewCompat.MEASURED_STATE_MASK);
-                return;
-            }
-            if (view instanceof ViewGroup) {
-                ViewGroup viewGroup = (ViewGroup) view;
-                for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                    c(viewGroup.getChildAt(i));
-                }
-            }
-        }
+        g.a(this.composeView_category.getKeywordsContainer(), this.kz, getActivity(), (View) null);
     }
 
     public void ck() {
         bA();
         this.kH = new d(getContext()).dO().ar(e.z(getActivity()));
-        this.kH.enqueue(new Callback<GeneralResponse<KeywordsResponse>>() { // from class: com.picacomic.fregata.fragments.CategoryFragment.5
-            @Override // retrofit2.Callback
+        this.kH.enqueue(new Callback<GeneralResponse<KeywordsResponse>>() {
+            @Override
             public void onResponse(Call<GeneralResponse<KeywordsResponse>> call, Response<GeneralResponse<KeywordsResponse>> response) {
                 if (response.code() == 200) {
                     if (response.body() != null && response.body().data != null && response.body().data.getKeywords() != null && response.body().data.getKeywords().size() > 0) {
                         f.D(CategoryFragment.TAG, "KEYWORD = " + response.body().data.getKeywords().toString());
-                        if (CategoryFragment.this.kB == null) {
-                            CategoryFragment.this.kB = new ArrayList<>();
-                        }
+                        CategoryFragment.this.kB = new ArrayList<>();
                         for (int i = 0; i < response.body().data.getKeywords().size(); i++) {
                             CategoryFragment.this.kB.add(response.body().data.getKeywords().get(i) + "");
                         }
@@ -293,7 +254,7 @@ public class CategoryFragment extends BaseFragment implements k {
                 CategoryFragment.this.bC();
             }
 
-            @Override // retrofit2.Callback
+            @Override
             public void onFailure(Call<GeneralResponse<KeywordsResponse>> call, Throwable th) {
                 th.printStackTrace();
                 new c(CategoryFragment.this.getActivity()).dN();
@@ -305,8 +266,8 @@ public class CategoryFragment extends BaseFragment implements k {
     public void cl() {
         C(getResources().getString(R.string.loading_get_categories));
         this.kF = new d(getContext()).dO().al(e.z(getActivity()));
-        this.kF.enqueue(new Callback<GeneralResponse<CategoryResponse>>() { // from class: com.picacomic.fregata.fragments.CategoryFragment.6
-            @Override // retrofit2.Callback
+        this.kF.enqueue(new Callback<GeneralResponse<CategoryResponse>>() {
+            @Override
             public void onResponse(Call<GeneralResponse<CategoryResponse>> call, Response<GeneralResponse<CategoryResponse>> response) {
                 if (response.code() == 200) {
                     if (response.body() != null && response.body().data != null && response.body().data.categories != null) {
@@ -327,7 +288,7 @@ public class CategoryFragment extends BaseFragment implements k {
                 CategoryFragment.this.bC();
             }
 
-            @Override // retrofit2.Callback
+            @Override
             public void onFailure(Call<GeneralResponse<CategoryResponse>> call, Throwable th) {
                 th.printStackTrace();
                 new c(CategoryFragment.this.getActivity()).dN();
@@ -336,11 +297,11 @@ public class CategoryFragment extends BaseFragment implements k {
         });
     }
 
-    @Override // com.picacomic.fregata.a_pkg.k
+    @Override
     public void C(int i) {
         int i2;
         if (this.kD != null) {
-            int size = this.kD.size() + 0;
+            int size = this.kD.size();
             switch (i) {
                 case 0:
                     break;
@@ -373,14 +334,13 @@ public class CategoryFragment extends BaseFragment implements k {
                         } else {
                             getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a(this.kC.get(i2).getTitle(), null, null, null, null, "dd", null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
                         }
-                        break;
                     }
                     break;
             }
         }
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment
+    @Override
     public void onDetach() {
         if (this.kG != null) {
             this.kG.cancel();

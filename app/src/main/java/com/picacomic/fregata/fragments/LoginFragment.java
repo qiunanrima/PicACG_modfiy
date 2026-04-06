@@ -13,10 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.picacomic.fregata.databinding.FragmentLoginBinding;
@@ -24,6 +22,8 @@ import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.b.c;
 import com.picacomic.fregata.b.d;
+import com.picacomic.fregata.compose.views.OnStringChangedListener;
+import com.picacomic.fregata.compose.views.PicaLoginComposeView;
 import com.picacomic.fregata.objects.NetworkErrorObject;
 import com.picacomic.fregata.objects.requests.ForgotPasswordBody;
 import com.picacomic.fregata.objects.requests.ResetPasswordBody;
@@ -47,14 +47,8 @@ public class LoginFragment extends BaseFragment {
     public static final String TAG = "LoginFragment";
 
     FragmentLoginBinding binding;
-    Button button_forgotPassword;
-    Button button_login;
-    Button button_register;
-    Button button_resendActivation;
-    EditText editText_email;
-    EditText editText_password;
+    PicaLoginComposeView composeView_loginForm;
     ImageView imageView_logo;
-    LinearLayout linearLayout_loginForm;
     EditText pT;
     Call<GeneralResponse<SignInResponse>> pU;
     Call<GeneralResponse<ForgotPasswordResponse>> pV;
@@ -68,14 +62,8 @@ public class LoginFragment extends BaseFragment {
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         this.binding = FragmentLoginBinding.inflate(layoutInflater, viewGroup, false);
-        this.button_forgotPassword = this.binding.buttonLoginForgetPassword;
-        this.button_login = this.binding.buttonLoginLoginButton;
-        this.button_register = this.binding.buttonLoginRegister;
-        this.button_resendActivation = this.binding.buttonLoginResendActivation;
-        this.editText_email = this.binding.editTextLoginEmail;
-        this.editText_password = this.binding.editTextLoginPassword;
+        this.composeView_loginForm = this.binding.composeViewLoginForm;
         this.imageView_logo = this.binding.imageViewLoginPicaLogo;
-        this.linearLayout_loginForm = this.binding.linearLayoutLoginFragment;
         a(this.binding.getRoot());
         return this.binding.getRoot();
     }
@@ -95,19 +83,31 @@ public class LoginFragment extends BaseFragment {
     @Override // com.picacomic.fregata.fragments.BaseFragment
     public void ca() {
         super.ca();
-        this.button_login.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.1
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-                if (LoginFragment.this.editText_password.length() < 8) {
+        this.composeView_loginForm.setOnEmailChangedListener(new OnStringChangedListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.1
+            @Override // com.picacomic.fregata.compose.views.OnStringChangedListener
+            public void onChanged(String str) {
+                LoginFragment.this.qa = str;
+            }
+        });
+        this.composeView_loginForm.setOnPasswordChangedListener(new OnStringChangedListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.2
+            @Override // com.picacomic.fregata.compose.views.OnStringChangedListener
+            public void onChanged(String str) {
+                LoginFragment.this.qb = str;
+            }
+        });
+        this.composeView_loginForm.setOnLoginAction(new Runnable() { // from class: com.picacomic.fregata.fragments.LoginFragment.3
+            @Override // java.lang.Runnable
+            public void run() {
+                if (LoginFragment.this.composeView_loginForm.getPasswordValue().length() < 8) {
                     AlertDialogCenter.passwordLength(LoginFragment.this.getActivity());
                 } else {
                     LoginFragment.this.dr();
                 }
             }
         });
-        this.button_register.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.2
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
+        this.composeView_loginForm.setOnRegisterAction(new Runnable() { // from class: com.picacomic.fregata.fragments.LoginFragment.4
+            @Override // java.lang.Runnable
+            public void run() {
                 try {
                     LoginFragment.this.getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, new RegisterFragment(), RegisterFragment.TAG).addToBackStack(RegisterFragment.TAG).commit();
                 } catch (Exception e) {
@@ -117,12 +117,16 @@ public class LoginFragment extends BaseFragment {
                 }
             }
         });
-        this.button_forgotPassword.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.3
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
+        this.composeView_loginForm.setOnForgotPasswordAction(new Runnable() { // from class: com.picacomic.fregata.fragments.LoginFragment.5
+            @Override // java.lang.Runnable
+            public void run() {
+                View view = LoginFragment.this.getView();
+                if (view == null) {
+                    return;
+                }
                 View viewInflate = ((LayoutInflater) LoginFragment.this.getActivity().getSystemService("layout_inflater")).inflate(R.layout.dialog_forgot_password_content_view, (ViewGroup) view.getParent(), false);
                 LoginFragment.this.pT = (EditText) viewInflate.findViewById(R.id.editText_dialog_forgot_password_content_email);
-                LoginFragment.this.pT.addTextChangedListener(new TextWatcher() { // from class: com.picacomic.fregata.fragments.LoginFragment.3.1
+                LoginFragment.this.pT.addTextChangedListener(new TextWatcher() { // from class: com.picacomic.fregata.fragments.LoginFragment.5.1
                     @Override // android.text.TextWatcher
                     public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
                     }
@@ -145,7 +149,7 @@ public class LoginFragment extends BaseFragment {
                         }
                     }
                 });
-                new AlertDialog.Builder(LoginFragment.this.getActivity(), R.style.MyAlertDialogStyle).setTitle(R.string.login_forget_password).setView(viewInflate).setCancelable(false).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.3.3
+                new AlertDialog.Builder(LoginFragment.this.getActivity(), R.style.MyAlertDialogStyle).setTitle(R.string.login_forget_password).setView(viewInflate).setCancelable(false).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.5.3
                     @Override // android.content.DialogInterface.OnClickListener
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (LoginFragment.this.pZ) {
@@ -158,7 +162,7 @@ public class LoginFragment extends BaseFragment {
                         }
                         LoginFragment.this.qa = LoginFragment.this.pT.getText().toString();
                     }
-                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.3.2
+                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.5.2
                     @Override // android.content.DialogInterface.OnClickListener
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
@@ -166,12 +170,16 @@ public class LoginFragment extends BaseFragment {
                 }).show();
             }
         });
-        this.button_resendActivation.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.4
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
+        this.composeView_loginForm.setOnResendActivationAction(new Runnable() { // from class: com.picacomic.fregata.fragments.LoginFragment.6
+            @Override // java.lang.Runnable
+            public void run() {
+                View view = LoginFragment.this.getView();
+                if (view == null) {
+                    return;
+                }
                 View viewInflate = ((LayoutInflater) LoginFragment.this.getActivity().getSystemService("layout_inflater")).inflate(R.layout.dialog_forgot_password_content_view, (ViewGroup) view.getParent(), false);
                 LoginFragment.this.pT = (EditText) viewInflate.findViewById(R.id.editText_dialog_forgot_password_content_email);
-                LoginFragment.this.pT.addTextChangedListener(new TextWatcher() { // from class: com.picacomic.fregata.fragments.LoginFragment.4.1
+                LoginFragment.this.pT.addTextChangedListener(new TextWatcher() { // from class: com.picacomic.fregata.fragments.LoginFragment.6.1
                     @Override // android.text.TextWatcher
                     public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
                     }
@@ -185,7 +193,7 @@ public class LoginFragment extends BaseFragment {
                         LoginFragment.this.E(true);
                     }
                 });
-                new AlertDialog.Builder(LoginFragment.this.getActivity(), R.style.MyAlertDialogStyle).setTitle(R.string.login_resend_activation).setView(viewInflate).setCancelable(false).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.4.3
+                new AlertDialog.Builder(LoginFragment.this.getActivity(), R.style.MyAlertDialogStyle).setTitle(R.string.login_resend_activation).setView(viewInflate).setCancelable(false).setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.6.3
                     @Override // android.content.DialogInterface.OnClickListener
                     public void onClick(DialogInterface dialogInterface, int i) {
                         LoginFragment.this.E(true);
@@ -198,7 +206,7 @@ public class LoginFragment extends BaseFragment {
                         }
                         LoginFragment.this.qa = LoginFragment.this.pT.getText().toString();
                     }
-                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.4.2
+                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() { // from class: com.picacomic.fregata.fragments.LoginFragment.6.2
                     @Override // android.content.DialogInterface.OnClickListener
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
@@ -221,13 +229,14 @@ public class LoginFragment extends BaseFragment {
     @Override // com.picacomic.fregata.fragments.BaseFragment
     public void bH() {
         super.bH();
-        this.linearLayout_loginForm.setVisibility(4);
+        this.composeView_loginForm.setVisibility(4);
         Picasso.with(getContext()).load(R.drawable.splash_title_new).into(this.imageView_logo);
         if (getContext() == null || !e.x(getContext())) {
             this.imageView_logo.startAnimation(this.pY);
         }
-        this.editText_email.setText(e.u(getActivity()));
-        this.editText_password.setText(e.v(getActivity()));
+        this.composeView_loginForm.setEmail(e.u(getActivity()));
+        this.composeView_loginForm.setPassword(e.v(getActivity()));
+        this.composeView_loginForm.setShowResendActivation(false);
         if (e.z(getActivity()) != null && !e.z(getActivity()).isEmpty()) {
             dq();
         } else {
@@ -240,9 +249,9 @@ public class LoginFragment extends BaseFragment {
         super.bI();
         if (getActivity() != null) {
             f.D(TAG, "When will you run");
-            this.linearLayout_loginForm.setVisibility(0);
+            this.composeView_loginForm.setVisibility(0);
             try {
-                this.linearLayout_loginForm.startAnimation(this.pX);
+                this.composeView_loginForm.startAnimation(this.pX);
             } catch (Exception e) {
                 e.printStackTrace();
                 Toast.makeText(getContext(), "Start Animation Error", 0).show();
@@ -279,14 +288,14 @@ public class LoginFragment extends BaseFragment {
 
     public void dr() {
         C(getResources().getString(R.string.loading_sign_in));
-        this.pU = new d(getContext()).dO().a(new SignInBody(this.editText_email.getText().toString(), this.editText_password.getText().toString()));
+        this.pU = new d(getContext()).dO().a(new SignInBody(this.composeView_loginForm.getEmailValue(), this.composeView_loginForm.getPasswordValue()));
         this.pU.enqueue(new Callback<GeneralResponse<SignInResponse>>() { // from class: com.picacomic.fregata.fragments.LoginFragment.7
             @Override // retrofit2.Callback
             public void onResponse(Call<GeneralResponse<SignInResponse>> call, Response<GeneralResponse<SignInResponse>> response) {
                 if (response.code() == 200) {
                     if (LoginFragment.this.getActivity() != null) {
-                        e.e(LoginFragment.this.getActivity(), LoginFragment.this.editText_email.getText().toString());
-                        e.f(LoginFragment.this.getActivity(), LoginFragment.this.editText_password.getText().toString());
+                        e.e(LoginFragment.this.getActivity(), LoginFragment.this.composeView_loginForm.getEmailValue());
+                        e.f(LoginFragment.this.getActivity(), LoginFragment.this.composeView_loginForm.getPasswordValue());
                         e.h(LoginFragment.this.getActivity(), response.body().data.getToken());
                     }
                     LoginFragment.this.dq();
@@ -373,8 +382,7 @@ public class LoginFragment extends BaseFragment {
             public void onResponse(Call<GeneralResponse<PasswordResponse>> call, Response<GeneralResponse<PasswordResponse>> response) {
                 if (response.code() == 200) {
                     LoginFragment.this.qb = response.body().data.getPassword();
-                    LoginFragment.this.editText_password.setText(LoginFragment.this.qb);
-                    LoginFragment.this.editText_password.setInputType(1);
+                    LoginFragment.this.composeView_loginForm.setPassword(LoginFragment.this.qb);
                     try {
                         ((ClipboardManager) LoginFragment.this.getActivity().getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("text", LoginFragment.this.qb));
                         Toast.makeText(LoginFragment.this.getContext(), "新密碼已複製", 1).show();
