@@ -98,18 +98,4 @@
     <color name="transparent_white">#66FFFFFF</color>
     <color name="transparent_white_75">#BFFFFFFF</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="expressive_background">#FFFDF7FA</color>
-    <color name="expressive_surface">#FFFFFFFF</color>
-    <color name="expressive_surface_variant">#FFFCEAF2</color>
-    <color name="expressive_surface_strong">#FFF8DCE8</color>
-    <color name="expressive_outline">#FFF0BFD2</color>
-    <color name="expressive_outline_strong">#FFE39AB8</color>
-    <color name="expressive_primary">#FFD63378</color>
-    <color name="expressive_primary_dark">#FFB71F60</color>
-    <color name="expressive_primary_container">#FFFFDCE9</color>
-    <color name="expressive_secondary">#FFF08CB3</color>
-    <color name="expressive_on_surface">#FF30111F</color>
-    <color name="expressive_on_surface_variant">#FF7B5867</color>
-    <color name="expressive_hero_start">#FFFFE3EE</color>
-    <color name="expressive_hero_end">#FFFFF8FB</color>
 </resources>
