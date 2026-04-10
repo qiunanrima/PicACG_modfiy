@@ -3,7 +3,6 @@ package com.picacomic.fregata.fragments;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,7 @@ import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.adapters.NotificationRecyclerViewAdapter;
 import com.picacomic.fregata.b.c;
 import com.picacomic.fregata.b.d;
+import com.picacomic.fregata.compose.views.PicaHeaderRecyclerComposeView;
 import com.picacomic.fregata.objects.ComicListObject;
 import com.picacomic.fregata.objects.NotificationObject;
 import com.picacomic.fregata.objects.responses.DataClass.NotificationsResponse.NotificationsResponse;
@@ -26,7 +26,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/* JADX INFO: loaded from: classes.dex */
 public class NotificationFragment extends BaseFragment implements h {
     public static final String TAG = "NotificationFragment";
     ArrayList<NotificationObject> ja;
@@ -36,28 +35,27 @@ public class NotificationFragment extends BaseFragment implements h {
     Call<GeneralResponse<NotificationsResponse>> qk;
 
     FragmentNotificationBinding binding;
+    PicaHeaderRecyclerComposeView composeView_notification;
     RecyclerView recyclerView;
-    Toolbar toolbar;
     int totalPage;
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
     }
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         this.binding = FragmentNotificationBinding.inflate(layoutInflater, viewGroup, false);
-        this.recyclerView = this.binding.recyclerViewNotification;
-        this.toolbar = this.binding.toolbar;
+        this.composeView_notification = this.binding.composeViewNotification;
+        this.recyclerView = this.composeView_notification.getRecyclerView();
         a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void init() {
         super.init();
-        a(this.toolbar, R.string.title_notification, true);
         if (getActivity() != null && (getActivity() instanceof MainActivity)) {
             ((MainActivity) getActivity()).t(8);
         }
@@ -70,34 +68,38 @@ public class NotificationFragment extends BaseFragment implements h {
         ds();
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void ca() {
         super.ca();
+        this.composeView_notification.setTitleText(getString(R.string.title_notification));
+        this.composeView_notification.setOnBackAction(new Runnable() {
+            @Override
+            public void run() {
+                if (NotificationFragment.this.getActivity() != null) {
+                    NotificationFragment.this.getActivity().onBackPressed();
+                }
+            }
+        });
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), 1, false));
         this.qj = new NotificationRecyclerViewAdapter(getContext(), this.ja, this);
         this.recyclerView.setAdapter(this.qj);
-        this.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() { // from class: com.picacomic.fregata.fragments.NotificationFragment.1
-            @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
+        this.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int i) {
                 super.onScrollStateChanged(recyclerView, i);
                 if (recyclerView.getLayoutManager() != null && (recyclerView.getLayoutManager() instanceof LinearLayoutManager) && ((LinearLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition() == ((LinearLayoutManager) recyclerView.getLayoutManager()).getItemCount() - 1) {
                     NotificationFragment.this.ds();
                 }
             }
-
-            @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrolled(RecyclerView recyclerView, int i, int i2) {
-                super.onScrolled(recyclerView, i, i2);
-            }
         });
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bH() {
         super.bH();
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bI() {
         super.bI();
         this.qj.notifyDataSetChanged();
@@ -110,8 +112,8 @@ public class NotificationFragment extends BaseFragment implements h {
         this.or = true;
         C(getResources().getString(R.string.loading_comic_viewer));
         this.qk = new d(getContext()).dO().d(e.z(getActivity()), this.page);
-        this.qk.enqueue(new Callback<GeneralResponse<NotificationsResponse>>() { // from class: com.picacomic.fregata.fragments.NotificationFragment.2
-            @Override // retrofit2.Callback
+        this.qk.enqueue(new Callback<GeneralResponse<NotificationsResponse>>() {
+            @Override
             public void onResponse(Call<GeneralResponse<NotificationsResponse>> call, Response<GeneralResponse<NotificationsResponse>> response) {
                 if (response.code() == 200) {
                     f.aA(response.body().data.toString());
@@ -134,7 +136,7 @@ public class NotificationFragment extends BaseFragment implements h {
                 NotificationFragment.this.or = false;
             }
 
-            @Override // retrofit2.Callback
+            @Override
             public void onFailure(Call<GeneralResponse<NotificationsResponse>> call, Throwable th) {
                 th.printStackTrace();
                 NotificationFragment.this.bC();
@@ -145,7 +147,7 @@ public class NotificationFragment extends BaseFragment implements h {
         });
     }
 
-    @Override // com.picacomic.fregata.a_pkg.h
+    @Override
     public void W(int i) {
         if (this.ja == null || this.ja.size() <= i || this.ja.get(i).getRedirectType() == null) {
             return;
@@ -171,7 +173,7 @@ public class NotificationFragment extends BaseFragment implements h {
         }
     }
 
-    @Override // com.picacomic.fregata.a_pkg.h
+    @Override
     public void X(int i) {
         if (this.ja == null || this.ja.size() <= i || this.ja.get(i).getSender() == null) {
             return;
@@ -179,7 +181,7 @@ public class NotificationFragment extends BaseFragment implements h {
         a(this.ja.get(i).getSender());
     }
 
-    @Override // com.picacomic.fregata.a_pkg.h
+    @Override
     public void Y(int i) {
         if (this.ja == null || this.ja.size() <= i || this.ja.get(i).getSender() == null) {
             return;
@@ -187,7 +189,7 @@ public class NotificationFragment extends BaseFragment implements h {
         D(g.b(this.ja.get(i).getCover()));
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment
+    @Override
     public void onDetach() {
         if (this.qk != null) {
             this.qk.cancel();

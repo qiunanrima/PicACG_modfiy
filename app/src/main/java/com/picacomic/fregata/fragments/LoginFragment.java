@@ -14,10 +14,8 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.picacomic.fregata.databinding.FragmentLoginBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.b.c;
@@ -36,7 +34,6 @@ import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
 import com.picacomic.fregata.utils.views.AlertDialogCenter;
-import com.squareup.picasso.Picasso;
 import java.util.Random;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,26 +43,21 @@ import retrofit2.Response;
 public class LoginFragment extends BaseFragment {
     public static final String TAG = "LoginFragment";
 
-    FragmentLoginBinding binding;
     PicaLoginComposeView composeView_loginForm;
-    ImageView imageView_logo;
     EditText pT;
     Call<GeneralResponse<SignInResponse>> pU;
     Call<GeneralResponse<ForgotPasswordResponse>> pV;
     Call<GeneralResponse<PasswordResponse>> pW;
     Animation pX;
-    Animation pY;
     boolean pZ = false;
     String qa;
     String qb;
 
     @Override // androidx.fragment.app.Fragment
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        this.binding = FragmentLoginBinding.inflate(layoutInflater, viewGroup, false);
-        this.composeView_loginForm = this.binding.composeViewLoginForm;
-        this.imageView_logo = this.binding.imageViewLoginPicaLogo;
-        a(this.binding.getRoot());
-        return this.binding.getRoot();
+        this.composeView_loginForm = new PicaLoginComposeView(requireContext());
+        a(this.composeView_loginForm);
+        return this.composeView_loginForm;
     }
 
     @Override // androidx.fragment.app.Fragment
@@ -77,7 +69,6 @@ public class LoginFragment extends BaseFragment {
     public void init() {
         super.init();
         this.pX = AnimationUtils.loadAnimation(getActivity(), R.anim.login_form_fade_in);
-        this.pY = AnimationUtils.loadAnimation(getActivity(), R.anim.login_logo_fade_in);
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -230,10 +221,6 @@ public class LoginFragment extends BaseFragment {
     public void bH() {
         super.bH();
         this.composeView_loginForm.setVisibility(4);
-        Picasso.with(getContext()).load(R.drawable.splash_title_new).into(this.imageView_logo);
-        if (getContext() == null || !e.x(getContext())) {
-            this.imageView_logo.startAnimation(this.pY);
-        }
         this.composeView_loginForm.setEmail(e.u(getActivity()));
         this.composeView_loginForm.setPassword(e.v(getActivity()));
         this.composeView_loginForm.setShowResendActivation(false);

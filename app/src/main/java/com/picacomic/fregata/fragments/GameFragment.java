@@ -5,7 +5,6 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.adapters.GameListRecyclerViewAdapter;
 import com.picacomic.fregata.b.c;
 import com.picacomic.fregata.b.d;
+import com.picacomic.fregata.compose.views.PicaHeaderRecyclerComposeView;
 import com.picacomic.fregata.objects.GameListObject;
 import com.picacomic.fregata.objects.responses.DataClass.GameListResponse.GameListResponse;
 import com.picacomic.fregata.objects.responses.GeneralResponse;
@@ -26,7 +26,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/* JADX INFO: loaded from: classes.dex */
 public class GameFragment extends BaseFragment implements k {
     public static final String TAG = "GameFragment";
     int page;
@@ -37,19 +36,19 @@ public class GameFragment extends BaseFragment implements k {
     ArrayList<GameListObject> pk;
 
     FragmentGameBinding binding;
+    PicaHeaderRecyclerComposeView composeView_game;
     RecyclerView recyclerView_games;
-    Toolbar toolbar;
 
-    @Override // androidx.fragment.app.Fragment
+    @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
         this.binding = FragmentGameBinding.inflate(layoutInflater, viewGroup, false);
-        this.recyclerView_games = this.binding.recyclerViewGame;
-        this.toolbar = this.binding.toolbar;
+        this.composeView_game = this.binding.composeViewGame;
+        this.recyclerView_games = this.composeView_game.getRecyclerView();
         a(this.binding.getRoot());
         return this.binding.getRoot();
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void init() {
         super.init();
         if (this.pk == null) {
@@ -63,33 +62,36 @@ public class GameFragment extends BaseFragment implements k {
         this.pj = new GameListRecyclerViewAdapter(getActivity(), this.pk, this);
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void ca() {
         super.ca();
+        this.composeView_game.setTitleText(getString(R.string.title_game_list));
+        this.composeView_game.setOnBackAction(new Runnable() {
+            @Override
+            public void run() {
+                if (GameFragment.this.getActivity() != null) {
+                    GameFragment.this.getActivity().onBackPressed();
+                }
+            }
+        });
         int i = (int) ((getContext().getResources().getDisplayMetrics().density * 4.0f) + 0.5f);
         this.recyclerView_games.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         this.recyclerView_games.setAdapter(this.pj);
         this.recyclerView_games.addItemDecoration(new ItemOffsetDecoration(i));
-        this.recyclerView_games.addOnScrollListener(new RecyclerView.OnScrollListener() { // from class: com.picacomic.fregata.fragments.GameFragment.1
-            @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
+        this.recyclerView_games.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int i2) {
                 super.onScrollStateChanged(recyclerView, i2);
                 if (recyclerView.getLayoutManager() != null && (recyclerView.getLayoutManager() instanceof LinearLayoutManager) && ((LinearLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition() == ((LinearLayoutManager) recyclerView.getLayoutManager()).getItemCount() - 1) {
                     GameFragment.this.di();
                 }
             }
-
-            @Override // androidx.recyclerview.widget.RecyclerView.OnScrollListener
-            public void onScrolled(RecyclerView recyclerView, int i2, int i3) {
-                super.onScrolled(recyclerView, i2, i3);
-            }
         });
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bH() {
         super.bH();
-        a(this.toolbar, R.string.title_game_list, true);
         if (getActivity() != null && (getActivity() instanceof MainActivity)) {
             ((MainActivity) getActivity()).t(0);
         }
@@ -98,7 +100,7 @@ public class GameFragment extends BaseFragment implements k {
         }
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment
+    @Override
     public void bI() {
         super.bI();
         this.pj.notifyDataSetChanged();
@@ -109,8 +111,8 @@ public class GameFragment extends BaseFragment implements k {
             C(getResources().getString(R.string.loading_general));
             f.aA("Show Progress");
             this.pi = new d(getContext()).dO().e(e.z(getActivity()), this.page);
-            this.pi.enqueue(new Callback<GeneralResponse<GameListResponse>>() { // from class: com.picacomic.fregata.fragments.GameFragment.2
-                @Override // retrofit2.Callback
+            this.pi.enqueue(new Callback<GeneralResponse<GameListResponse>>() {
+                @Override
                 public void onResponse(Call<GeneralResponse<GameListResponse>> call, Response<GeneralResponse<GameListResponse>> response) {
                     if (response.code() == 200) {
                         if (response.body() != null && response.body().data != null && response.body().data.getGames() != null) {
@@ -136,7 +138,7 @@ public class GameFragment extends BaseFragment implements k {
                     GameFragment.this.bC();
                 }
 
-                @Override // retrofit2.Callback
+                @Override
                 public void onFailure(Call<GeneralResponse<GameListResponse>> call, Throwable th) {
                     th.printStackTrace();
                     f.aA("dismiss progress");
@@ -147,7 +149,7 @@ public class GameFragment extends BaseFragment implements k {
         }
     }
 
-    @Override // com.picacomic.fregata.a_pkg.k
+    @Override
     public void C(int i) {
         getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, GameDetailFragment.ad(this.pk.get(i).getGameId()), GameDetailFragment.TAG).addToBackStack(GameDetailFragment.TAG).commit();
     }
@@ -159,7 +161,7 @@ public class GameFragment extends BaseFragment implements k {
             this.offset = i;
         }
 
-        @Override // androidx.recyclerview.widget.RecyclerView.ItemDecoration
+        @Override
         public void getItemOffsets(Rect rect, View view, RecyclerView recyclerView, RecyclerView.State state) {
             rect.left = this.offset;
             rect.right = this.offset;
@@ -170,7 +172,7 @@ public class GameFragment extends BaseFragment implements k {
         }
     }
 
-    @Override // com.picacomic.fregata.fragments.BaseFragment, androidx.fragment.app.Fragment
+    @Override
     public void onDetach() {
         if (this.pi != null) {
             this.pi.cancel();

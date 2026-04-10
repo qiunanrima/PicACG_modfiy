@@ -11,8 +11,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.DatePicker;
-import android.widget.FrameLayout;
-import com.picacomic.fregata.databinding.FragmentRegisterBinding;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.a_pkg.g;
 import com.picacomic.fregata.activities.MainActivity;
@@ -38,9 +36,7 @@ import retrofit2.Response;
 public class RegisterFragment extends BaseFragment {
     public static final String TAG = "RegisterFragment";
     String birthday;
-    FragmentRegisterBinding binding;
     PicaRegisterComposeView composeView_register;
-    FrameLayout frameLayout_backgroundWhite;
     String[] genders;
     Animation iE;
     Call<GeneralResponse<SignInResponse>> pU;
@@ -62,12 +58,10 @@ public class RegisterFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        this.binding = FragmentRegisterBinding.inflate(layoutInflater, viewGroup, false);
-        this.composeView_register = this.binding.composeViewRegister;
-        this.frameLayout_backgroundWhite = this.binding.frameLayoutRegisterBackgroundWhite;
+        this.composeView_register = new PicaRegisterComposeView(requireContext());
         this.genders = getResources().getStringArray(R.array.register_genders);
-        a(this.binding.getRoot());
-        return this.binding.getRoot();
+        a(this.composeView_register);
+        return this.composeView_register;
     }
 
     @Override
@@ -137,7 +131,7 @@ public class RegisterFragment extends BaseFragment {
     @Override
     public void bH() {
         super.bH();
-        this.frameLayout_backgroundWhite.startAnimation(this.iE);
+        this.composeView_register.startAnimation(this.iE);
         aa(0);
     }
 

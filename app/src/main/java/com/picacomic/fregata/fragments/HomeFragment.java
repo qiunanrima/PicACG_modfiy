@@ -72,13 +72,13 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener, 
 
     @Override
     public void ca() {
-        super.ca();
+        /*super.ca();
         this.composeView_home.setOnNotificationAction(new Runnable() {
             @Override
             public void run() {
                 HomeFragment.this.doOpenNotification();
             }
-        });
+        });*/
     }
 
     @Override
