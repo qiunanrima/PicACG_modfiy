@@ -16,14 +16,22 @@ public class MyApplication extends SugarApp {
     private static Context mAppContext;
     private d hl;
 
-    public native String getStringComFromNative();
+    public String getStringComFromNative()
+    {
+        return JniTestReconstructed.getStringComFromNative();
+    }
 
-    public native String getStringConFromNative(String[] strArr);
+    public String getStringConFromNative(String[] strArr)
+    {
+         return JniTestReconstructed.getStringConFromNative(strArr);
+    }
 
-    public native String getStringSigFromNative();
+    public String getStringSigFromNative()
+    {
+        return JniTestReconstructed.getStringSigFromNative(this);
+    }
 
     static {
-        System.loadLibrary("JniTest");
         androidx.appcompat.app.AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
