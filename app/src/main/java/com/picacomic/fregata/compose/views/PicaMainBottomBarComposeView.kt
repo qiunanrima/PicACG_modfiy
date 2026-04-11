@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +48,8 @@ class PicaMainBottomBarComposeView @JvmOverloads constructor(
         listener = value
     }
 
-    @Composable
+    @Preview
+@Composable
     override fun Content() {
         val labels = listOf(
             context.getString(R.string.title_home),

@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -85,7 +86,8 @@ class PicaRegisterComposeView @JvmOverloads constructor(
     fun setOnBirthdayAction(value: Runnable?) { birthdayAction = value }
     fun setOnSubmitAction(value: Runnable?) { submitAction = value }
 
-    @Composable
+    @Preview
+@Composable
     override fun Content() {
         PicaComposeTheme {
             Column(
@@ -170,7 +172,8 @@ class PicaRegisterComposeView @JvmOverloads constructor(
         }
     }
 
-    @Composable
+    @Preview
+@Composable
     private fun RegisterField(
         value: String,
         onValueChange: (String) -> Unit,

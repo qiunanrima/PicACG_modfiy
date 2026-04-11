@@ -9,6 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
+import com.picacomic.fregata.adapters.CategoryRecyclerViewAdapter
+import com.picacomic.fregata.utils.FullGridLayoutManager
+import androidx.core.content.res.ResourcesCompat
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -24,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.widget.NestedScrollView
@@ -38,10 +44,12 @@ import com.picacomic.fregata.compose.PicaComposeTheme
  * @param legacyContentView  Inflated [R.layout.layout_category_compose_content].
  * @param onSearch  Called with the query string when the user submits.
  */
+@Preview
 @Composable
 fun CategoryScreen(
-    legacyContentView: View,
+    viewModel: CategoryViewModel = viewModel(),
     onSearch: (String) -> Unit,
+    onCategoryClick: (String) -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
 
@@ -86,8 +94,33 @@ fun CategoryScreen(
                 }
             }
             AndroidView(
-                factory = { legacyContentView },
-                modifier = Modifier.fillMaxSize()
+                factory = { context ->
+                    android.view.LayoutInflater.from(context).inflate(R.layout.layout_category_compose_content, null, false)
+                },
+                modifier = Modifier.fillMaxSize(),
+                update = { view ->
+                    val recyclerView = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_category)
+                    val tagsContainer = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_category_tag_list)
+                    val keywordsContainer = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_category_keywords_list)
+
+                    // Setup RecyclerView
+                    recyclerView.layoutManager = FullGridLayoutManager(view.context, 3)
+                    recyclerView.adapter = CategoryRecyclerViewAdapter(
+                        view.context, 
+                        ArrayList(), 
+                        ArrayList(viewModel.categories), 
+                        object : com.picacomic.fregata.a_pkg.k {
+                            override fun C(i: Int) {
+                                val size = 0 // assuming jg is empty for now
+                                val realIndex = i - size
+                                if (realIndex >= 0 && realIndex < viewModel.categories.size) {
+                                    onCategoryClick(viewModel.categories[realIndex].title)
+                                }
+                            }
+                        }
+                    )
+                    recyclerView.isNestedScrollingEnabled = false
+                }
             )
         }
     }

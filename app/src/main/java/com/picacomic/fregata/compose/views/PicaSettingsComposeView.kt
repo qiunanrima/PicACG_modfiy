@@ -24,9 +24,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 
@@ -69,38 +70,123 @@ class PicaSettingsComposeView @JvmOverloads constructor(
     private var testingChanged: OnBooleanChangedListener? by mutableStateOf(null)
     private var performanceChanged: OnBooleanChangedListener? by mutableStateOf(null)
 
-    fun setApkVersionTitle(value: String) { apkVersionTitleState = value }
-    fun setScreenOrientationValue(value: String) { screenOrientationValueState = value }
-    fun setScrollDirectionValue(value: String) { scrollDirectionValueState = value }
-    fun setAutoPagingValue(value: String) { autoPagingValueState = value }
-    fun setImageQualityValue(value: String) { imageQualityValueState = value }
-    fun setThemeColorValue(value: String) { themeColorValueState = value }
-    fun setCacheTitleValue(value: String) { cacheTitleValueState = value }
-    fun setPinTitleValue(value: String) { pinTitleValueState = value }
-    fun setPinValue(value: String) { pinValueState = value }
-    fun setNightModeEnabled(value: Boolean) { nightModeEnabledState = value }
-    fun setVolumePagingEnabled(value: Boolean) { volumePagingEnabledState = value }
-    fun setTestingEnabled(value: Boolean) { testingEnabledState = value }
-    fun setPerformanceEnabled(value: Boolean) { performanceEnabledState = value }
+    fun setApkVersionTitle(value: String) {
+        apkVersionTitleState = value
+    }
 
-    fun setOnScreenOrientationAction(value: Runnable?) { screenOrientationAction = value }
-    fun setOnScrollDirectionAction(value: Runnable?) { scrollDirectionAction = value }
-    fun setOnAutoPagingAction(value: Runnable?) { autoPagingAction = value }
-    fun setOnImageQualityAction(value: Runnable?) { imageQualityAction = value }
-    fun setOnThemeColorAction(value: Runnable?) { themeColorAction = value }
-    fun setOnContinueDownloadAction(value: Runnable?) { continueDownloadAction = value }
-    fun setOnApkVersionAction(value: Runnable?) { apkVersionAction = value }
-    fun setOnCacheAction(value: Runnable?) { cacheAction = value }
-    fun setOnFaqAction(value: Runnable?) { faqAction = value }
-    fun setOnPinAction(value: Runnable?) { pinAction = value }
-    fun setOnPasswordAction(value: Runnable?) { passwordAction = value }
-    fun setOnLogoutAction(value: Runnable?) { logoutAction = value }
+    fun setScreenOrientationValue(value: String) {
+        screenOrientationValueState = value
+    }
 
-    fun setOnNightModeChanged(value: OnBooleanChangedListener?) { nightModeChanged = value }
-    fun setOnVolumePagingChanged(value: OnBooleanChangedListener?) { volumePagingChanged = value }
-    fun setOnTestingChanged(value: OnBooleanChangedListener?) { testingChanged = value }
-    fun setOnPerformanceChanged(value: OnBooleanChangedListener?) { performanceChanged = value }
+    fun setScrollDirectionValue(value: String) {
+        scrollDirectionValueState = value
+    }
 
+    fun setAutoPagingValue(value: String) {
+        autoPagingValueState = value
+    }
+
+    fun setImageQualityValue(value: String) {
+        imageQualityValueState = value
+    }
+
+    fun setThemeColorValue(value: String) {
+        themeColorValueState = value
+    }
+
+    fun setCacheTitleValue(value: String) {
+        cacheTitleValueState = value
+    }
+
+    fun setPinTitleValue(value: String) {
+        pinTitleValueState = value
+    }
+
+    fun setPinValue(value: String) {
+        pinValueState = value
+    }
+
+    fun setNightModeEnabled(value: Boolean) {
+        nightModeEnabledState = value
+    }
+
+    fun setVolumePagingEnabled(value: Boolean) {
+        volumePagingEnabledState = value
+    }
+
+    fun setTestingEnabled(value: Boolean) {
+        testingEnabledState = value
+    }
+
+    fun setPerformanceEnabled(value: Boolean) {
+        performanceEnabledState = value
+    }
+
+    fun setOnScreenOrientationAction(value: Runnable?) {
+        screenOrientationAction = value
+    }
+
+    fun setOnScrollDirectionAction(value: Runnable?) {
+        scrollDirectionAction = value
+    }
+
+    fun setOnAutoPagingAction(value: Runnable?) {
+        autoPagingAction = value
+    }
+
+    fun setOnImageQualityAction(value: Runnable?) {
+        imageQualityAction = value
+    }
+
+    fun setOnThemeColorAction(value: Runnable?) {
+        themeColorAction = value
+    }
+
+    fun setOnContinueDownloadAction(value: Runnable?) {
+        continueDownloadAction = value
+    }
+
+    fun setOnApkVersionAction(value: Runnable?) {
+        apkVersionAction = value
+    }
+
+    fun setOnCacheAction(value: Runnable?) {
+        cacheAction = value
+    }
+
+    fun setOnFaqAction(value: Runnable?) {
+        faqAction = value
+    }
+
+    fun setOnPinAction(value: Runnable?) {
+        pinAction = value
+    }
+
+    fun setOnPasswordAction(value: Runnable?) {
+        passwordAction = value
+    }
+
+    fun setOnLogoutAction(value: Runnable?) {
+        logoutAction = value
+    }
+
+    fun setOnNightModeChanged(value: OnBooleanChangedListener?) {
+        nightModeChanged = value
+    }
+
+    fun setOnVolumePagingChanged(value: OnBooleanChangedListener?) {
+        volumePagingChanged = value
+    }
+
+    fun setOnTestingChanged(value: OnBooleanChangedListener?) {
+        testingChanged = value
+    }
+
+    fun setOnPerformanceChanged(value: OnBooleanChangedListener?) {
+        performanceChanged = value
+    }
+
+    @Preview
     @Composable
     override fun Content() {
         PicaComposeTheme {
@@ -225,6 +311,7 @@ class PicaSettingsComposeView @JvmOverloads constructor(
         }
     }
 
+    @Preview
     @Composable
     private fun SettingsSection(
         title: String,
@@ -241,6 +328,7 @@ class PicaSettingsComposeView @JvmOverloads constructor(
         }
     }
 
+    @Preview
     @Composable
     private fun SettingsValueRow(
         label: String,
@@ -269,6 +357,7 @@ class PicaSettingsComposeView @JvmOverloads constructor(
         HorizontalDivider()
     }
 
+    @Preview
     @Composable
     private fun SettingsSwitchRow(
         label: String,

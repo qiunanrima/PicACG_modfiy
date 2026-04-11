@@ -2,11 +2,16 @@ package com.picacomic.fregata.activities
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.RelativeLayout
@@ -15,24 +20,16 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.outlined.Category
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.SportsEsports
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,15 +37,17 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.FragmentContainerView
 import com.google.gson.Gson
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.b.d
-import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.views.OnIntChangedListener
+import com.picacomic.fregata.compose.views.PicaMainBottomBarComposeView
+import com.picacomic.fregata.databinding.ActivityMainBinding
 import com.picacomic.fregata.fragments.CategoryFragment
 import com.picacomic.fregata.fragments.GameFragment
 import com.picacomic.fregata.fragments.HomeFragment
@@ -63,10 +62,22 @@ import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.utils.f
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
+import com.picacomic.fregata.utils.views.BannerWebview
+import com.picacomic.fregata.utils.views.PopupWebview
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import kotlin.math.abs
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.navigation.Screen
+import com.picacomic.fregata.compose.navigation.navItems
+import com.picacomic.fregata.compose.screens.SettingsState
+import com.picacomic.fregata.compose.screens.*
 
 /* JADX INFO: loaded from: classes.dex */
 class MainActivity : BaseActivity() {
@@ -75,6 +86,7 @@ class MainActivity : BaseActivity() {
     private var iF: Call<GeneralResponse<InitialResponse?>?>? = null
     private var iG: Call<RegisterResponse?>? = null
     private var iH: InitialResponse? = null
+    private var iI: RelativeLayout.LayoutParams? = null
 
     // Compose State
     private var selectedTabIndex by mutableIntStateOf(0)
@@ -99,114 +111,197 @@ class MainActivity : BaseActivity() {
         super.onCreate(bundle)
 
         setContent {
-            MainScreen(
-                selectedIndex = selectedTabIndex,
-                onTabSelected = { index ->
-                    u(index)
-                }
-            )
+            MainScreen()
         }
 
         e.j(this, null as String?)
         e.l(this, null as String?)
 
-        // Start initial setups (Fragment loading moved to LaunchedEffect in MainScreen)
-        bX()
-        g.av(this)
-
-        val strY = e.y(this)
-        if (!strY.isNullOrEmpty()) {
-            bD()
-        }
     }
 
     @Preview
-    @Composable
-    private fun MainScreen(
-        selectedIndex: Int,
-        onTabSelected: (Int) -> Unit
-    ) {
+@Composable
+    private fun MainScreen() {
+        val navController = rememberNavController()
+        
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+        val showBottomBar = navItems.any { it.route == currentRoute }
+
         PicaComposeTheme {
             Scaffold(
                 bottomBar = {
-                    NavigationBar {
+                    if (showBottomBar) {
                         NavigationBar {
-                            data class NavItem(
-                                val titleRes: Int,
-                                val selectedIcon: ImageVector,
-                                val unselectedIcon: ImageVector
-                            )
-
-                            val items = listOf(
-                                NavItem(
-                                    R.string.title_home,
-                                    Icons.Filled.Home,
-                                    Icons.Outlined.Home
-                                ),
-                                NavItem(
-                                    R.string.title_category,
-                                    Icons.Filled.Category,
-                                    Icons.Outlined.Category
-                                ),
-                                NavItem(
-                                    R.string.title_game_list,
-                                    Icons.Filled.SportsEsports,
-                                    Icons.Outlined.SportsEsports
-                                ),
-                                NavItem(
-                                    R.string.title_profile,
-                                    Icons.Filled.Person,
-                                    Icons.Outlined.Person
-                                ),
-                                NavItem(
-                                    R.string.title_setting,
-                                    Icons.Filled.Settings,
-                                    Icons.Outlined.Settings
-                                )
-                            )
-
-                            items.forEachIndexed { index, item ->
+                            navItems.forEach { screen ->
                                 NavigationBarItem(
-                                    selected = selectedIndex == index,
-                                    onClick = { onTabSelected(index) },
+                                    selected = currentRoute == screen.route,
+                                    onClick = {
+                                        if (currentRoute != screen.route) {
+                                            navController.navigate(screen.route) {
+                                                popUpTo(navController.graph.startDestinationId) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    },
                                     icon = {
                                         Icon(
-                                            imageVector = if (selectedIndex == index)
-                                                item.selectedIcon else item.unselectedIcon,
-                                            contentDescription = stringResource(id = item.titleRes)
+                                            imageVector = if (currentRoute == screen.route)
+                                                screen.selectedIcon!! else screen.unselectedIcon!!,
+                                            contentDescription = stringResource(id = screen.titleRes)
                                         )
                                     },
-                                    label = { Text(stringResource(id = item.titleRes)) }
+                                    label = { Text(stringResource(id = screen.titleRes)) }
                                 )
                             }
                         }
                     }
                 }
-            ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                ) {
-                    // Fragment Container
-                    AndroidView(
-                        modifier = Modifier.fillMaxSize(),
-                        factory = { context ->
-                            FragmentContainerView(context).apply {
-                                id = R.id.container
-                                post {
-                                    // Trigger initial fragment load once the view is attached
-                                    u(selectedTabIndex)
-                                }
-                            }
-                        },
-                        update = { _ ->
-                            // Update logic if needed when selectedTabIndex changes
-                            // But u(selectedIndex) is already called from NavigationBar onClick
+            )
+ { innerPadding ->
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.Home.route,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        composable(Screen.Home.route) {
+                            HomeScreen(
+                                onNotification = { navController.navigate(Screen.Notification.route) },
+                                onComicClick = { id -> navController.navigate(Screen.createComicDetailRoute(id)) },
+                                onMoreClick = { category -> navController.navigate(Screen.createComicListRoute(category = category)) }
+                            )
                         }
-                    )
+                        composable(Screen.Category.route) {
+                            CategoryScreen(
+                                onSearch = { query -> 
+                                    navController.navigate(Screen.createComicListRoute(keywords = query))
+                                },
+                                onCategoryClick = { category ->
+                                    navController.navigate(Screen.createComicListRoute(category = category))
+                                }
+                            )
+                        }
+                        composable(Screen.Game.route) {
+                            GameScreen(onGameClick = { id -> 
+                                navController.navigate(Screen.createGameDetailRoute(id))
+                            })
+                        }
+                        composable(Screen.Profile.route) {
+                            ProfileScreen(onEdit = { navController.navigate(Screen.ProfileEdit.route) })
+                        }
+                        composable(Screen.Settings.route) {
+                            val settingsViewModel: com.picacomic.fregata.compose.viewmodels.SettingsViewModel = viewModel()
+                            SettingsScreen(
+                                state = settingsViewModel.state,
+                                onScreenOrientation = { /* Show dialog logic could be here or in VM */ },
+                                onScrollDirection = {},
+                                onAutoPaging = {},
+                                onImageQuality = {},
+                                onThemeColor = {},
+                                onContinueDownload = {},
+                                onApkVersion = {},
+                                onCache = {},
+                                onFaq = {},
+                                onPin = {},
+                                onPassword = {},
+                                onLogout = { settingsViewModel.logout() },
+                                onNightModeChanged = { settingsViewModel.toggleNightMode(it) },
+                                onVolumePagingChanged = { settingsViewModel.toggleVolumePaging(it) },
+                                onTestingChanged = { settingsViewModel.toggleTesting(it) },
+                                onPerformanceChanged = { settingsViewModel.togglePerformance(it) }
+                            )
+                        }
 
-                    // Banner WebView
+                        // Secondary Screens
+                        composable(Screen.Notification.route) {
+                            NotificationScreen(onBack = { navController.popBackStack() })
+                        }
+
+                        composable(Screen.ComicList.route) { backStackEntry ->
+                            val category = backStackEntry.arguments?.getString("category")
+                            val tags = backStackEntry.arguments?.getString("tags")
+                            val creatorId = backStackEntry.arguments?.getString("creatorId")
+                            val creatorName = backStackEntry.arguments?.getString("creatorName")
+                            val author = backStackEntry.arguments?.getString("author")
+                            val keywords = backStackEntry.arguments?.getString("keywords")
+                            val finished = backStackEntry.arguments?.getString("finished")
+                            val sorting = backStackEntry.arguments?.getString("sorting")
+                            val translate = backStackEntry.arguments?.getString("translate")
+                            
+                            ComicListScreen(
+                                category = category,
+                                tags = tags,
+                                creatorId = creatorId,
+                                creatorName = creatorName,
+                                author = author,
+                                keywords = keywords,
+                                finished = finished,
+                                sorting = sorting,
+                                translate = translate,
+                                onBack = { navController.popBackStack() },
+                                onComicClick = { comicId -> 
+                                    navController.navigate(Screen.createComicDetailRoute(comicId))
+                                }
+                            )
+                        }
+
+                        composable(Screen.ComicDetail.route) { backStackEntry ->
+                            val comicId = backStackEntry.arguments?.getString("comicId") ?: ""
+                            ComicDetailScreen(
+                                comicId = comicId,
+                                onBack = { navController.popBackStack() },
+                                onCommentClick = { id -> 
+                                    navController.navigate(Screen.createCommentRoute(comicId = id))
+                                },
+                                onComicListClick = { category, tag, author ->
+                                    navController.navigate(
+                                        Screen.createComicListRoute(
+                                            category = category,
+                                            tags = tag,
+                                            author = author
+                                        )
+                                    )
+                                }
+                            )
+                        }
+
+                        composable(Screen.ProfileEdit.route) {
+                            ProfileEditScreen(onBack = { navController.popBackStack() })
+                        }
+
+                        composable(Screen.GameDetail.route) { backStackEntry ->
+                            val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
+                            GameDetailScreen(gameId = gameId, onBack = { navController.popBackStack() })
+                        }
+
+                        composable(Screen.Comment.route) { backStackEntry ->
+                            val comicId = backStackEntry.arguments?.getString("comicId")
+                            val gameId = backStackEntry.arguments?.getString("gameId")
+                            val commentId = backStackEntry.arguments?.getString("commentId")
+                            CommentScreen(
+                                comicId = comicId,
+                                gameId = gameId,
+                                commentId = commentId,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(Screen.PicaApp.route) { backStackEntry ->
+                            val title = backStackEntry.arguments?.getString("title") ?: ""
+                            val link = backStackEntry.arguments?.getString("link") ?: ""
+                            PicaAppScreen(title = title, link = link, onBack = { navController.popBackStack() })
+                        }
+
+                        composable(Screen.Leaderboard.route) {
+                            LeaderboardScreen(onBack = { navController.popBackStack() })
+                        }
+                    }
+
+                    // Global overlays preserved as Compose components
                     if (bannerVisible) {
                         AndroidView(
                             modifier = Modifier
@@ -220,72 +315,12 @@ class MainActivity : BaseActivity() {
                         )
                     }
 
-                    // Popup WebView
                     if (popupVisible) {
                         AndroidView(
                             modifier = Modifier.fillMaxSize(),
                             factory = { context ->
                                 com.picacomic.fregata.utils.views.PopupWebview(context).apply {
                                     id = R.id.popupWebview
-                                }
-                            }
-                        )
-                    }
-
-                    // Floating Buttons Overlay
-                    if (expButtonsVisible) {
-                        AndroidView(
-                            modifier = Modifier.fillMaxSize(),
-                            factory = { context ->
-                                RelativeLayout(context).apply {
-                                    // EXP Button
-                                    buttonControlExp = ImageButton(context).apply {
-                                        id = R.id.imageButton_control_exp
-                                        setImageResource(R.drawable.icon_exp_gray)
-                                        setBackgroundResource(android.R.color.transparent)
-                                        layoutParams = RelativeLayout.LayoutParams(
-                                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                                            ViewGroup.LayoutParams.WRAP_CONTENT
-                                        ).apply {
-                                            addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                                            addRule(RelativeLayout.ALIGN_PARENT_START)
-                                            bottomMargin =
-                                                context.resources.getDimensionPixelSize(R.dimen.padding_4)
-                                            marginStart =
-                                                context.resources.getDimensionPixelSize(R.dimen.padding_4)
-                                        }
-                                        setOnTouchListener { v, event ->
-                                            handleTouch(v, event)
-                                            true
-                                        }
-                                    }
-                                    addView(buttonControlExp)
-
-                                    // Block Button
-                                    buttonControlBlock = ImageButton(context).apply {
-                                        id = R.id.imageButton_control_block
-                                        setImageResource(R.drawable.icon_block_gray)
-                                        setBackgroundResource(android.R.color.transparent)
-                                        layoutParams = RelativeLayout.LayoutParams(
-                                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                                            ViewGroup.LayoutParams.WRAP_CONTENT
-                                        ).apply {
-                                            addRule(
-                                                RelativeLayout.RIGHT_OF,
-                                                R.id.imageButton_control_exp
-                                            )
-                                            addRule(
-                                                RelativeLayout.ALIGN_TOP,
-                                                R.id.imageButton_control_exp
-                                            )
-                                            marginStart =
-                                                context.resources.getDimensionPixelSize(R.dimen.padding_1)
-                                        }
-                                        setOnClickListener {
-                                            v(2) // Toggle block mode
-                                        }
-                                    }
-                                    addView(buttonControlBlock)
                                 }
                             }
                         )
@@ -339,31 +374,14 @@ class MainActivity : BaseActivity() {
         // or hides via a state boolean. For now, leave as no-op.
     }
 
-    private fun u(index: Int) {
-        val container = findViewById<View>(R.id.container)
-        if (container == null) {
-            // Container not ready yet, LaunchedEffect will retry or bH will handle it
-            return
-        }
-
-        selectedTabIndex = index
-        val fragmentManager = supportFragmentManager
-        fragmentManager.popBackStack()
-        val transaction = fragmentManager.beginTransaction()
-
-        when (index) {
-            0 -> transaction.replace(R.id.container, HomeFragment(), HomeFragment.TAG)
-            1 -> transaction.replace(R.id.container, CategoryFragment(), CategoryFragment.TAG)
-            2 -> transaction.replace(R.id.container, GameFragment(), GameFragment.TAG)
-            3 -> transaction.replace(R.id.container, ProfileFragment(), ProfileFragment.TAG)
-            4 -> transaction.replace(R.id.container, SettingFragment(), SettingFragment.TAG)
-        }
-        transaction.commitAllowingStateLoss()
-    }
-
     private fun bH() {
-        // Legacy bH behavior adjusted: bX and g.av moved to onCreate, 
-        // fragment loading moved to LaunchedEffect.
+        bX()
+        g.av(this)
+
+        val strY = e.y(this)
+        if (!strY.isNullOrEmpty()) {
+            bD()
+        }
     }
 
     private fun bX() {
@@ -425,18 +443,6 @@ class MainActivity : BaseActivity() {
                 g.D(this, version)
             )
         }
-        if (iH?.isIdUpdated == true) {
-            return
-        }
-        if (findViewById<android.view.View>(R.id.container) == null) {
-            // Container not ready, fragment manager will be dispatched once it is
-            // or we could retry. For now, pop/replace is only safe when attached.
-            return
-        }
-        supportFragmentManager.popBackStack()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.container, OneTimeUpdateQAFragment(), OneTimeUpdateQAFragment.TAG)
-            .commit()
     }
 
     // Following exp & block functions preserved for potential future overlay implementations.

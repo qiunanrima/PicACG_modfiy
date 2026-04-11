@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -90,7 +91,8 @@ class PicaLoginComposeView @JvmOverloads constructor(
         resendActivationAction = value
     }
 
-    @Composable
+    @Preview
+@Composable
     override fun Content() {
         PicaComposeTheme {
             Column(

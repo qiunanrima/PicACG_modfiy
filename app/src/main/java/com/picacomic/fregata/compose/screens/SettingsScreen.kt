@@ -14,9 +14,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,6 +43,7 @@ data class SettingsState(
     val performanceEnabled: Boolean = false,
 )
 
+@Preview
 @Composable
 fun SettingsScreen(
     state: SettingsState,
@@ -63,12 +66,28 @@ fun SettingsScreen(
 ) {
     PicaComposeTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
+            Surface(shadowElevation = 2.dp, tonalElevation = 2.dp) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.title_setting),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
             SettingsSection(title = stringResource(R.string.setting_comic_viewer_title)) {
                 SettingsValueRow(
                     label = stringResource(R.string.setting_comic_viewer_screen_orientation),
@@ -161,14 +180,16 @@ fun SettingsScreen(
             ) {
                 Text(text = stringResource(R.string.setting_logout))
             }
+            }
         }
     }
 }
 
+@Preview
 @Composable
 private fun SettingsSection(
     title: String,
-    content: @Composable ColumnScope.() -> Unit
+    content:@Composable ColumnScope.() -> Unit
 ) {
     Text(
         text = title,
@@ -181,6 +202,7 @@ private fun SettingsSection(
     }
 }
 
+@Preview
 @Composable
 private fun SettingsValueRow(label: String, value: String, onClick: () -> Unit) {
     Row(
@@ -205,6 +227,7 @@ private fun SettingsValueRow(label: String, value: String, onClick: () -> Unit) 
     HorizontalDivider()
 }
 
+@Preview
 @Composable
 private fun SettingsSwitchRow(
     label: String,

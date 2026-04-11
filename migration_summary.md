@@ -10,7 +10,8 @@
 *   **逻辑解耦**：将原本高度耦合在 Fragment 中的业务逻辑（如登录、重置密码等）提升到 Activity 层，直接与 Compose State 交互。
 
 ### 2. 组件模块化 (`compose.screens` package)
-创建了独立的 `@Composable` Screen 函数，实现了 UI 与容器的彻底分离：
+创建了独立的 `@Preview
+@Composable` Screen 函数，实现了 UI 与容器的彻底分离：
 
 | 屏幕 (Screen) | 迁移状态 | 技术细节 |
 | :--- | :--- | :--- |

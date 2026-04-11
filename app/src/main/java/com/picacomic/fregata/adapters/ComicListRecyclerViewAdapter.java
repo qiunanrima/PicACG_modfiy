@@ -129,4 +129,9 @@ public class ComicListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
         this.jt[i] = z;
         notifyDataSetChanged();
     }
+
+    public void setData(ArrayList<ComicListObject> arrayList) {
+        this.ja = arrayList;
+        notifyDataSetChanged();
+    }
 }
