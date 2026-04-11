@@ -88,7 +88,7 @@ open class BaseActivity : AppCompatActivity() {
         bC()
     }
 
-    fun a(iVar: i) {
+    fun a(iVar: i?) {
         this.ho = iVar
     }
 

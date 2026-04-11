@@ -1,13 +1,14 @@
 package com.picacomic.fregata;
 
 import android.content.Context;
+
 import com.orm.SugarApp;
 import com.picacomic.fregata.b.b;
-import com.picacomic.fregata.utils.JniTestReconstructed;
 import com.picacomic.fregata.utils.d;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.squareup.picasso.Picasso;
+
 import okhttp3.OkHttpClient;
 
 /* JADX INFO: loaded from: classes.dex */
@@ -17,22 +18,14 @@ public class MyApplication extends SugarApp {
     private static Context mAppContext;
     private d hl;
 
-    public String getStringComFromNative()
-    {
-        return "1";
-    }
+    public native String getStringSigFromNative();
 
-    public String getStringConFromNative(String[] strArr)
-    {
-         return JniTestReconstructed.getStringConFromNative(strArr[0],strArr[1],strArr[2],strArr[3],strArr[4]);
-    }
+    public native String getStringConFromNative(String[] strArr);
 
-    public String getStringSigFromNative()
-    {
-        return JniTestReconstructed.getStringSigFromNative(this);
-    }
+    public native String getStringComFromNative();
 
     static {
+        System.loadLibrary("JniTest");
         androidx.appcompat.app.AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 

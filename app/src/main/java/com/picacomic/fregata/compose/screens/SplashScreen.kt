@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 
+
 @Composable
 fun SplashScreen(
     isLoading: Boolean,

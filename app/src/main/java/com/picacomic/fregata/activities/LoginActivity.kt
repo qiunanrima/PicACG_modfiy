@@ -12,13 +12,16 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.b.c
 import com.picacomic.fregata.b.d
@@ -41,7 +44,7 @@ import retrofit2.Response
 import java.util.Random
 
 /* JADX INFO: loaded from: classes.dex */
-class LoginActivity : ComponentActivity() {
+class LoginActivity : BaseActivity() {
 
     // Compose state – mutating these triggers recomposition
     private var showResendActivationState by mutableStateOf(false)
@@ -73,27 +76,35 @@ class LoginActivity : ComponentActivity() {
         }
 
         setContent {
-            LoginScreen(
-                initialEmail = initialEmail,
-                initialPassword = initialPassword,
-                showResendActivation = showResendActivationState,
-                onLogin = { email, password ->
-                    if (password.length < 8) {
-                        AlertDialogCenter.passwordLength(this)
-                    } else {
-                        doSignIn(email, password)
+            Box(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
+                LoginScreen(
+                    initialEmail = initialEmail,
+                    initialPassword = initialPassword,
+                    showResendActivation = showResendActivationState,
+                    onLogin = { email, password ->
+                        if (password.length < 8) {
+                            AlertDialogCenter.passwordLength(this@LoginActivity)
+                        } else {
+                            doSignIn(email, password)
+                        }
+                    },
+                    onRegister = {
+                        showRegisterScreen()
+                    },
+                    onForgotPassword = { showForgotPasswordDialog() },
+                    onResendActivation = { showResendActivationDialog() }
+                )
+
+                // Overlay for legacy fragments
+                AndroidView(
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+                    factory = { context ->
+                        androidx.fragment.app.FragmentContainerView(context).apply {
+                            id = R.id.container
+                        }
                     }
-                },
-                onRegister = {
-                    // LoginActivity no longer hosts fragments; delegate to a lightweight
-                    // sub-activity or show a dialog/bottom sheet. For now we navigate to
-                    // the existing fragment-based RegisterFragment via a stub approach.
-                    // TODO: replace with Compose RegisterScreen when fragment is migrated.
-                    showRegisterScreen()
-                },
-                onForgotPassword = { showForgotPasswordDialog() },
-                onResendActivation = { showResendActivationDialog() }
-            )
+                )
+            }
         }
     }
 
@@ -105,10 +116,13 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun showRegisterScreen() {
-        // Keep fragments working during incremental migration.
-        // Start a tiny fragment-host activity (existing LoginActivity with a flag) or
-        // directly show the register fragment. We use the legacy approach here.
-        startActivity(Intent(this, RegisterActivity::class.java))
+        if (findViewById<android.view.View>(R.id.container) == null) return
+
+        supportFragmentManager.beginTransaction()
+            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+            .add(R.id.container, com.picacomic.fregata.fragments.RegisterFragment(), com.picacomic.fregata.fragments.RegisterFragment.TAG)
+            .addToBackStack(com.picacomic.fregata.fragments.RegisterFragment.TAG)
+            .commit()
     }
 
     // ------------------------------------------------------------------ Sign-in
@@ -123,7 +137,9 @@ class LoginActivity : ComponentActivity() {
                 if (response.code() == 200) {
                     e.e(this@LoginActivity, email)
                     e.f(this@LoginActivity, password)
-                    e.h(this@LoginActivity, response.body()!!.data.getToken())
+                    response.body()?.data?.getToken()?.let {
+                        e.h(this@LoginActivity, it)
+                    }
                     goToMain()
                 } else {
                     try {
@@ -209,10 +225,11 @@ class LoginActivity : ComponentActivity() {
                 if (response.code() == 200) {
                     val rng = Random(System.currentTimeMillis())
                     val pick = rng.nextInt(3)
+                    val data = response.body()?.data
                     val (questionNum, question) = when (pick) {
-                        1 -> 2 to response.body()!!.data.getQuestion2()
-                        2 -> 3 to response.body()!!.data.getQuestion3()
-                        else -> 1 to response.body()!!.data.getQuestion1()
+                        1 -> 2 to (data?.getQuestion2() ?: "")
+                        2 -> 3 to (data?.getQuestion3() ?: "")
+                        else -> 1 to (data?.getQuestion1() ?: "")
                     }
                     showAnswerDialog(picaId, questionNum, question)
                 } else {
@@ -262,13 +279,13 @@ class LoginActivity : ComponentActivity() {
                 response: Response<GeneralResponse<PasswordResponse>>
             ) {
                 if (response.code() == 200) {
-                    val newPassword = response.body()!!.data.getPassword()
+                    val newPassword = response.body()?.data?.getPassword() ?: ""
                     initialPassword = newPassword
                     try {
                         (getSystemService("clipboard") as ClipboardManager)
                             .setPrimaryClip(ClipData.newPlainText("text", newPassword))
-                        Toast.makeText(this@LoginActivity, "新密碼已複製", 1).show()
-                        Toast.makeText(this@LoginActivity, "登入後請到「設定」修改密碼", 1).show()
+                        Toast.makeText(this@LoginActivity, "新密碼已複製", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@LoginActivity, "登入後請到「設定」修改密碼", Toast.LENGTH_SHORT).show()
                     } catch (ex: Exception) {
                         ex.printStackTrace()
                     }

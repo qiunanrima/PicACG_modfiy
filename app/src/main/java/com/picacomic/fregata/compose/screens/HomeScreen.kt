@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
+
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +32,7 @@ import com.picacomic.fregata.compose.PicaComposeTheme
  * @param hasNotification    Whether to show the notification badge dot.
  * @param onNotification     Called when the notification button is tapped.
  */
+
 @Composable
 fun HomeScreen(
     legacyContentView: View,
