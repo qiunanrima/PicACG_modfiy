@@ -63,6 +63,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
     private var iJ = 0
     private var iK = 0
     var iL: Long = 0
+    @JvmField
     var iM: Boolean = false
     var iN: Boolean = false
     var popupWebview: PopupWebview? = null

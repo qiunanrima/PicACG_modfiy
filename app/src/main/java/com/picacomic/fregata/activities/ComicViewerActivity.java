@@ -1,1546 +1,1323 @@
-package com.picacomic.fregata.activities
+package com.picacomic.fregata.activities;
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.res.Configuration
-import android.graphics.drawable.Drawable
-import android.media.MediaPlayer
-import android.net.ConnectivityManager
-import android.os.Build
-import android.os.Bundle
-import android.os.CountDownTimer
-import android.provider.Settings
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
-import android.view.KeyEvent
-import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.AbsListView
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
-import android.widget.FrameLayout
-import android.widget.GridView
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.ListAdapter
-import android.widget.RelativeLayout
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
-import android.widget.TextView
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import com.picacomic.fregata.R
-import com.picacomic.fregata.adapters.c
-import com.picacomic.fregata.databinding.ActivityComicViewerBinding
-import com.picacomic.fregata.fragments.ComicViewFragment
-import com.picacomic.fregata.fragments.ComicViewerListFragment
-import com.picacomic.fregata.objects.ComicEpisodeObject
-import com.picacomic.fregata.objects.ComicPageObject
-import com.picacomic.fregata.objects.databaseTable.DbComicViewRecordObject
-import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
-import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject
-import com.picacomic.fregata.objects.responses.DataClass.ComicEpisodeResponse.ComicEpisodeResponse
-import com.picacomic.fregata.objects.responses.DataClass.ComicPageResponse.ComicPagesResponse
-import com.picacomic.fregata.objects.responses.GeneralResponse
-import com.picacomic.fregata.utils.b
-import com.picacomic.fregata.utils.e
-import com.picacomic.fregata.utils.f
-import com.picacomic.fregata.utils.g
-import com.picacomic.fregata.utils.views.AlertDialogCenter
-import com.picacomic.fregata.utils.views.VerticalSeekBar
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.provider.Settings;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.FrameLayout;
+import android.widget.GridView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.picacomic.fregata.databinding.ActivityComicViewerBinding;
+import com.picacomic.fregata.R;
+import com.picacomic.fregata.a_pkg.d;
+import com.picacomic.fregata.adapters.c;
+import com.picacomic.fregata.fragments.ComicViewFragment;
+import com.picacomic.fregata.fragments.ComicViewerListFragment;
+import com.picacomic.fregata.objects.ComicEpisodeObject;
+import com.picacomic.fregata.objects.ComicPageObject;
+import com.picacomic.fregata.objects.databaseTable.DbComicViewRecordObject;
+import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject;
+import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject;
+import com.picacomic.fregata.objects.responses.DataClass.ComicEpisodeResponse.ComicEpisodeResponse;
+import com.picacomic.fregata.objects.responses.DataClass.ComicPageResponse.ComicPagesResponse;
+import com.picacomic.fregata.objects.responses.GeneralResponse;
+import com.picacomic.fregata.utils.b;
+import com.picacomic.fregata.utils.e;
+import com.picacomic.fregata.utils.f;
+import com.picacomic.fregata.utils.g;
+import com.picacomic.fregata.utils.views.AlertDialogCenter;
+import com.picacomic.fregata.utils.views.VerticalSeekBar;
+import java.util.ArrayList;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /* JADX INFO: loaded from: classes.dex */
-class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
-    var binding: ActivityComicViewerBinding? = null
-    var button_autoPaging: Button? = null
-    var button_comment: Button? = null
-    var button_dialogAutoPagingStart: Button? = null
-    var button_download: Button? = null
-    var button_hide: Button? = null
-    var button_hint: Button? = null
-    var button_nextEpisode: Button? = null
-    var button_nextPageBottom: Button? = null
-    var button_nextPageRight: Button? = null
-    var button_nightMode: Button? = null
-    var button_panel: Button? = null
-    var button_panelLeftCorner: Button? = null
-    var button_previousEpisode: Button? = null
-    var button_previousPage: Button? = null
-    var button_screenOrientation: Button? = null
-    var button_scrollOrientation: Button? = null
-    var button_selectEpisode: Button? = null
-    var button_setting: Button? = null
-    var button_share: Button? = null
-    var button_twoPageViewMode: Button? = null
-    var checkBox_brightnessSystem: CheckBox? = null
-    var comicId: String? = null
-    var currentPage: Int = 0
-    var episodeOrder: Int = 0
-    var episodeTotal: Int = 0
+public class ComicViewerActivity extends BaseActivity implements d {
+    public static final String TAG = "ComicViewerActivity";
+    public static int hq = 40;
 
-    var frameLayout_gestureArea: FrameLayout? = null
-    var frameLayout_nightModeMask: FrameLayout? = null
-    var gridView_episodeDialog: GridView? = null
-    var hA: c? = null
-    var hB: Boolean = false
-    var hC: Boolean = false
-    var hD: Boolean = false
-    var hE: Boolean = false
-    var hF: Int = 0
-    var hG: Int = 0
-    var hH: Int = 0
-    var hI: Int = 0
-    var hJ: Int = 0
-    var hK: ComicEpisodeObject? = null
-    var hL: String? = null
-    var hM: Int = 0
-    var hN: Int = 0
-    var hO: Int = 0
-    var hP: Int = 0
-    var hQ: Boolean = false
-    var hR: Boolean = false
-    var hS: Boolean = false
-    var hT: Boolean = false
-    var hU: Boolean = false
-    var hV: Boolean = false
-    var hX: CountDownTimer? = null
-    var hY: CountDownTimer? = null
-    var hZ: Call<GeneralResponse<ComicPagesResponse?>?>? = null
-    var hr: Animation? = null
-    var hs: Animation? = null
-    var ht: Animation? = null
-    var hu: Animation? = null
-    var hv: Animation? = null
-    var hw: Animation? = null
-    var hx: Animation? = null
-    var hy: Animation? = null
-    var hz: com.picacomic.fregata.a_pkg.c? = null
-    var ia: Call<GeneralResponse<ComicEpisodeResponse?>?>? = null
-    var ib: View.OnClickListener? = null
-    var ic: View.OnClickListener? = null
-    var ie: OnSeekBarChangeListener? = null
+    ActivityComicViewerBinding binding;
+    Button button_autoPaging;
+    Button button_comment;
+    Button button_dialogAutoPagingStart;
+    Button button_download;
+    Button button_hide;
+    Button button_hint;
+    Button button_nextEpisode;
+    Button button_nextPageBottom;
+    Button button_nextPageRight;
+    Button button_nightMode;
+    Button button_panel;
+    Button button_panelLeftCorner;
+    Button button_previousEpisode;
+    Button button_previousPage;
+    Button button_screenOrientation;
+    Button button_scrollOrientation;
+    Button button_selectEpisode;
+    Button button_setting;
+    Button button_share;
+    Button button_twoPageViewMode;
+    CheckBox checkBox_brightnessSystem;
+    public String comicId;
+    int currentPage;
+    public int episodeOrder;
+    public int episodeTotal;
+
+    FrameLayout frameLayout_gestureArea;
+    FrameLayout frameLayout_nightModeMask;
+    GridView gridView_episodeDialog;
+    c hA;
+    boolean hB;
+    boolean hC;
+    boolean hD;
+    boolean hE;
+    public int hF;
+    public int hG;
+    public int hH;
+    public int hI;
+    public int hJ;
+    public ComicEpisodeObject hK;
+    public String hL;
+    int hM;
+    int hN;
+    int hO;
+    int hP;
+    boolean hQ;
+    boolean hR;
+    boolean hS;
+    boolean hT;
+    boolean hU;
+    boolean hV;
+    CountDownTimer hX;
+    CountDownTimer hY;
+    Call<GeneralResponse<ComicPagesResponse>> hZ;
+    Animation hr;
+    Animation hs;
+    Animation ht;
+    Animation hu;
+    Animation hv;
+    Animation hw;
+    Animation hx;
+    Animation hy;
+    com.picacomic.fregata.a_pkg.c hz;
+    Call<GeneralResponse<ComicEpisodeResponse>> ia;
+    View.OnClickListener ib;
+    View.OnClickListener ic;
+    SeekBar.OnSeekBarChangeListener ie;
 
     /* JADX INFO: renamed from: if, reason: not valid java name */
-    var f1if: ArrayList<ComicPageObject?>? = null
-    var ig: ArrayList<ComicEpisodeObject?>? = null
+    public ArrayList<ComicPageObject> f1if;
+    ArrayList<ComicEpisodeObject> ig;
 
-    var imageButton_back: ImageButton? = null
-    var linearLayout_bottomPanel: LinearLayout? = null
-    var linearLayout_dialogAutoPaging: LinearLayout? = null
-    var linearLayout_horizontalPagingScrollbar: LinearLayout? = null
-    var linearLayout_rightPanel: LinearLayout? = null
-    var linearLayout_verticalPagingScrollbar: LinearLayout? = null
-    var relativeLayout_leftPanel: RelativeLayout? = null
-    var relativeLayout_toolbar: RelativeLayout? = null
+    ImageButton imageButton_back;
+    LinearLayout linearLayout_bottomPanel;
+    LinearLayout linearLayout_dialogAutoPaging;
+    LinearLayout linearLayout_horizontalPagingScrollbar;
+    LinearLayout linearLayout_rightPanel;
+    LinearLayout linearLayout_verticalPagingScrollbar;
+    RelativeLayout relativeLayout_leftPanel;
+    RelativeLayout relativeLayout_toolbar;
 
-    var seekBar_dialogAutoPaging: SeekBar? = null
-    var seekBar_horizontalPaging: SeekBar? = null
-    var seekBar_verticalPaging: SeekBar? = null
+    SeekBar seekBar_dialogAutoPaging;
+    SeekBar seekBar_horizontalPaging;
+    SeekBar seekBar_verticalPaging;
 
-    var textView_dialogAutoPagingTitle: TextView? = null
-    var textView_horizontalPage: TextView? = null
-    var textView_page: TextView? = null
-    var textView_title: TextView? = null
-    var textView_verticalPage: TextView? = null
-    var verticalSeekBar_brightness: VerticalSeekBar? = null
-    var hW: String = "不明"
-    private val ih: BroadcastReceiver? = object : BroadcastReceiver() {
-        // from class: com.picacomic.fregata.activities.ComicViewerActivity.1
-        // android.content.BroadcastReceiver
-        override fun onReceive(context: Context?, intent: Intent) {
+    TextView textView_dialogAutoPagingTitle;
+    TextView textView_horizontalPage;
+    TextView textView_page;
+    TextView textView_title;
+    TextView textView_verticalPage;
+    VerticalSeekBar verticalSeekBar_brightness;
+    String hW = "不明";
+    private BroadcastReceiver ih = new BroadcastReceiver() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.1
+        @Override // android.content.BroadcastReceiver
+        public void onReceive(Context context, Intent intent) {
             try {
-                val intExtra = intent.getIntExtra("level", 0)
-                this@ComicViewerActivity.hW = intExtra.toString() + "%"
-            } catch (e: Exception) {
-                e.printStackTrace()
-                if (this@ComicViewerActivity != null) {
-                    Toast.makeText(this@ComicViewerActivity, "cannot parse battery level.", 0)
-                        .show()
+                int intExtra = intent.getIntExtra("level", 0);
+                ComicViewerActivity.this.hW = String.valueOf(intExtra) + "%";
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (ComicViewerActivity.this != null) {
+                    Toast.makeText(ComicViewerActivity.this, "cannot parse battery level.", 0).show();
                 }
             }
         }
-    }
-    private val ii: MediaPlayer? = null
+    };
+    private MediaPlayer ii = null;
 
-    // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
-    override fun onCreate(bundle: Bundle?) {
-        super.onCreate(bundle)
-        this.binding = ActivityComicViewerBinding.inflate(getLayoutInflater())
-        setContentView(this.binding!!.getRoot())
+    @Override // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
+    protected void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        this.binding = ActivityComicViewerBinding.inflate(getLayoutInflater());
+        setContentView(this.binding.getRoot());
 
-        this.button_autoPaging = this.binding!!.layoutBottomPanel.buttonComicViewerAutoPaging
-        this.button_comment = this.binding!!.layoutRightPanel.buttonComicViewerComment
-        this.button_dialogAutoPagingStart =
-            this.binding!!.layoutAutoPaging.buttonComicViewerDialogAutoPagingStart
-        this.button_download = this.binding!!.layoutToolbar.buttonComicViewerDownload
-        this.button_hide = findViewById<Button>(R.id.button_comic_viewer_hide)
-        this.button_hint = this.binding!!.layoutToolbar.buttonComicViewerHint
-        this.button_nextEpisode = findViewById<Button?>(R.id.button_comic_viewer_next_episode)
-        this.button_nextPageBottom = findViewById<Button>(R.id.button_comic_viewer_next_page_bottom)
-        this.button_nextPageRight = findViewById<Button>(R.id.button_comic_viewer_next_page_right)
-        this.button_nightMode = this.binding!!.layoutRightPanel.buttonComicViewerNightMode
-        this.button_panel = findViewById<Button>(R.id.button_comic_viewer_panel)
-        this.button_panelLeftCorner =
-            findViewById<Button>(R.id.button_comic_viewer_panel_left_corner)
-        this.button_previousEpisode =
-            findViewById<Button?>(R.id.button_comic_viewer_previous_episode)
-        this.button_previousPage = findViewById<Button>(R.id.button_comic_viewer_previous_page)
-        this.button_screenOrientation =
-            findViewById<Button>(R.id.button_comic_viewer_screen_orientation)
-        this.button_scrollOrientation =
-            findViewById<Button>(R.id.button_comic_viewer_scroll_orientation)
-        this.button_selectEpisode = this.binding!!.layoutRightPanel.buttonComicViewerSelectEpisode
-        this.button_setting = findViewById<Button>(R.id.button_comic_viewer_setting)
-        this.button_share = this.binding!!.layoutToolbar.buttonComicViewerShare
-        this.button_twoPageViewMode =
-            findViewById<Button?>(R.id.button_comic_viewer_two_page_view_mode)
-        this.checkBox_brightnessSystem =
-            this.binding!!.layoutLeftPanel.checkBoxComicViewerSystemBrightness
-        this.frameLayout_gestureArea =
-            findViewById<FrameLayout>(R.id.frameLayout_comic_viewer_gesture_area)
-        this.frameLayout_nightModeMask = this.binding!!.frameLayoutComicViewerNightModeMask
-        this.gridView_episodeDialog = this.binding!!.gridViewComicViewerDialogSelectEpisode
-        this.imageButton_back = this.binding!!.layoutToolbar.imageButtonComicViewerBack
-        this.linearLayout_bottomPanel =
-            this.binding!!.layoutBottomPanel.linearLayoutComicViewerBottomPanel
-        this.linearLayout_dialogAutoPaging =
-            this.binding!!.layoutAutoPaging.linearLayoutComicViewerDialogAutoPaging
-        this.linearLayout_horizontalPagingScrollbar =
-            findViewById<LinearLayout>(R.id.linearLayout_comic_viewer_horizontal_paging_scrollbar)
-        this.linearLayout_rightPanel =
-            this.binding!!.layoutRightPanel.linearLayoutComicViewerRightPanel
-        this.linearLayout_verticalPagingScrollbar =
-            findViewById<LinearLayout>(R.id.linearLayout_comic_viewer_vertical_paging_scrollbar)
-        this.relativeLayout_leftPanel =
-            this.binding!!.layoutLeftPanel.relativeLayoutComicViewerLeftPanel
-        this.relativeLayout_toolbar = this.binding!!.layoutToolbar.relativeLayoutComicViewerToolbar
-        this.seekBar_dialogAutoPaging =
-            this.binding!!.layoutAutoPaging.seekBarComicViewerDialogAutoPaging
-        this.seekBar_horizontalPaging =
-            findViewById<SeekBar>(R.id.seekBar_comic_viewer_horizontal_page)
-        this.seekBar_verticalPaging = findViewById<SeekBar>(R.id.seekBar_comic_viewer_vertical_page)
-        this.textView_dialogAutoPagingTitle =
-            this.binding!!.layoutAutoPaging.textViewComicViewerDialogAutoPagingTitle
-        this.textView_horizontalPage =
-            findViewById<TextView>(R.id.textView_comic_viewer_horizontal_page)
-        this.textView_page = this.binding!!.textViewComicViewerPage
-        this.textView_title = this.binding!!.layoutToolbar.textViewComicViewerTitle
-        this.textView_verticalPage =
-            findViewById<TextView>(R.id.textView_comic_viewer_vertical_page)
-        this.verticalSeekBar_brightness =
-            this.binding!!.layoutLeftPanel.verticalSeekBarComicViewerBrightness
+        this.button_autoPaging = this.binding.layoutBottomPanel.buttonComicViewerAutoPaging;
+        this.button_comment = this.binding.layoutRightPanel.buttonComicViewerComment;
+        this.button_dialogAutoPagingStart = this.binding.layoutAutoPaging.buttonComicViewerDialogAutoPagingStart;
+        this.button_download = this.binding.layoutToolbar.buttonComicViewerDownload;
+        this.button_hide = findViewById(R.id.button_comic_viewer_hide);
+        this.button_hint = this.binding.layoutToolbar.buttonComicViewerHint;
+        this.button_nextEpisode = findViewById(R.id.button_comic_viewer_next_episode);
+        this.button_nextPageBottom = findViewById(R.id.button_comic_viewer_next_page_bottom);
+        this.button_nextPageRight = findViewById(R.id.button_comic_viewer_next_page_right);
+        this.button_nightMode = this.binding.layoutRightPanel.buttonComicViewerNightMode;
+        this.button_panel = findViewById(R.id.button_comic_viewer_panel);
+        this.button_panelLeftCorner = findViewById(R.id.button_comic_viewer_panel_left_corner);
+        this.button_previousEpisode = findViewById(R.id.button_comic_viewer_previous_episode);
+        this.button_previousPage = findViewById(R.id.button_comic_viewer_previous_page);
+        this.button_screenOrientation = findViewById(R.id.button_comic_viewer_screen_orientation);
+        this.button_scrollOrientation = findViewById(R.id.button_comic_viewer_scroll_orientation);
+        this.button_selectEpisode = this.binding.layoutRightPanel.buttonComicViewerSelectEpisode;
+        this.button_setting = findViewById(R.id.button_comic_viewer_setting);
+        this.button_share = this.binding.layoutToolbar.buttonComicViewerShare;
+        this.button_twoPageViewMode = findViewById(R.id.button_comic_viewer_two_page_view_mode);
+        this.checkBox_brightnessSystem = this.binding.layoutLeftPanel.checkBoxComicViewerSystemBrightness;
+        this.frameLayout_gestureArea = findViewById(R.id.frameLayout_comic_viewer_gesture_area);
+        this.frameLayout_nightModeMask = this.binding.frameLayoutComicViewerNightModeMask;
+        this.gridView_episodeDialog = this.binding.gridViewComicViewerDialogSelectEpisode;
+        this.imageButton_back = this.binding.layoutToolbar.imageButtonComicViewerBack;
+        this.linearLayout_bottomPanel = this.binding.layoutBottomPanel.linearLayoutComicViewerBottomPanel;
+        this.linearLayout_dialogAutoPaging = this.binding.layoutAutoPaging.linearLayoutComicViewerDialogAutoPaging;
+        this.linearLayout_horizontalPagingScrollbar = findViewById(R.id.linearLayout_comic_viewer_horizontal_paging_scrollbar);
+        this.linearLayout_rightPanel = this.binding.layoutRightPanel.linearLayoutComicViewerRightPanel;
+        this.linearLayout_verticalPagingScrollbar = findViewById(R.id.linearLayout_comic_viewer_vertical_paging_scrollbar);
+        this.relativeLayout_leftPanel = this.binding.layoutLeftPanel.relativeLayoutComicViewerLeftPanel;
+        this.relativeLayout_toolbar = this.binding.layoutToolbar.relativeLayoutComicViewerToolbar;
+        this.seekBar_dialogAutoPaging = this.binding.layoutAutoPaging.seekBarComicViewerDialogAutoPaging;
+        this.seekBar_horizontalPaging = findViewById(R.id.seekBar_comic_viewer_horizontal_page);
+        this.seekBar_verticalPaging = findViewById(R.id.seekBar_comic_viewer_vertical_page);
+        this.textView_dialogAutoPagingTitle = this.binding.layoutAutoPaging.textViewComicViewerDialogAutoPagingTitle;
+        this.textView_horizontalPage = findViewById(R.id.textView_comic_viewer_horizontal_page);
+        this.textView_page = this.binding.textViewComicViewerPage;
+        this.textView_title = this.binding.layoutToolbar.textViewComicViewerTitle;
+        this.textView_verticalPage = findViewById(R.id.textView_comic_viewer_vertical_page);
+        this.verticalSeekBar_brightness = this.binding.layoutLeftPanel.verticalSeekBarComicViewerBrightness;
 
-        setSupportActionBar(this.binding!!.layoutToolbar.toolbar)
-        this.binding!!.layoutToolbar.toolbar.setTitle("")
+        setSupportActionBar(this.binding.layoutToolbar.toolbar);
+        this.binding.layoutToolbar.toolbar.setTitle("");
         if (getSupportActionBar() != null) {
-            getSupportActionBar()!!.setDisplayShowTitleEnabled(false)
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
         if (bundle == null) {
             if (e.w(this)) {
-                getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, ComicViewerListFragment(), ComicViewerListFragment.TAG)
-                    .commit()
+                getSupportFragmentManager().beginTransaction().add(R.id.container, new ComicViewerListFragment(), ComicViewerListFragment.TAG).commit();
             } else {
-                getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, ComicViewFragment(), ComicViewFragment.TAG).commit()
+                getSupportFragmentManager().beginTransaction().add(R.id.container, new ComicViewFragment(), ComicViewFragment.TAG).commit();
             }
-            init()
-            bF()
-            bH()
-            return
+            init();
+            bF();
+            bH();
+            return;
         }
-        finish()
+        finish();
     }
 
-    fun init() {
-        this.hT = e.Q(this)
-        this.hB = e.M(this)
-        this.hC = e.N(this)
-        this.hE = e.L(this)
-        this.hM = e.O(this)
-        this.hQ = false
-        this.hR = false
-        this.hS = false
-        this.hF = 0
-        this.hG = 1
-        this.hI = 0
-        this.hJ = 1
-        this.hP = 0
-        this.hU = false
-        this.hV = true
-        this.comicId = getIntent().getStringExtra("EXTRA_KEY_COMIC_ID")
-        this.hL = getIntent().getStringExtra("EXTRA_KEY_COMIC_TITLE")
-        this.episodeOrder = getIntent().getIntExtra("EXTRA_KEY_LAST_VIEW_EPISODE_ORDER", 1)
-        this.episodeTotal = getIntent().getIntExtra("EXTRA_KEY_EPISODE_TOTAL", 1)
-        this.currentPage = getIntent().getIntExtra("EXTRA_KEY_LAST_VIEW_PAGE", 0)
-        val booleanExtra = getIntent().getBooleanExtra("EXTRA_KEY_VIEW_FROM_RECORD", false)
-        this.hN = 8
-        val dbComicViewRecordObjectAx = b.ax(this.comicId)
+    public void init() {
+        this.hT = e.Q(this);
+        this.hB = e.M(this);
+        this.hC = e.N(this);
+        this.hE = e.L(this);
+        this.hM = e.O(this);
+        this.hQ = false;
+        this.hR = false;
+        this.hS = false;
+        this.hF = 0;
+        this.hG = 1;
+        this.hI = 0;
+        this.hJ = 1;
+        this.hP = 0;
+        this.hU = false;
+        this.hV = true;
+        this.comicId = getIntent().getStringExtra("EXTRA_KEY_COMIC_ID");
+        this.hL = getIntent().getStringExtra("EXTRA_KEY_COMIC_TITLE");
+        this.episodeOrder = getIntent().getIntExtra("EXTRA_KEY_LAST_VIEW_EPISODE_ORDER", 1);
+        this.episodeTotal = getIntent().getIntExtra("EXTRA_KEY_EPISODE_TOTAL", 1);
+        this.currentPage = getIntent().getIntExtra("EXTRA_KEY_LAST_VIEW_PAGE", 0);
+        boolean booleanExtra = getIntent().getBooleanExtra("EXTRA_KEY_VIEW_FROM_RECORD", false);
+        this.hN = 8;
+        DbComicViewRecordObject dbComicViewRecordObjectAx = b.ax(this.comicId);
         if (dbComicViewRecordObjectAx != null && booleanExtra) {
-            this.hP = dbComicViewRecordObjectAx.getPage()
-            this.episodeOrder = dbComicViewRecordObjectAx.getEpisodeOrder()
-            this.episodeTotal = dbComicViewRecordObjectAx.getEpisodeTotal()
-            this.hF = bT()
-            this.hG = this.hF + 1
-            this.hU = true
+            this.hP = dbComicViewRecordObjectAx.getPage();
+            this.episodeOrder = dbComicViewRecordObjectAx.getEpisodeOrder();
+            this.episodeTotal = dbComicViewRecordObjectAx.getEpisodeTotal();
+            this.hF = bT();
+            this.hG = this.hF + 1;
+            this.hU = true;
         }
-        bK()
-        bJ()
+        bK();
+        bJ();
     }
 
-    fun bF() {
+    public void bF() {
         if (this.ig == null) {
-            this.ig = ArrayList<ComicEpisodeObject?>()
+            this.ig = new ArrayList<>();
         }
-        this.hA = com.picacomic.fregata.adapters.c(this, this.ig)
-        this.gridView_episodeDialog!!.setAdapter(this.hA as ListAdapter)
-        this.gridView_episodeDialog!!.setOnItemClickListener(object : OnItemClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.12
-            // android.widget.AdapterView.OnItemClickListener
-            override fun onItemClick(adapterView: AdapterView<*>?, view: View?, i: Int, j: Long) {
-                if (this@ComicViewerActivity.ig == null || this@ComicViewerActivity.ig!!.size <= i) {
-                    return
+        this.hA = new c(this, this.ig);
+        this.gridView_episodeDialog.setAdapter((ListAdapter) this.hA);
+        this.gridView_episodeDialog.setOnItemClickListener(new AdapterView.OnItemClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.12
+            @Override // android.widget.AdapterView.OnItemClickListener
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
+                if (ComicViewerActivity.this.ig == null || ComicViewerActivity.this.ig.size() <= i) {
+                    return;
                 }
-                this@ComicViewerActivity.episodeOrder =
-                    this@ComicViewerActivity.ig!!.get(i)!!.getOrder()
-                this@ComicViewerActivity.b(this@ComicViewerActivity.episodeOrder, 0, true)
+                ComicViewerActivity.this.episodeOrder = ComicViewerActivity.this.ig.get(i).getOrder();
+                ComicViewerActivity.this.b(ComicViewerActivity.this.episodeOrder, 0, true);
             }
-        })
-        this.gridView_episodeDialog!!.setOnScrollListener(object : AbsListView.OnScrollListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.23
-            var im: Int = 0
+        });
+        this.gridView_episodeDialog.setOnScrollListener(new AbsListView.OnScrollListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.23
+            int im;
 
             /* JADX INFO: renamed from: io, reason: collision with root package name */
-            var f6io: Int = 0
-            var ip: Int = 0
+            int f6io;
+            int ip;
 
-            // android.widget.AbsListView.OnScrollListener
-            override fun onScrollStateChanged(absListView: AbsListView?, i: Int) {
-                s(i)
+            @Override // android.widget.AbsListView.OnScrollListener
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+                s(i);
             }
 
-            // android.widget.AbsListView.OnScrollListener
-            override fun onScroll(absListView: AbsListView?, i: Int, i2: Int, i3: Int) {
-                this.im = i
-                this.f6io = i2
-                this.ip = i3
+            @Override // android.widget.AbsListView.OnScrollListener
+            public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+                this.im = i;
+                this.f6io = i2;
+                this.ip = i3;
             }
 
-            fun s(i: Int) {
+            private void s(int i) {
                 if (this.im < this.ip - this.f6io || i != 0) {
-                    return
+                    return;
                 }
-                this@ComicViewerActivity.bN()
+                ComicViewerActivity.this.bN();
             }
-        })
-        this.imageButton_back!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.26
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.onBackPressed()
+        });
+        this.imageButton_back.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.26
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.onBackPressed();
             }
-        })
-        this.button_hint!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.27
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.k(8)
-                this@ComicViewerActivity.l(0)
-                e.c(this@ComicViewerActivity as Context, true)
+        });
+        this.button_hint.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.27
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.k(8);
+                ComicViewerActivity.this.l(0);
+                e.c((Context) ComicViewerActivity.this, true);
             }
-        })
-        this.button_share!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.28
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                Toast.makeText(this@ComicViewerActivity, "Download and Share Image", 0).show()
+        });
+        this.button_share.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.28
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                Toast.makeText(ComicViewerActivity.this, "Download and Share Image", 0).show();
             }
-        })
-        this.button_download!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.29
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                Toast.makeText(this@ComicViewerActivity, "Download Current Image", 0).show()
+        });
+        this.button_download.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.29
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                Toast.makeText(ComicViewerActivity.this, "Download Current Image", 0).show();
             }
-        })
-        this.button_screenOrientation!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.30
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.hB) {
-                    this@ComicViewerActivity.hB = false
-                    this@ComicViewerActivity.h(false)
+        });
+        this.button_screenOrientation.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.30
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.hB) {
+                    ComicViewerActivity.this.hB = false;
+                    ComicViewerActivity.this.h(false);
                 } else {
-                    this@ComicViewerActivity.hB = true
-                    this@ComicViewerActivity.h(true)
+                    ComicViewerActivity.this.hB = true;
+                    ComicViewerActivity.this.h(true);
                 }
-                e.e(this@ComicViewerActivity, this@ComicViewerActivity.hB)
+                e.e(ComicViewerActivity.this, ComicViewerActivity.this.hB);
             }
-        })
-        this.button_scrollOrientation!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.31
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.hC) {
-                    this@ComicViewerActivity.hC = false
-                    this@ComicViewerActivity.i(false)
+        });
+        this.button_scrollOrientation.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.31
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.hC) {
+                    ComicViewerActivity.this.hC = false;
+                    ComicViewerActivity.this.i(false);
                 } else {
-                    this@ComicViewerActivity.hC = true
-                    this@ComicViewerActivity.i(true)
+                    ComicViewerActivity.this.hC = true;
+                    ComicViewerActivity.this.i(true);
                 }
-                e.f(this@ComicViewerActivity, this@ComicViewerActivity.hC)
+                e.f(ComicViewerActivity.this, ComicViewerActivity.this.hC);
             }
-        })
-        this.button_autoPaging!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.2
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.getVisibility() == 0) {
-                    this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.setVisibility(8)
-                    return
+        });
+        this.button_autoPaging.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.2
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.linearLayout_dialogAutoPaging.getVisibility() == 0) {
+                    ComicViewerActivity.this.linearLayout_dialogAutoPaging.setVisibility(8);
+                    return;
                 }
-                if (this@ComicViewerActivity.gridView_episodeDialog!!.getVisibility() == 0) {
-                    this@ComicViewerActivity.gridView_episodeDialog!!.setVisibility(8)
+                if (ComicViewerActivity.this.gridView_episodeDialog.getVisibility() == 0) {
+                    ComicViewerActivity.this.gridView_episodeDialog.setVisibility(8);
                 }
-                this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.setVisibility(0)
+                ComicViewerActivity.this.linearLayout_dialogAutoPaging.setVisibility(0);
             }
-        })
-        this.button_dialogAutoPagingStart!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.3
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.k(8)
-                this@ComicViewerActivity.bO()
+        });
+        this.button_dialogAutoPagingStart.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.3
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.k(8);
+                ComicViewerActivity.this.bO();
             }
-        })
-        this.button_setting!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.4
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                val intent = Intent(this@ComicViewerActivity, PopupActivity::class.java as Class<*>)
-                intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_SETTING")
-                this@ComicViewerActivity.startActivity(intent)
+        });
+        this.button_setting.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.4
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                Intent intent = new Intent(ComicViewerActivity.this, (Class<?>) PopupActivity.class);
+                intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_SETTING");
+                ComicViewerActivity.this.startActivity(intent);
             }
-        })
-        this.button_hide!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.5
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.k(8)
+        });
+        this.button_hide.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.5
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.k(8);
             }
-        })
-        this.button_selectEpisode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.6
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.gridView_episodeDialog!!.getVisibility() == 0) {
-                    this@ComicViewerActivity.gridView_episodeDialog!!.setVisibility(8)
-                    return
+        });
+        this.button_selectEpisode.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.6
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.gridView_episodeDialog.getVisibility() == 0) {
+                    ComicViewerActivity.this.gridView_episodeDialog.setVisibility(8);
+                    return;
                 }
-                if (this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.getVisibility() == 0) {
-                    this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.setVisibility(8)
+                if (ComicViewerActivity.this.linearLayout_dialogAutoPaging.getVisibility() == 0) {
+                    ComicViewerActivity.this.linearLayout_dialogAutoPaging.setVisibility(8);
                 }
-                this@ComicViewerActivity.gridView_episodeDialog!!.setVisibility(0)
-                this@ComicViewerActivity.bN()
+                ComicViewerActivity.this.gridView_episodeDialog.setVisibility(0);
+                ComicViewerActivity.this.bN();
             }
-        })
-        this.button_nightMode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.7
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.hE) {
-                    this@ComicViewerActivity.k(false)
+        });
+        this.button_nightMode.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.7
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.hE) {
+                    ComicViewerActivity.this.k(false);
                 } else {
-                    this@ComicViewerActivity.k(true)
+                    ComicViewerActivity.this.k(true);
                 }
             }
-        })
-        this.button_comment!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.8
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.comicId != null) {
-                    val intent =
-                        Intent(this@ComicViewerActivity, PopupActivity::class.java as Class<*>)
-                    intent.putExtra("EXTRA_KEY_COMIC_ID", this@ComicViewerActivity.comicId)
-                    intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_COMMENT")
-                    this@ComicViewerActivity.startActivity(intent)
+        });
+        this.button_comment.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.8
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.comicId != null) {
+                    Intent intent = new Intent(ComicViewerActivity.this, (Class<?>) PopupActivity.class);
+                    intent.putExtra("EXTRA_KEY_COMIC_ID", ComicViewerActivity.this.comicId);
+                    intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_COMMENT");
+                    ComicViewerActivity.this.startActivity(intent);
                 }
             }
-        })
-        this.checkBox_brightnessSystem!!.setOnCheckedChangeListener(object :
-            CompoundButton.OnCheckedChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.9
-            // android.widget.CompoundButton.OnCheckedChangeListener
-            override fun onCheckedChanged(compoundButton: CompoundButton?, z: Boolean) {
-                this@ComicViewerActivity.j(z)
+        });
+        this.checkBox_brightnessSystem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.9
+            @Override // android.widget.CompoundButton.OnCheckedChangeListener
+            public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
+                ComicViewerActivity.this.j(z);
+            }
+        });
+        this.ib = new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.10
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.k(0);
+                ComicViewerActivity.this.bP();
+            }
+        };
+        this.button_panel.setOnClickListener(this.ib);
+        this.button_panelLeftCorner.setOnClickListener(this.ib);
+        this.verticalSeekBar_brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.11
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            override fun onCheckedChanged(p0: CompoundButton, p1: Boolean) {
-                TODO("Not yet implemented")
-            }
-        })
-        this.ib = object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.10
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.k(0)
-                this@ComicViewerActivity.bP()
-            }
-        }
-        this.button_panel!!.setOnClickListener(this.ib)
-        this.button_panelLeftCorner!!.setOnClickListener(this.ib)
-        this.verticalSeekBar_brightness!!.setOnSeekBarChangeListener(object :
-            OnSeekBarChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.11
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
 
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
+                ComicViewerActivity.this.m(i);
+            }
+        });
+        this.ie = new SeekBar.OnSeekBarChangeListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.13
+            int ik;
+
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onProgressChanged(seekBar: SeekBar?, i: Int, z: Boolean) {
-                this@ComicViewerActivity.m(i)
-            }
-        })
-        this.ie = object : OnSeekBarChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.13
-            var ik: Int = 0
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
 
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onProgressChanged(seekBar: SeekBar?, i: Int, z: Boolean) {
-                this.ik = i
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
+                this.ik = i;
                 if (z) {
-                    this@ComicViewerActivity.currentPage = this.ik
-                    this@ComicViewerActivity.hz!!.b(this.ik, false)
-                    this@ComicViewerActivity.r(this@ComicViewerActivity.currentPage)
+                    ComicViewerActivity.this.currentPage = this.ik;
+                    ComicViewerActivity.this.hz.b(this.ik, false);
+                    ComicViewerActivity.this.r(ComicViewerActivity.this.currentPage);
                 }
             }
-        }
-        this.seekBar_horizontalPaging!!.setOnSeekBarChangeListener(this.ie)
-        this.seekBar_verticalPaging!!.setOnSeekBarChangeListener(this.ie)
-        this.seekBar_dialogAutoPaging!!.setOnSeekBarChangeListener(object :
-            OnSeekBarChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.14
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        };
+        this.seekBar_horizontalPaging.setOnSeekBarChangeListener(this.ie);
+        this.seekBar_verticalPaging.setOnSeekBarChangeListener(this.ie);
+        this.seekBar_dialogAutoPaging.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.14
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
 
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onProgressChanged(seekBar: SeekBar?, i: Int, z: Boolean) {
-                this@ComicViewerActivity.hM = (i * 100) + 1000
-                e.b(this@ComicViewerActivity as Context, this@ComicViewerActivity.hM)
-                val textView = this@ComicViewerActivity.textView_dialogAutoPagingTitle!!
-                textView.setText(
-                    this@ComicViewerActivity.getResources()
-                        .getString(R.string.comic_viewer_setting_panel_auto_paging) + " 【 " + String.format(
-                        "%.1f",
-                        this@ComicViewerActivity.hM / 1000.0f
-                    ) + this@ComicViewerActivity.getResources().getString(R.string.second) + " 】"
-                )
+            @Override // android.widget.SeekBar.OnSeekBarChangeListener
+            public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
+                ComicViewerActivity.this.hM = (i * 100) + 1000;
+                e.b((Context) ComicViewerActivity.this, ComicViewerActivity.this.hM);
+                TextView textView = ComicViewerActivity.this.textView_dialogAutoPagingTitle;
+                textView.setText(ComicViewerActivity.this.getResources().getString(R.string.comic_viewer_setting_panel_auto_paging) + " 【 " + String.format("%.1f", Float.valueOf(ComicViewerActivity.this.hM / 1000.0f)) + ComicViewerActivity.this.getResources().getString(R.string.second) + " 】");
             }
-        })
-        this.ic = object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.15
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.bR()
+        });
+        this.ic = new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.15
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.bR();
             }
-        }
-        this.button_nextPageBottom!!.setOnClickListener(this.ic)
-        this.button_nextPageRight!!.setOnClickListener(this.ic)
-        this.button_nextEpisode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.16
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.episodeOrder < this@ComicViewerActivity.episodeTotal) {
-                    this@ComicViewerActivity.episodeOrder++
-                    this@ComicViewerActivity.b(this@ComicViewerActivity.episodeOrder, 0, true)
+        };
+        this.button_nextPageBottom.setOnClickListener(this.ic);
+        this.button_nextPageRight.setOnClickListener(this.ic);
+        this.button_nextEpisode.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.16
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.episodeOrder < ComicViewerActivity.this.episodeTotal) {
+                    ComicViewerActivity.this.episodeOrder++;
+                    ComicViewerActivity.this.b(ComicViewerActivity.this.episodeOrder, 0, true);
                 } else {
-                    this@ComicViewerActivity.p(8)
-                    Toast.makeText(
-                        this@ComicViewerActivity,
-                        R.string.comic_viewer_no_more_episode,
-                        0
-                    ).show()
+                    ComicViewerActivity.this.p(8);
+                    Toast.makeText(ComicViewerActivity.this, R.string.comic_viewer_no_more_episode, 0).show();
                 }
             }
-        })
-        this.button_previousEpisode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.17
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.episodeOrder > 1) {
-                    this@ComicViewerActivity.episodeOrder--
-                    this@ComicViewerActivity.b(this@ComicViewerActivity.episodeOrder, 0, true)
+        });
+        this.button_previousEpisode.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.17
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                if (ComicViewerActivity.this.episodeOrder > 1) {
+                    ComicViewerActivity.this.episodeOrder--;
+                    ComicViewerActivity.this.b(ComicViewerActivity.this.episodeOrder, 0, true);
                 } else {
-                    this@ComicViewerActivity.q(8)
-                    Toast.makeText(this@ComicViewerActivity, R.string.comic_viewer_first_episode, 0)
-                        .show()
+                    ComicViewerActivity.this.q(8);
+                    Toast.makeText(ComicViewerActivity.this, R.string.comic_viewer_first_episode, 0).show();
                 }
             }
-        })
-        this.button_previousPage!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.18
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.bS()
+        });
+        this.button_previousPage.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.18
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.bS();
             }
-        })
-        this.frameLayout_gestureArea!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.19
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.l(4)
-                e.c(this@ComicViewerActivity as Context, false)
+        });
+        this.frameLayout_gestureArea.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.19
+            @Override // android.view.View.OnClickListener
+            public void onClick(View view) {
+                ComicViewerActivity.this.l(4);
+                e.c((Context) ComicViewerActivity.this, false);
             }
-        })
+        });
     }
 
-    fun bG() {
-        this.currentPage = 0
-        this.hF = 0
-        this.hG = 1
-        this.hP = 0
-        this.hS = false
-        this.hQ = false
-        this.hU = false
+    public void bG() {
+        this.currentPage = 0;
+        this.hF = 0;
+        this.hG = 1;
+        this.hP = 0;
+        this.hS = false;
+        this.hQ = false;
+        this.hU = false;
     }
 
-    fun bH() {
-        k(8)
-        h(this.hB)
-        i(this.hC)
-        k(this.hE)
+    public void bH() {
+        k(8);
+        h(this.hB);
+        i(this.hC);
+        k(this.hE);
         if (this.hM + NotificationManagerCompat.IMPORTANCE_UNSPECIFIED < 0) {
-            this.seekBar_dialogAutoPaging!!.setProgress(0)
+            this.seekBar_dialogAutoPaging.setProgress(0);
         } else {
-            this.seekBar_dialogAutoPaging!!.setProgress((this.hM + NotificationManagerCompat.IMPORTANCE_UNSPECIFIED) / 100)
+            this.seekBar_dialogAutoPaging.setProgress((this.hM + NotificationManagerCompat.IMPORTANCE_UNSPECIFIED) / 100);
         }
         if (e.K(this)) {
-            k(8)
-            l(0)
+            k(8);
+            l(0);
         } else {
-            k(8)
-            l(4)
+            k(8);
+            l(4);
         }
     }
 
-    fun bI() {
-        p(8)
-        q(8)
-        n(this.currentPage)
+    public void bI() {
+        p(8);
+        q(8);
+        n(this.currentPage);
         if (this.hK != null) {
-            this.textView_title!!.setText("〖" + this.hK!!.getTitle() + "〗 ")
-            val spannableString = SpannableString(this.hL)
-            spannableString.setSpan(
-                ForegroundColorSpan(getResources().getColor(R.color.white)),
-                0,
-                spannableString.length,
-                33
-            )
-            this.textView_title!!.append(spannableString)
+            this.textView_title.setText("〖" + this.hK.getTitle() + "〗 ");
+            SpannableString spannableString = new SpannableString(this.hL);
+            spannableString.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.white)), 0, spannableString.length(), 33);
+            this.textView_title.append(spannableString);
         }
     }
 
-    fun bJ() {
-        if (Build.VERSION.SDK_INT < 21 || ContextCompat.checkSelfPermission(
-                this,
-                "android.permission.WRITE_SETTINGS"
-            ) == 0
-        ) {
-            return
+    public void bJ() {
+        if (Build.VERSION.SDK_INT < 21 || ContextCompat.checkSelfPermission(this, "android.permission.WRITE_SETTINGS") == 0) {
+            return;
         }
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf<String>("android.permission.WRITE_SETTINGS"),
-            2001
-        )
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                "android.permission.WRITE_SETTINGS"
-            )
-        ) {
-            Toast.makeText(this, "To ", 0).show()
+        ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_SETTINGS"}, 2001);
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, "android.permission.WRITE_SETTINGS")) {
+            Toast.makeText(this, "To ", 0).show();
         } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf<String>("android.permission.WRITE_SETTINGS"),
-                2001
-            )
+            ActivityCompat.requestPermissions(this, new String[]{"android.permission.WRITE_SETTINGS"}, 2001);
         }
     }
 
-    fun bK() {
-        this.hr = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_left_enter)
-        this.hs = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_left_exit)
-        this.ht = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_right_enter)
-        this.hu = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_right_exit)
-        this.hv = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_top_enter)
-        this.hw = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_top_exit)
-        this.hx = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_bottom_enter)
-        this.hy = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_bottom_exit)
+    public void bK() {
+        this.hr = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_left_enter);
+        this.hs = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_left_exit);
+        this.ht = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_right_enter);
+        this.hu = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_right_exit);
+        this.hv = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_top_enter);
+        this.hw = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_top_exit);
+        this.hx = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_bottom_enter);
+        this.hy = AnimationUtils.loadAnimation(this, R.anim.comic_viewer_panel_bottom_exit);
     }
 
-    // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
-    override fun onResume() {
-        super.onResume()
-        bK()
+    @Override // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
+    protected void onResume() {
+        super.onResume();
+        bK();
         try {
             if (this.ih != null) {
-                registerReceiver(this.ih, IntentFilter("android.intent.action.BATTERY_CHANGED"))
+                registerReceiver(this.ih, new IntentFilter("android.intent.action.BATTERY_CHANGED"));
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
-    override fun onPause() {
-        if (this.hK != null && this.hK!!.getTitle() != null) {
-            val title = this.hK!!.getTitle()
-            b.a(
-                DbComicViewRecordObject(
-                    this.comicId,
-                    bU() + this.currentPage,
-                    title,
-                    this.episodeOrder,
-                    this.episodeTotal,
-                    System.currentTimeMillis()
-                )
-            )
+    @Override // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
+    protected void onPause() {
+        if (this.hK != null && this.hK.getTitle() != null) {
+            String title = this.hK.getTitle();
+            com.picacomic.fregata.utils.b.a(new DbComicViewRecordObject(this.comicId, bU() + this.currentPage, title, this.episodeOrder, this.episodeTotal, System.currentTimeMillis()));
         }
         try {
             if (this.ih != null) {
-                unregisterReceiver(this.ih)
+                unregisterReceiver(this.ih);
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        super.onPause()
+        super.onPause();
     }
 
-    // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
-    override fun onSaveInstanceState(bundle: Bundle) {
-        var title: String? = ""
-        if (this.hK != null && this.hK!!.getTitle() != null) {
-            title = this.hK!!.getTitle()
+    @Override // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
+    protected void onSaveInstanceState(Bundle bundle) {
+        String title = "";
+        if (this.hK != null && this.hK.getTitle() != null) {
+            title = this.hK.getTitle();
         }
-        b.a(
-            DbComicViewRecordObject(
-                this.comicId,
-                bU() + this.currentPage,
-                title,
-                this.episodeOrder,
-                this.episodeTotal,
-                System.currentTimeMillis()
-            )
-        )
-        f.D(TAG, "Save View Record: ")
-        super.onSaveInstanceState(bundle)
+        com.picacomic.fregata.utils.b.a(new DbComicViewRecordObject(this.comicId, bU() + this.currentPage, title, this.episodeOrder, this.episodeTotal, System.currentTimeMillis()));
+        f.D(TAG, "Save View Record: ");
+        super.onSaveInstanceState(bundle);
     }
 
-    // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
-    override fun onStop() {
-        bP()
+    @Override // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
+    protected void onStop() {
+        bP();
         if (this.hZ != null) {
-            this.hZ!!.cancel()
+            this.hZ.cancel();
         }
         if (this.ia != null) {
-            this.ia!!.cancel()
+            this.ia.cancel();
         }
         if (this.hx != null) {
-            this.hx!!.cancel()
+            this.hx.cancel();
         }
         if (this.hy != null) {
-            this.hy!!.cancel()
+            this.hy.cancel();
         }
         if (this.hr != null) {
-            this.hr!!.cancel()
+            this.hr.cancel();
         }
         if (this.hs != null) {
-            this.hs!!.cancel()
+            this.hs.cancel();
         }
         if (this.ht != null) {
-            this.ht!!.cancel()
+            this.ht.cancel();
         }
         if (this.hu != null) {
-            this.hu!!.cancel()
+            this.hu.cancel();
         }
         if (this.hv != null) {
-            this.hv!!.cancel()
+            this.hv.cancel();
         }
         if (this.hw != null) {
-            this.hw!!.cancel()
+            this.hw.cancel();
         }
         if (this.hY != null) {
-            this.hY!!.cancel()
+            this.hY.cancel();
         }
-        super.onStop()
+        super.onStop();
     }
 
-    fun j(i: Int): Boolean {
-        val listFind: MutableList<*>? =
-            DownloadComicEpisodeObject.find<DownloadComicEpisodeObject?>(
-                DownloadComicEpisodeObject::class.java,
-                "comic_id = ? and episode_order = ?",
-                this.comicId,
-                i.toString() + ""
-            )
-        if (listFind != null && listFind.size > 0) {
-            f.D(TAG, "HAVE DOWNLOAD EP")
-            return true
+    public boolean j(int i) {
+        List listFind = DownloadComicEpisodeObject.find(DownloadComicEpisodeObject.class, "comic_id = ? and episode_order = ?", this.comicId, i + "");
+        if (listFind != null && listFind.size() > 0) {
+            f.D(TAG, "HAVE DOWNLOAD EP");
+            return true;
         }
-        f.D(TAG, "NO DOWNLOAD EP")
-        return false
+        f.D(TAG, "NO DOWNLOAD EP");
+        return false;
     }
 
-    fun bL() {
+    public void bL() {
         if (j(this.episodeOrder)) {
-            c(this.episodeOrder, this.hF, false)
+            c(this.episodeOrder, this.hF, false);
         } else {
-            d(this.episodeOrder, this.hF, false)
+            d(this.episodeOrder, this.hF, false);
         }
     }
 
-    fun b(i: Int, i2: Int, z: Boolean) {
+    public void b(int i, int i2, boolean z) {
         if (j(i)) {
-            c(i, i2, z)
+            c(i, i2, z);
         } else {
-            d(i, i2, z)
+            d(i, i2, z);
         }
     }
 
-    @Synchronized
-    fun c(i: Int, i2: Int, z: Boolean) {
+    public synchronized void c(int i, int i2, boolean z) {
         if (z) {
             try {
-                bG()
-                this.f1if!!.clear()
-            } catch (th: Throwable) {
-                throw th
+                bG();
+                this.f1if.clear();
+            } catch (Throwable th) {
+                throw th;
             }
         }
-        val listFind: MutableList<*>? =
-            DownloadComicEpisodeObject.find<DownloadComicEpisodeObject?>(
-                DownloadComicEpisodeObject::class.java,
-                "comic_id = ? and episode_order = ?",
-                this.comicId,
-                i.toString() + ""
-            )
-        if (listFind != null && listFind.size > 0) {
-            this.hK = (listFind.get(0) as DownloadComicEpisodeObject).getComicEpisodeObject()
-            this.hH = (listFind.get(0) as DownloadComicEpisodeObject).getTotal()
+        List listFind = DownloadComicEpisodeObject.find(DownloadComicEpisodeObject.class, "comic_id = ? and episode_order = ?", this.comicId, i + "");
+        if (listFind != null && listFind.size() > 0) {
+            this.hK = ((DownloadComicEpisodeObject) listFind.get(0)).getComicEpisodeObject();
+            this.hH = ((DownloadComicEpisodeObject) listFind.get(0)).getTotal();
             if (this.hH < hq) {
-                this.hG = 1
+                this.hG = 1;
             } else if (this.hH % hq == 0) {
-                this.hG = this.hH / hq
+                this.hG = this.hH / hq;
             } else {
-                this.hG = (this.hH / hq) + 1
+                this.hG = (this.hH / hq) + 1;
             }
-            var listFindWithQuery: MutableList<*>? = null
+            List listFindWithQuery = null;
             if (this.hG > i2) {
-                listFindWithQuery = DownloadComicPageObject.findWithQuery<DownloadComicPageObject?>(
-                    DownloadComicPageObject::class.java,
-                    "SELECT * FROM download_comic_page_object WHERE episode_id = ? LIMIT ? OFFSET ?",
-                    this.hK!!.getEpisodeId(),
-                    hq.toString() + "",
-                    (hq * i2).toString() + ""
-                )
-                f.D(
-                    TAG,
-                    "SIZE = " + listFindWithQuery.size + "LIMIT = " + hq + " OFFSET = " + (hq * i2)
-                )
-                this.hF = i2 + 1
+                listFindWithQuery = DownloadComicPageObject.findWithQuery(DownloadComicPageObject.class, "SELECT * FROM download_comic_page_object WHERE episode_id = ? LIMIT ? OFFSET ?", this.hK.getEpisodeId(), hq + "", (hq * i2) + "");
+                f.D(TAG, "SIZE = " + listFindWithQuery.size() + "LIMIT = " + hq + " OFFSET = " + (hq * i2));
+                this.hF = i2 + 1;
             }
             if (this.f1if == null) {
-                this.f1if = ArrayList<ComicPageObject?>()
+                this.f1if = new ArrayList<>();
             }
-            if (listFindWithQuery != null && listFindWithQuery.size > 0) {
-                val arrayList = ArrayList<ComicPageObject?>()
-                for (i3 in listFindWithQuery.indices) {
-                    val comicPageObject =
-                        (listFindWithQuery.get(i3) as DownloadComicPageObject).getComicPageObject()
-                    this.f1if!!.add(comicPageObject)
-                    arrayList.add(comicPageObject)
+            if (listFindWithQuery != null && listFindWithQuery.size() > 0) {
+                ArrayList<ComicPageObject> arrayList = new ArrayList<>();
+                for (int i3 = 0; i3 < listFindWithQuery.size(); i3++) {
+                    ComicPageObject comicPageObject = ((DownloadComicPageObject) listFindWithQuery.get(i3)).getComicPageObject();
+                    this.f1if.add(comicPageObject);
+                    arrayList.add(comicPageObject);
                 }
-                this.hz!!.a(arrayList, this.hP, this.hU, z)
+                this.hz.a(arrayList, this.hP, this.hU, z);
                 if (this.hU) {
-                    this.hU = false
+                    this.hU = false;
                 }
-                o(this.f1if!!.size)
-                bI()
+                o(this.f1if.size());
+                bI();
             } else {
-                f.D(TAG, "Load DownloadComicPageObjectList DB FAILED")
+                f.D(TAG, "Load DownloadComicPageObjectList DB FAILED");
             }
         } else {
-            f.D(TAG, "Load DownloadComicEpisodeObject DB FAILED")
+            f.D(TAG, "Load DownloadComicEpisodeObject DB FAILED");
         }
-        f.D(TAG, "current Page = " + this.currentPage)
-        f.D(TAG, "Comic Paging Page = " + this.hF)
-        f.D(TAG, "Comic Paging Page Total = " + this.hG)
-        f.D(TAG, "jumpingPage = " + this.hP)
-        f.D(TAG, "episodeOrder = " + this.episodeOrder)
-        f.D(TAG, "episodeTotal = " + this.episodeTotal)
-        f.D(TAG, "episodePagingPage = " + this.hI)
-        f.D(TAG, "episodePagingPageTotal = " + this.hJ)
+        f.D(TAG, "current Page = " + this.currentPage);
+        f.D(TAG, "Comic Paging Page = " + this.hF);
+        f.D(TAG, "Comic Paging Page Total = " + this.hG);
+        f.D(TAG, "jumpingPage = " + this.hP);
+        f.D(TAG, "episodeOrder = " + this.episodeOrder);
+        f.D(TAG, "episodeTotal = " + this.episodeTotal);
+        f.D(TAG, "episodePagingPage = " + this.hI);
+        f.D(TAG, "episodePagingPageTotal = " + this.hJ);
     }
 
-    fun d(i: Int, i2: Int, z: Boolean) {
-        f.D(TAG, "Call Comic Page ?")
+    public void d(int i, int i2, final boolean z) {
+        f.D(TAG, "Call Comic Page ?");
         if (i2 >= this.hG || this.hR) {
-            return
+            return;
         }
-        this.hR = true
-        C(getResources().getString(R.string.loading_comic_viewer))
-        val dVar = com.picacomic.fregata.b.d(this)
-        val str: String = TAG
-        val sb = StringBuilder()
-        sb.append("Call Page api = ")
-        sb.append(e.z(this))
-        sb.append("  ")
-        sb.append(this.comicId)
-        sb.append("  ")
-        sb.append(i)
-        sb.append("  ")
-        val i3 = i2 + 1
-        sb.append(i3)
-        f.D(str, sb.toString())
-        this.hZ = dVar.dO().a(e.z(this), this.comicId, i, i3)
-        this.hZ!!.enqueue(object : Callback<GeneralResponse<ComicPagesResponse?>?> {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.20
-            // retrofit2.Callback
-            override fun onResponse(
-                call: Call<GeneralResponse<ComicPagesResponse?>?>,
-                response: Response<GeneralResponse<ComicPagesResponse?>?>
-            ) {
+        this.hR = true;
+        C(getResources().getString(R.string.loading_comic_viewer));
+        com.picacomic.fregata.b.d dVar = new com.picacomic.fregata.b.d(this);
+        String str = TAG;
+        StringBuilder sb = new StringBuilder();
+        sb.append("Call Page api = ");
+        sb.append(e.z(this));
+        sb.append("  ");
+        sb.append(this.comicId);
+        sb.append("  ");
+        sb.append(i);
+        sb.append("  ");
+        int i3 = i2 + 1;
+        sb.append(i3);
+        f.D(str, sb.toString());
+        this.hZ = dVar.dO().a(e.z(this), this.comicId, i, i3);
+        this.hZ.enqueue(new Callback<GeneralResponse<ComicPagesResponse>>() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.20
+            @Override // retrofit2.Callback
+            public void onResponse(Call<GeneralResponse<ComicPagesResponse>> call, Response<GeneralResponse<ComicPagesResponse>> response) {
                 if (response.code() == 200) {
-                    f.aA(response.body()!!.data!!.getPages().toString())
-                    if (response.body()!!.data != null && response.body()!!.data!!.getPages()
-                            .getDocs() != null
-                    ) {
-                        hq = response.body()!!.data!!.getPages().getLimit()
+                    f.aA(response.body().data.getPages().toString());
+                    if (response.body().data != null && response.body().data.getPages().getDocs() != null) {
+                        ComicViewerActivity.hq = response.body().data.getPages().getLimit();
                         if (z) {
-                            this@ComicViewerActivity.bG()
-                            this@ComicViewerActivity.f1if!!.clear()
+                            ComicViewerActivity.this.bG();
+                            ComicViewerActivity.this.f1if.clear();
                         }
-                        this@ComicViewerActivity.hH = response.body()!!.data!!.getPages().getTotal()
-                        this@ComicViewerActivity.hF = response.body()!!.data!!.getPages().getPage()
-                        this@ComicViewerActivity.hG = response.body()!!.data!!.getPages().getPages()
-                        this@ComicViewerActivity.hK = response.body()!!.data!!.getEp()
-                        if (this@ComicViewerActivity.f1if == null) {
-                            this@ComicViewerActivity.f1if = ArrayList<ComicPageObject?>()
+                        ComicViewerActivity.this.hH = response.body().data.getPages().getTotal();
+                        ComicViewerActivity.this.hF = response.body().data.getPages().getPage();
+                        ComicViewerActivity.this.hG = response.body().data.getPages().getPages();
+                        ComicViewerActivity.this.hK = response.body().data.getEp();
+                        if (ComicViewerActivity.this.f1if == null) {
+                            ComicViewerActivity.this.f1if = new ArrayList<>();
                         }
-                        for (i4 in response.body()!!.data!!.getPages().getDocs().indices) {
-                            this@ComicViewerActivity.f1if!!.add(
-                                response.body()!!.data!!.getPages().getDocs().get(i4)
-                            )
+                        for (int i4 = 0; i4 < response.body().data.getPages().getDocs().size(); i4++) {
+                            ComicViewerActivity.this.f1if.add(response.body().data.getPages().getDocs().get(i4));
                         }
-                        f.D(TAG, "current Page = " + this@ComicViewerActivity.currentPage)
-                        f.D(TAG, "Comic Paging Page = " + this@ComicViewerActivity.hF)
-                        f.D(TAG, "Comic Paging Page Total = " + this@ComicViewerActivity.hG)
-                        f.D(TAG, "jumpingPage = " + this@ComicViewerActivity.hP)
-                        f.D(TAG, "episodeOrder = " + this@ComicViewerActivity.episodeOrder)
-                        f.D(TAG, "episodeTotal = " + this@ComicViewerActivity.episodeTotal)
-                        f.D(TAG, "episodePagingPage = " + this@ComicViewerActivity.hI)
-                        f.D(TAG, "episodePagingPageTotal = " + this@ComicViewerActivity.hJ)
-                        this@ComicViewerActivity.hz!!.a(
-                            response.body()!!.data!!.getPages().getDocs(),
-                            this@ComicViewerActivity.hP,
-                            this@ComicViewerActivity.hU,
-                            z
-                        )
-                        if (this@ComicViewerActivity.hU) {
-                            this@ComicViewerActivity.hU = false
+                        f.D(ComicViewerActivity.TAG, "current Page = " + ComicViewerActivity.this.currentPage);
+                        f.D(ComicViewerActivity.TAG, "Comic Paging Page = " + ComicViewerActivity.this.hF);
+                        f.D(ComicViewerActivity.TAG, "Comic Paging Page Total = " + ComicViewerActivity.this.hG);
+                        f.D(ComicViewerActivity.TAG, "jumpingPage = " + ComicViewerActivity.this.hP);
+                        f.D(ComicViewerActivity.TAG, "episodeOrder = " + ComicViewerActivity.this.episodeOrder);
+                        f.D(ComicViewerActivity.TAG, "episodeTotal = " + ComicViewerActivity.this.episodeTotal);
+                        f.D(ComicViewerActivity.TAG, "episodePagingPage = " + ComicViewerActivity.this.hI);
+                        f.D(ComicViewerActivity.TAG, "episodePagingPageTotal = " + ComicViewerActivity.this.hJ);
+                        ComicViewerActivity.this.hz.a(response.body().data.getPages().getDocs(), ComicViewerActivity.this.hP, ComicViewerActivity.this.hU, z);
+                        if (ComicViewerActivity.this.hU) {
+                            ComicViewerActivity.this.hU = false;
                         }
-                        this@ComicViewerActivity.o(this@ComicViewerActivity.f1if!!.size)
-                        this@ComicViewerActivity.bI()
+                        ComicViewerActivity.this.o(ComicViewerActivity.this.f1if.size());
+                        ComicViewerActivity.this.bI();
                     }
                 } else {
                     try {
-                        com.picacomic.fregata.b.c(
-                            this@ComicViewerActivity,
-                            response.code(),
-                            response.errorBody()!!.string()
-                        ).dN()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                        new com.picacomic.fregata.b.c(ComicViewerActivity.this, response.code(), response.errorBody().string()).dN();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
-                this@ComicViewerActivity.hR = false
-                this@ComicViewerActivity.bC()
+                ComicViewerActivity.this.hR = false;
+                ComicViewerActivity.this.bC();
             }
 
-            // retrofit2.Callback
-            override fun onFailure(
-                call: Call<GeneralResponse<ComicPagesResponse?>?>,
-                th: Throwable
-            ) {
-                this@ComicViewerActivity.hR = false
-                th.printStackTrace()
-                this@ComicViewerActivity.bC()
+            @Override // retrofit2.Callback
+            public void onFailure(Call<GeneralResponse<ComicPagesResponse>> call, Throwable th) {
+                ComicViewerActivity.this.hR = false;
+                th.printStackTrace();
+                ComicViewerActivity.this.bC();
             }
-        })
+        });
     }
 
-    fun bM() {
-        f.D(TAG, "Call Comic Page ?")
+    public void bM() {
+        f.D(TAG, "Call Comic Page ?");
         if (bT() <= 0 || this.hR) {
-            return
+            return;
         }
-        this.hR = true
-        C(getResources().getString(R.string.loading_comic_viewer))
-        this.hZ =
-            com.picacomic.fregata.b.d(this).dO().a(e.z(this), this.comicId, this.episodeOrder, bT())
-        this.hZ!!.enqueue(object : Callback<GeneralResponse<ComicPagesResponse?>?> {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.21
-            // retrofit2.Callback
-            override fun onResponse(
-                call: Call<GeneralResponse<ComicPagesResponse?>?>,
-                response: Response<GeneralResponse<ComicPagesResponse?>?>
-            ) {
+        this.hR = true;
+        C(getResources().getString(R.string.loading_comic_viewer));
+        this.hZ = new com.picacomic.fregata.b.d(this).dO().a(e.z(this), this.comicId, this.episodeOrder, bT());
+        this.hZ.enqueue(new Callback<GeneralResponse<ComicPagesResponse>>() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.21
+            @Override // retrofit2.Callback
+            public void onResponse(Call<GeneralResponse<ComicPagesResponse>> call, Response<GeneralResponse<ComicPagesResponse>> response) {
                 if (response.code() == 200) {
-                    f.aA(response.body()!!.data!!.getPages().toString())
-                    if (response.body()!!.data != null && response.body()!!.data!!.getPages()
-                            .getDocs() != null
-                    ) {
-                        hq = response.body()!!.data!!.getPages().getLimit()
-                        this@ComicViewerActivity.hH = response.body()!!.data!!.getPages().getTotal()
-                        this@ComicViewerActivity.f1if!!.addAll(
-                            0,
-                            response.body()!!.data!!.getPages().getDocs()
-                        )
-                        this@ComicViewerActivity.hP -= hq
-                        f.D(TAG, "current Page = " + this@ComicViewerActivity.currentPage)
-                        f.D(TAG, "Comic Paging Page = " + this@ComicViewerActivity.hF)
-                        f.D(TAG, "Comic Paging Page Total = " + this@ComicViewerActivity.hG)
-                        f.D(TAG, "jumpingPage = " + this@ComicViewerActivity.hP)
-                        f.D(TAG, "episodeOrder = " + this@ComicViewerActivity.episodeOrder)
-                        f.D(TAG, "episodeTotal = " + this@ComicViewerActivity.episodeTotal)
-                        f.D(TAG, "episodePagingPage = " + this@ComicViewerActivity.hI)
-                        f.D(TAG, "episodePagingPageTotal = " + this@ComicViewerActivity.hJ)
-                        this@ComicViewerActivity.hz!!.a(
-                            response.body()!!.data!!.getPages().getDocs(),
-                            this@ComicViewerActivity.hP,
-                            false,
-                            false
-                        )
-                        this@ComicViewerActivity.o(this@ComicViewerActivity.f1if!!.size)
-                        this@ComicViewerActivity.bI()
+                    f.aA(response.body().data.getPages().toString());
+                    if (response.body().data != null && response.body().data.getPages().getDocs() != null) {
+                        ComicViewerActivity.hq = response.body().data.getPages().getLimit();
+                        ComicViewerActivity.this.hH = response.body().data.getPages().getTotal();
+                        ComicViewerActivity.this.f1if.addAll(0, response.body().data.getPages().getDocs());
+                        ComicViewerActivity.this.hP -= ComicViewerActivity.hq;
+                        f.D(ComicViewerActivity.TAG, "current Page = " + ComicViewerActivity.this.currentPage);
+                        f.D(ComicViewerActivity.TAG, "Comic Paging Page = " + ComicViewerActivity.this.hF);
+                        f.D(ComicViewerActivity.TAG, "Comic Paging Page Total = " + ComicViewerActivity.this.hG);
+                        f.D(ComicViewerActivity.TAG, "jumpingPage = " + ComicViewerActivity.this.hP);
+                        f.D(ComicViewerActivity.TAG, "episodeOrder = " + ComicViewerActivity.this.episodeOrder);
+                        f.D(ComicViewerActivity.TAG, "episodeTotal = " + ComicViewerActivity.this.episodeTotal);
+                        f.D(ComicViewerActivity.TAG, "episodePagingPage = " + ComicViewerActivity.this.hI);
+                        f.D(ComicViewerActivity.TAG, "episodePagingPageTotal = " + ComicViewerActivity.this.hJ);
+                        ComicViewerActivity.this.hz.a(response.body().data.getPages().getDocs(), ComicViewerActivity.this.hP, false, false);
+                        ComicViewerActivity.this.o(ComicViewerActivity.this.f1if.size());
+                        ComicViewerActivity.this.bI();
                     }
                 } else {
                     try {
-                        com.picacomic.fregata.b.c(
-                            this@ComicViewerActivity,
-                            response.code(),
-                            response.errorBody()!!.string()
-                        ).dN()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                        new com.picacomic.fregata.b.c(ComicViewerActivity.this, response.code(), response.errorBody().string()).dN();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
-                this@ComicViewerActivity.hR = false
-                this@ComicViewerActivity.bC()
+                ComicViewerActivity.this.hR = false;
+                ComicViewerActivity.this.bC();
             }
 
-            // retrofit2.Callback
-            override fun onFailure(
-                call: Call<GeneralResponse<ComicPagesResponse?>?>,
-                th: Throwable
-            ) {
-                this@ComicViewerActivity.hR = false
-                th.printStackTrace()
-                this@ComicViewerActivity.bC()
+            @Override // retrofit2.Callback
+            public void onFailure(Call<GeneralResponse<ComicPagesResponse>> call, Throwable th) {
+                ComicViewerActivity.this.hR = false;
+                th.printStackTrace();
+                ComicViewerActivity.this.bC();
             }
-        })
+        });
     }
 
-    fun bN() {
+    public void bN() {
         if (this.hI < this.hJ) {
-            bA()
-            this.ia = com.picacomic.fregata.b.d(this).dO().b(e.z(this), this.comicId, this.hI + 1)
-            this.ia!!.enqueue(object : Callback<GeneralResponse<ComicEpisodeResponse?>?> {
-                // from class: com.picacomic.fregata.activities.ComicViewerActivity.22
-                // retrofit2.Callback
-                override fun onResponse(
-                    call: Call<GeneralResponse<ComicEpisodeResponse?>?>,
-                    response: Response<GeneralResponse<ComicEpisodeResponse?>?>
-                ) {
+            bA();
+            this.ia = new com.picacomic.fregata.b.d(this).dO().b(e.z(this), this.comicId, this.hI + 1);
+            this.ia.enqueue(new Callback<GeneralResponse<ComicEpisodeResponse>>() { // from class: com.picacomic.fregata.activities.ComicViewerActivity.22
+                @Override // retrofit2.Callback
+                public void onResponse(Call<GeneralResponse<ComicEpisodeResponse>> call, Response<GeneralResponse<ComicEpisodeResponse>> response) {
                     if (response.code() == 200) {
-                        if (response.body()!!.data != null && response.body()!!.data!!.getEps() != null && response.body()!!.data!!.getEps()
-                                .getDocs() != null && response.body()!!.data!!.getEps()
-                                .getDocs().size > 0
-                        ) {
-                            this@ComicViewerActivity.episodeTotal =
-                                response.body()!!.data!!.getEps().getTotal()
-                            this@ComicViewerActivity.hI =
-                                response.body()!!.data!!.getEps().getPage()
-                            this@ComicViewerActivity.hJ =
-                                response.body()!!.data!!.getEps().getPages()
-                            for (i in response.body()!!.data!!.getEps().getDocs().indices) {
-                                this@ComicViewerActivity.ig!!.add(
-                                    response.body()!!.data!!.getEps().getDocs().get(i)
-                                )
+                        if (response.body().data != null && response.body().data.getEps() != null && response.body().data.getEps().getDocs() != null && response.body().data.getEps().getDocs().size() > 0) {
+                            ComicViewerActivity.this.episodeTotal = response.body().data.getEps().getTotal();
+                            ComicViewerActivity.this.hI = response.body().data.getEps().getPage();
+                            ComicViewerActivity.this.hJ = response.body().data.getEps().getPages();
+                            for (int i = 0; i < response.body().data.getEps().getDocs().size(); i++) {
+                                ComicViewerActivity.this.ig.add(response.body().data.getEps().getDocs().get(i));
                             }
-                            this@ComicViewerActivity.hA!!.notifyDataSetChanged()
-                            f.D(TAG, this@ComicViewerActivity.ig!!.size.toString() + "")
+                            ComicViewerActivity.this.hA.notifyDataSetChanged();
+                            f.D(ComicViewerActivity.TAG, ComicViewerActivity.this.ig.size() + "");
                         }
                     } else {
                         try {
-                            com.picacomic.fregata.b.c(
-                                this@ComicViewerActivity,
-                                response.code(),
-                                response.errorBody()!!.string()
-                            ).dN()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                            new com.picacomic.fregata.b.c(ComicViewerActivity.this, response.code(), response.errorBody().string()).dN();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
-                    this@ComicViewerActivity.bC()
+                    ComicViewerActivity.this.bC();
                 }
 
-                // retrofit2.Callback
-                override fun onFailure(
-                    call: Call<GeneralResponse<ComicEpisodeResponse?>?>,
-                    th: Throwable
-                ) {
-                    th.printStackTrace()
-                    this@ComicViewerActivity.bC()
-                    com.picacomic.fregata.b.c(this@ComicViewerActivity).dN()
+                @Override // retrofit2.Callback
+                public void onFailure(Call<GeneralResponse<ComicEpisodeResponse>> call, Throwable th) {
+                    th.printStackTrace();
+                    ComicViewerActivity.this.bC();
+                    new com.picacomic.fregata.b.c(ComicViewerActivity.this).dN();
                 }
-            })
+            });
         }
     }
 
-    fun h(z: Boolean) {
+    public void h(boolean z) {
         if (this.hz != null) {
             if (!z) {
-                setRequestedOrientation(6)
+                setRequestedOrientation(6);
                 if (this.hz != null) {
-                    this.hz!!.M(6)
-                    return
+                    this.hz.M(6);
+                    return;
                 }
-                return
+                return;
             }
-            setRequestedOrientation(7)
+            setRequestedOrientation(7);
             if (this.hz != null) {
-                this.hz!!.M(7)
+                this.hz.M(7);
             }
         }
     }
 
-    fun i(z: Boolean) {
+    public void i(boolean z) {
         if (this.hz != null) {
-            this.hz!!.B(z)
+            this.hz.B(z);
             if (z) {
-                this.button_scrollOrientation!!.setCompoundDrawablesWithIntrinsicBounds(
-                    null as Drawable?,
-                    ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_flip),
-                    null as Drawable?,
-                    null as Drawable?
-                )
+                this.button_scrollOrientation.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_flip), (Drawable) null, (Drawable) null);
             } else {
-                this.button_scrollOrientation!!.setCompoundDrawablesWithIntrinsicBounds(
-                    null as Drawable?,
-                    ContextCompat.getDrawable(
-                        getApplicationContext(),
-                        R.drawable.ic_action_flip_vert
-                    ),
-                    null as Drawable?,
-                    null as Drawable?
-                )
+                this.button_scrollOrientation.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_flip_vert), (Drawable) null, (Drawable) null);
             }
         }
     }
 
-    fun a(cVar: com.picacomic.fregata.a_pkg.c?) {
-        this.hz = cVar
+    public void a(com.picacomic.fregata.a_pkg.c cVar) {
+        this.hz = cVar;
     }
 
-    fun k(i: Int) {
-        bK()
-        this.relativeLayout_leftPanel!!.setVisibility(i)
-        this.linearLayout_rightPanel!!.setVisibility(i)
-        this.relativeLayout_toolbar!!.setVisibility(i)
-        this.linearLayout_bottomPanel!!.setVisibility(i)
+    public void k(int i) {
+        bK();
+        this.relativeLayout_leftPanel.setVisibility(i);
+        this.linearLayout_rightPanel.setVisibility(i);
+        this.relativeLayout_toolbar.setVisibility(i);
+        this.linearLayout_bottomPanel.setVisibility(i);
         if (i == 0) {
             if (!e.x(this)) {
-                this.relativeLayout_leftPanel!!.startAnimation(this.hr)
-                this.linearLayout_rightPanel!!.startAnimation(this.ht)
-                this.relativeLayout_toolbar!!.startAnimation(this.hv)
-                this.linearLayout_bottomPanel!!.startAnimation(this.hx)
+                this.relativeLayout_leftPanel.startAnimation(this.hr);
+                this.linearLayout_rightPanel.startAnimation(this.ht);
+                this.relativeLayout_toolbar.startAnimation(this.hv);
+                this.linearLayout_bottomPanel.startAnimation(this.hx);
             }
-            l(8)
-            return
+            l(8);
+            return;
         }
         if (!e.x(this)) {
-            this.relativeLayout_leftPanel!!.startAnimation(this.hs)
-            this.linearLayout_rightPanel!!.startAnimation(this.hu)
-            this.relativeLayout_toolbar!!.startAnimation(this.hw)
-            this.linearLayout_bottomPanel!!.startAnimation(this.hy)
+            this.relativeLayout_leftPanel.startAnimation(this.hs);
+            this.linearLayout_rightPanel.startAnimation(this.hu);
+            this.relativeLayout_toolbar.startAnimation(this.hw);
+            this.linearLayout_bottomPanel.startAnimation(this.hy);
         }
-        this.gridView_episodeDialog!!.setVisibility(8)
-        this.linearLayout_dialogAutoPaging!!.setVisibility(8)
-        l(4)
+        this.gridView_episodeDialog.setVisibility(8);
+        this.linearLayout_dialogAutoPaging.setVisibility(8);
+        l(4);
     }
 
-    fun l(i: Int) {
+    public void l(int i) {
         if (i == 4) {
-            this.button_nextPageRight!!.setVisibility(0)
-            this.button_nextPageBottom!!.setVisibility(0)
-            this.button_previousPage!!.setVisibility(0)
-            this.button_panel!!.setVisibility(0)
-            this.button_panelLeftCorner!!.setVisibility(0)
-            this.button_nextPageRight!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_nextPageBottom!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_previousPage!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_nextPageRight!!.setText("")
-            this.button_nextPageBottom!!.setText("")
-            this.button_previousPage!!.setText("")
-            this.button_panel!!.setText("")
-            this.button_panelLeftCorner!!.setText("")
-            this.frameLayout_gestureArea!!.setVisibility(8)
-            return
+            this.button_nextPageRight.setVisibility(0);
+            this.button_nextPageBottom.setVisibility(0);
+            this.button_previousPage.setVisibility(0);
+            this.button_panel.setVisibility(0);
+            this.button_panelLeftCorner.setVisibility(0);
+            this.button_nextPageRight.setBackgroundColor(getResources().getColor(R.color.transparent));
+            this.button_nextPageBottom.setBackgroundColor(getResources().getColor(R.color.transparent));
+            this.button_previousPage.setBackgroundColor(getResources().getColor(R.color.transparent));
+            this.button_panel.setBackgroundColor(getResources().getColor(R.color.transparent));
+            this.button_panelLeftCorner.setBackgroundColor(getResources().getColor(R.color.transparent));
+            this.button_nextPageRight.setText("");
+            this.button_nextPageBottom.setText("");
+            this.button_previousPage.setText("");
+            this.button_panel.setText("");
+            this.button_panelLeftCorner.setText("");
+            this.frameLayout_gestureArea.setVisibility(8);
+            return;
         }
         if (i == 8) {
-            this.button_nextPageRight!!.setVisibility(8)
-            this.button_nextPageBottom!!.setVisibility(8)
-            this.button_previousPage!!.setVisibility(8)
-            this.button_panel!!.setVisibility(8)
-            this.button_panelLeftCorner!!.setVisibility(8)
-            this.button_panel!!.setText("")
-            this.button_panelLeftCorner!!.setText("")
-            this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.frameLayout_gestureArea!!.setVisibility(8)
-            return
+            this.button_nextPageRight.setVisibility(8);
+            this.button_nextPageBottom.setVisibility(8);
+            this.button_previousPage.setVisibility(8);
+            this.button_panel.setVisibility(8);
+            this.button_panelLeftCorner.setVisibility(8);
+            this.button_panel.setText("");
+            this.button_panelLeftCorner.setText("");
+            this.button_panel.setBackgroundColor(getResources().getColor(R.color.transparent));
+            this.button_panelLeftCorner.setBackgroundColor(getResources().getColor(R.color.transparent));
+            this.frameLayout_gestureArea.setVisibility(8);
+            return;
         }
         if (i == 0) {
-            this.button_nextPageRight!!.setVisibility(0)
-            this.button_nextPageBottom!!.setVisibility(0)
-            this.button_previousPage!!.setVisibility(0)
-            this.button_panel!!.setVisibility(0)
-            this.button_panelLeftCorner!!.setVisibility(0)
-            this.button_nextPageRight!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_next_page_vertical))
-            this.button_nextPageBottom!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_next_page))
-            this.button_previousPage!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_previous_page_vertical))
-            this.button_panel!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu))
-            this.button_panelLeftCorner!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu))
-            this.button_nextPageRight!!.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark))
-            this.button_nextPageBottom!!.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark))
-            this.button_previousPage!!.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark))
-            this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.green_transparent_30))
-            this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.green_transparent_30))
-            this.frameLayout_gestureArea!!.setVisibility(0)
+            this.button_nextPageRight.setVisibility(0);
+            this.button_nextPageBottom.setVisibility(0);
+            this.button_previousPage.setVisibility(0);
+            this.button_panel.setVisibility(0);
+            this.button_panelLeftCorner.setVisibility(0);
+            this.button_nextPageRight.setText(getResources().getString(R.string.comic_viewer_setting_panel_next_page_vertical));
+            this.button_nextPageBottom.setText(getResources().getString(R.string.comic_viewer_setting_panel_next_page));
+            this.button_previousPage.setText(getResources().getString(R.string.comic_viewer_setting_panel_previous_page_vertical));
+            this.button_panel.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu));
+            this.button_panelLeftCorner.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu));
+            this.button_nextPageRight.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            this.button_nextPageBottom.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            this.button_previousPage.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            this.button_panel.setBackgroundColor(getResources().getColor(R.color.green_transparent_30));
+            this.button_panelLeftCorner.setBackgroundColor(getResources().getColor(R.color.green_transparent_30));
+            this.frameLayout_gestureArea.setVisibility(0);
         }
     }
 
-    fun j(z: Boolean) {
+    public void j(boolean z) {
         try {
             if (z) {
-                Settings.System.putInt(getContentResolver(), "screen_brightness_mode", 1)
-                this.checkBox_brightnessSystem!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_brightness_auto))
+                Settings.System.putInt(getContentResolver(), "screen_brightness_mode", 1);
+                this.checkBox_brightnessSystem.setText(getResources().getString(R.string.comic_viewer_setting_panel_brightness_auto));
             } else {
-                Settings.System.putInt(getContentResolver(), "screen_brightness_mode", 0)
-                this.checkBox_brightnessSystem!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_brightness_manual))
+                Settings.System.putInt(getContentResolver(), "screen_brightness_mode", 0);
+                this.checkBox_brightnessSystem.setText(getResources().getString(R.string.comic_viewer_setting_panel_brightness_manual));
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        this.hD = z
+        this.hD = z;
     }
 
-    fun m(i: Int) {
+    public void m(int i) {
         try {
             if (Settings.System.getInt(getContentResolver(), "screen_brightness_mode") == 1) {
-                this.checkBox_brightnessSystem!!.setChecked(false)
+                this.checkBox_brightnessSystem.setChecked(false);
             }
-            Settings.System.putInt(getContentResolver(), "screen_brightness", i)
-        } catch (e: Exception) {
-            e.printStackTrace()
+            Settings.System.putInt(getContentResolver(), "screen_brightness", i);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        this.hO = i
+        this.hO = i;
     }
 
-    fun k(z: Boolean) {
+    public void k(boolean z) {
         if (z) {
-            this.frameLayout_nightModeMask!!.setVisibility(0)
-            this.button_nightMode!!.setCompoundDrawablesWithIntrinsicBounds(
-                null as Drawable?,
-                ContextCompat.getDrawable(
-                    getApplicationContext(),
-                    R.drawable.icon_comicviewer_nightfilter_on
-                ),
-                null as Drawable?,
-                null as Drawable?
-            )
-            this.button_nightMode!!.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
-            Toast.makeText(this, R.string.comic_viewer_toast_night_mode_on, 0).show()
+            this.frameLayout_nightModeMask.setVisibility(0);
+            this.button_nightMode.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, ContextCompat.getDrawable(getApplicationContext(), R.drawable.icon_comicviewer_nightfilter_on), (Drawable) null, (Drawable) null);
+            this.button_nightMode.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
+            Toast.makeText(this, R.string.comic_viewer_toast_night_mode_on, 0).show();
         } else {
-            this.frameLayout_nightModeMask!!.setVisibility(8)
-            this.button_nightMode!!.setCompoundDrawablesWithIntrinsicBounds(
-                null as Drawable?,
-                ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_night),
-                null as Drawable?,
-                null as Drawable?
-            )
-            this.button_nightMode!!.setTextColor(ContextCompat.getColor(this, R.color.white))
+            this.frameLayout_nightModeMask.setVisibility(8);
+            this.button_nightMode.setCompoundDrawablesWithIntrinsicBounds((Drawable) null, ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_night), (Drawable) null, (Drawable) null);
+            this.button_nightMode.setTextColor(ContextCompat.getColor(this, R.color.white));
         }
-        this.hE = z
-        e.d(this, this.hE)
+        this.hE = z;
+        e.d(this, this.hE);
     }
 
     /* JADX WARN: Type inference failed for: r0v1, types: [com.picacomic.fregata.activities.ComicViewerActivity$24] */
-    fun bO() {
+    public void bO() {
         if (this.hM > 0) {
-            this.hX = object : CountDownTimer(this.hM.toLong(), this.hM.toLong()) {
-                // from class: com.picacomic.fregata.activities.ComicViewerActivity.24
-                // android.os.CountDownTimer
-                override fun onTick(j: Long) {
+            this.hX = new CountDownTimer(this.hM, this.hM) { // from class: com.picacomic.fregata.activities.ComicViewerActivity.24
+                @Override // android.os.CountDownTimer
+                public void onTick(long j) {
                 }
 
-                // android.os.CountDownTimer
-                override fun onFinish() {
-                    if (this@ComicViewerActivity.currentPage < g.ad(this@ComicViewerActivity.f1if!!.size)) {
-                        this@ComicViewerActivity.currentPage++
-                        this@ComicViewerActivity.hz!!.b(this@ComicViewerActivity.currentPage, false)
-                        this@ComicViewerActivity.r(this@ComicViewerActivity.currentPage)
-                        this@ComicViewerActivity.bO()
+                @Override // android.os.CountDownTimer
+                public void onFinish() {
+                    if (ComicViewerActivity.this.currentPage < g.ad(ComicViewerActivity.this.f1if.size())) {
+                        ComicViewerActivity.this.currentPage++;
+                        ComicViewerActivity.this.hz.b(ComicViewerActivity.this.currentPage, false);
+                        ComicViewerActivity.this.r(ComicViewerActivity.this.currentPage);
+                        ComicViewerActivity.this.bO();
                     }
                 }
-            }.start()
+            }.start();
         }
     }
 
-    fun bP() {
+    public void bP() {
         if (this.hX != null) {
-            this.hX!!.cancel()
-            this.hX = null
+            this.hX.cancel();
+            this.hX = null;
         }
     }
 
-    // androidx.appcompat.app.AppCompatActivity, android.app.Activity, android.view.KeyEvent.Callback
-    override fun onKeyDown(i: Int, keyEvent: KeyEvent?): Boolean {
+    @Override // androidx.appcompat.app.AppCompatActivity, android.app.Activity, android.view.KeyEvent.Callback
+    public boolean onKeyDown(int i, KeyEvent keyEvent) {
         if (this.hT) {
             if (i == 25) {
-                bR()
-                return true
+                bR();
+                return true;
             }
             if (i == 24) {
-                bS()
-                return true
+                bS();
+                return true;
             }
         }
         if (i != 4) {
-            return false
+            return false;
         }
-        onBackPressed()
-        return false
+        onBackPressed();
+        return false;
     }
 
-    // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, android.content.ComponentCallbacks
-    override fun onConfigurationChanged(configuration: Configuration) {
-        super.onConfigurationChanged(configuration)
+    @Override // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, android.content.ComponentCallbacks
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
         if (configuration.orientation == 2) {
-            this.linearLayout_horizontalPagingScrollbar!!.setVisibility(0)
-            this.linearLayout_verticalPagingScrollbar!!.setVisibility(8)
+            this.linearLayout_horizontalPagingScrollbar.setVisibility(0);
+            this.linearLayout_verticalPagingScrollbar.setVisibility(8);
         } else if (configuration.orientation == 1) {
-            this.linearLayout_horizontalPagingScrollbar!!.setVisibility(8)
-            this.linearLayout_verticalPagingScrollbar!!.setVisibility(0)
+            this.linearLayout_horizontalPagingScrollbar.setVisibility(8);
+            this.linearLayout_verticalPagingScrollbar.setVisibility(0);
         }
     }
 
-    // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
-    override fun onRequestPermissionsResult(i: Int, strArr: Array<String?>, iArr: IntArray) {
-        if (i == 2001 && iArr.size > 0) {
-            val i2 = iArr[0]
+    @Override // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
+    public void onRequestPermissionsResult(int i, @NonNull String[] strArr, @NonNull int[] iArr) {
+        if (i == 2001 && iArr.length > 0) {
+            int i2 = iArr[0];
         }
     }
 
-    fun n(i: Int) {
-        var string: String?
-        val string2: String?
-        string = ""
+    public void n(int i) {
+        String string;
+        String string2;
+        string = "";
         try {
-            val connectivityManager = getSystemService("connectivity") as ConnectivityManager
-            val zIsConnectedOrConnecting =
-                connectivityManager.getNetworkInfo(0)!!.isConnectedOrConnecting()
-            val zIsConnectedOrConnecting2 =
-                connectivityManager.getNetworkInfo(1)!!.isConnectedOrConnecting()
-            println(zIsConnectedOrConnecting.toString() + " net " + zIsConnectedOrConnecting2)
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService("connectivity");
+            boolean zIsConnectedOrConnecting = connectivityManager.getNetworkInfo(0).isConnectedOrConnecting();
+            boolean zIsConnectedOrConnecting2 = connectivityManager.getNetworkInfo(1).isConnectedOrConnecting();
+            System.out.println(zIsConnectedOrConnecting + " net " + zIsConnectedOrConnecting2);
             if (!zIsConnectedOrConnecting && !zIsConnectedOrConnecting2) {
-                string2 = getString(R.string.network_status_no_network)
+                string2 = getString(R.string.network_status_no_network);
             } else {
-                string =
-                    if (zIsConnectedOrConnecting2) getString(R.string.network_status_wifi) else ""
+                string = zIsConnectedOrConnecting2 ? getString(R.string.network_status_wifi) : "";
                 if (zIsConnectedOrConnecting) {
-                    string2 = getString(R.string.network_status_mobile)
+                    string2 = getString(R.string.network_status_mobile);
                     try {
                         if (this.hV) {
-                            AlertDialogCenter.usingMobileNetwork(this)
-                            this.hV = false
+                            AlertDialogCenter.usingMobileNetwork(this);
+                            this.hV = false;
                         }
-                    } catch (e: Exception) {
-                        e = e
-                        string = string2
-                        e.printStackTrace()
-                        Toast.makeText(this, "Cannot get NetworkInfo", 0).show()
+                    } catch (Exception e) {
+                        e = e;
+                        string = string2;
+                        e.printStackTrace();
+                        Toast.makeText(this, "Cannot get NetworkInfo", 0).show();
                     }
                 } else {
-                    string2 = string
+                    string2 = string;
                 }
             }
-            string = string2
-        } catch (e2: Exception) {
-            val e = e2
+            string = string2;
+        } catch (Exception e2) {
+            Exception e = e2;
         }
         if (this.f1if != null) {
-            val i2 = this.hH
-            if (g.ac(i) + 1 > this.f1if!!.size) {
-                this.textView_horizontalPage!!.setText("完/" + i2)
-                this.textView_verticalPage!!.setText("完/" + i2)
-                this.textView_page!!.setText("完/" + i2 + " " + string + " 電量:" + this.hW)
-                return
+            int i2 = this.hH;
+            if (g.ac(i) + 1 > this.f1if.size()) {
+                this.textView_horizontalPage.setText("完/" + i2);
+                this.textView_verticalPage.setText("完/" + i2);
+                this.textView_page.setText("完/" + i2 + " " + string + " 電量:" + this.hW);
+                return;
             }
-            this.textView_horizontalPage!!.setText((g.ac(i) + 1 + bU()).toString() + "/" + i2)
-            this.textView_verticalPage!!.setText((g.ac(i) + 1 + bU()).toString() + "/" + i2)
-            this.textView_page!!.setText("P." + (g.ac(i) + 1 + bU()) + "/" + i2 + " " + string + " 電量:" + this.hW)
+            this.textView_horizontalPage.setText((g.ac(i) + 1 + bU()) + "/" + i2);
+            this.textView_verticalPage.setText((g.ac(i) + 1 + bU()) + "/" + i2);
+            this.textView_page.setText("P." + (g.ac(i) + 1 + bU()) + "/" + i2 + " " + string + " 電量:" + this.hW);
         }
     }
 
-    fun o(i: Int) {
-        val iAd = g.ad(i)
-        this.seekBar_verticalPaging!!.setMax(iAd)
-        this.seekBar_horizontalPaging!!.setMax(iAd)
+    public void o(int i) {
+        int iAd = g.ad(i);
+        this.seekBar_verticalPaging.setMax(iAd);
+        this.seekBar_horizontalPaging.setMax(iAd);
     }
 
-    fun p(i: Int) {
-        this.button_nextEpisode!!.setVisibility(i)
-        this.button_nextEpisode!!.setAlpha(1.0f)
-        bQ()
+    public void p(int i) {
+        this.button_nextEpisode.setVisibility(i);
+        this.button_nextEpisode.setAlpha(1.0f);
+        bQ();
     }
 
-    fun q(i: Int) {
-        this.button_previousEpisode!!.setVisibility(i)
-        this.button_previousEpisode!!.setAlpha(1.0f)
-        bQ()
+    public void q(int i) {
+        this.button_previousEpisode.setVisibility(i);
+        this.button_previousEpisode.setAlpha(1.0f);
+        bQ();
     }
 
     /* JADX WARN: Type inference failed for: r0v1, types: [com.picacomic.fregata.activities.ComicViewerActivity$25] */
-    fun bQ() {
+    public void bQ() {
         if (this.hY != null) {
-            this.hY!!.cancel()
+            this.hY.cancel();
         }
-        this.hY = object : CountDownTimer(2000L, 2000L) {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.25
-            // android.os.CountDownTimer
-            override fun onTick(j: Long) {
+        this.hY = new CountDownTimer(2000L, 2000L) { // from class: com.picacomic.fregata.activities.ComicViewerActivity.25
+            @Override // android.os.CountDownTimer
+            public void onTick(long j) {
             }
 
-            // android.os.CountDownTimer
-            override fun onFinish() {
-                if (this@ComicViewerActivity.button_nextEpisode != null) {
-                    this@ComicViewerActivity.button_nextEpisode!!.setAlpha(0.0f)
+            @Override // android.os.CountDownTimer
+            public void onFinish() {
+                if (ComicViewerActivity.this.button_nextEpisode != null) {
+                    ComicViewerActivity.this.button_nextEpisode.setAlpha(0.0f);
                 }
-                if (this@ComicViewerActivity.button_previousEpisode != null) {
-                    this@ComicViewerActivity.button_previousEpisode!!.setAlpha(0.0f)
+                if (ComicViewerActivity.this.button_previousEpisode != null) {
+                    ComicViewerActivity.this.button_previousEpisode.setAlpha(0.0f);
                 }
             }
-        }.start()
+        }.start();
     }
 
-    // com.picacomic.fregata.a_pkg.d
-    override fun r(i: Int) {
-        f.D(TAG, "Current Page = " + this.currentPage + " pageNumber = " + i)
+    @Override // com.picacomic.fregata.a_pkg.d
+    public void r(int i) {
+        f.D(TAG, "Current Page = " + this.currentPage + " pageNumber = " + i);
         if (this.f1if != null) {
             if (this.hB) {
-                this.seekBar_verticalPaging!!.setProgress(i)
+                this.seekBar_verticalPaging.setProgress(i);
             } else {
-                this.seekBar_horizontalPaging!!.setProgress(i)
+                this.seekBar_horizontalPaging.setProgress(i);
             }
-            n(i)
-            this.currentPage = i
+            n(i);
+            this.currentPage = i;
             if (!this.hQ && i != 0) {
-                this.hQ = true
+                this.hQ = true;
             }
-            if (this.currentPage == g.ad(this.f1if!!.size)) {
-                bL()
-                q(8)
+            if (this.currentPage == g.ad(this.f1if.size())) {
+                bL();
+                q(8);
                 if (this.hF == this.hG) {
-                    p(0)
-                    return
+                    p(0);
+                    return;
                 }
-                return
+                return;
             }
             if (this.hQ && i == 0) {
                 if (bT() > 0) {
-                    bM()
-                    return
+                    bM();
+                    return;
                 } else {
-                    q(0)
-                    p(8)
-                    return
+                    q(0);
+                    p(8);
+                    return;
                 }
             }
-            q(8)
-            p(8)
+            q(8);
+            p(8);
         }
     }
 
-    fun bR() {
-        if (this.currentPage < g.ad(this.f1if!!.size)) {
-            this.currentPage++
-            this.hz!!.b(this.currentPage, false)
-            r(this.currentPage)
+    public void bR() {
+        if (this.currentPage < g.ad(this.f1if.size())) {
+            this.currentPage++;
+            this.hz.b(this.currentPage, false);
+            r(this.currentPage);
         }
     }
 
-    fun bS() {
+    public void bS() {
         if (this.currentPage > 0) {
-            this.currentPage--
-            this.hz!!.b(this.currentPage, false)
-            r(this.currentPage)
+            this.currentPage--;
+            this.hz.b(this.currentPage, false);
+            r(this.currentPage);
         }
     }
 
-    fun bT(): Int {
-        return this.hP / hq
+    public int bT() {
+        return this.hP / hq;
     }
 
-    fun bU(): Int {
-        return (this.hP / hq) * hq
-    }
-
-    companion object {
-        const val TAG: String = "ComicViewerActivity"
-        var hq: Int = 40
+    public int bU() {
+        return (this.hP / hq) * hq;
     }
 }

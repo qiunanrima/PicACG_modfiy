@@ -279,7 +279,8 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     // androidx.fragment.app.FragmentActivity, android.app.Activity, androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
-    override fun onRequestPermissionsResult(i: Int, strArr: Array<String?>?, iArr: IntArray) {
+    override fun onRequestPermissionsResult(i: Int, strArr: Array<out String>, iArr: IntArray) {
+        super.onRequestPermissionsResult(i, strArr, iArr)
         when (i) {
             PointerIconCompat.TYPE_CONTEXT_MENU -> if (iArr.size > 0) {
                 val i2 = iArr[0]
@@ -304,7 +305,7 @@ open class BaseActivity : AppCompatActivity() {
 
     // androidx.fragment.app.FragmentActivity, android.app.Activity
     override fun onPause() {
-        val strY: String?
+        var strY: String? = null
         super.onPause()
         if (this.hn != null) {
             bC()

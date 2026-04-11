@@ -3,6 +3,7 @@ package com.picacomic.fregata;
 import android.content.Context;
 import com.orm.SugarApp;
 import com.picacomic.fregata.b.b;
+import com.picacomic.fregata.utils.JniTestReconstructed;
 import com.picacomic.fregata.utils.d;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
@@ -18,12 +19,12 @@ public class MyApplication extends SugarApp {
 
     public String getStringComFromNative()
     {
-        return JniTestReconstructed.getStringComFromNative();
+        return "1";
     }
 
     public String getStringConFromNative(String[] strArr)
     {
-         return JniTestReconstructed.getStringConFromNative(strArr);
+         return JniTestReconstructed.getStringConFromNative(strArr[0],strArr[1],strArr[2],strArr[3],strArr[4]);
     }
 
     public String getStringSigFromNative()
