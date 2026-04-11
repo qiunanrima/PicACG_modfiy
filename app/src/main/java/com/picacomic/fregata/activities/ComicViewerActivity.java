@@ -486,6 +486,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             override fun onCheckedChanged(compoundButton: CompoundButton?, z: Boolean) {
                 this@ComicViewerActivity.j(z)
             }
+
+            override fun onCheckedChanged(p0: CompoundButton, p1: Boolean) {
+                TODO("Not yet implemented")
+            }
         })
         this.ib = object : View.OnClickListener {
             // from class: com.picacomic.fregata.activities.ComicViewerActivity.10
