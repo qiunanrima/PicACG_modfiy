@@ -25,6 +25,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         ndk {
             abiFilters "armeabi-v7a"  // 只保留 32 位
+            abiFilters "arm64-v8a"
         }
     }
 

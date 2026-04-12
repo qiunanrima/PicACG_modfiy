@@ -1,6 +1,20 @@
 package com.picacomic.fregata.compose.screens
 
+import android.Manifest
+import android.animation.ValueAnimator
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
+import android.text.TextUtils
 import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,27 +28,175 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.viewpager.widget.ViewPager
+import com.google.android.material.tabs.TabLayout
 import com.picacomic.fregata.R
+import com.picacomic.fregata.activities.BaseActivity
+import com.picacomic.fregata.activities.ImageCropActivity
+import com.picacomic.fregata.adapters.ProfileFragmentPagerAdapter
+import com.picacomic.fregata.b.c
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.viewmodels.ProfileViewModel
+import com.picacomic.fregata.objects.UserBasicObject
+import com.picacomic.fregata.objects.UserProfileObject
+import com.picacomic.fregata.utils.g
+import com.picacomic.fregata.utils.views.AlertDialogCenter
+import com.picacomic.fregata.utils.views.ExpCircleView
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
+import de.hdodenhof.circleimageview.CircleImageView
+import java.io.File
+import kotlin.math.max
 
-/**
- * Profile screen. The legacy XML content (avatar, level, tabs/ViewPager) is embedded
- * via [AndroidView]. A Compose top-bar with Edit button sits above.
- *
- * @param legacyContentView  Inflated [R.layout.layout_profile_compose_content].
- * @param onEdit  Called when the Edit button is tapped.
- */
-@Preview
 @Composable
 fun ProfileScreen(
     onEdit: () -> Unit,
+    viewModel: ProfileViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val cropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val cropResultUri = result.data?.getStringExtra("CROP_IMAGE_RESULT_URI")
+        if (!cropResultUri.isNullOrEmpty()) {
+            viewModel.onAvatarCropped(cropResultUri)
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
+        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+            putExtra("KEY_ACTION_TYPE", 1)
+            putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
+        }
+        cropLauncher.launch(cropIntent)
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
+        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+            putExtra("KEY_ACTION_TYPE", 1)
+            putExtra("KEY_IMAGE_URI_STRING", cameraUri)
+        }
+        cropLauncher.launch(cropIntent)
+    }
+
+    val onAvatarClick: () -> Unit = {
+        val hasStoragePermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasCameraPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasStoragePermission || !hasCameraPermission) {
+            (activity as? BaseActivity)?.requestPermission()
+        } else {
+            AlertDialog.Builder(context)
+                .setTitle(R.string.alert_dialog_select_title)
+                .setSingleChoiceItems(
+                    context.resources.getStringArray(R.array.alert_dialog_photo_chooser),
+                    0,
+                    null
+                )
+                .setPositiveButton(R.string.ok) { dialogInterface, _ ->
+                    val checked = (dialogInterface as AlertDialog).listView.checkedItemPosition
+                    if (checked == 0) {
+                        val photoFile = File(Environment.getExternalStorageDirectory(), "Pic.jpg")
+                        val photoUri = Uri.fromFile(photoFile)
+                        pendingCameraUri = photoUri.toString()
+                        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                            putExtra("output", photoUri)
+                        }
+                        cameraLauncher.launch(cameraIntent)
+                    } else {
+                        val pickIntent = Intent(Intent.ACTION_PICK).apply {
+                            type = "image/*"
+                        }
+                        galleryLauncher.launch(pickIntent)
+                    }
+                }
+                .show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.loadProfile()
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.loadProfile(force = true)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    DisposableEffect(activity) {
+        onDispose {
+            clearProfilePagerFragments((activity as? FragmentActivity)?.supportFragmentManager)
+        }
+    }
+
+    LaunchedEffect(viewModel.punchInSuccessEvent) {
+        if (viewModel.punchInSuccessEvent > 0) {
+            AlertDialogCenter.punchedIn(context)
+        }
+    }
+
+    LaunchedEffect(viewModel.levelUpEvent) {
+        if (viewModel.levelUpEvent > 0) {
+            AlertDialogCenter.levelUp(context)
+        }
+    }
+
+    LaunchedEffect(viewModel.errorEvent) {
+        if (viewModel.errorEvent <= 0) return@LaunchedEffect
+        val code = viewModel.errorCode
+        if (code != null) {
+            c(context, code, viewModel.errorBody).dN()
+        } else {
+            c(context).dN()
+        }
+    }
+
     PicaComposeTheme {
         Column(
             modifier = Modifier
@@ -58,104 +220,242 @@ fun ProfileScreen(
                     }
                 }
             }
+
             Box(modifier = Modifier.weight(1f)) {
                 AndroidView(
-                    factory = { context ->
-                        android.view.LayoutInflater.from(context).inflate(R.layout.layout_profile_compose_content, null, false)
+                    factory = { ctx ->
+                        android.view.LayoutInflater.from(ctx)
+                            .inflate(R.layout.layout_profile_compose_content, null, false)
                     },
                     modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        try {
-                            val context = view.context
-                            
-                            // Get all views
-                            val avatarView = view.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.imageView_profile_avatar)
-                            val avatarBlurView = view.findViewById<android.widget.ImageView>(R.id.imageView_profile_avatar_blur)
-                            val characterView = view.findViewById<android.widget.ImageView>(R.id.imageView_profile_character)
-                            val verifiedView = view.findViewById<android.widget.ImageView>(R.id.imageView_profile_verified)
-                            val levelTextView = view.findViewById<android.widget.TextView>(R.id.textView_profile_level)
-                            val nameTextView = view.findViewById<android.widget.TextView>(R.id.textView_profile_name)
-                            val honorTextView = view.findViewById<android.widget.TextView>(R.id.textView_profile_honor)
-                            val sloganTextView = view.findViewById<android.widget.TextView>(R.id.textView_profile_slogan)
-                            val expCircleView = view.findViewById<com.picacomic.fregata.utils.views.ExpCircleView>(R.id.expCircleView_profile)
-                            
-                            // Load user profile data (only once)
-                            if (avatarView?.tag == null) {
-                                avatarView?.tag = "loaded"
-                                
-                                val auth = com.picacomic.fregata.utils.e.z(context)
-                                val api = com.picacomic.fregata.b.d(context).dO()
-                                
-                                api.am(auth).enqueue(object : retrofit2.Callback<com.picacomic.fregata.objects.responses.GeneralResponse<com.picacomic.fregata.objects.responses.UserProfileResponse>> {
-                                    override fun onResponse(
-                                        call: retrofit2.Call<com.picacomic.fregata.objects.responses.GeneralResponse<com.picacomic.fregata.objects.responses.UserProfileResponse>>,
-                                        response: retrofit2.Response<com.picacomic.fregata.objects.responses.GeneralResponse<com.picacomic.fregata.objects.responses.UserProfileResponse>>
-                                    ) {
-                                        if (response.code() == 200) {
-                                            val userProfile = response.body()?.data?.user
-                                            if (userProfile != null) {
-                                                try {
-                                                    // Load avatar
-                                                    if (userProfile.avatar != null) {
-                                                        com.squareup.picasso.Picasso.with(context)
-                                                            .load(com.picacomic.fregata.utils.g.b(userProfile.avatar))
-                                                            .into(avatarView)
-                                                        // Load blurred avatar
-                                                        com.squareup.picasso.Picasso.with(context)
-                                                            .load(com.picacomic.fregata.utils.g.b(userProfile.avatar))
-                                                            .into(object : com.squareup.picasso.Target {
-                                                                override fun onBitmapLoaded(bitmap: android.graphics.Bitmap?, from: com.squareup.picasso.Picasso.LoadedFrom?) {
-                                                                    if (bitmap != null) {
-                                                                        avatarBlurView?.setImageBitmap(com.picacomic.fregata.utils.g.a(bitmap, 0.5f, 5))
-                                                                    }
-                                                                }
-                                                                override fun onBitmapFailed(errorDrawable: android.graphics.drawable.Drawable?) {}
-                                                                override fun onPrepareLoad(placeHolderDrawable: android.graphics.drawable.Drawable?) {}
-                                                            })
-                                                    }
-                                                    
-                                                    // Load character if exists
-                                                    if (userProfile.character != null) {
-                                                        com.squareup.picasso.Picasso.with(context)
-                                                            .load(userProfile.character)
-                                                            .into(characterView)
-                                                        characterView?.visibility = android.view.View.VISIBLE
-                                                    } else {
-                                                        characterView?.visibility = android.view.View.GONE
-                                                    }
-                                                    
-                                                    // Set verified badge
-                                                    verifiedView?.visibility = if (userProfile.isVerified) android.view.View.VISIBLE else android.view.View.GONE
-                                                    
-                                                    // Set text fields
-                                                    levelTextView?.text = "${userProfile.level} (${userProfile.exp}/10000)"
-                                                    nameTextView?.text = userProfile.name
-                                                    honorTextView?.text = userProfile.title ?: "暂无头衔"
-                                                    sloganTextView?.text = userProfile.slogan ?: "这个用户很懒，什么都没写~"
-                                                    
-                                                    // Set exp circle angle (假设最大经验值为10000)
-                                                    if (expCircleView != null) {
-                                                        val angle = (userProfile.exp * 360f) / 10000f
-                                                        expCircleView.setAngle(angle)
-                                                    }
-                                                } catch (e: Exception) {
-                                                    e.printStackTrace()
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    override fun onFailure(call: retrofit2.Call<com.picacomic.fregata.objects.responses.GeneralResponse<com.picacomic.fregata.objects.responses.UserProfileResponse>>, t: Throwable) {
-                                        t.printStackTrace()
-                                    }
-                                })
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                    update = { root ->
+                        val avatarView =
+                            root.findViewById<CircleImageView>(R.id.imageView_profile_avatar)
+                        val avatarBlurView =
+                            root.findViewById<ImageView>(R.id.imageView_profile_avatar_blur)
+                        val characterView =
+                            root.findViewById<ImageView>(R.id.imageView_profile_character)
+                        val verifiedView =
+                            root.findViewById<ImageView>(R.id.imageView_profile_verified)
+                        val levelTextView =
+                            root.findViewById<TextView>(R.id.textView_profile_level)
+                        val nameTextView =
+                            root.findViewById<TextView>(R.id.textView_profile_name)
+                        val honorTextView =
+                            root.findViewById<TextView>(R.id.textView_profile_honor)
+                        val sloganTextView =
+                            root.findViewById<TextView>(R.id.textView_profile_slogan)
+                        val punchInTextView =
+                            root.findViewById<TextView>(R.id.textView_profile_punch_in)
+                        val expCircleView =
+                            root.findViewById<ExpCircleView>(R.id.expCircleView_profile)
+                        val tabLayout = root.findViewById<TabLayout>(R.id.tabs)
+                        val viewPager = root.findViewById<ViewPager>(R.id.viewPager_profile)
+
+                        expCircleView?.setGridSize(20)
+
+                        if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
+                            avatarView?.setOnClickListener { onAvatarClick() }
+                            avatarView?.setTag(R.id.imageView_profile_avatar, true)
                         }
+
+                        if (punchInTextView?.getTag(R.id.textView_profile_punch_in) != true) {
+                            punchInTextView?.setOnClickListener { viewModel.punchIn() }
+                            punchInTextView?.setTag(R.id.textView_profile_punch_in, true)
+                        }
+
+                        bindProfilePager(
+                            root = root,
+                            activity = activity as? FragmentActivity,
+                            viewPager = viewPager,
+                            tabLayout = tabLayout,
+                            userProfile = viewModel.userProfile
+                        )
+
+                        bindProfileHeader(
+                            root = root,
+                            userProfile = viewModel.userProfile,
+                            avatarPreviewUri = viewModel.avatarPreviewUri,
+                            avatarView = avatarView,
+                            avatarBlurView = avatarBlurView,
+                            characterView = characterView,
+                            verifiedView = verifiedView,
+                            levelTextView = levelTextView,
+                            nameTextView = nameTextView,
+                            honorTextView = honorTextView,
+                            sloganTextView = sloganTextView,
+                            punchInTextView = punchInTextView,
+                            expCircleView = expCircleView,
+                            isPunchingIn = viewModel.isPunchingIn
+                        )
                     }
                 )
             }
         }
     }
+}
+
+private fun bindProfileHeader(
+    root: View,
+    userProfile: UserProfileObject?,
+    avatarPreviewUri: String?,
+    avatarView: CircleImageView?,
+    avatarBlurView: ImageView?,
+    characterView: ImageView?,
+    verifiedView: ImageView?,
+    levelTextView: TextView?,
+    nameTextView: TextView?,
+    honorTextView: TextView?,
+    sloganTextView: TextView?,
+    punchInTextView: TextView?,
+    expCircleView: ExpCircleView?,
+    isPunchingIn: Boolean
+) {
+    if (userProfile == null) {
+        punchInTextView?.visibility = View.GONE
+        return
+    }
+
+    val avatarPath = avatarPreviewUri ?: userProfile.avatar?.let { g.b(it) }
+    if (!avatarPath.isNullOrEmpty()) {
+        loadAvatar(root, avatarPath, avatarView, avatarBlurView)
+    }
+
+    if (!userProfile.character.isNullOrEmpty()) {
+        Picasso.with(root.context).load(userProfile.character).into(characterView)
+        characterView?.visibility = View.VISIBLE
+    } else {
+        characterView?.visibility = View.GONE
+    }
+
+    verifiedView?.visibility = if (userProfile.isVerified) View.VISIBLE else View.GONE
+
+    val nextExp = max(1, expForLevel(userProfile.level + 1))
+    levelTextView?.text = "${userProfile.level} (${userProfile.exp}/$nextExp)"
+    nameTextView?.apply {
+        maxLines = 1
+        ellipsize = TextUtils.TruncateAt.END
+        text = displayName(userProfile)
+    }
+    honorTextView?.text = userProfile.title.orEmpty()
+    sloganTextView?.text = userProfile.slogan.orEmpty()
+    punchInTextView?.visibility = if (userProfile.isPunched) View.GONE else View.VISIBLE
+    punchInTextView?.isEnabled = !isPunchingIn
+
+    val angle = (userProfile.exp * 360f) / nextExp.toFloat()
+    animateExpCircle(root, expCircleView, angle)
+}
+
+private fun bindProfilePager(
+    root: View,
+    activity: FragmentActivity?,
+    viewPager: ViewPager?,
+    tabLayout: TabLayout?,
+    userProfile: UserProfileObject?
+) {
+    if (activity == null || viewPager == null || tabLayout == null) return
+
+    val profileKey = userProfile?.userId ?: "__profile_no_user__"
+    val oldProfileKey = root.getTag(R.id.viewPager_profile) as? String
+    if (oldProfileKey == profileKey && viewPager.adapter != null) return
+
+    clearProfilePagerFragments(activity.supportFragmentManager)
+    viewPager.adapter = null
+    val userBasicObject = userProfile?.let { UserBasicObject(it) }
+    viewPager.adapter = ProfileFragmentPagerAdapter(activity.supportFragmentManager, userBasicObject)
+    viewPager.offscreenPageLimit = 2
+    tabLayout.setupWithViewPager(viewPager)
+    tabLayout.getTabAt(0)?.setText(R.string.comic)
+    if (userBasicObject != null) {
+        tabLayout.getTabAt(1)?.setText(R.string.comment)
+    }
+    root.setTag(R.id.viewPager_profile, profileKey)
+}
+
+private fun displayName(userProfile: UserProfileObject): String {
+    val raw = userProfile.name.orEmpty().trim()
+    if (raw.isEmpty()) return ""
+    // Guard against corrupted profile payload that occasionally injects debug text.
+    if (raw.contains("SocketAddress", ignoreCase = true)) {
+        return userProfile.title.orEmpty().ifEmpty { "" }
+    }
+    return raw
+}
+
+private fun clearProfilePagerFragments(fragmentManager: FragmentManager?) {
+    if (fragmentManager == null || fragmentManager.isStateSaved) return
+    try {
+        val transaction = fragmentManager.beginTransaction()
+        var changed = false
+        for (index in 0..2) {
+            val tag = "android:switcher:${R.id.viewPager_profile}:$index"
+            val fragment = fragmentManager.findFragmentByTag(tag)
+            if (fragment != null) {
+                transaction.remove(fragment)
+                changed = true
+            }
+        }
+        if (changed) {
+            transaction.commitNowAllowingStateLoss()
+        }
+    } catch (_: Exception) {
+    }
+}
+
+private fun loadAvatar(
+    root: View,
+    avatarPath: String,
+    avatarView: CircleImageView?,
+    avatarBlurView: ImageView?
+) {
+    Picasso.with(root.context).load(avatarPath).into(avatarView)
+    val blurTarget = object : Target {
+        override fun onBitmapLoaded(
+            bitmap: android.graphics.Bitmap?,
+            from: Picasso.LoadedFrom?
+        ) {
+            if (bitmap != null && avatarBlurView != null) {
+                avatarBlurView.setImageBitmap(g.a(bitmap, 0.5f, 5))
+            }
+        }
+
+        override fun onBitmapFailed(errorDrawable: android.graphics.drawable.Drawable?) {}
+
+        override fun onPrepareLoad(placeHolderDrawable: android.graphics.drawable.Drawable?) {}
+    }
+    // Keep a strong reference to avoid Picasso target GC.
+    root.setTag(R.id.imageView_profile_avatar_blur, blurTarget)
+    Picasso.with(root.context).load(avatarPath).into(blurTarget)
+}
+
+private fun animateExpCircle(root: View, expCircleView: ExpCircleView?, targetAngle: Float) {
+    if (expCircleView == null) return
+
+    val lastAngle = root.getTag(R.id.expCircleView_profile) as? Float
+    if (lastAngle != null && kotlin.math.abs(lastAngle - targetAngle) < 0.1f) {
+        return
+    }
+
+    (root.getTag(R.id.textView_profile_level) as? ValueAnimator)?.cancel()
+
+    val animator = ValueAnimator.ofFloat(0f, targetAngle).apply {
+        duration = 1000L
+        addUpdateListener { animation ->
+            expCircleView.setAngle(animation.animatedValue as Float)
+        }
+        start()
+    }
+    root.setTag(R.id.textView_profile_level, animator)
+    root.setTag(R.id.expCircleView_profile, targetAngle)
+}
+
+private fun expForLevel(level: Int): Int {
+    val n = (level * 2) - 1
+    return ((n * n) - 1) * 25
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ProfileScreenPreview() {
+    ProfileScreen(onEdit = {})
 }

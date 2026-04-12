@@ -7,7 +7,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.utils.e
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -81,7 +83,14 @@ private val PicaShapes = Shapes(
 
 @Composable
 fun PicaComposeTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = run {
+        val context = LocalContext.current
+        when (e.al(context)) {
+            1 -> true
+            0 -> false
+            else -> isSystemInDarkTheme()
+        }
+    },
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

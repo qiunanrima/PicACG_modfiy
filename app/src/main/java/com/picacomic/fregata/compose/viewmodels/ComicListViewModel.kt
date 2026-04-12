@@ -26,6 +26,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
     private var isEnd = false
 
     private var currentCall: Call<*>? = null
+    private var requestKey: String? = null
 
     fun init(
         category: String? = null,
@@ -38,10 +39,41 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         creatorId: String? = null,
         creatorName: String? = null
     ) {
-        if (comics.isNotEmpty()) return // Already loaded
-        
-        title = category ?: keywords ?: tags ?: author ?: translate ?: creatorName
-        loadData(category, keywords, tags, author, finished, sorting, translate, creatorId)
+        val appContext = getApplication<Application>()
+        val newRequestKey = buildRequestKey(
+            category = category,
+            keywords = keywords,
+            tags = tags,
+            author = author,
+            finished = finished,
+            sorting = sorting,
+            translate = translate,
+            creatorId = creatorId,
+            creatorName = creatorName
+        )
+
+        if (requestKey != newRequestKey) {
+            resetState()
+            requestKey = newRequestKey
+        }
+
+        title = when {
+            !keywords.isNullOrBlank() -> appContext.getString(com.picacomic.fregata.R.string.title_search) + keywords
+            !tags.isNullOrBlank() -> appContext.getString(com.picacomic.fregata.R.string.title_search) + tags
+            !author.isNullOrBlank() -> appContext.getString(com.picacomic.fregata.R.string.title_search) + author
+            !translate.isNullOrBlank() -> appContext.getString(com.picacomic.fregata.R.string.title_search) + translate
+            !creatorName.isNullOrBlank() -> appContext.getString(com.picacomic.fregata.R.string.title_search) + creatorName
+            category == "CATEGORY_USER_FAVOURITE" -> appContext.getString(com.picacomic.fregata.R.string.bookmarked)
+            category == "CATEGORY_RECENT_VIEW" -> appContext.getString(com.picacomic.fregata.R.string.recent_view)
+            category == "CATEGORY_DOWNLOADED" -> appContext.getString(com.picacomic.fregata.R.string.downloaded)
+            category == "CATEGORY_RANDOM" -> appContext.getString(com.picacomic.fregata.R.string.category_title_random)
+            !category.isNullOrBlank() -> category
+            sorting.equals("dd", ignoreCase = true) -> appContext.getString(com.picacomic.fregata.R.string.category_title_latest)
+            else -> appContext.getString(com.picacomic.fregata.R.string.title_search)
+        }
+        if (comics.isEmpty()) {
+            loadData(category, keywords, tags, author, finished, sorting, translate, creatorId)
+        }
     }
 
     fun loadData(
@@ -122,6 +154,39 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
                 isLoading = false
             }
         })
+    }
+
+    private fun resetState() {
+        currentCall?.cancel()
+        comics = emptyList()
+        page = 1
+        totalPage = 1
+        isEnd = false
+        isLoading = false
+    }
+
+    private fun buildRequestKey(
+        category: String? = null,
+        keywords: String? = null,
+        tags: String? = null,
+        author: String? = null,
+        finished: String? = null,
+        sorting: String? = null,
+        translate: String? = null,
+        creatorId: String? = null,
+        creatorName: String? = null
+    ): String {
+        return listOf(
+            category,
+            keywords,
+            tags,
+            author,
+            finished,
+            sorting,
+            translate,
+            creatorId,
+            creatorName
+        ).joinToString("|") { it.orEmpty() }
     }
 
     override fun onCleared() {

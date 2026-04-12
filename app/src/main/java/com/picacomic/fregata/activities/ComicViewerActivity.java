@@ -225,11 +225,8 @@ public class ComicViewerActivity extends BaseActivity implements d {
         this.textView_verticalPage = findViewById(R.id.textView_comic_viewer_vertical_page);
         this.verticalSeekBar_brightness = this.binding.layoutLeftPanel.verticalSeekBarComicViewerBrightness;
 
-        setSupportActionBar(this.binding.layoutToolbar.toolbar);
-        this.binding.layoutToolbar.toolbar.setTitle("");
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-        }
+        this.binding.layoutToolbar.toolbar.setVisibility(View.GONE);
+        this.relativeLayout_toolbar.setVisibility(View.GONE);
         if (bundle == null) {
             if (e.w(this)) {
                 getSupportFragmentManager().beginTransaction().add(R.id.container, new ComicViewerListFragment(), ComicViewerListFragment.TAG).commit();
@@ -987,13 +984,12 @@ public class ComicViewerActivity extends BaseActivity implements d {
         bK();
         this.relativeLayout_leftPanel.setVisibility(i);
         this.linearLayout_rightPanel.setVisibility(i);
-        this.relativeLayout_toolbar.setVisibility(i);
+        this.relativeLayout_toolbar.setVisibility(8);
         this.linearLayout_bottomPanel.setVisibility(i);
         if (i == 0) {
             if (!e.x(this)) {
                 this.relativeLayout_leftPanel.startAnimation(this.hr);
                 this.linearLayout_rightPanel.startAnimation(this.ht);
-                this.relativeLayout_toolbar.startAnimation(this.hv);
                 this.linearLayout_bottomPanel.startAnimation(this.hx);
             }
             l(8);
@@ -1002,7 +998,6 @@ public class ComicViewerActivity extends BaseActivity implements d {
         if (!e.x(this)) {
             this.relativeLayout_leftPanel.startAnimation(this.hs);
             this.linearLayout_rightPanel.startAnimation(this.hu);
-            this.relativeLayout_toolbar.startAnimation(this.hw);
             this.linearLayout_bottomPanel.startAnimation(this.hy);
         }
         this.gridView_episodeDialog.setVisibility(8);

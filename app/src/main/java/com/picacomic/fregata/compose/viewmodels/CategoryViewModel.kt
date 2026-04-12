@@ -1,6 +1,8 @@
 package com.picacomic.fregata.compose.viewmodels
 
 import android.app.Application
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +27,25 @@ class CategoryViewModel(application: Application) : AndroidViewModel(application
     private var keywordsCall: Call<GeneralResponse<KeywordsResponse>>? = null
 
     init {
+        loadCachedCategories()
         loadData()
+    }
+
+    private fun loadCachedCategories() {
+        val context = getApplication<Application>()
+        val cached = e.C(context)
+        if (cached.isNullOrEmpty()) {
+            return
+        }
+        try {
+            val type = object : TypeToken<List<CategoryObject>>() {}.type
+            val cachedList: List<CategoryObject> = Gson().fromJson(cached, type) ?: emptyList()
+            if (cachedList.isNotEmpty()) {
+                categories.clear()
+                categories.addAll(cachedList)
+            }
+        } catch (_: Exception) {
+        }
     }
 
     fun loadData() {
@@ -44,7 +64,10 @@ class CategoryViewModel(application: Application) : AndroidViewModel(application
             ) {
                 if (response.code() == 200) {
                     categories.clear()
-                    response.body()?.data?.categories?.let { categories.addAll(it) }
+                    response.body()?.data?.categories?.let {
+                        categories.addAll(it)
+                        e.j(context, Gson().toJson(it))
+                    }
                 }
                 isLoading = false
             }

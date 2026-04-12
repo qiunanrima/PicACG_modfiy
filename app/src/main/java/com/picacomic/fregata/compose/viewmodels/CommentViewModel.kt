@@ -16,47 +16,92 @@ import retrofit2.Response
 
 class CommentViewModel(application: Application) : AndroidViewModel(application) {
     var comments by mutableStateOf<List<CommentObject>>(emptyList())
+    var topComments by mutableStateOf<List<CommentObject>>(emptyList())
     var isLoading by mutableStateOf(false)
-    
+    var currentPage by mutableStateOf(0)
+    var totalPages by mutableStateOf(1)
+    var hasMore by mutableStateOf(true)
+
+    private var requestKey: String? = null
     private var commentsCall: Call<GeneralResponse<CommentsResponse>>? = null
 
-    fun loadComments(comicId: String? = null, gameId: String? = null, commentId: String? = null, page: Int = 1) {
-        if (comments.isNotEmpty()) return
+    fun loadComments(
+        comicId: String? = null,
+        gameId: String? = null,
+        commentId: String? = null,
+        page: Int = 1,
+        force: Boolean = false
+    ) {
+        val newRequestKey = listOf(comicId, gameId, commentId).joinToString("|") { it.orEmpty() }
+        if (requestKey != newRequestKey) {
+            resetState()
+            requestKey = newRequestKey
+        }
+
+        if (!force && isLoading) return
+        if (!force && page > 1 && !hasMore) return
+
+        commentsCall?.cancel()
+        if (page <= 1) {
+            comments = emptyList()
+            topComments = emptyList()
+            currentPage = 0
+            totalPages = 1
+            hasMore = true
+        }
+
         isLoading = true
-        
+
         val context = getApplication<Application>()
         val api = d(context).dO()
         val auth = e.z(context)
 
-        // Fetch Comments based on provided ID
-        when {
-            !comicId.isNullOrEmpty() -> {
-                commentsCall = api.c(auth, comicId, page)
-            }
-            !gameId.isNullOrEmpty() -> {
-                commentsCall = api.f(auth, gameId, page)
-            }
-            !commentId.isNullOrEmpty() -> {
-                commentsCall = api.d(auth, commentId, page)
-            }
+        commentsCall = when {
+            !comicId.isNullOrEmpty() -> api.c(auth, comicId, page)
+            !gameId.isNullOrEmpty() -> api.f(auth, gameId, page)
+            !commentId.isNullOrEmpty() -> api.d(auth, commentId, page)
             else -> {
                 isLoading = false
-                return
+                null
             }
         }
 
         commentsCall?.enqueue(object : Callback<GeneralResponse<CommentsResponse>> {
-            override fun onResponse(call: Call<GeneralResponse<CommentsResponse>>, response: Response<GeneralResponse<CommentsResponse>>) {
+            override fun onResponse(
+                call: Call<GeneralResponse<CommentsResponse>>,
+                response: Response<GeneralResponse<CommentsResponse>>
+            ) {
                 if (response.code() == 200) {
-                    val commentsData = response.body()?.data?.comments?.docs ?: emptyList()
-                    comments = commentsData
+                    val data = response.body()?.data
+                    val pageData = data?.comments
+                    val docs = pageData?.docs ?: emptyList()
+                    if (page <= 1) {
+                        comments = docs
+                        topComments = data?.topComments ?: emptyList()
+                    } else {
+                        comments = comments + docs
+                    }
+                    currentPage = pageData?.page ?: page
+                    totalPages = pageData?.pages ?: 1
+                    hasMore = currentPage < totalPages
                 }
                 isLoading = false
             }
+
             override fun onFailure(call: Call<GeneralResponse<CommentsResponse>>, t: Throwable) {
                 isLoading = false
             }
         })
+    }
+
+    private fun resetState() {
+        commentsCall?.cancel()
+        comments = emptyList()
+        topComments = emptyList()
+        currentPage = 0
+        totalPages = 1
+        hasMore = true
+        isLoading = false
     }
 
     override fun onCleared() {

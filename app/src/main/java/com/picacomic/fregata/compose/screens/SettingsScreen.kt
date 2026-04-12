@@ -43,7 +43,6 @@ data class SettingsState(
     val performanceEnabled: Boolean = false,
 )
 
-@Preview
 @Composable
 fun SettingsScreen(
     state: SettingsState,
@@ -185,7 +184,6 @@ fun SettingsScreen(
     }
 }
 
-@Preview
 @Composable
 private fun SettingsSection(
     title: String,
@@ -202,7 +200,6 @@ private fun SettingsSection(
     }
 }
 
-@Preview
 @Composable
 private fun SettingsValueRow(label: String, value: String, onClick: () -> Unit) {
     Row(
@@ -227,7 +224,6 @@ private fun SettingsValueRow(label: String, value: String, onClick: () -> Unit) 
     HorizontalDivider()
 }
 
-@Preview
 @Composable
 private fun SettingsSwitchRow(
     label: String,
@@ -249,4 +245,42 @@ private fun SettingsSwitchRow(
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
     HorizontalDivider()
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsScreenPreview() {
+    SettingsScreen(
+        state = SettingsState(
+            apkVersionTitle = "1.0.0",
+            screenOrientationValue = "Portrait",
+            scrollDirectionValue = "Top to Bottom",
+            autoPagingValue = "1000ms",
+            imageQualityValue = "High",
+            themeColorValue = "Default",
+            cacheTitleValue = "20MB",
+            pinTitleValue = "PIN",
+            pinValue = "Off",
+            nightModeEnabled = false,
+            volumePagingEnabled = true,
+            testingEnabled = false,
+            performanceEnabled = true
+        ),
+        onScreenOrientation = {},
+        onScrollDirection = {},
+        onAutoPaging = {},
+        onImageQuality = {},
+        onThemeColor = {},
+        onContinueDownload = {},
+        onApkVersion = {},
+        onCache = {},
+        onFaq = {},
+        onPin = {},
+        onPassword = {},
+        onLogout = {},
+        onNightModeChanged = {},
+        onVolumePagingChanged = {},
+        onTestingChanged = {},
+        onPerformanceChanged = {}
+    )
 }

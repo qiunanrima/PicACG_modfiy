@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import com.picacomic.fregata.databinding.FragmentProfileComicBinding;
 import com.picacomic.fregata.R;
+import com.picacomic.fregata.activities.MainActivity;
 import com.picacomic.fregata.b.d;
 import com.picacomic.fregata.c.c;
 import com.picacomic.fregata.holders.ComicCollectionView;
@@ -80,6 +81,29 @@ public class ProfileComicFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
+    private void openComicList(String category) {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).openComicListFromLegacy(category, null, null);
+            return;
+        }
+        if (getParentFragment() != null) {
+            getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a(category, null, null, null, null, null, null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
+        }
+    }
+
+    private void openComicDetail(String comicId) {
+        if (comicId == null || comicId.equalsIgnoreCase("")) {
+            return;
+        }
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).openComicDetailFromLegacy(comicId);
+            return;
+        }
+        if (getParentFragment() != null) {
+            getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicDetailFragment.a(new ComicListObject(comicId)), ComicDetailFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
+        }
+    }
+
     public void dv() {
         List listFindWithQuery = DbComicViewRecordObject.findWithQuery(DbComicViewRecordObject.class, "SELECT * FROM db_comic_view_record_object WHERE last_view_timestamp > 0 ORDER BY last_view_timestamp DESC LIMIT 4", new String[0]);
         if (listFindWithQuery != null) {
@@ -99,12 +123,13 @@ public class ProfileComicFragment extends BaseFragment implements View.OnClickLi
     public void dw() {
         if (this.qI != null) {
             try {
+                if (this.linearLayout_recentView != null) {
+                    this.linearLayout_recentView.removeAllViews();
+                }
                 ComicCollectionView comicCollectionView = new ComicCollectionView(getActivity(), this.qI, ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION, this, new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileComicFragment.1
                     @Override // android.view.View.OnClickListener
                     public void onClick(View view) {
-                        if (ProfileComicFragment.this.getParentFragment() != null) {
-                            ProfileComicFragment.this.getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a("CATEGORY_RECENT_VIEW", null, null, null, null, null, null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
-                        }
+                        ProfileComicFragment.this.openComicList("CATEGORY_RECENT_VIEW");
                     }
                 });
                 comicCollectionView.getTextView_count().setText(this.qJ + "");
@@ -131,12 +156,13 @@ public class ProfileComicFragment extends BaseFragment implements View.OnClickLi
     public void dy() {
         if (this.qK != null) {
             try {
+                if (this.linearLayout_downloaded != null) {
+                    this.linearLayout_downloaded.removeAllViews();
+                }
                 ComicCollectionView comicCollectionView = new ComicCollectionView(getActivity(), this.qK, 300, this, new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileComicFragment.2
                     @Override // android.view.View.OnClickListener
                     public void onClick(View view) {
-                        if (ProfileComicFragment.this.getParentFragment() != null) {
-                            ProfileComicFragment.this.getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a("CATEGORY_DOWNLOADED", null, null, null, null, null, null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
-                        }
+                        ProfileComicFragment.this.openComicList("CATEGORY_DOWNLOADED");
                     }
                 });
                 comicCollectionView.getTextView_count().setText(this.qL + "");
@@ -153,12 +179,13 @@ public class ProfileComicFragment extends BaseFragment implements View.OnClickLi
         super.bI();
         if (this.qG != null) {
             try {
+                if (this.linearLayout_bookmarked != null) {
+                    this.linearLayout_bookmarked.removeAllViews();
+                }
                 ComicCollectionView comicCollectionView = new ComicCollectionView(getActivity(), this.qG, 100, this, new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ProfileComicFragment.3
                     @Override // android.view.View.OnClickListener
                     public void onClick(View view) {
-                        if (ProfileComicFragment.this.getParentFragment() != null) {
-                            ProfileComicFragment.this.getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicListFragment.a("CATEGORY_USER_FAVOURITE", null, null, null, null, null, null, null, null), ComicListFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
-                        }
+                        ProfileComicFragment.this.openComicList("CATEGORY_USER_FAVOURITE");
                     }
                 });
                 comicCollectionView.getTextView_count().setText(this.qH + "");
@@ -217,22 +244,16 @@ public class ProfileComicFragment extends BaseFragment implements View.OnClickLi
     public void onClick(View view) {
         f.D(TAG, "CLICK TAG = " + view.getTag());
         if (((Integer) view.getTag()).intValue() / 300 == 1) {
-            if (getParentFragment() != null) {
-                getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicDetailFragment.a(new ComicListObject(this.qK.get(((Integer) view.getTag()).intValue() % 300).getComicId() + "")), ComicDetailFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
-                return;
-            }
+            openComicDetail(this.qK.get(((Integer) view.getTag()).intValue() % 300).getComicId() + "");
             return;
         }
         if (((Integer) view.getTag()).intValue() / ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION == 1) {
-            if (getParentFragment() != null) {
-                getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicDetailFragment.a(new ComicListObject(this.qI.get(((Integer) view.getTag()).intValue() % ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION).getComicId() + "")), ComicDetailFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
-                return;
-            }
+            openComicDetail(this.qI.get(((Integer) view.getTag()).intValue() % ItemTouchHelper.Callback.DEFAULT_DRAG_ANIMATION_DURATION).getComicId() + "");
             return;
         }
-        if (((Integer) view.getTag()).intValue() / 100 != 1 || getParentFragment() == null) {
+        if (((Integer) view.getTag()).intValue() / 100 != 1) {
             return;
         }
-        getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicDetailFragment.a(new ComicListObject(this.qG.get(((Integer) view.getTag()).intValue() % 100).getComicId() + "")), ComicDetailFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
+        openComicDetail(this.qG.get(((Integer) view.getTag()).intValue() % 100).getComicId() + "");
     }
 }

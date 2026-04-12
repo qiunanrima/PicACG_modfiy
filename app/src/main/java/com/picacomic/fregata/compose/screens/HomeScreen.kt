@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
@@ -38,7 +39,6 @@ import com.picacomic.fregata.compose.PicaComposeTheme
  * @param onNotification     Called when the notification button is tapped.
  */
 
-@Preview
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
@@ -46,6 +46,8 @@ fun HomeScreen(
     onComicClick: (String) -> Unit,
     onMoreClick: (String) -> Unit, // category name
 ) {
+    val contentBg = MaterialTheme.colorScheme.surface.toArgb()
+
     PicaComposeTheme {
         androidx.compose.foundation.layout.Column(
             modifier = Modifier
@@ -80,6 +82,10 @@ fun HomeScreen(
                     },
                     modifier = Modifier.fillMaxSize(),
                     update = { view ->
+                        val scrollView = view as? androidx.core.widget.NestedScrollView
+                        scrollView?.setBackgroundColor(contentBg)
+                        (scrollView?.getChildAt(0) as? android.view.ViewGroup)?.setBackgroundColor(contentBg)
+
                         val announcementsContainer = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_announcements)
                         val collectionContainers = listOf(
                             view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_collection_1),
@@ -95,10 +101,10 @@ fun HomeScreen(
                             val announcementView = AnnouncementContainerView(view.context, ArrayList(viewModel.announcements), 0, { onNotification() }, { onNotification() })
                             announcementView.textView_title?.setText(R.string.title_notification)
                             announcementsContainer.addView(announcementView)
+                            announcementsContainer.visibility = View.GONE//这里别动
+                        } else {
+                            announcementsContainer?.visibility = View.GONE
                         }
-
-                        announcementsContainer.visibility = View.GONE
-
 
                         // Render Collections
                         collectionContainers.forEach { it?.removeAllViews() }
@@ -129,4 +135,14 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenPreview() {
+    HomeScreen(
+        onNotification = {},
+        onComicClick = {},
+        onMoreClick = {}
+    )
 }

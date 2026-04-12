@@ -1,8 +1,16 @@
 package com.picacomic.fregata.compose.screens
 
+import android.content.Context
+import android.content.Intent
+import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.View
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,13 +28,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
+import com.picacomic.fregata.a_pkg.b
+import com.picacomic.fregata.a_pkg.k
+import com.picacomic.fregata.activities.ComicViewerActivity
+import com.picacomic.fregata.adapters.ComicRecommendationRecyclerViewAdapter
+import com.picacomic.fregata.adapters.EpisodeRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.ComicDetailViewModel
+import com.picacomic.fregata.utils.FullGridLayoutManager
+import com.picacomic.fregata.utils.PicassoTransformations
 import com.picacomic.fregata.utils.g
 import com.squareup.picasso.Picasso
 
@@ -37,12 +54,24 @@ import com.squareup.picasso.Picasso
 fun ComicDetailScreen(
     comicId: String,
     onBack: () -> Unit,
+    onComicClick: (String) -> Unit,
     onCommentClick: (String) -> Unit,
-    onComicListClick: (category: String?, tag: String?, author: String?) -> Unit,
+    onComicListClick: (
+        category: String?,
+        tag: String?,
+        author: String?,
+        translate: String?,
+        creatorId: String?,
+        creatorName: String?
+    ) -> Unit,
     viewModel: ComicDetailViewModel = viewModel()
 ) {
-    LaunchedEffect(comicId) {
-        viewModel.loadComic(comicId)
+    val inPreview = LocalInspectionMode.current
+
+    LaunchedEffect(comicId, inPreview) {
+        if (!inPreview) {
+            viewModel.loadComic(comicId)
+        }
     }
 
     PicaComposeTheme {
@@ -60,7 +89,7 @@ fun ComicDetailScreen(
                 ) {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -72,73 +101,391 @@ fun ComicDetailScreen(
                 }
             }
             Box(modifier = Modifier.weight(1f)) {
-                AndroidView(
-                    factory = { context ->
-                        LayoutInflater.from(context).inflate(R.layout.fragment_comic_detail, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        val detail = viewModel.comicDetail ?: return@AndroidView
-                        
-                        // Bind basic info
-                        view.findViewById<android.widget.TextView>(R.id.textView_comic_detail_title)?.text = detail.title
-                        
-                        val authorView = view.findViewById<android.widget.TextView>(R.id.textView_comic_detail_author)
-                        authorView?.text = detail.author
-                        authorView?.setOnClickListener { onComicListClick(null, null, detail.author) }
+                if (inPreview) {
+                    Box(modifier = Modifier.fillMaxSize())
+                } else {
+                    AndroidView(
+                        factory = { context ->
+                            LayoutInflater.from(context)
+                                .inflate(R.layout.fragment_comic_detail, null, false)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { view ->
+                            view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
+                            view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
 
-                        view.findViewById<android.widget.TextView>(R.id.textView_comic_detail_description)?.text = detail.description
-                        
-                        val categoryView = view.findViewById<android.view.View>(R.id.linearLayout_comic_detail_category)
-                        categoryView?.setOnClickListener { 
-                            if (detail.categories.isNotEmpty()) {
-                                onComicListClick(detail.categories[0], null, null)
+                            val detail = viewModel.comicDetail ?: return@AndroidView
+                            val context = view.context
+
+                            val titleView = view.findViewById<TextView>(R.id.textView_comic_detail_title)
+                            titleView?.let {
+                                g.a(
+                                    context,
+                                    it,
+                                    detail.title ?: "",
+                                    detail.pagesCount,
+                                    detail.isFinished
+                                )
                             }
-                        }
 
-                        // Load cover
-                        val coverView = view.findViewById<android.widget.ImageView>(R.id.imageView_comic_detail_cover)
-                        if (coverView != null && detail.thumb != null) {
-                             Picasso.with(view.context).load(g.b(detail.thumb)).placeholder(R.drawable.placeholder_avatar_2).into(coverView)
-                        }
+                            val authorView =
+                                view.findViewById<TextView>(R.id.textView_comic_detail_author)
+                            authorView?.text = detail.author ?: ""
+                            authorView?.setOnClickListener {
+                                onComicListClick(
+                                    null,
+                                    null,
+                                    detail.author,
+                                    null,
+                                    null,
+                                    null
+                                )
+                            }
 
-                        // Populate Tags
-                        val tagContainer = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_comic_detail_tags)
-                        if (tagContainer != null && tagContainer.childCount == 0 && detail.tags.isNotEmpty()) {
-                            detail.tags.forEach { tagName ->
-                                val tagView = android.widget.TextView(view.context).apply {
-                                    text = tagName
-                                    setPadding(16, 8, 16, 8)
-                                    setOnClickListener { onComicListClick(null, tagName, null) }
+                            val translateView =
+                                view.findViewById<TextView>(R.id.textView_comic_detail_translate)
+                            translateView?.text = detail.chineseTeam ?: ""
+                            translateView?.setOnClickListener {
+                                onComicListClick(
+                                    null,
+                                    null,
+                                    null,
+                                    detail.chineseTeam,
+                                    null,
+                                    null
+                                )
+                            }
+
+                            view.findViewById<TextView>(R.id.textView_comic_detail_description)?.text =
+                                detail.description ?: ""
+                            view.findViewById<TextView>(R.id.textView_comic_detail_view_count)?.text =
+                                detail.viewsCount.toString()
+                            view.findViewById<TextView>(R.id.textView_comic_detail_like_count)?.text =
+                                detail.likesCount.toString()
+                            view.findViewById<TextView>(R.id.textView_comic_detail_comment_count)?.text =
+                                if (detail.isAllowComment) detail.commentsCount.toString() else "禁"
+                            view.findViewById<TextView>(R.id.textView_comic_detail_timestamp)?.text =
+                                "${g.B(context, detail.updatedAt)} "
+
+                            val categoryText = detail.categories?.joinToString(" ").orEmpty()
+                            view.findViewById<TextView>(R.id.textView_comic_detail_category)?.text =
+                                categoryText
+                            view.findViewById<View>(R.id.linearLayout_comic_detail_category)?.setOnClickListener {
+                                val firstCategory = detail.categories?.firstOrNull()
+                                if (!firstCategory.isNullOrBlank()) {
+                                    onComicListClick(
+                                        firstCategory,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                    )
                                 }
-                                tagContainer.addView(tagView)
                             }
-                        }
 
-                        // Setup Episodes RecyclerView
-                        val epsRv = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_comic_detail_episode)
-                        if (epsRv != null && epsRv.adapter == null) {
-                            epsRv.layoutManager = com.picacomic.fregata.utils.FullGridLayoutManager(view.context, 4)
-                            epsRv.adapter = com.picacomic.fregata.adapters.EpisodeRecyclerViewAdapter(
-                                view.context, 
-                                ArrayList(viewModel.episodes),
-                                object : com.picacomic.fregata.a_pkg.k {
-                                    override fun C(i: Int) {
-                                        // Handle episode click
+                            val creator = detail.creator
+                            view.findViewById<TextView>(R.id.textView_comic_detail_knight)?.apply {
+                                text = creator?.name ?: ""
+                                setOnClickListener {
+                                    if (!creator?.creatorId.isNullOrBlank() && !creator?.name.isNullOrBlank()) {
+                                        onComicListClick(
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            creator?.creatorId,
+                                            creator?.name
+                                        )
                                     }
                                 }
-                            )
-                        } else if (epsRv != null) {
-                            // Episode data update omitted for brevity, usually handled via adapter.notify
-                        }
+                            }
 
-                        // Comment Button
-                        view.findViewById<android.view.View>(R.id.imageButton_comic_detail_comment)?.setOnClickListener {
-                            onCommentClick(comicId)
+                            val creatorAvatar =
+                                view.findViewById<ImageView>(R.id.imageView_comic_detail_knight_avatar)
+                            if (creatorAvatar != null && creator?.avatar != null) {
+                                Picasso.with(context).load(g.b(creator.avatar))
+                                    .placeholder(R.drawable.placeholder_avatar_2).into(creatorAvatar)
+                            }
+                            creatorAvatar?.setOnClickListener {
+                                if (!creator?.creatorId.isNullOrBlank() && !creator?.name.isNullOrBlank()) {
+                                    onComicListClick(
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        creator?.creatorId,
+                                        creator?.name
+                                    )
+                                }
+                            }
+                            view.findViewById<ImageView>(R.id.imageView_comic_detail_knight_verified)?.visibility =
+                                View.GONE
+
+                            val coverView =
+                                view.findViewById<ImageView>(R.id.imageView_comic_detail_cover)
+                            if (coverView != null && detail.thumb != null) {
+                                Picasso.with(context).load(g.b(detail.thumb))
+                                    .transform(PicassoTransformations.CARD_COVER)
+                                    .placeholder(R.drawable.placeholder_avatar_2).into(coverView)
+                            }
+
+                            val bookmarkButton =
+                                view.findViewById<ImageButton>(R.id.imageButton_comic_detail_bookmark)
+                            val likeButton =
+                                view.findViewById<ImageButton>(R.id.imageButton_comic_detail_like)
+                            bookmarkButton?.setImageResource(
+                                if (detail.isFavourite) R.drawable.icon_like else R.drawable.icon_like_off
+                            )
+                            likeButton?.setImageResource(
+                                if (detail.isLiked) R.drawable.icon_bookmark_on else R.drawable.icon_bookmark_off
+                            )
+                            bookmarkButton?.isEnabled = !viewModel.isActionLoading
+                            likeButton?.isEnabled = !viewModel.isActionLoading
+                            bookmarkButton?.setOnClickListener { viewModel.toggleFavourite() }
+                            likeButton?.setOnClickListener { viewModel.toggleLike() }
+
+                            val commentButton =
+                                view.findViewById<ImageButton>(R.id.imageButton_comic_detail_comment)
+                            commentButton?.isEnabled = detail.isAllowComment
+                            commentButton?.setOnClickListener {
+                                if (detail.isAllowComment) {
+                                    onCommentClick(comicId)
+                                }
+                            }
+
+                            val descView =
+                                view.findViewById<TextView>(R.id.textView_comic_detail_description)
+                            val descControl =
+                                view.findViewById<ImageButton>(R.id.imageButton_comic_detail_description_height_control)
+                            descView?.post {
+                                if ((descView.lineCount) <= 1) {
+                                    descControl?.visibility = View.GONE
+                                } else {
+                                    descControl?.visibility = View.VISIBLE
+                                }
+                            }
+                            descControl?.setOnClickListener {
+                                val isCollapsed = (descView?.getTag(R.id.textView_comic_detail_description) as? Boolean) == true
+                                if (isCollapsed) {
+                                    descView?.setSingleLine(false)
+                                    descView?.setTag(R.id.textView_comic_detail_description, false)
+                                    descControl.setImageResource(R.drawable.icon_expand)
+                                } else {
+                                    descView?.setSingleLine(true)
+                                    descView?.setTag(R.id.textView_comic_detail_description, true)
+                                    descControl.setImageResource(R.drawable.icon_collapse)
+                                }
+                            }
+
+                            val tagContainer =
+                                view.findViewById<LinearLayout>(R.id.linearLayout_comic_detail_tags)
+                            val tagControl =
+                                view.findViewById<ImageButton>(R.id.imageButton_comic_detail_tag_height_control)
+                            val tagKey = detail.tags?.joinToString("|").orEmpty()
+                            val oldTagKey =
+                                tagContainer?.getTag(R.id.linearLayout_comic_detail_tags) as? String
+                            if (tagContainer != null && oldTagKey != tagKey) {
+                                val tagButtons = detail.tags?.map { tagName ->
+                                    Button(context, null, R.style.TagButtonPink).apply {
+                                        text = tagName
+                                        setOnClickListener {
+                                            onComicListClick(
+                                                null,
+                                                tagName,
+                                                null,
+                                                null,
+                                                null,
+                                                null
+                                            )
+                                        }
+                                    }
+                                }?.toTypedArray() ?: emptyArray()
+                                if (tagButtons.isNotEmpty()) {
+                                    val rows = g.a(tagContainer, tagButtons, context, tagControl)
+                                    tagControl?.visibility = if (rows <= 1) View.GONE else View.VISIBLE
+                                } else {
+                                    tagContainer.removeAllViews()
+                                    tagControl?.visibility = View.GONE
+                                }
+                                tagContainer.setTag(R.id.linearLayout_comic_detail_tags, tagKey)
+                            }
+                            tagControl?.setOnClickListener {
+                                val isCollapsed =
+                                    (tagContainer?.getTag(R.id.imageButton_comic_detail_tag_height_control) as? Boolean) == true
+                                if (isCollapsed) {
+                                    val layoutParams = tagContainer?.layoutParams
+                                    layoutParams?.height = LinearLayout.LayoutParams.WRAP_CONTENT
+                                    tagContainer?.layoutParams = layoutParams
+                                    tagContainer?.setTag(
+                                        R.id.imageButton_comic_detail_tag_height_control,
+                                        false
+                                    )
+                                    tagControl.setImageResource(R.drawable.icon_expand)
+                                } else {
+                                    val firstRow = tagContainer?.getChildAt(0)
+                                    val layoutParams = tagContainer?.layoutParams
+                                    layoutParams?.height = firstRow?.measuredHeight
+                                        ?: firstRow?.height
+                                        ?: LinearLayout.LayoutParams.WRAP_CONTENT
+                                    tagContainer?.layoutParams = layoutParams
+                                    tagContainer?.setTag(
+                                        R.id.imageButton_comic_detail_tag_height_control,
+                                        true
+                                    )
+                                    tagControl.setImageResource(R.drawable.icon_collapse)
+                                }
+                            }
+
+                            val startReadButton =
+                                view.findViewById<Button>(R.id.button_comic_detail_start_read)
+                            val historyRecord = com.picacomic.fregata.utils.b.ax(comicId)
+                            if (historyRecord != null) {
+                                startReadButton?.text =
+                                    "从 ${historyRecord.episodeTitle}\nP.${historyRecord.page} 开始"
+                                startReadButton?.setTextSize(
+                                    TypedValue.COMPLEX_UNIT_PX,
+                                    view.resources.getDimension(R.dimen.textsize_content_1)
+                                )
+                            } else {
+                                startReadButton?.setText(R.string.comic_detail_start_read)
+                                startReadButton?.setTextSize(
+                                    TypedValue.COMPLEX_UNIT_PX,
+                                    view.resources.getDimension(R.dimen.textsize_title_3)
+                                )
+                            }
+                            startReadButton?.setOnClickListener {
+                                val episodeTotal = if (viewModel.episodeTotal > 0) {
+                                    viewModel.episodeTotal
+                                } else {
+                                    detail.episodeCount
+                                }
+                                val record = com.picacomic.fregata.utils.b.ax(comicId)
+                                if (record != null) {
+                                    openComicViewer(
+                                        context = context,
+                                        comicId = comicId,
+                                        title = detail.title,
+                                        episodeOrder = record.episodeOrder,
+                                        page = record.page,
+                                        episodeTotal = if (record.episodeTotal > 0) record.episodeTotal else episodeTotal,
+                                        fromRecord = true
+                                    )
+                                } else {
+                                    val firstEpisodeOrder = viewModel.episodes.firstOrNull()?.order ?: 1
+                                    openComicViewer(
+                                        context = context,
+                                        comicId = comicId,
+                                        title = detail.title,
+                                        episodeOrder = firstEpisodeOrder,
+                                        page = 1,
+                                        episodeTotal = episodeTotal,
+                                        fromRecord = false
+                                    )
+                                }
+                            }
+
+                            val episodesRv =
+                                view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_comic_detail_episode)
+                            val episodesKey =
+                                viewModel.episodes.joinToString("|") { "${it.episodeId}:${it.order}" }
+                            val oldEpisodesKey =
+                                episodesRv?.getTag(R.id.recyclerView_comic_detail_episode) as? String
+                            if (episodesRv != null && oldEpisodesKey != episodesKey) {
+                                episodesRv.layoutManager = FullGridLayoutManager(context, 4)
+                                episodesRv.adapter = EpisodeRecyclerViewAdapter(
+                                    context,
+                                    ArrayList(viewModel.episodes),
+                                    object : k {
+                                        override fun C(i: Int) {
+                                            val episode = viewModel.episodes.getOrNull(i) ?: return
+                                            val episodeTotal = if (viewModel.episodeTotal > 0) {
+                                                viewModel.episodeTotal
+                                            } else {
+                                                detail.episodeCount
+                                            }
+                                            openComicViewer(
+                                                context = context,
+                                                comicId = comicId,
+                                                title = detail.title,
+                                                episodeOrder = episode.order,
+                                                page = 1,
+                                                episodeTotal = episodeTotal,
+                                                fromRecord = false
+                                            )
+                                        }
+                                    }
+                                )
+                                episodesRv.setTag(R.id.recyclerView_comic_detail_episode, episodesKey)
+                            }
+
+                            val recommendationRv =
+                                view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_recommendation)
+                            val recKey =
+                                viewModel.recommendations.joinToString("|") { it.comicId ?: "" }
+                            val oldRecKey =
+                                recommendationRv?.getTag(R.id.recyclerView_recommendation) as? String
+                            if (recommendationRv != null && oldRecKey != recKey) {
+                                if (recommendationRv.layoutManager == null) {
+                                    recommendationRv.layoutManager =
+                                        androidx.recyclerview.widget.LinearLayoutManager(
+                                            context,
+                                            androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
+                                            false
+                                        )
+                                }
+                                recommendationRv.adapter = ComicRecommendationRecyclerViewAdapter(
+                                    context,
+                                    ArrayList(viewModel.recommendations),
+                                    object : b {
+                                        override fun C(i: Int) {
+                                            val item = viewModel.recommendations.getOrNull(i) ?: return
+                                            val targetComicId = item.comicId ?: return
+                                            onComicClick(targetComicId)
+                                        }
+
+                                        override fun I(i: Int) = Unit
+                                    }
+                                )
+                                recommendationRv.setTag(R.id.recyclerView_recommendation, recKey)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
 }
+
+private fun openComicViewer(
+    context: Context,
+    comicId: String,
+    title: String?,
+    episodeOrder: Int,
+    page: Int,
+    episodeTotal: Int,
+    fromRecord: Boolean
+) {
+    val intent = Intent(context, ComicViewerActivity::class.java).apply {
+        putExtra("EXTRA_KEY_COMIC_ID", comicId)
+        putExtra("EXTRA_KEY_LAST_VIEW_EPISODE_ORDER", episodeOrder)
+        putExtra("EXTRA_KEY_LAST_VIEW_PAGE", page)
+        putExtra("EXTRA_KEY_EPISODE_TOTAL", episodeTotal)
+        putExtra("EXTRA_KEY_COMIC_TITLE", title ?: "")
+        putExtra("EXTRA_KEY_VIEW_FROM_RECORD", fromRecord)
+    }
+    context.startActivity(intent)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ComicDetailScreenPreview() {
+    ComicDetailScreen(
+        comicId = "preview",
+        onBack = {},
+        onComicClick = {},
+        onCommentClick = {},
+        onComicListClick = { _, _, _, _, _, _ -> }
+    )
+}
+

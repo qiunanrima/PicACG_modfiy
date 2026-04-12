@@ -9,7 +9,7 @@
                 <TextView android:gravity="center" android:layout_gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="/" style="@style/TextBaseStyleGrayDarkContent2" />
                 <TextView android:layout_gravity="center" android:id="@id/textView_comic_list_total_page" android:padding="@dimen/padding_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="1" style="@style/TextBaseStyleGrayDarkContent2" />
             </LinearLayout>
-            <HorizontalScrollView android:background="?custom_background_color" android:scrollbars="none" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layoutDirection="ltr">
+            <HorizontalScrollView android:background="?custom_background_color" android:scrollbars="none" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_weight="1.0" android:layoutDirection="ltr">
                 <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layoutDirection="ltr">
                     <Button android:id="@id/button_comic_list_filter_forbidden" android:background="@drawable/button_filter_forbidden_bg" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_list_filter_button_forbidden" style="@style/FilterButton" />
                     <Button android:id="@id/button_comic_list_filter_japanese" android:background="@drawable/button_filter_japanese_bg" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/comic_list_filter_button_non_chinese" style="@style/FilterButton" />

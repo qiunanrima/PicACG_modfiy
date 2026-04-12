@@ -1,6 +1,7 @@
 package com.picacomic.fregata.compose.screens
 
 import android.view.LayoutInflater
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,7 +37,7 @@ fun GameDetailScreen(
     viewModel: GameDetailViewModel = viewModel()
 ) {
     LaunchedEffect(gameId) {
-        viewModel.loadGame(gameId)
+        viewModel.loadGame(gameId, force = true)
     }
 
     PicaComposeTheme {
@@ -52,7 +54,7 @@ fun GameDetailScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                     Text(
                         text = stringResource(R.string.title_game_detail),
@@ -68,6 +70,8 @@ fun GameDetailScreen(
                     },
                     modifier = Modifier.fillMaxSize(),
                     update = { view ->
+                        view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
+                        view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
                         val detail = viewModel.gameDetail
                         if (detail != null) {
                             try {
@@ -89,3 +93,13 @@ fun GameDetailScreen(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun GameDetailScreenPreview() {
+    GameDetailScreen(
+        gameId = "preview",
+        onBack = {}
+    )
+}
+

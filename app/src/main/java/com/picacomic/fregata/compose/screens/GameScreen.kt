@@ -13,11 +13,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,12 +28,17 @@ import com.picacomic.fregata.adapters.GameListRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.GameViewModel
 
-@Preview
 @Composable
 fun GameScreen(
     viewModel: GameViewModel = viewModel(),
     onGameClick: (String) -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        if (viewModel.games.isEmpty()) {
+            viewModel.loadData()
+        }
+    }
+
     PicaComposeTheme {
         Column(
             modifier = Modifier
@@ -57,15 +62,17 @@ fun GameScreen(
             Box(modifier = Modifier.weight(1f)) {
                 AndroidView(
                     factory = { context ->
-                        LayoutInflater.from(context).inflate(R.layout.fragment_game, null, false)
+                        LayoutInflater.from(context)
+                            .inflate(R.layout.layout_compose_recycler_content, null, false)
                     },
                     modifier = Modifier.fillMaxSize(),
                     update = { view ->
-                        val headerView = view.findViewById<com.picacomic.fregata.compose.views.PicaHeaderRecyclerComposeView>(R.id.composeView_game)
-                        val recyclerView = headerView?.getRecyclerView()
+                        val recyclerView =
+                            view.findViewById<RecyclerView>(R.id.recyclerView_compose_content)
                         
                         recyclerView?.let { rv ->
-                             if (rv.adapter == null) {
+                            val oldSize = rv.getTag(R.id.composeView_game) as? Int
+                            if (rv.adapter == null || oldSize != viewModel.games.size) {
                                 rv.layoutManager = GridLayoutManager(view.context, 2)
                                 rv.adapter = GameListRecyclerViewAdapter(
                                     view.context, 
@@ -78,13 +85,32 @@ fun GameScreen(
                                         }
                                     }
                                 )
-                             } else {
-                                (rv.adapter as GameListRecyclerViewAdapter).notifyDataSetChanged()
-                             }
+                                rv.setTag(R.id.composeView_game, viewModel.games.size)
+                            }
+
+                            if (rv.getTag(R.id.textView_profile_level) != true) {
+                                rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                                        super.onScrollStateChanged(recyclerView, newState)
+                                        val layoutManager = recyclerView.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager
+                                            ?: return
+                                        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
+                                            viewModel.loadData()
+                                        }
+                                    }
+                                })
+                                rv.setTag(R.id.textView_profile_level, true)
+                            }
                         }
                     }
                 )
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun GameScreenPreview() {
+    GameScreen(onGameClick = {})
 }

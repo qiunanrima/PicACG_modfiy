@@ -46,6 +46,9 @@ public class CategoryRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
         int i2;
         if (viewHolder instanceof CategoryWebViewHolder) {
+            if (this.jg == null || this.jg.size() <= i) {
+                return;
+            }
             ((CategoryWebViewHolder) viewHolder).a(this.jg.get(i));
             return;
         }
@@ -68,7 +71,7 @@ public class CategoryRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
         if (this.jg == null) {
             return 1;
         }
-        if (i == 3) {
+        if (i == 3 && this.jg.size() > 3) {
             return 2;
         }
         return i < this.jg.size() ? 0 : 1;

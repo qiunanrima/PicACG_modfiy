@@ -1,5 +1,6 @@
 package com.picacomic.fregata.compose.navigation
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Home
@@ -33,10 +34,17 @@ sealed class Screen(
     object GameDetail : Screen("game_detail/{gameId}", R.string.title_game_detail)
     object Comment : Screen("comment?comicId={comicId}&gameId={gameId}&commentId={commentId}", R.string.title_comment)
     object PicaApp : Screen("pica_app?title={title}&link={link}", R.string.app_name)
+    object PicaAppList : Screen("pica_app_list", R.string.title_pica_app)
+    object ApkVersionList : Screen("apk_version_list", R.string.title_apk_version)
+    object AnnouncementList : Screen("announcement_list", R.string.title_announcement)
     object ProfileEdit : Screen("profile_edit", R.string.edit)
     object Leaderboard : Screen("leaderboard", R.string.category_title_leaderboard)
+    object ChangePin : Screen("change_pin", R.string.setting_pin_title)
+    object ChangePassword : Screen("change_password", R.string.setting_password_title)
 
     companion object {
+        private fun enc(value: String): String = Uri.encode(value)
+
         fun createComicListRoute(
             category: String? = null,
             keywords: String? = null,
@@ -49,15 +57,15 @@ sealed class Screen(
             creatorName: String? = null
         ): String {
             val params = listOfNotNull(
-                category?.let { "category=$it" },
-                keywords?.let { "keywords=$it" },
-                tags?.let { "tags=$it" },
-                author?.let { "author=$it" },
-                finished?.let { "finished=$it" },
-                sorting?.let { "sorting=$it" },
-                translate?.let { "translate=$it" },
-                creatorId?.let { "creatorId=$it" },
-                creatorName?.let { "creatorName=$it" }
+                category?.takeIf { it.isNotBlank() }?.let { "category=${enc(it)}" },
+                keywords?.takeIf { it.isNotBlank() }?.let { "keywords=${enc(it)}" },
+                tags?.takeIf { it.isNotBlank() }?.let { "tags=${enc(it)}" },
+                author?.takeIf { it.isNotBlank() }?.let { "author=${enc(it)}" },
+                finished?.takeIf { it.isNotBlank() }?.let { "finished=${enc(it)}" },
+                sorting?.takeIf { it.isNotBlank() }?.let { "sorting=${enc(it)}" },
+                translate?.takeIf { it.isNotBlank() }?.let { "translate=${enc(it)}" },
+                creatorId?.takeIf { it.isNotBlank() }?.let { "creatorId=${enc(it)}" },
+                creatorName?.takeIf { it.isNotBlank() }?.let { "creatorName=${enc(it)}" }
             )
             return if (params.isEmpty()) "comic_list" else "comic_list?${params.joinToString("&")}"
         }
@@ -66,11 +74,12 @@ sealed class Screen(
         fun createGameDetailRoute(gameId: String) = "game_detail/$gameId"
         fun createCommentRoute(comicId: String? = null, gameId: String? = null, commentId: String? = null) = 
             "comment?" + listOfNotNull(
-                comicId?.let { "comicId=$it" },
-                gameId?.let { "gameId=$it" },
-                commentId?.let { "commentId=$it" }
+                comicId?.takeIf { it.isNotBlank() }?.let { "comicId=${enc(it)}" },
+                gameId?.takeIf { it.isNotBlank() }?.let { "gameId=${enc(it)}" },
+                commentId?.takeIf { it.isNotBlank() }?.let { "commentId=${enc(it)}" }
             ).joinToString("&")
-        fun createPicaAppRoute(title: String, link: String) = "pica_app?title=$title&link=$link"
+        fun createPicaAppRoute(title: String, link: String) =
+            "pica_app?title=${enc(title)}&link=${enc(link)}"
     }
 }
 

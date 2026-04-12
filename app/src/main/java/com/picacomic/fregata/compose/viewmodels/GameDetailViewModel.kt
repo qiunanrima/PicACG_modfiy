@@ -17,11 +17,15 @@ import retrofit2.Response
 class GameDetailViewModel(application: Application) : AndroidViewModel(application) {
     var gameDetail by mutableStateOf<GameDetailObject?>(null)
     var isLoading by mutableStateOf(false)
+    private var loadedGameId: String? = null
     
     private var detailCall: Call<GeneralResponse<GameDetailResponse>>? = null
 
-    fun loadGame(gameId: String) {
-        if (gameDetail != null) return
+    fun loadGame(gameId: String, force: Boolean = false) {
+        if (!force && loadedGameId == gameId && gameDetail != null) return
+        loadedGameId = gameId
+        gameDetail = null
+        detailCall?.cancel()
         isLoading = true
         
         val context = getApplication<Application>()
@@ -32,12 +36,14 @@ class GameDetailViewModel(application: Application) : AndroidViewModel(applicati
         detailCall = api.z(auth, gameId)
         detailCall?.enqueue(object : Callback<GeneralResponse<GameDetailResponse>> {
             override fun onResponse(call: Call<GeneralResponse<GameDetailResponse>>, response: Response<GeneralResponse<GameDetailResponse>>) {
+                if (loadedGameId != gameId) return
                 if (response.code() == 200) {
                     gameDetail = response.body()?.data?.game
                 }
                 isLoading = false
             }
             override fun onFailure(call: Call<GeneralResponse<GameDetailResponse>>, t: Throwable) {
+                if (loadedGameId != gameId) return
                 isLoading = false
             }
         })

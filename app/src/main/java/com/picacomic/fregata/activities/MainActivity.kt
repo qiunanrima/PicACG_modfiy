@@ -3,7 +3,10 @@ package com.picacomic.fregata.activities
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -15,6 +18,7 @@ import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.RelativeLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -28,10 +32,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -76,7 +84,6 @@ import androidx.navigation.compose.rememberNavController
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.navigation.Screen
 import com.picacomic.fregata.compose.navigation.navItems
-import com.picacomic.fregata.compose.screens.SettingsState
 import com.picacomic.fregata.compose.screens.*
 
 /* JADX INFO: loaded from: classes.dex */
@@ -93,6 +100,7 @@ class MainActivity : BaseActivity() {
     private var bannerVisible by mutableStateOf(false)
     private var popupVisible by mutableStateOf(false)
     private var expButtonsVisible by mutableStateOf(false)
+    private var navControllerRef: NavHostController? = null
 
     // Legacy controls overlay
     private var buttonControlBlock: ImageButton? = null
@@ -120,10 +128,19 @@ class MainActivity : BaseActivity() {
     }
 
     @Preview
-@Composable
+    @Composable
     private fun MainScreen() {
         val navController = rememberNavController()
-        
+
+        DisposableEffect(navController) {
+            navControllerRef = navController
+            onDispose {
+                if (navControllerRef === navController) {
+                    navControllerRef = null
+                }
+            }
+        }
+
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         val showBottomBar = navItems.any { it.route == currentRoute }
@@ -132,7 +149,10 @@ class MainActivity : BaseActivity() {
             Scaffold(
                 bottomBar = {
                     if (showBottomBar) {
-                        NavigationBar {
+                        NavigationBar(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                            tonalElevation = 0.dp
+                        ) {
                             navItems.forEach { screen ->
                                 NavigationBarItem(
                                     selected = currentRoute == screen.route,
@@ -154,14 +174,21 @@ class MainActivity : BaseActivity() {
                                             contentDescription = stringResource(id = screen.titleRes)
                                         )
                                     },
-                                    label = { Text(stringResource(id = screen.titleRes)) }
+                                    label = { Text(stringResource(id = screen.titleRes)) },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 )
                             }
                         }
                     }
                 }
             )
- { innerPadding ->
+            { innerPadding ->
                 Box(modifier = Modifier.padding(innerPadding)) {
                     NavHost(
                         navController = navController,
@@ -171,22 +198,103 @@ class MainActivity : BaseActivity() {
                         composable(Screen.Home.route) {
                             HomeScreen(
                                 onNotification = { navController.navigate(Screen.Notification.route) },
-                                onComicClick = { id -> navController.navigate(Screen.createComicDetailRoute(id)) },
-                                onMoreClick = { category -> navController.navigate(Screen.createComicListRoute(category = category)) }
+                                onComicClick = { id ->
+                                    navController.navigate(
+                                        Screen.createComicDetailRoute(
+                                            id
+                                        )
+                                    )
+                                },
+                                onMoreClick = { category ->
+                                    navController.navigate(
+                                        Screen.createComicListRoute(
+                                            category = category
+                                        )
+                                    )
+                                }
                             )
                         }
                         composable(Screen.Category.route) {
                             CategoryScreen(
-                                onSearch = { query -> 
-                                    navController.navigate(Screen.createComicListRoute(keywords = query))
+                                onSearch = { query ->
+                                    val value = query.trim()
+                                    val route = when {
+                                        value.startsWith("作者:", ignoreCase = true) -> {
+                                            val author = value.substringAfter(":", "").trim()
+                                            if (author.isEmpty()) Screen.createComicListRoute(
+                                                keywords = value
+                                            )
+                                            else Screen.createComicListRoute(author = author)
+                                        }
+
+                                        value.startsWith("author:", ignoreCase = true) -> {
+                                            val author = value.substringAfter(":", "").trim()
+                                            if (author.isEmpty()) Screen.createComicListRoute(
+                                                keywords = value
+                                            )
+                                            else Screen.createComicListRoute(author = author)
+                                        }
+
+                                        value.startsWith("标签:", ignoreCase = true) -> {
+                                            val tag = value.substringAfter(":", "").trim()
+                                            if (tag.isEmpty()) Screen.createComicListRoute(keywords = value)
+                                            else Screen.createComicListRoute(tags = tag)
+                                        }
+
+                                        value.startsWith("tag:", ignoreCase = true) -> {
+                                            val tag = value.substringAfter(":", "").trim()
+                                            if (tag.isEmpty()) Screen.createComicListRoute(keywords = value)
+                                            else Screen.createComicListRoute(tags = tag)
+                                        }
+
+                                        else -> Screen.createComicListRoute(keywords = value)
+                                    }
+                                    navController.navigate(route) {
+                                        launchSingleTop = true
+                                    }
                                 },
                                 onCategoryClick = { category ->
-                                    navController.navigate(Screen.createComicListRoute(category = category))
-                                }
+                                    navController.navigate(
+                                        Screen.createComicListRoute(
+                                            category = category,
+                                            sorting = "dd"
+                                        )
+                                    )
+                                },
+                                onWebCategoryClick = { title, link ->
+                                    navController.navigate(
+                                        Screen.createPicaAppRoute(
+                                            title = title,
+                                            link = link
+                                        )
+                                    )
+                                },
+                                onLeaderboardClick = {
+                                    navController.navigate(Screen.Leaderboard.route)
+                                },
+                                onGameClick = {
+                                    navController.navigate(Screen.Game.route)
+                                },
+                                onLovePicaClick = {
+                                    navController.navigate(Screen.PicaAppList.route)
+                                },
+                                onForumClick = {
+                                    navController.navigate(
+                                        Screen.createCommentRoute(commentId = "5822a6e3ad7ede654696e482")
+                                    )
+                                },
+                                onLatestClick = {
+                                    navController.navigate(Screen.createComicListRoute(sorting = "dd"))
+                                },
+                                onRandomClick = {
+                                    navController.navigate(
+                                        Screen.createComicListRoute(category = "CATEGORY_RANDOM")
+                                    )
+                                },
                             )
                         }
                         composable(Screen.Game.route) {
-                            GameScreen(onGameClick = { id -> 
+                            GameScreen(onGameClick = { id ->
                                 navController.navigate(Screen.createGameDetailRoute(id))
                             })
                         }
@@ -194,20 +302,162 @@ class MainActivity : BaseActivity() {
                             ProfileScreen(onEdit = { navController.navigate(Screen.ProfileEdit.route) })
                         }
                         composable(Screen.Settings.route) {
-                            val settingsViewModel: com.picacomic.fregata.compose.viewmodels.SettingsViewModel = viewModel()
+                            val settingsViewModel: com.picacomic.fregata.compose.viewmodels.SettingsViewModel =
+                                viewModel()
+                            LaunchedEffect(Unit) {
+                                settingsViewModel.loadSettings()
+                            }
                             SettingsScreen(
                                 state = settingsViewModel.state,
-                                onScreenOrientation = { /* Show dialog logic could be here or in VM */ },
-                                onScrollDirection = {},
-                                onAutoPaging = {},
-                                onImageQuality = {},
-                                onThemeColor = {},
-                                onContinueDownload = {},
-                                onApkVersion = {},
-                                onCache = {},
-                                onFaq = {},
-                                onPin = {},
-                                onPassword = {},
+                                onScreenOrientation = {
+                                    val checked = if (e.M(this@MainActivity)) 0 else 1
+                                    AlertDialog.Builder(
+                                        this@MainActivity,
+                                        R.style.MyAlertDialogStyle
+                                    )
+                                        .setTitle(R.string.setting_comic_viewer_screen_orientation)
+                                        .setSingleChoiceItems(
+                                            R.array.setting_options_screen_orientations,
+                                            checked
+                                        ) { dialog, which ->
+                                            settingsViewModel.setScreenOrientationIndex(which)
+                                            dialog.dismiss()
+                                        }
+                                        .show()
+                                },
+                                onScrollDirection = {
+                                    val checked = if (e.N(this@MainActivity)) 0 else 1
+                                    AlertDialog.Builder(
+                                        this@MainActivity,
+                                        R.style.MyAlertDialogStyle
+                                    )
+                                        .setTitle(R.string.setting_comic_viewer_scroll_direction)
+                                        .setSingleChoiceItems(
+                                            R.array.setting_options_scroll_directions,
+                                            checked
+                                        ) { dialog, which ->
+                                            settingsViewModel.setScrollDirectionIndex(which)
+                                            dialog.dismiss()
+                                        }
+                                        .show()
+                                },
+                                onAutoPaging = {
+                                    val viewInflate = layoutInflater.inflate(
+                                        R.layout.dialog_auto_paging_content_view,
+                                        null,
+                                        false
+                                    )
+                                    val titleView = viewInflate.findViewById<TextView>(
+                                        R.id.textView_setting_dialog_auto_paging_title
+                                    )
+                                    val seekBar = viewInflate.findViewById<SeekBar>(
+                                        R.id.seekBar_setting_dialog_auto_paging
+                                    )
+                                    var interval = e.O(this@MainActivity)
+                                    fun updateTitle(value: Int) {
+                                        titleView.text =
+                                            getString(R.string.comic_viewer_setting_panel_auto_paging) +
+                                                    " 【 " +
+                                                    String.format("%.1f", value / 1000.0f) +
+                                                    getString(R.string.second) +
+                                                    " 】"
+                                    }
+                                    updateTitle(interval)
+                                    seekBar.progress = ((interval - 1000) / 100).coerceAtLeast(0)
+                                    seekBar.setOnSeekBarChangeListener(object :
+                                        SeekBar.OnSeekBarChangeListener {
+                                        override fun onProgressChanged(
+                                            seekBar: SeekBar?,
+                                            progress: Int,
+                                            fromUser: Boolean
+                                        ) {
+                                            interval = (progress * 100) + 1000
+                                            updateTitle(interval)
+                                        }
+
+                                        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                                        override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                                    })
+
+                                    AlertDialog.Builder(
+                                        this@MainActivity,
+                                        R.style.MyAlertDialogStyle
+                                    )
+                                        .setTitle(R.string.setting_comic_viewer_auto_paging_interval)
+                                        .setView(viewInflate)
+                                        .setPositiveButton(R.string.ok) { dialog, _ ->
+                                            settingsViewModel.setAutoPagingInterval(interval)
+                                            dialog.dismiss()
+                                        }
+                                        .setNegativeButton(R.string.cancel) { dialog, _ ->
+                                            dialog.dismiss()
+                                        }
+                                        .show()
+                                },
+                                onImageQuality = {
+                                    val checked = e.R(this@MainActivity)
+                                    AlertDialog.Builder(
+                                        this@MainActivity,
+                                        R.style.MyAlertDialogStyle
+                                    )
+                                        .setTitle(R.string.setting_comic_viewer_image_quality)
+                                        .setSingleChoiceItems(
+                                            R.array.setting_options_image_qualities,
+                                            checked
+                                        ) { dialog, which ->
+                                            settingsViewModel.setImageQualityIndex(which)
+                                            dialog.dismiss()
+                                        }
+                                        .show()
+                                },
+                                onThemeColor = {
+                                    if (Build.VERSION.SDK_INT < 21) {
+                                        AlertDialogCenter.versionNotSupport(this@MainActivity)
+                                    } else {
+                                        val checked = e.al(this@MainActivity)
+                                        AlertDialog.Builder(
+                                            this@MainActivity,
+                                            R.style.MyAlertDialogStyle
+                                        )
+                                            .setTitle(R.string.setting_theme_color)
+                                            .setSingleChoiceItems(
+                                                R.array.setting_theme_colors,
+                                                checked
+                                            ) { dialog, which ->
+                                                if (checked != which) {
+                                                    settingsViewModel.setThemeColorIndex(which)
+                                                    recreate()
+                                                }
+                                                dialog.dismiss()
+                                            }
+                                            .show()
+                                    }
+                                },
+                                onContinueDownload = {
+                                    g.av(this@MainActivity)
+                                },
+                                onApkVersion = {
+                                    navController.navigate(Screen.ApkVersionList.route)
+                                },
+                                onCache = {
+                                    val intent =
+                                        Intent("android.settings.APPLICATION_DETAILS_SETTINGS")
+                                    intent.data = Uri.fromParts("package", packageName, null)
+                                    startActivity(intent)
+                                },
+                                onFaq = {
+                                    AlertDialogCenter.showFaqAlertDialog(
+                                        this@MainActivity,
+                                        "https://www.picacomic.com/faq",
+                                        null
+                                    )
+                                },
+                                onPin = {
+                                    navController.navigate(Screen.ChangePin.route)
+                                },
+                                onPassword = {
+                                    navController.navigate(Screen.ChangePassword.route)
+                                },
                                 onLogout = { settingsViewModel.logout() },
                                 onNightModeChanged = { settingsViewModel.toggleNightMode(it) },
                                 onVolumePagingChanged = { settingsViewModel.toggleVolumePaging(it) },
@@ -218,20 +468,48 @@ class MainActivity : BaseActivity() {
 
                         // Secondary Screens
                         composable(Screen.Notification.route) {
-                            NotificationScreen(onBack = { navController.popBackStack() })
+                            NotificationScreen(
+                                onBack = { navController.popBackStack() },
+                                onComicClick = { comicId ->
+                                    navController.navigate(Screen.createComicDetailRoute(comicId))
+                                },
+                                onGameClick = { gameId ->
+                                    navController.navigate(Screen.createGameDetailRoute(gameId))
+                                },
+                                onCommentClick = { commentId ->
+                                    navController.navigate(Screen.createCommentRoute(commentId = commentId))
+                                },
+                                onPicaAppClick = { title, link ->
+                                    navController.navigate(
+                                        Screen.createPicaAppRoute(
+                                            title = title,
+                                            link = link
+                                        )
+                                    )
+                                }
+                            )
                         }
 
                         composable(Screen.ComicList.route) { backStackEntry ->
                             val category = backStackEntry.arguments?.getString("category")
-                            val tags = backStackEntry.arguments?.getString("tags")
+                                ?.let { Uri.decode(it) }
+                            val tags =
+                                backStackEntry.arguments?.getString("tags")?.let { Uri.decode(it) }
                             val creatorId = backStackEntry.arguments?.getString("creatorId")
+                                ?.let { Uri.decode(it) }
                             val creatorName = backStackEntry.arguments?.getString("creatorName")
+                                ?.let { Uri.decode(it) }
                             val author = backStackEntry.arguments?.getString("author")
+                                ?.let { Uri.decode(it) }
                             val keywords = backStackEntry.arguments?.getString("keywords")
+                                ?.let { Uri.decode(it) }
                             val finished = backStackEntry.arguments?.getString("finished")
+                                ?.let { Uri.decode(it) }
                             val sorting = backStackEntry.arguments?.getString("sorting")
+                                ?.let { Uri.decode(it) }
                             val translate = backStackEntry.arguments?.getString("translate")
-                            
+                                ?.let { Uri.decode(it) }
+
                             ComicListScreen(
                                 category = category,
                                 tags = tags,
@@ -243,7 +521,7 @@ class MainActivity : BaseActivity() {
                                 sorting = sorting,
                                 translate = translate,
                                 onBack = { navController.popBackStack() },
-                                onComicClick = { comicId -> 
+                                onComicClick = { comicId ->
                                     navController.navigate(Screen.createComicDetailRoute(comicId))
                                 }
                             )
@@ -254,15 +532,21 @@ class MainActivity : BaseActivity() {
                             ComicDetailScreen(
                                 comicId = comicId,
                                 onBack = { navController.popBackStack() },
-                                onCommentClick = { id -> 
+                                onComicClick = { id ->
+                                    navController.navigate(Screen.createComicDetailRoute(id))
+                                },
+                                onCommentClick = { id ->
                                     navController.navigate(Screen.createCommentRoute(comicId = id))
                                 },
-                                onComicListClick = { category, tag, author ->
+                                onComicListClick = { category, tag, author, translate, creatorId, creatorName ->
                                     navController.navigate(
                                         Screen.createComicListRoute(
                                             category = category,
                                             tags = tag,
-                                            author = author
+                                            author = author,
+                                            translate = translate,
+                                            creatorId = creatorId,
+                                            creatorName = creatorName
                                         )
                                     )
                                 }
@@ -273,31 +557,92 @@ class MainActivity : BaseActivity() {
                             ProfileEditScreen(onBack = { navController.popBackStack() })
                         }
 
+                        composable(Screen.ChangePin.route) {
+                            ChangePinScreen(onBack = { navController.popBackStack() })
+                        }
+
+                        composable(Screen.ChangePassword.route) {
+                            ChangePasswordScreen(onBack = { navController.popBackStack() })
+                        }
+
                         composable(Screen.GameDetail.route) { backStackEntry ->
                             val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
-                            GameDetailScreen(gameId = gameId, onBack = { navController.popBackStack() })
+                            GameDetailScreen(
+                                gameId = gameId,
+                                onBack = { navController.popBackStack() })
                         }
 
                         composable(Screen.Comment.route) { backStackEntry ->
                             val comicId = backStackEntry.arguments?.getString("comicId")
+                                ?.let { Uri.decode(it) }
                             val gameId = backStackEntry.arguments?.getString("gameId")
+                                ?.let { Uri.decode(it) }
                             val commentId = backStackEntry.arguments?.getString("commentId")
+                                ?.let { Uri.decode(it) }
                             CommentScreen(
                                 comicId = comicId,
                                 gameId = gameId,
                                 commentId = commentId,
-                                onBack = { navController.popBackStack() }
+                                onBack = { navController.popBackStack() },
+                                onComicClick = { id ->
+                                    navController.navigate(Screen.createComicDetailRoute(id))
+                                },
+                                onGameClick = { id ->
+                                    navController.navigate(Screen.createGameDetailRoute(id))
+                                }
                             )
                         }
 
                         composable(Screen.PicaApp.route) { backStackEntry ->
-                            val title = backStackEntry.arguments?.getString("title") ?: ""
-                            val link = backStackEntry.arguments?.getString("link") ?: ""
-                            PicaAppScreen(title = title, link = link, onBack = { navController.popBackStack() })
+                            val title = Uri.decode(
+                                backStackEntry.arguments?.getString("title") ?: ""
+                            )
+                            val link = Uri.decode(
+                                backStackEntry.arguments?.getString("link") ?: ""
+                            )
+                            PicaAppScreen(
+                                title = title,
+                                link = link,
+                                onBack = { navController.popBackStack() })
+                        }
+
+                        composable(Screen.PicaAppList.route) {
+                            PicaAppListScreen(
+                                onBack = { navController.popBackStack() },
+                                onPicaAppClick = { title, link ->
+                                    navController.navigate(
+                                        Screen.createPicaAppRoute(
+                                            title = title,
+                                            link = link
+                                        )
+                                    )
+                                }
+                            )
+                        }
+
+                        composable(Screen.ApkVersionList.route) {
+                            ApkVersionListScreen(onBack = { navController.popBackStack() })
+                        }
+
+                        composable(Screen.AnnouncementList.route) {
+                            AnnouncementListScreen(onBack = { navController.popBackStack() })
                         }
 
                         composable(Screen.Leaderboard.route) {
-                            LeaderboardScreen(onBack = { navController.popBackStack() })
+                            LeaderboardScreen(
+                                onBack = { navController.popBackStack() },
+                                onComicClick = { comicId ->
+                                    navController.navigate(Screen.createComicDetailRoute(comicId))
+                                },
+                                onKnightClick = { knightId, knightName ->
+                                    navController.navigate(
+                                        Screen.createComicListRoute(
+                                            creatorId = knightId,
+                                            creatorName = knightName
+                                        )
+                                    )
+                                }
+                            )
                         }
                     }
 
@@ -495,6 +840,24 @@ class MainActivity : BaseActivity() {
 
     fun m(z: Boolean) {
         iN = z
+    }
+
+    fun openComicDetailFromLegacy(comicId: String) {
+        navControllerRef?.navigate(Screen.createComicDetailRoute(comicId))
+    }
+
+    fun openComicListFromLegacy(
+        category: String? = null,
+        creatorId: String? = null,
+        creatorName: String? = null
+    ) {
+        navControllerRef?.navigate(
+            Screen.createComicListRoute(
+                category = category,
+                creatorId = creatorId,
+                creatorName = creatorName
+            )
+        )
     }
 
     // -------------------------------------------------------------

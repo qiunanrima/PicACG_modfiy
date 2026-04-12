@@ -16,23 +16,36 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
+import com.picacomic.fregata.adapters.NotificationRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.viewmodels.NotificationViewModel
 
-/**
- * Notification screen. Wraps the legacy [R.layout.fragment_notification].
- * 
- * @param onBack Callback to return to the previous screen.
- */
 @Composable
 fun NotificationScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onComicClick: (String) -> Unit = {},
+    onGameClick: (String) -> Unit = {},
+    onCommentClick: (String) -> Unit = {},
+    onPicaAppClick: (title: String, link: String) -> Unit = { _, _ -> },
+    viewModel: NotificationViewModel = viewModel()
 ) {
+    val inPreview = LocalInspectionMode.current
+
+    LaunchedEffect(Unit) {
+        if (!inPreview && viewModel.notifications.isEmpty()) {
+            viewModel.loadData()
+        }
+    }
 
     PicaComposeTheme {
         Column(
@@ -49,7 +62,7 @@ fun NotificationScreen(
                 ) {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -60,18 +73,97 @@ fun NotificationScreen(
                     )
                 }
             }
+
             Box(modifier = Modifier.weight(1f)) {
-                AndroidView(
-                    factory = { context ->
-                        LayoutInflater.from(context).inflate(R.layout.fragment_notification, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        // Notification layout handles its own RecyclerView through custom ComposeView
-                        // The AndroidView will manage the lifecycle automatically
-                    }
-                )
+                if (inPreview) {
+                    Box(modifier = Modifier.fillMaxSize())
+                } else {
+                    AndroidView(
+                        factory = { context ->
+                            LayoutInflater.from(context)
+                                .inflate(R.layout.layout_compose_recycler_content, null, false)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { view ->
+                            val recyclerView = view.findViewById<androidx.recyclerview.widget.RecyclerView>(
+                                R.id.recyclerView_compose_content
+                            )
+
+                            if (recyclerView.layoutManager == null) {
+                                recyclerView.layoutManager =
+                                    androidx.recyclerview.widget.LinearLayoutManager(view.context)
+                            }
+
+                            val oldSize = recyclerView.getTag(R.id.recyclerView_compose_content) as? Int
+                            if (recyclerView.adapter == null || oldSize != viewModel.notifications.size) {
+                                recyclerView.adapter = NotificationRecyclerViewAdapter(
+                                    view.context,
+                                    ArrayList(viewModel.notifications),
+                                    object : com.picacomic.fregata.a_pkg.h {
+                                        override fun W(i: Int) {
+                                            val item = viewModel.notifications.getOrNull(i) ?: return
+                                            val redirectType = item.redirectType ?: return
+                                            val redirectId = item.redirectId
+                                            when {
+                                                redirectType.equals("comic", ignoreCase = true) && !redirectId.isNullOrEmpty() -> {
+                                                    onComicClick(redirectId)
+                                                }
+
+                                                redirectType.equals("game", ignoreCase = true) && !redirectId.isNullOrEmpty() -> {
+                                                    onGameClick(redirectId)
+                                                }
+
+                                                redirectType.equals("comment", ignoreCase = true) && !redirectId.isNullOrEmpty() -> {
+                                                    onCommentClick(redirectId)
+                                                }
+
+                                                (redirectType.equals("app", ignoreCase = true) ||
+                                                    redirectType.equals("web", ignoreCase = true)) && !item.link.isNullOrEmpty() -> {
+                                                    onPicaAppClick(item.title ?: "", item.link)
+                                                }
+                                            }
+                                        }
+
+                                        override fun X(i: Int) {
+                                        }
+
+                                        override fun Y(i: Int) {
+                                        }
+                                    }
+                                )
+                                recyclerView.setTag(
+                                    R.id.recyclerView_compose_content,
+                                    viewModel.notifications.size
+                                )
+                            }
+
+                            if (recyclerView.getTag(R.id.composeView_notification) != true) {
+                                recyclerView.addOnScrollListener(object :
+                                    androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+                                    override fun onScrollStateChanged(
+                                        recyclerView: androidx.recyclerview.widget.RecyclerView,
+                                        newState: Int
+                                    ) {
+                                        super.onScrollStateChanged(recyclerView, newState)
+                                        val lm = recyclerView.layoutManager as?
+                                            androidx.recyclerview.widget.LinearLayoutManager ?: return
+                                        if (lm.findLastVisibleItemPosition() == lm.itemCount - 1) {
+                                            viewModel.loadData()
+                                        }
+                                    }
+                                })
+                                recyclerView.setTag(R.id.composeView_notification, true)
+                            }
+                        }
+                    )
+                }
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NotificationScreenPreview() {
+    NotificationScreen(onBack = {})
 }

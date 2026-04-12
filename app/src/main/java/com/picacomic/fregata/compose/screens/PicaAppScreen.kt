@@ -1,6 +1,7 @@
 package com.picacomic.fregata.compose.screens
 
 import android.view.LayoutInflater
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,21 +17,38 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.viewmodels.PicaAppViewModel
+import com.picacomic.fregata.utils.g
 
-@Preview
 @Composable
 fun PicaAppScreen(
     title: String,
     link: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: PicaAppViewModel = viewModel(),
 ) {
+    val inPreview = LocalInspectionMode.current
+
+    LaunchedEffect(title, link) {
+        viewModel.initialize(title, link)
+    }
+
+    LaunchedEffect(viewModel.invalidLinkEvent) {
+        if (viewModel.invalidLinkEvent > 0) {
+            onBack()
+        }
+    }
+
     PicaComposeTheme {
         Column(
             modifier = Modifier
@@ -45,43 +63,65 @@ fun PicaAppScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                     Text(
-                        text = title,
+                        text = viewModel.title,
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
             }
             Box(modifier = Modifier.weight(1f)) {
-                AndroidView(
-                    factory = { context ->
-                        LayoutInflater.from(context).inflate(R.layout.fragment_pica_app, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        // PicaApp (WebView) layout can load the URL directly
-                        // The title and link parameters are available in this Composable scope
-                        try {
-                            val container = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_web)
-                            if (container != null && container.childCount == 0) {
-                                val webView = android.webkit.WebView(view.context)
-                                webView.settings.apply {
-                                    javaScriptEnabled = true
+                if (inPreview) {
+                    Box(modifier = Modifier.fillMaxSize())
+                } else {
+                    AndroidView(
+                        factory = { context ->
+                            LayoutInflater.from(context).inflate(R.layout.fragment_pica_app, null, false)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { view ->
+                            try {
+                                view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
+                                view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
+                                val container = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_web)
+                                if (container != null && container.childCount == 0) {
+                                    val webView = android.webkit.WebView(view.context)
+                                    g.k(webView)
+                                    container.addView(
+                                        webView,
+                                        android.widget.LinearLayout.LayoutParams(
+                                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+                                        )
+                                    )
                                 }
-                                webView.loadUrl(link)
-                                container.addView(webView, android.widget.LinearLayout.LayoutParams(
-                                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT
-                                ))
+                                val webView = container?.getChildAt(0) as? android.webkit.WebView
+                                val oldLink = view.getTag(R.id.linearLayout_web) as? String
+                                val authenticatedLink = viewModel.authenticatedLink
+                                if (webView != null && authenticatedLink != null && oldLink != authenticatedLink) {
+                                    webView.loadUrl(authenticatedLink)
+                                    view.setTag(R.id.linearLayout_web, authenticatedLink)
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun PicaAppScreenPreview() {
+    PicaAppScreen(
+        title = "Pica App",
+        link = "https://www.example.com",
+        onBack = {}
+    )
+}
+
