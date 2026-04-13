@@ -86,6 +86,35 @@
         <item name="custom_text_black_color_light">@color/gray</item>
         <item name="custom_transparent_white">@color/transparent_white</item>
     </style>
+    <style name="AppThemeNeon" parent="@style/Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/theme_neon_background</item>
+        <item name="android:statusBarColor">@color/theme_neon_background</item>
+        <item name="android:navigationBarColor">@color/theme_neon_surface</item>
+        <item name="android:textColorHint">@color/theme_neon_outline</item>
+        <item name="android:editTextColor">@color/theme_neon_on_surface</item>
+        <item name="android:actionMenuTextColor">@color/theme_neon_on_surface</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="colorAccent">@color/theme_neon_tertiary</item>
+        <item name="colorControlNormal">@color/theme_neon_outline</item>
+        <item name="colorPrimary">@color/theme_neon_primary</item>
+        <item name="colorPrimaryDark">@color/theme_neon_primary_dark</item>
+        <item name="colorSecondary">@color/theme_neon_secondary</item>
+        <item name="colorTertiary">@color/theme_neon_tertiary</item>
+        <item name="colorSurface">@color/theme_neon_surface</item>
+        <item name="colorSurfaceVariant">@color/theme_neon_background</item>
+        <item name="colorOutline">@color/theme_neon_outline</item>
+        <item name="toolbarStyle">@style/AppTheme.PopupOverlay</item>
+        <item name="chatroom_background">@drawable/chat_bg_image_dark</item>
+        <item name="chatroom_bubble_background">@drawable/bubble_dark_9</item>
+        <item name="chatroom_reply_color">@color/theme_neon_background</item>
+        <item name="custom_background_color">@color/theme_neon_surface</item>
+        <item name="custom_background_color_dark">@color/theme_neon_background</item>
+        <item name="custom_text_black_color">@color/theme_neon_on_surface</item>
+        <item name="custom_text_black_color_dark">@color/theme_neon_on_surface</item>
+        <item name="custom_text_black_color_light">@color/theme_neon_outline</item>
+        <item name="custom_transparent_white">@color/transparent_white</item>
+    </style>
     <style name="Base.AlertDialog.AppCompat" parent="@android:style/Widget">
         <item name="android:layout">@layout/abc_alert_dialog_material</item>
         <item name="listItemLayout">@layout/select_dialog_item_material</item>

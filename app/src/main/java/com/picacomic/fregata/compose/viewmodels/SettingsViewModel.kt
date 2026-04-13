@@ -3,18 +3,24 @@ package com.picacomic.fregata.compose.viewmodels
 import android.app.Application
 import android.content.Intent
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.LoginActivity
+import com.picacomic.fregata.compose.screens.SettingsDialog
 import com.picacomic.fregata.compose.screens.SettingsState
 import com.picacomic.fregata.utils.e
+import com.picacomic.fregata.utils.LauncherIconHelper
 import java.io.File
 import java.text.DecimalFormat
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     var state by mutableStateOf(SettingsState())
+        private set
+
+    var themeRecreateEvent by mutableIntStateOf(0)
         private set
 
     init {
@@ -37,11 +43,21 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val cacheSize = formatSize(sizeOf(app.cacheDir) + sizeOf(app.externalCacheDir))
 
         state = state.copy(
+            screenOrientationIndex = rx,
             screenOrientationValue = orientations.getOrElse(rx) { "" },
+            scrollDirectionIndex = rz,
             scrollDirectionValue = directions.getOrElse(rz) { "" },
+            autoPagingIntervalMs = hM,
             imageQualityValue = qualities.getOrElse(rB) { "" },
+            imageQualityIndex = rB,
             themeColorValue = colors.getOrElse(rD) { "" },
+            themeColorIndex = rD,
             autoPagingValue = String.format("%.1f", hM / 1000.0f) + " " + app.getString(R.string.second),
+            autoPagingDraftIntervalMs = if (state.activeDialog == SettingsDialog.AutoPaging) {
+                state.autoPagingDraftIntervalMs
+            } else {
+                hM
+            },
             cacheTitleValue = app.getString(R.string.setting_cache_title) + " (~$cacheSize)",
             pinValue = if (pin.isNullOrEmpty()) app.getString(R.string.setting_pin_off) else app.getString(R.string.setting_pin_on),
             pinTitleValue = if (pin.isNullOrEmpty()) app.getString(R.string.setting_pin_title) else app.getString(R.string.setting_pin_title_on),
@@ -53,28 +69,72 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         )
     }
 
-    fun setScreenOrientationIndex(index: Int) {
+    fun openScreenOrientationDialog() {
+        state = state.copy(activeDialog = SettingsDialog.ScreenOrientation)
+    }
+
+    fun openScrollDirectionDialog() {
+        state = state.copy(activeDialog = SettingsDialog.ScrollDirection)
+    }
+
+    fun openAutoPagingDialog() {
+        state = state.copy(
+            activeDialog = SettingsDialog.AutoPaging,
+            autoPagingDraftIntervalMs = state.autoPagingIntervalMs,
+        )
+    }
+
+    fun openImageQualityDialog() {
+        state = state.copy(activeDialog = SettingsDialog.ImageQuality)
+    }
+
+    fun openThemeColorDialog() {
+        state = state.copy(activeDialog = SettingsDialog.ThemeColor)
+    }
+
+    fun dismissDialog() {
+        state = state.copy(
+            activeDialog = null,
+            autoPagingDraftIntervalMs = state.autoPagingIntervalMs,
+        )
+    }
+
+    fun selectScreenOrientationIndex(index: Int) {
+        state = state.copy(activeDialog = null)
         e.e(getApplication(), index == 0)
         loadSettings()
     }
 
-    fun setScrollDirectionIndex(index: Int) {
+    fun selectScrollDirectionIndex(index: Int) {
+        state = state.copy(activeDialog = null)
         e.f(getApplication(), index == 0)
         loadSettings()
     }
 
-    fun setImageQualityIndex(index: Int) {
+    fun selectImageQualityIndex(index: Int) {
+        state = state.copy(activeDialog = null)
         e.c(getApplication(), index)
         loadSettings()
     }
 
-    fun setThemeColorIndex(index: Int) {
+    fun selectThemeColorIndex(index: Int) {
+        val changed = state.themeColorIndex != index
+        state = state.copy(activeDialog = null)
         e.h(getApplication(), index)
+        LauncherIconHelper.syncLauncherIcon(getApplication(), index)
         loadSettings()
+        if (changed) {
+            themeRecreateEvent++
+        }
     }
 
-    fun setAutoPagingInterval(intervalMs: Int) {
-        e.b(getApplication(), intervalMs)
+    fun updateAutoPagingDraftProgress(progress: Int) {
+        state = state.copy(autoPagingDraftIntervalMs = (progress.coerceIn(0, 100) * 100) + 1000)
+    }
+
+    fun confirmAutoPagingInterval() {
+        state = state.copy(activeDialog = null)
+        e.b(getApplication(), state.autoPagingDraftIntervalMs)
         loadSettings()
     }
 

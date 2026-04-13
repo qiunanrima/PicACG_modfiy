@@ -15,7 +15,6 @@ import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.objects.responses.PasswordResponse
 import com.picacomic.fregata.objects.responses.SignInResponse
 import com.picacomic.fregata.utils.e
-import com.picacomic.fregata.utils.g
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -103,7 +102,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun validateEmail(input: String, eager: Boolean = true): Int? {
-        return if (g.A(input)) {
+        return if (input.isNotBlank()) {
             null
         } else if (eager) {
             com.picacomic.fregata.R.string.alert_empty_email

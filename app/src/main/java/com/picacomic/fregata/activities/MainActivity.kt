@@ -307,132 +307,18 @@ class MainActivity : BaseActivity() {
                             LaunchedEffect(Unit) {
                                 settingsViewModel.loadSettings()
                             }
+                            LaunchedEffect(settingsViewModel.themeRecreateEvent) {
+                                if (settingsViewModel.themeRecreateEvent > 0) {
+                                    recreate()
+                                }
+                            }
                             SettingsScreen(
                                 state = settingsViewModel.state,
-                                onScreenOrientation = {
-                                    val checked = if (e.M(this@MainActivity)) 0 else 1
-                                    AlertDialog.Builder(
-                                        this@MainActivity,
-                                        R.style.MyAlertDialogStyle
-                                    )
-                                        .setTitle(R.string.setting_comic_viewer_screen_orientation)
-                                        .setSingleChoiceItems(
-                                            R.array.setting_options_screen_orientations,
-                                            checked
-                                        ) { dialog, which ->
-                                            settingsViewModel.setScreenOrientationIndex(which)
-                                            dialog.dismiss()
-                                        }
-                                        .show()
-                                },
-                                onScrollDirection = {
-                                    val checked = if (e.N(this@MainActivity)) 0 else 1
-                                    AlertDialog.Builder(
-                                        this@MainActivity,
-                                        R.style.MyAlertDialogStyle
-                                    )
-                                        .setTitle(R.string.setting_comic_viewer_scroll_direction)
-                                        .setSingleChoiceItems(
-                                            R.array.setting_options_scroll_directions,
-                                            checked
-                                        ) { dialog, which ->
-                                            settingsViewModel.setScrollDirectionIndex(which)
-                                            dialog.dismiss()
-                                        }
-                                        .show()
-                                },
-                                onAutoPaging = {
-                                    val viewInflate = layoutInflater.inflate(
-                                        R.layout.dialog_auto_paging_content_view,
-                                        null,
-                                        false
-                                    )
-                                    val titleView = viewInflate.findViewById<TextView>(
-                                        R.id.textView_setting_dialog_auto_paging_title
-                                    )
-                                    val seekBar = viewInflate.findViewById<SeekBar>(
-                                        R.id.seekBar_setting_dialog_auto_paging
-                                    )
-                                    var interval = e.O(this@MainActivity)
-                                    fun updateTitle(value: Int) {
-                                        titleView.text =
-                                            getString(R.string.comic_viewer_setting_panel_auto_paging) +
-                                                    " 【 " +
-                                                    String.format("%.1f", value / 1000.0f) +
-                                                    getString(R.string.second) +
-                                                    " 】"
-                                    }
-                                    updateTitle(interval)
-                                    seekBar.progress = ((interval - 1000) / 100).coerceAtLeast(0)
-                                    seekBar.setOnSeekBarChangeListener(object :
-                                        SeekBar.OnSeekBarChangeListener {
-                                        override fun onProgressChanged(
-                                            seekBar: SeekBar?,
-                                            progress: Int,
-                                            fromUser: Boolean
-                                        ) {
-                                            interval = (progress * 100) + 1000
-                                            updateTitle(interval)
-                                        }
-
-                                        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                                        override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-                                    })
-
-                                    AlertDialog.Builder(
-                                        this@MainActivity,
-                                        R.style.MyAlertDialogStyle
-                                    )
-                                        .setTitle(R.string.setting_comic_viewer_auto_paging_interval)
-                                        .setView(viewInflate)
-                                        .setPositiveButton(R.string.ok) { dialog, _ ->
-                                            settingsViewModel.setAutoPagingInterval(interval)
-                                            dialog.dismiss()
-                                        }
-                                        .setNegativeButton(R.string.cancel) { dialog, _ ->
-                                            dialog.dismiss()
-                                        }
-                                        .show()
-                                },
-                                onImageQuality = {
-                                    val checked = e.R(this@MainActivity)
-                                    AlertDialog.Builder(
-                                        this@MainActivity,
-                                        R.style.MyAlertDialogStyle
-                                    )
-                                        .setTitle(R.string.setting_comic_viewer_image_quality)
-                                        .setSingleChoiceItems(
-                                            R.array.setting_options_image_qualities,
-                                            checked
-                                        ) { dialog, which ->
-                                            settingsViewModel.setImageQualityIndex(which)
-                                            dialog.dismiss()
-                                        }
-                                        .show()
-                                },
-                                onThemeColor = {
-                                    if (Build.VERSION.SDK_INT < 21) {
-                                        AlertDialogCenter.versionNotSupport(this@MainActivity)
-                                    } else {
-                                        val checked = e.al(this@MainActivity)
-                                        AlertDialog.Builder(
-                                            this@MainActivity,
-                                            R.style.MyAlertDialogStyle
-                                        )
-                                            .setTitle(R.string.setting_theme_color)
-                                            .setSingleChoiceItems(
-                                                R.array.setting_theme_colors,
-                                                checked
-                                            ) { dialog, which ->
-                                                if (checked != which) {
-                                                    settingsViewModel.setThemeColorIndex(which)
-                                                    recreate()
-                                                }
-                                                dialog.dismiss()
-                                            }
-                                            .show()
-                                    }
-                                },
+                                onScreenOrientation = settingsViewModel::openScreenOrientationDialog,
+                                onScrollDirection = settingsViewModel::openScrollDirectionDialog,
+                                onAutoPaging = settingsViewModel::openAutoPagingDialog,
+                                onImageQuality = settingsViewModel::openImageQualityDialog,
+                                onThemeColor = settingsViewModel::openThemeColorDialog,
                                 onContinueDownload = {
                                     g.av(this@MainActivity)
                                 },
@@ -462,7 +348,14 @@ class MainActivity : BaseActivity() {
                                 onNightModeChanged = { settingsViewModel.toggleNightMode(it) },
                                 onVolumePagingChanged = { settingsViewModel.toggleVolumePaging(it) },
                                 onTestingChanged = { settingsViewModel.toggleTesting(it) },
-                                onPerformanceChanged = { settingsViewModel.togglePerformance(it) }
+                                onPerformanceChanged = { settingsViewModel.togglePerformance(it) },
+                                onDialogDismiss = settingsViewModel::dismissDialog,
+                                onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
+                                onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
+                                onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
+                                onThemeColorSelected = settingsViewModel::selectThemeColorIndex,
+                                onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
+                                onAutoPagingConfirmed = settingsViewModel::confirmAutoPagingInterval
                             )
                         }
 

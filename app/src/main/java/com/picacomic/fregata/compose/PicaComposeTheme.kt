@@ -73,6 +73,37 @@ private val DarkColors = darkColorScheme(
     surfaceTint = md_theme_dark_primary
 )
 
+private val NeonColors = darkColorScheme(
+    primary = md_theme_neon_primary,
+    onPrimary = md_theme_neon_onPrimary,
+    primaryContainer = md_theme_neon_primaryContainer,
+    onPrimaryContainer = md_theme_neon_onPrimaryContainer,
+    secondary = md_theme_neon_secondary,
+    onSecondary = md_theme_neon_onSecondary,
+    secondaryContainer = md_theme_neon_secondaryContainer,
+    onSecondaryContainer = md_theme_neon_onSecondaryContainer,
+    tertiary = md_theme_neon_tertiary,
+    onTertiary = md_theme_neon_onTertiary,
+    tertiaryContainer = md_theme_neon_tertiaryContainer,
+    onTertiaryContainer = md_theme_neon_onTertiaryContainer,
+    error = md_theme_neon_error,
+    onError = md_theme_neon_onError,
+    errorContainer = md_theme_neon_errorContainer,
+    onErrorContainer = md_theme_neon_onErrorContainer,
+    background = md_theme_neon_background,
+    onBackground = md_theme_neon_onBackground,
+    surface = md_theme_neon_surface,
+    onSurface = md_theme_neon_onSurface,
+    surfaceVariant = md_theme_neon_surfaceVariant,
+    onSurfaceVariant = md_theme_neon_onSurfaceVariant,
+    outline = md_theme_neon_outline,
+    outlineVariant = md_theme_neon_surfaceVariant,
+    inverseSurface = md_theme_neon_inverseSurface,
+    inverseOnSurface = md_theme_neon_inverseOnSurface,
+    inversePrimary = md_theme_neon_inversePrimary,
+    surfaceTint = md_theme_neon_primary
+)
+
 private val PicaShapes = Shapes(
     extraSmall = RoundedCornerShape(12.dp),
     small = RoundedCornerShape(18.dp),
@@ -87,14 +118,23 @@ fun PicaComposeTheme(
         val context = LocalContext.current
         when (e.al(context)) {
             1 -> true
+            2 -> true
             0 -> false
             else -> isSystemInDarkTheme()
         }
     },
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val colorScheme = when (e.al(context)) {
+        2 -> NeonColors
+        1 -> DarkColors
+        0 -> LightColors
+        else -> if (darkTheme) DarkColors else LightColors
+    }
+
     MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
+        colorScheme = colorScheme,
         shapes = PicaShapes,
         content = content
     )

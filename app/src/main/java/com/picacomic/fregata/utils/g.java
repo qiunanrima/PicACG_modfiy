@@ -652,14 +652,14 @@ public class g {
     }
 
     public static String af(int i) {
-        if (i == 1) {
+        if (i == 1 || i == 2) {
             return a.dS() + "?color=black";
         }
         return a.dS();
     }
 
     public static String ag(int i) {
-        if (i == 1) {
+        if (i == 1 || i == 2) {
             return a.getDetail() + "?color=black";
         }
         return a.getDetail();
@@ -669,6 +669,8 @@ public class g {
         if (Build.VERSION.SDK_INT >= 21) {
             if (e.al(context) == 0) {
                 context.setTheme(R.style.AppTheme);
+            } else if (e.al(context) == 2) {
+                context.setTheme(R.style.AppThemeNeon);
             } else {
                 context.setTheme(R.style.AppThemeBlack);
             }

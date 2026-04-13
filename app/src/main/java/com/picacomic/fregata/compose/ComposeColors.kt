@@ -67,3 +67,36 @@ val md_theme_dark_outline = Color(0xFF9B8F94)
 val md_theme_dark_inverseSurface = Color(0xFFF1DDE2)
 val md_theme_dark_inverseOnSurface = Color(0xFF342F31)
 val md_theme_dark_inversePrimary = Color(0xFFC43D74)
+
+// ===== Neon Theme =====
+
+val md_theme_neon_primary = Color(0xFF7B2CFF)
+val md_theme_neon_onPrimary = Color(0xFFFFFFFF)
+val md_theme_neon_primaryContainer = Color(0xFF2A0A52)
+val md_theme_neon_onPrimaryContainer = Color(0xFFF4EFFF)
+
+val md_theme_neon_secondary = Color(0xFFFFE600)
+val md_theme_neon_onSecondary = Color(0xFF1A0033)
+val md_theme_neon_secondaryContainer = Color(0xFF5E5600)
+val md_theme_neon_onSecondaryContainer = Color(0xFFFFF8B8)
+
+val md_theme_neon_tertiary = Color(0xFFFF2E9F)
+val md_theme_neon_onTertiary = Color(0xFFFFFFFF)
+val md_theme_neon_tertiaryContainer = Color(0xFF5E123E)
+val md_theme_neon_onTertiaryContainer = Color(0xFFFFD8EC)
+
+val md_theme_neon_error = Color(0xFFFF1744)
+val md_theme_neon_onError = Color(0xFF000000)
+val md_theme_neon_errorContainer = Color(0xFF6E1024)
+val md_theme_neon_onErrorContainer = Color(0xFFFFD9DF)
+
+val md_theme_neon_background = Color(0xFF140028)
+val md_theme_neon_onBackground = Color(0xFFF4EFFF)
+val md_theme_neon_surface = Color(0xFF1E1033)
+val md_theme_neon_onSurface = Color(0xFFEADFFF)
+val md_theme_neon_surfaceVariant = Color(0xFF2B1A45)
+val md_theme_neon_onSurfaceVariant = Color(0xFFC7B8E6)
+val md_theme_neon_outline = Color(0xFF5A4A7A)
+val md_theme_neon_inverseSurface = Color(0xFFF4EFFF)
+val md_theme_neon_inverseOnSurface = Color(0xFF1A0033)
+val md_theme_neon_inversePrimary = Color(0xFFB891FF)

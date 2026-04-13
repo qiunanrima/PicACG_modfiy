@@ -7,6 +7,7 @@ import com.picacomic.fregata.b.b;
 import com.picacomic.fregata.utils.d;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
+import com.picacomic.fregata.utils.LauncherIconHelper;
 import com.squareup.picasso.Picasso;
 
 import okhttp3.OkHttpClient;
@@ -35,8 +36,11 @@ public class MyApplication extends SugarApp {
         androidx.appcompat.app.AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         hk = this;
         s(getApplicationContext());
+        LauncherIconHelper.syncLauncherIcon(this, e.al(this));
         if (e.al(this) == 0) {
             setTheme(R.style.AppTheme);
+        } else if (e.al(this) == 2) {
+            setTheme(R.style.AppThemeNeon);
         } else {
             setTheme(R.style.AppThemeBlack);
         }

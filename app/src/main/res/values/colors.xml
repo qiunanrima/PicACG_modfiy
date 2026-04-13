@@ -14,6 +14,15 @@
     <color name="md3_secondary_container">#FFFAD8E1</color>
     <color name="md3_tertiary_container">#FFD7E7F3</color>
     <color name="md3_error">#FFBA1A1A</color>
+    <color name="theme_neon_primary">#FF7B2CFF</color>
+    <color name="theme_neon_primary_dark">#FF5C1FD1</color>
+    <color name="theme_neon_secondary">#FFFFE600</color>
+    <color name="theme_neon_tertiary">#FFFF2E9F</color>
+    <color name="theme_neon_background">#FF140028</color>
+    <color name="theme_neon_surface">#FF1E1033</color>
+    <color name="theme_neon_on_surface">#FFEADFFF</color>
+    <color name="theme_neon_on_background">#FFF4EFFF</color>
+    <color name="theme_neon_outline">#FF5A4A7A</color>
 
     <color name="abc_search_url_text_normal">#FF3F6F93</color>
     <color name="abc_search_url_text_pressed">#FF295576</color>

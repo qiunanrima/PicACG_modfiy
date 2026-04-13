@@ -98,6 +98,7 @@
     <string-array name="setting_theme_colors">
         <item>@string/theme_color_white</item>
         <item>@string/theme_color_dark</item>
+        <item>@string/theme_color_neon</item>
     </string-array>
     <string-array name="sorting_advanced">
         <item>@string/sorting_dd</item>
