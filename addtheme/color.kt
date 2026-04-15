@@ -1,74 +1,75 @@
-package com.example.ui.theme
+package com.picacomic.fregata.compose
 
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// ====================
-// 🎆 Neon Starburst Palette
-// ====================
+// ==============================================
+// Miracle Neon
+// Inspired by Honkai Impact 3rd — Miracle Magical Girl
+// Purple × Crimson clash · Gold accent
+// ==============================================
 
-// Core Colors
-val NeonPurple = Color(0xFF7B2CFF)
-val NeonYellow = Color(0xFFFFE600)
-val NeonPink = Color(0xFFFF2E9F)
-val NeonRed = Color(0xFFFF1744)
+// ===== Light Theme =====
 
-// Background & Surface
-val NightPurple = Color(0xFF140028)
-val DarkSurface = Color(0xFF1E1033)
-val OutlinePurple = Color(0xFF5A4A7A)
+val md_theme_light_primary = Color(0xFF6B3FBF)
+val md_theme_light_onPrimary = Color(0xFFFFFFFF)
+val md_theme_light_primaryContainer = Color(0xFFE8D8FF)
+val md_theme_light_onPrimaryContainer = Color(0xFF220060)
 
+val md_theme_light_secondary = Color(0xFFC4254A)
+val md_theme_light_onSecondary = Color(0xFFFFFFFF)
+val md_theme_light_secondaryContainer = Color(0xFFFFD9E1)
+val md_theme_light_onSecondaryContainer = Color(0xFF3F0014)
 
-// ====================
-// 🌞 Light Color Scheme
-// ====================
+val md_theme_light_tertiary = Color(0xFF8A6800)
+val md_theme_light_onTertiary = Color(0xFFFFFFFF)
+val md_theme_light_tertiaryContainer = Color(0xFFFDEEA0)
+val md_theme_light_onTertiaryContainer = Color(0xFF291F00)
 
-val LightColorScheme = lightColorScheme(
-    primary = NeonPurple,
-    onPrimary = Color(0xFFF4EFFF),
+val md_theme_light_error = Color(0xFFBA1A1A)
+val md_theme_light_onError = Color(0xFFFFFFFF)
+val md_theme_light_errorContainer = Color(0xFFFFDAD6)
+val md_theme_light_onErrorContainer = Color(0xFF410002)
 
-    secondary = NeonYellow,
-    onSecondary = Color(0xFF1A0033),
+val md_theme_light_background = Color(0xFFFBF8FF)
+val md_theme_light_onBackground = Color(0xFF1C1628)
+val md_theme_light_surface = Color(0xFFFBF8FF)
+val md_theme_light_onSurface = Color(0xFF1C1628)
+val md_theme_light_surfaceVariant = Color(0xFFEDE8F5)
+val md_theme_light_onSurfaceVariant = Color(0xFF4A4458)
+val md_theme_light_outline = Color(0xFF7B7489)
+val md_theme_light_inverseSurface = Color(0xFF312C40)
+val md_theme_light_inverseOnSurface = Color(0xFFF3EEFF)
+val md_theme_light_inversePrimary = Color(0xFFC9AEFF)
 
-    tertiary = NeonPink,
-    onTertiary = Color.White,
+// ===== Dark Theme =====
 
-    error = NeonRed,
-    onError = Color.White,
+val md_theme_dark_primary = Color(0xFFC9AEFF)
+val md_theme_dark_onPrimary = Color(0xFF3A0096)
+val md_theme_dark_primaryContainer = Color(0xFF5127A8)
+val md_theme_dark_onPrimaryContainer = Color(0xFFE8D8FF)
 
-    background = Color(0xFFF8F4FF),
-    onBackground = Color(0xFF1A0033),
+val md_theme_dark_secondary = Color(0xFFFFB1C2)
+val md_theme_dark_onSecondary = Color(0xFF6B0025)
+val md_theme_dark_secondaryContainer = Color(0xFF8F0036)
+val md_theme_dark_onSecondaryContainer = Color(0xFFFFD9E1)
 
-    surface = Color.White,
-    onSurface = Color(0xFF1A0033),
+val md_theme_dark_tertiary = Color(0xFFF5C842)
+val md_theme_dark_onTertiary = Color(0xFF453200)
+val md_theme_dark_tertiaryContainer = Color(0xFF624900)
+val md_theme_dark_onTertiaryContainer = Color(0xFFFDEEA0)
 
-    outline = OutlinePurple
-)
+val md_theme_dark_error = Color(0xFFFFB4AB)
+val md_theme_dark_onError = Color(0xFF690005)
+val md_theme_dark_errorContainer = Color(0xFF93000A)
+val md_theme_dark_onErrorContainer = Color(0xFFFFDAD6)
 
-
-// ====================
-// 🌙 Dark Color Scheme (推荐主用)
-// ====================
-
-val DarkColorScheme = darkColorScheme(
-    primary = NeonPurple,
-    onPrimary = Color.White,
-
-    secondary = NeonYellow,
-    onSecondary = Color(0xFF1A0033),
-
-    tertiary = NeonPink,
-    onTertiary = Color.White,
-
-    error = NeonRed,
-    onError = Color.Black,
-
-    background = NightPurple,
-    onBackground = Color(0xFFF4EFFF),
-
-    surface = DarkSurface,
-    onSurface = Color(0xFFEADFFF),
-
-    outline = OutlinePurple
-)
+val md_theme_dark_background = Color(0xFF130F1F)
+val md_theme_dark_onBackground = Color(0xFFE8E0F5)
+val md_theme_dark_surface = Color(0xFF130F1F)
+val md_theme_dark_onSurface = Color(0xFFE8E0F5)
+val md_theme_dark_surfaceVariant = Color(0xFF4A4458)
+val md_theme_dark_onSurfaceVariant = Color(0xFFCBC4D8)
+val md_theme_dark_outline = Color(0xFF948FA2)
+val md_theme_dark_inverseSurface = Color(0xFFE8E0F5)
+val md_theme_dark_inverseOnSurface = Color(0xFF312C40)
+val md_theme_dark_inversePrimary = Color(0xFF6B3FBF)

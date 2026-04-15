@@ -11,6 +11,10 @@
 
     <attr name="custom_background_color" format="reference|color" />
     <attr name="custom_background_color_dark" format="reference|color" />
+    <attr name="custom_primary_container_color" format="reference|color" />
+    <attr name="custom_secondary_container_color" format="reference|color" />
+    <attr name="custom_primary_overlay_color" format="reference|color" />
+    <attr name="custom_secondary_overlay_color" format="reference|color" />
     <attr name="custom_text_black_color" format="reference|color" />
     <attr name="custom_text_black_color_dark" format="reference|color" />
     <attr name="custom_text_black_color_light" format="reference|color" />

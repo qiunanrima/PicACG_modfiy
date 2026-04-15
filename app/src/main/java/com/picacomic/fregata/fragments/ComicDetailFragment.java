@@ -8,6 +8,8 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -52,6 +54,10 @@ import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.g;
 import com.picacomic.fregata.utils.views.AlertDialogCenter;
+import com.picacomic.fregata.viewmodels.ComicDetailFragmentErrorEvent;
+import com.picacomic.fregata.viewmodels.ComicDetailFragmentMessageEvent;
+import com.picacomic.fregata.viewmodels.ComicDetailFragmentState;
+import com.picacomic.fregata.viewmodels.ComicDetailFragmentViewModel;
 import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,6 +124,9 @@ public class ComicDetailFragment extends BaseFragment implements k {
     boolean isLiked = false;
     boolean nk = true;
     int downloadStatus = 0;
+    ComicDetailFragmentViewModel viewModel;
+    long lastMessageEventId = -1;
+    long lastErrorEventId = -1;
 
     public static ComicDetailFragment a(ComicListObject comicListObject) {
         ComicDetailFragment comicDetailFragment = new ComicDetailFragment();
@@ -130,6 +139,7 @@ public class ComicDetailFragment extends BaseFragment implements k {
     @Override // androidx.fragment.app.Fragment
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        this.viewModel = (ComicDetailFragmentViewModel) new ViewModelProvider(this).get(ComicDetailFragmentViewModel.class);
         if (getArguments() != null) {
             this.nn = (ComicListObject) getArguments().getParcelable("COMIC_LIST_OBJECT");
         }
@@ -231,6 +241,7 @@ public class ComicDetailFragment extends BaseFragment implements k {
     @Override // com.picacomic.fregata.fragments.BaseFragment
     public void ca() {
         super.ca();
+        observeViewModel();
         this.recyclerView_episode.setLayoutManager(new FullGridLayoutManager(getActivity(), 4));
         this.nd = new EpisodeRecyclerViewAdapter(getActivity(), this.ig, this);
         this.recyclerView_episode.setAdapter(this.nd);
@@ -291,13 +302,13 @@ public class ComicDetailFragment extends BaseFragment implements k {
         this.imageButton_bookmark.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ComicDetailFragment.21
             @Override // android.view.View.OnClickListener
             public void onClick(View view) {
-                ComicDetailFragment.this.cK();
+                ComicDetailFragment.this.viewModel.toggleFavourite();
             }
         });
         this.imageButton_like.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ComicDetailFragment.22
             @Override // android.view.View.OnClickListener
             public void onClick(View view) {
-                ComicDetailFragment.this.cL();
+                ComicDetailFragment.this.viewModel.toggleLike();
             }
         });
         this.imageButton_comment.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ComicDetailFragment.2
@@ -380,14 +391,14 @@ public class ComicDetailFragment extends BaseFragment implements k {
         this.button_moreEpisode.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ComicDetailFragment.6
             @Override // android.view.View.OnClickListener
             public void onClick(View view) {
-                ComicDetailFragment.this.A(false);
+                ComicDetailFragment.this.viewModel.loadMoreEpisodes();
             }
         });
         this.nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() { // from class: com.picacomic.fregata.fragments.ComicDetailFragment.7
             @Override // androidx.core.widget.NestedScrollView.OnScrollChangeListener
             public void onScrollChange(NestedScrollView nestedScrollView, int i, int i2, int i3, int i4) {
                 if (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1).getBottom() - (nestedScrollView.getHeight() + nestedScrollView.getScrollY()) == 0) {
-                    ComicDetailFragment.this.A(false);
+                    ComicDetailFragment.this.viewModel.loadMoreEpisodes();
                 }
             }
         });
@@ -432,10 +443,9 @@ public class ComicDetailFragment extends BaseFragment implements k {
             }
             Y(this.nn.getComicId());
         }
-        if (this.kE) {
-            cJ();
+        if (this.nn != null && this.nn.getComicId() != null) {
+            this.viewModel.loadComic(this.nn.getComicId(), this.kE);
         }
-        cM();
     }
 
     @Override // com.picacomic.fregata.fragments.BaseFragment
@@ -517,6 +527,109 @@ public class ComicDetailFragment extends BaseFragment implements k {
         }
         if (g.a(this.linearLayout_tags, this.ng, getActivity(), this.imageButton_tagHeightControl) == 1) {
             this.imageButton_tagHeightControl.setVisibility(8);
+        }
+    }
+
+    private void observeViewModel() {
+        this.viewModel.getState().observe(getViewLifecycleOwner(), new Observer<ComicDetailFragmentState>() {
+            @Override
+            public void onChanged(ComicDetailFragmentState comicDetailFragmentState) {
+                ComicDetailFragment.this.applyViewModelState(comicDetailFragmentState);
+            }
+        });
+        this.viewModel.getLoading().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean bool) {
+                if (Boolean.TRUE.equals(bool)) {
+                    ComicDetailFragment.this.bA();
+                } else {
+                    ComicDetailFragment.this.bC();
+                }
+            }
+        });
+        this.viewModel.getMessageEvent().observe(getViewLifecycleOwner(), new Observer<ComicDetailFragmentMessageEvent>() {
+            @Override
+            public void onChanged(ComicDetailFragmentMessageEvent comicDetailFragmentMessageEvent) {
+                if (comicDetailFragmentMessageEvent == null || comicDetailFragmentMessageEvent.getEventId() == ComicDetailFragment.this.lastMessageEventId || ComicDetailFragment.this.getActivity() == null) {
+                    return;
+                }
+                ComicDetailFragment.this.lastMessageEventId = comicDetailFragmentMessageEvent.getEventId();
+                Toast.makeText(ComicDetailFragment.this.getActivity(), comicDetailFragmentMessageEvent.getMessageRes(), 0).show();
+            }
+        });
+        this.viewModel.getErrorEvent().observe(getViewLifecycleOwner(), new Observer<ComicDetailFragmentErrorEvent>() {
+            @Override
+            public void onChanged(ComicDetailFragmentErrorEvent comicDetailFragmentErrorEvent) {
+                if (comicDetailFragmentErrorEvent == null || comicDetailFragmentErrorEvent.getEventId() == ComicDetailFragment.this.lastErrorEventId || ComicDetailFragment.this.getActivity() == null) {
+                    return;
+                }
+                ComicDetailFragment.this.lastErrorEventId = comicDetailFragmentErrorEvent.getEventId();
+                if (comicDetailFragmentErrorEvent.getCode() != null && comicDetailFragmentErrorEvent.getBody() != null) {
+                    new c(ComicDetailFragment.this.getActivity(), comicDetailFragmentErrorEvent.getCode().intValue(), comicDetailFragmentErrorEvent.getBody()).dN();
+                } else {
+                    new c(ComicDetailFragment.this.getActivity()).dN();
+                }
+            }
+        });
+    }
+
+    private void applyViewModelState(ComicDetailFragmentState comicDetailFragmentState) {
+        if (comicDetailFragmentState == null) {
+            return;
+        }
+        if (comicDetailFragmentState.getComicDetail() != null) {
+            this.np = comicDetailFragmentState.getComicDetail();
+            DbComicDetailObject dbComicDetailObject = new DbComicDetailObject(this.np);
+            dbComicDetailObject.setDownloadStatus(this.downloadStatus);
+            com.picacomic.fregata.utils.b.a(dbComicDetailObject);
+        }
+        this.episodeTotal = comicDetailFragmentState.getEpisodeTotal();
+        this.nm = comicDetailFragmentState.getNextEpisodePage();
+        this.nk = comicDetailFragmentState.getHasMoreEpisodes();
+        syncEpisodes(comicDetailFragmentState.getEpisodes());
+        if (this.nf == null) {
+            this.nf = new ArrayList<>();
+        } else {
+            this.nf.clear();
+        }
+        this.nf.addAll(comicDetailFragmentState.getRecommendations());
+        if (this.ne != null) {
+            this.ne.notifyDataSetChanged();
+        }
+        bI();
+    }
+
+    private void syncEpisodes(List<ComicEpisodeObject> list) {
+        if (this.ig == null) {
+            this.ig = new ArrayList<>();
+        } else {
+            this.ig.clear();
+        }
+        if (list == null) {
+            return;
+        }
+        boolean z = false;
+        DbComicViewRecordObject dbComicViewRecordObjectAx = this.nn != null ? com.picacomic.fregata.utils.b.ax(this.nn.getComicId()) : null;
+        for (ComicEpisodeObject comicEpisodeObject : list) {
+            DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(comicEpisodeObject.getEpisodeId());
+            if (downloadComicEpisodeObjectAy != null) {
+                if (downloadComicEpisodeObjectAy.getStatus() == 1 || downloadComicEpisodeObjectAy.getStatus() == 2 || downloadComicEpisodeObjectAy.getStatus() == 3) {
+                    comicEpisodeObject.setStatus(1);
+                } else if (downloadComicEpisodeObjectAy.getStatus() == 4) {
+                    comicEpisodeObject.setStatus(2);
+                } else {
+                    comicEpisodeObject.setStatus(0);
+                }
+            }
+            if (!z && dbComicViewRecordObjectAx != null && downloadComicEpisodeObjectAy != null && dbComicViewRecordObjectAx.getEpisodeOrder() == downloadComicEpisodeObjectAy.getEpisodeOrder()) {
+                comicEpisodeObject.setStatus(4);
+                z = true;
+            }
+            comicEpisodeObject.setSelected(false);
+            this.ig.add(comicEpisodeObject);
+        }
+        if (this.nd != null) {
+            this.nd.notifyDataSetChanged();
         }
     }
 

@@ -670,7 +670,8 @@ public class g {
             if (e.al(context) == 0) {
                 context.setTheme(R.style.AppTheme);
             } else if (e.al(context) == 2) {
-                context.setTheme(R.style.AppThemeNeon);
+                int nightMode = context.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+                context.setTheme(nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES ? R.style.AppThemeNeonDark : R.style.AppThemeNeon);
             } else {
                 context.setTheme(R.style.AppThemeBlack);
             }

@@ -4,7 +4,7 @@
     <item>
         <shape android:shape="rectangle">
             <corners android:topLeftRadius="@dimen/size_chatroom_connection_bar_radius" android:bottomLeftRadius="@dimen/size_chatroom_connection_bar_radius" />
-            <solid android:color="@color/pinkDark_transparent_30" />
+            <solid android:color="?custom_secondary_overlay_color" />
         </shape>
     </item>
 </selector>

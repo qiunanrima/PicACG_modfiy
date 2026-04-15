@@ -17,7 +17,6 @@ app/build/
 /*/build/
 gradle-app.setting
 .gradletasknamecache
-build.log
 
 # 生成的构建文件
 *.apk
@@ -29,6 +28,7 @@ build.log
 *.aar
 
 # 本地配置文件
+local.properties
 *.jks
 *.keystore
 keystore/
@@ -71,12 +71,31 @@ desktop.ini
 # Android Emulator 和开发工具
 .android/
 captures/
-*.log
+
+# Kotlin 编译缓存
+.kotlin/
 
 # Copilot 和其他开发工具
 .claude/
 
+# 临时脚本文件
+fix_*.py
+jni_kt.kt
+
+# 日志文件
+*.log
+build.log
+build_output.log
+compile.log
+
+# 调试构建输出
+app-debug.apk
+app-debug.apk_
+
+# 迁移文档（临时）
+migration_summary.md
+
 # 其他临时文件
-*.class
 node_modules/
+addtheme/
 

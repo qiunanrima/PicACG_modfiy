@@ -151,10 +151,14 @@ public class PicaAppListFragment extends BaseFragment implements k {
         if (this.arrayList == null || this.arrayList.size() <= i) {
             return;
         }
+        androidx.fragment.app.FragmentManager fragmentManager = getParentFragment() != null ? getParentFragment().getFragmentManager() : getFragmentManager();
+        if (fragmentManager == null) {
+            return;
+        }
         if (this.arrayList.get(i).getTitle().equalsIgnoreCase("嗶咔萌約")) {
-            getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, new AnonymousChatFragment(), AnonymousChatFragment.TAG).addToBackStack(AnonymousChatFragment.TAG).commit();
+            fragmentManager.beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, new AnonymousChatFragment(), AnonymousChatFragment.TAG).addToBackStack(AnonymousChatFragment.TAG).commit();
         } else {
-            getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, PicaAppFragment.n(this.arrayList.get(i).getTitle(), this.arrayList.get(i).getUrl()), PicaAppFragment.TAG).addToBackStack(PicaAppFragment.TAG).commit();
+            fragmentManager.beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, PicaAppFragment.n(this.arrayList.get(i).getTitle(), this.arrayList.get(i).getUrl()), PicaAppFragment.TAG).addToBackStack(PicaAppFragment.TAG).commit();
         }
     }
 }

@@ -37,13 +37,16 @@ public class MyApplication extends SugarApp {
         hk = this;
         s(getApplicationContext());
         LauncherIconHelper.syncLauncherIcon(this, e.al(this));
-        if (e.al(this) == 0) {
-            setTheme(R.style.AppTheme);
-        } else if (e.al(this) == 2) {
-            setTheme(R.style.AppThemeNeon);
-        } else {
-            setTheme(R.style.AppThemeBlack);
+        setTheme(resolveThemeResId(this));
+    }
+
+    private static int resolveThemeResId(Context context) {
+        int themeIndex = e.al(context);
+        if (themeIndex == 2) {
+            int nightMode = context.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+            return nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES ? R.style.AppThemeNeonDark : R.style.AppThemeNeon;
         }
+        return themeIndex == 0 ? R.style.AppTheme : R.style.AppThemeBlack;
     }
 
     public static void bw() {

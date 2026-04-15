@@ -1,0 +1,221 @@
+# MD3 Token Mapping
+
+## Scope
+
+This file defines the current semantic mapping between:
+
+- Compose `MaterialTheme.colorScheme`
+- legacy XML theme items in `styles.xml`
+- custom legacy attrs in `attrs.xml`
+- the active theme mode chosen by `e.al(context)`
+
+It is intended to be the working baseline for P0 theme alignment.
+
+## Theme Modes
+
+| Theme index | Meaning | Compose scheme | XML theme |
+| --- | --- | --- | --- |
+| `0` | Light Pink | `LightColors` | `AppTheme` |
+| `1` | Dark Red | `DarkColors` | `AppThemeBlack` |
+| `2` | Miracle Neon | `NeonLightColors` or `NeonDarkColors` | `AppThemeNeon` or `AppThemeNeonDark` |
+
+## Theme Entry Points
+
+- Preference source: `e.al(context)`
+- Compose theme switch: `app/src/main/java/com/picacomic/fregata/compose/PicaComposeTheme.kt`
+- Application theme switch: `app/src/main/java/com/picacomic/fregata/MyApplication.java`
+- Legacy helper theme switch: `app/src/main/java/com/picacomic/fregata/utils/g.java`
+- Settings write-back: `app/src/main/java/com/picacomic/fregata/compose/viewmodels/SettingsViewModel.kt`
+
+## Current Architecture Status
+
+The theme layer is currently shared by both:
+
+- pure Compose screens
+- Compose component wrappers
+- Compose-hosted legacy Fragments via `LegacyFragmentHost.kt`
+
+This means token changes must keep Compose and legacy Fragment pages visually aligned at the same time.
+
+## Component Layer Status
+
+The current Compose component baseline includes:
+
+- `PicaTopBar.kt`
+- `PicaButtons.kt`
+- `PicaFields.kt`
+- `PicaSurfaceContainers.kt`
+
+These components are the preferred entry point for new Compose pages, but a number of high-interaction secondary pages are now temporarily routed back through legacy Fragments for behavior completeness.
+
+## Secondary Route Status
+
+In `MainActivity.kt`, several secondary routes currently use `LegacyFragmentHost` instead of direct Compose business pages, including:
+
+- `Notification`
+- `ComicList`
+- `ComicDetail`
+- `ProfileEdit`
+- `ChangePin`
+- `ChangePassword`
+- `GameDetail`
+- `Comment`
+- `PicaApp`
+- `PicaAppList`
+- `ApkVersionList`
+- `AnnouncementList`
+- `Leaderboard`
+
+Rule:
+
+- Theme work must remain compatible with both Compose-hosted screens and Fragment-hosted screens.
+- Component unification can continue in Compose, but interaction-heavy pages should not bypass proven Fragment behavior unless the matching ViewModel split is complete.
+
+## Canonical Source Order
+
+1. Compose semantic source: `PicaComposeTheme.kt`
+2. Theme value source: `ComposeColors.kt`
+3. Legacy theme binding: `styles.xml`
+4. Legacy semantic attrs: `attrs.xml`
+
+Rule:
+
+- New UI should bind to semantic tokens first.
+- Legacy XML should prefer theme attrs or custom semantic attrs, not direct fixed color resources.
+- Direct `@color/colorPrimary*`, `@color/pink*`, `@color/peach` usage should be treated as migration debt unless the color is intentionally content-specific.
+
+## Core Token Mapping
+
+| MD3 token | Compose token | XML theme item | Legacy semantic attr | Notes |
+| --- | --- | --- | --- | --- |
+| `primary` | `colorScheme.primary` | `colorPrimary` | use `?colorPrimary` | Main brand/action color |
+| `onPrimary` | `colorScheme.onPrimary` | none | none | Mostly Compose-only today |
+| `primaryContainer` | `colorScheme.primaryContainer` | no direct Material item in current XML theme | `?custom_primary_container_color` | Use for chips, soft pills, top gradients |
+| `onPrimaryContainer` | `colorScheme.onPrimaryContainer` | none | none | Compose-only today |
+| `secondary` | `colorScheme.secondary` | `colorSecondary`, `colorAccent` | use `?colorSecondary` when possible | Secondary accent/action |
+| `onSecondary` | `colorScheme.onSecondary` | none | none | Compose-only today |
+| `secondaryContainer` | `colorScheme.secondaryContainer` | no direct Material item in current XML theme | `?custom_secondary_container_color` | Use for secondary soft chips |
+| `tertiary` | `colorScheme.tertiary` | `colorTertiary` | use `?colorTertiary` | Reserved for special highlights |
+| `background` | `colorScheme.background` | `android:windowBackground` | none | App/page background |
+| `onBackground` | `colorScheme.onBackground` | none | none | Compose-only today |
+| `surface` | `colorScheme.surface` | `colorSurface` | `?custom_background_color` in many legacy pages | Main card/panel surface |
+| `surfaceVariant` | `colorScheme.surfaceVariant` | `colorSurfaceVariant` | `?custom_background_color_dark` | Secondary panel/background split |
+| `onSurface` | `colorScheme.onSurface` | partial legacy binding through text items | `?custom_text_black_color`, `?custom_text_black_color_dark` | Main readable text |
+| `onSurfaceVariant` | `colorScheme.onSurfaceVariant` | none | `?custom_text_black_color_light` | Hint, secondary text, outlines |
+| `outline` | `colorScheme.outline` | `colorOutline` | none | Borders and separators |
+| `error` | `colorScheme.error` | none | none | Error states |
+| `surfaceTint` | `colorScheme.surfaceTint` | none | none | Compose elevation tint |
+
+## Legacy Custom Attr Mapping
+
+These attrs are the current semantic bridge for XML pages:
+
+| Attr | Meaning | Preferred MD3 source |
+| --- | --- | --- |
+| `custom_background_color` | main surface container | `surface` |
+| `custom_background_color_dark` | secondary surface container | `surfaceVariant` |
+| `custom_text_black_color` | primary foreground text | `onSurface` |
+| `custom_text_black_color_dark` | strong foreground text | `onSurface` |
+| `custom_text_black_color_light` | muted foreground text | `onSurfaceVariant` |
+| `custom_transparent_white` | translucent overlay on top of mixed/chat surfaces | theme-specific helper |
+| `custom_primary_container_color` | soft primary chip/pill/container | `primaryContainer` |
+| `custom_secondary_container_color` | soft secondary chip/pill/container | `secondaryContainer` |
+| `custom_primary_overlay_color` | translucent pressed/highlight using primary hue | helper derived from `primary` |
+| `custom_secondary_overlay_color` | translucent mention/highlight using secondary hue | helper derived from `secondary` |
+| `chatroom_reply_color` | chat reply strip background | theme-specific helper, nearest to `surfaceVariant` |
+
+## Theme Value Snapshot
+
+Only the highest-impact tokens are listed here.
+
+### Light Pink
+
+| Token | Value |
+| --- | --- |
+| `primary` | `#C43D74` |
+| `primaryContainer` | `#FDE0EC` |
+| `secondary` | `#75565F` |
+| `secondaryContainer` | `#FCCFDF` |
+| `background` | `#FFF5F8` |
+| `surface` | `#FFF5F8` |
+| `surfaceVariant` | `#E8D6DB` |
+| `outline` | `#7E7478` |
+
+### Dark Red
+
+| Token | Value |
+| --- | --- |
+| `primary` | `#F4A6C1` |
+| `primaryContainer` | `#A32E5E` |
+| `secondary` | `#D6A3AF` |
+| `secondaryContainer` | `#6B2347` |
+| `background` | `#1E0F16` |
+| `surface` | `#1E0F16` |
+| `surfaceVariant` | `#4C4447` |
+| `outline` | `#9B8F94` |
+
+### Miracle Neon Light
+
+| Token | Value |
+| --- | --- |
+| `primary` | `#6B3FBF` |
+| `primaryContainer` | `#E8D8FF` |
+| `secondary` | `#C4254A` |
+| `secondaryContainer` | `#FFD9E1` |
+| `tertiary` | `#8A6800` |
+| `background` | `#FBF8FF` |
+| `surface` | `#FBF8FF` |
+| `surfaceVariant` | `#EDE8F5` |
+| `outline` | `#7B7489` |
+
+### Miracle Neon Dark
+
+| Token | Value |
+| --- | --- |
+| `primary` | `#C9AEFF` |
+| `primaryContainer` | `#5127A8` |
+| `secondary` | `#FFB1C2` |
+| `secondaryContainer` | `#8F0036` |
+| `tertiary` | `#F5C842` |
+| `background` | `#130F1F` |
+| `surface` | `#130F1F` |
+| `surfaceVariant` | `#4A4458` |
+| `outline` | `#948FA2` |
+
+## Current Gaps
+
+1. Typography is not yet mapped at the same semantic level as color.
+2. Shapes are unified in Compose, but not fully represented in legacy XML styles.
+3. Some legacy XML still uses direct fixed resources such as `@color/colorPrimary`, `@color/colorPrimaryLight`, `@color/peach`, `@color/pinkDark`.
+4. `colorAccent` is still used as a bridge in older XML paths and should eventually be treated as a compatibility alias, not a source of truth.
+5. A number of interaction-heavy pages still depend on legacy Fragment implementations, so MD3 visual migration and architecture migration are not yet at the same completion level.
+6. Fragment business logic extraction is only partially started; `ComicDetailFragment` now has a dedicated Fragment ViewModel, but `ComicListFragment` and `CommentFragment` still keep most request logic in Fragment.
+
+## Migration Rules
+
+1. Prefer `?colorPrimary`, `?colorSecondary`, `?colorTertiary` for strong accents.
+2. Prefer `?custom_primary_container_color` or `?custom_secondary_container_color` for soft chips, badges, and title pills.
+3. Prefer `?custom_background_color` and `?custom_background_color_dark` for mixed legacy page surfaces.
+4. Replace direct fixed pink resources only after assigning them a semantic role.
+5. Do not migrate page by page before the semantic token is decided.
+
+## Suggested Next Batch
+
+1. Add typography mapping beside this token map.
+2. Audit remaining direct color references and classify each as:
+   - semantic token candidate
+   - content-specific fixed color
+   - obsolete legacy resource
+3. Extract shared legacy component styles for:
+   - toolbar
+   - tab
+   - dialog action row
+   - avatar border/fill
+   - tag/chip background
+4. Continue Fragment-side ViewModel extraction in this order:
+   - `ComicListFragment`
+   - `CommentFragment`
+   - remaining secondary detail/list pages
+5. After Fragment ViewModel extraction stabilizes, decide page-by-page whether to:
+   - stay Fragment-hosted under Compose
+   - or migrate fully back to Compose screens

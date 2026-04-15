@@ -80,9 +80,9 @@
                     app:exp_border_color="@color/grayDark"
                     app:exp_border_color_dark="@color/black"
                     app:exp_border_width="@dimen/size_image_profile_exp_bar_stroke_width"
-                    app:exp_fill_color="@color/colorPrimary"
-                    app:exp_fill_color_dark="@color/peach"
-                    app:exp_fill_color_light="@color/colorPrimaryLight"
+                    app:exp_fill_color="?colorPrimary"
+                    app:exp_fill_color_dark="?colorSecondary"
+                    app:exp_fill_color_light="?custom_primary_container_color"
                     app:exp_fill_width="@dimen/size_image_profile_exp_bar_width" />
 
                 <de.hdodenhof.circleimageview.CircleImageView
@@ -163,8 +163,8 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:background="?custom_background_color"
-        app:tabIndicatorColor="@color/colorPrimary"
-        app:tabSelectedTextColor="@color/colorPrimary"
+        app:tabIndicatorColor="?colorPrimary"
+        app:tabSelectedTextColor="?colorPrimary"
         app:tabTextColor="@color/gray" />
 
     <androidx.viewpager.widget.ViewPager

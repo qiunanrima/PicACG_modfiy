@@ -749,17 +749,18 @@ public class CommentFragment extends BaseFragment implements e {
         if (this.jz == null || this.jz.size() <= i) {
             return;
         }
+        androidx.fragment.app.FragmentManager fragmentManager = getParentFragment() != null ? getParentFragment().getFragmentManager() : getFragmentManager();
+        if (fragmentManager == null) {
+            return;
+        }
         if (this.jz.get(i).getComicId() != null) {
-            if (getParentFragment() != null) {
-                getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicDetailFragment.a(new ComicListObject(this.jz.get(i).getComicId().getComicId() + "")), ComicDetailFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
-                return;
-            }
+            fragmentManager.beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, ComicDetailFragment.a(new ComicListObject(this.jz.get(i).getComicId().getComicId() + "")), ComicDetailFragment.TAG).addToBackStack(ComicListFragment.TAG).commit();
             return;
         }
-        if (this.jz.get(i).getGameId() == null || getParentFragment() == null) {
+        if (this.jz.get(i).getGameId() == null) {
             return;
         }
-        getParentFragment().getFragmentManager().beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, GameDetailFragment.ad(this.jz.get(i).getGameId().getGameId() + ""), GameDetailFragment.TAG).addToBackStack(GameDetailFragment.TAG).commit();
+        fragmentManager.beginTransaction().setCustomAnimations(R.anim.transaction_anim_enter, R.anim.transaction_anim_exit, R.anim.transaction_anim_pop_enter, R.anim.transaction_anim_pop_exit).replace(R.id.container, GameDetailFragment.ad(this.jz.get(i).getGameId().getGameId() + ""), GameDetailFragment.TAG).addToBackStack(GameDetailFragment.TAG).commit();
     }
 
     @Override // com.picacomic.fregata.a_pkg.e

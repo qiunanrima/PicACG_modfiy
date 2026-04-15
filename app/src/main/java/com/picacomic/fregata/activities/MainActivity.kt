@@ -85,6 +85,22 @@ import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.navigation.Screen
 import com.picacomic.fregata.compose.navigation.navItems
 import com.picacomic.fregata.compose.screens.*
+import com.picacomic.fregata.compose.views.LegacyFragmentHost
+import com.picacomic.fregata.fragments.AnnouncementListFragment
+import com.picacomic.fregata.fragments.ApkVersionListFragment
+import com.picacomic.fregata.fragments.ChangePasswordFragment
+import com.picacomic.fregata.fragments.ChangePinFragment
+import com.picacomic.fregata.fragments.ComicDetailFragment
+import com.picacomic.fregata.fragments.ComicListFragment
+import com.picacomic.fregata.fragments.CommentFragment
+import com.picacomic.fregata.fragments.GameDetailFragment
+import com.picacomic.fregata.fragments.LeaderboardContainerFragment
+import com.picacomic.fregata.fragments.NotificationFragment
+import com.picacomic.fregata.fragments.PicaAppFragment
+import com.picacomic.fregata.fragments.PicaAppListFragment
+import com.picacomic.fregata.objects.ComicListObject
+import com.picacomic.fregata.fragments.ProfileEditFragment
+import com.picacomic.fregata.objects.UserProfileObject
 
 /* JADX INFO: loaded from: classes.dex */
 class MainActivity : BaseActivity() {
@@ -361,24 +377,10 @@ class MainActivity : BaseActivity() {
 
                         // Secondary Screens
                         composable(Screen.Notification.route) {
-                            NotificationScreen(
-                                onBack = { navController.popBackStack() },
-                                onComicClick = { comicId ->
-                                    navController.navigate(Screen.createComicDetailRoute(comicId))
-                                },
-                                onGameClick = { gameId ->
-                                    navController.navigate(Screen.createGameDetailRoute(gameId))
-                                },
-                                onCommentClick = { commentId ->
-                                    navController.navigate(Screen.createCommentRoute(commentId = commentId))
-                                },
-                                onPicaAppClick = { title, link ->
-                                    navController.navigate(
-                                        Screen.createPicaAppRoute(
-                                            title = title,
-                                            link = link
-                                        )
-                                    )
+                            LegacyFragmentHost(
+                                fragmentTag = NotificationFragment.TAG,
+                                fragmentFactory = {
+                                NotificationFragment()
                                 }
                             )
                         }
@@ -403,66 +405,65 @@ class MainActivity : BaseActivity() {
                             val translate = backStackEntry.arguments?.getString("translate")
                                 ?.let { Uri.decode(it) }
 
-                            ComicListScreen(
-                                category = category,
-                                tags = tags,
-                                creatorId = creatorId,
-                                creatorName = creatorName,
-                                author = author,
-                                keywords = keywords,
-                                finished = finished,
-                                sorting = sorting,
-                                translate = translate,
-                                onBack = { navController.popBackStack() },
-                                onComicClick = { comicId ->
-                                    navController.navigate(Screen.createComicDetailRoute(comicId))
+                            LegacyFragmentHost(
+                                fragmentTag = ComicListFragment.TAG,
+                                fragmentFactory = {
+                                    ComicListFragment.a(
+                                        category,
+                                        keywords,
+                                        tags,
+                                        author,
+                                        finished,
+                                        sorting,
+                                        translate,
+                                        creatorId,
+                                        creatorName
+                                    )
                                 }
                             )
                         }
 
                         composable(Screen.ComicDetail.route) { backStackEntry ->
                             val comicId = backStackEntry.arguments?.getString("comicId") ?: ""
-                            ComicDetailScreen(
-                                comicId = comicId,
-                                onBack = { navController.popBackStack() },
-                                onComicClick = { id ->
-                                    navController.navigate(Screen.createComicDetailRoute(id))
-                                },
-                                onCommentClick = { id ->
-                                    navController.navigate(Screen.createCommentRoute(comicId = id))
-                                },
-                                onComicListClick = { category, tag, author, translate, creatorId, creatorName ->
-                                    navController.navigate(
-                                        Screen.createComicListRoute(
-                                            category = category,
-                                            tags = tag,
-                                            author = author,
-                                            translate = translate,
-                                            creatorId = creatorId,
-                                            creatorName = creatorName
-                                        )
-                                    )
+                            LegacyFragmentHost(
+                                fragmentTag = "${ComicDetailFragment.TAG}:$comicId",
+                                fragmentFactory = {
+                                    ComicDetailFragment.a(ComicListObject(comicId))
                                 }
                             )
                         }
 
                         composable(Screen.ProfileEdit.route) {
-                            ProfileEditScreen(onBack = { navController.popBackStack() })
+                            val cachedProfile = e.B(this@MainActivity)
+                                ?.takeIf { it.isNotBlank() }
+                                ?.let { Gson().fromJson(it, UserProfileObject::class.java) }
+                                ?: UserProfileObject()
+                            LegacyFragmentHost(
+                                fragmentTag = ProfileEditFragment.TAG,
+                                fragmentFactory = { ProfileEditFragment.b(cachedProfile) }
+                            )
                         }
 
                         composable(Screen.ChangePin.route) {
-                            ChangePinScreen(onBack = { navController.popBackStack() })
+                            LegacyFragmentHost(
+                                fragmentTag = ChangePinFragment.TAG,
+                                fragmentFactory = { ChangePinFragment() }
+                            )
                         }
 
                         composable(Screen.ChangePassword.route) {
-                            ChangePasswordScreen(onBack = { navController.popBackStack() })
+                            LegacyFragmentHost(
+                                fragmentTag = ChangePasswordFragment.TAG,
+                                fragmentFactory = { ChangePasswordFragment() }
+                            )
                         }
 
                         composable(Screen.GameDetail.route) { backStackEntry ->
                             val gameId = backStackEntry.arguments?.getString("gameId") ?: ""
-                            GameDetailScreen(
-                                gameId = gameId,
-                                onBack = { navController.popBackStack() })
+                            LegacyFragmentHost(
+                                fragmentTag = "${GameDetailFragment.TAG}:$gameId",
+                                fragmentFactory = { GameDetailFragment.ad(gameId) }
+                            )
                         }
 
                         composable(Screen.Comment.route) { backStackEntry ->
@@ -472,16 +473,24 @@ class MainActivity : BaseActivity() {
                                 ?.let { Uri.decode(it) }
                             val commentId = backStackEntry.arguments?.getString("commentId")
                                 ?.let { Uri.decode(it) }
-                            CommentScreen(
-                                comicId = comicId,
-                                gameId = gameId,
-                                commentId = commentId,
-                                onBack = { navController.popBackStack() },
-                                onComicClick = { id ->
-                                    navController.navigate(Screen.createComicDetailRoute(id))
-                                },
-                                onGameClick = { id ->
-                                    navController.navigate(Screen.createGameDetailRoute(id))
+                            val fragmentTag = buildString {
+                                append(CommentFragment.TAG)
+                                append(':')
+                                append(comicId.orEmpty())
+                                append(':')
+                                append(gameId.orEmpty())
+                                append(':')
+                                append(commentId.orEmpty())
+                            }
+                            LegacyFragmentHost(
+                                fragmentTag = fragmentTag,
+                                fragmentFactory = {
+                                    when {
+                                        !gameId.isNullOrBlank() -> CommentFragment.Z(gameId)
+                                        !comicId.isNullOrBlank() -> CommentFragment.l(null, comicId)
+                                        !commentId.isNullOrBlank() -> CommentFragment.l(null, commentId)
+                                        else -> CommentFragment.l(null, "")
+                                    }
                                 }
                             )
                         }
@@ -493,48 +502,37 @@ class MainActivity : BaseActivity() {
                             val link = Uri.decode(
                                 backStackEntry.arguments?.getString("link") ?: ""
                             )
-                            PicaAppScreen(
-                                title = title,
-                                link = link,
-                                onBack = { navController.popBackStack() })
+                            LegacyFragmentHost(
+                                fragmentTag = "${PicaAppFragment.TAG}:$title",
+                                fragmentFactory = { PicaAppFragment.n(title, link) }
+                            )
                         }
 
                         composable(Screen.PicaAppList.route) {
-                            PicaAppListScreen(
-                                onBack = { navController.popBackStack() },
-                                onPicaAppClick = { title, link ->
-                                    navController.navigate(
-                                        Screen.createPicaAppRoute(
-                                            title = title,
-                                            link = link
-                                        )
-                                    )
-                                }
+                            LegacyFragmentHost(
+                                fragmentTag = PicaAppListFragment.TAG,
+                                fragmentFactory = { PicaAppListFragment() }
                             )
                         }
 
                         composable(Screen.ApkVersionList.route) {
-                            ApkVersionListScreen(onBack = { navController.popBackStack() })
+                            LegacyFragmentHost(
+                                fragmentTag = ApkVersionListFragment.TAG,
+                                fragmentFactory = { ApkVersionListFragment() }
+                            )
                         }
 
                         composable(Screen.AnnouncementList.route) {
-                            AnnouncementListScreen(onBack = { navController.popBackStack() })
+                            LegacyFragmentHost(
+                                fragmentTag = AnnouncementListFragment.TAG,
+                                fragmentFactory = { AnnouncementListFragment() }
+                            )
                         }
 
                         composable(Screen.Leaderboard.route) {
-                            LeaderboardScreen(
-                                onBack = { navController.popBackStack() },
-                                onComicClick = { comicId ->
-                                    navController.navigate(Screen.createComicDetailRoute(comicId))
-                                },
-                                onKnightClick = { knightId, knightName ->
-                                    navController.navigate(
-                                        Screen.createComicListRoute(
-                                            creatorId = knightId,
-                                            creatorName = knightName
-                                        )
-                                    )
-                                }
+                            LegacyFragmentHost(
+                                fragmentTag = LeaderboardContainerFragment.TAG,
+                                fragmentFactory = { LeaderboardContainerFragment() }
                             )
                         }
                     }

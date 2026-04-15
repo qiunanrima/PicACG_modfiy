@@ -1,7 +1,6 @@
 package com.picacomic.fregata.compose.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,15 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaPrimaryButton
+import com.picacomic.fregata.compose.components.PicaSecondaryScreen
+import com.picacomic.fregata.compose.components.PicaTextField
 import com.picacomic.fregata.compose.viewmodels.ChangePasswordViewModel
 
 @Composable
@@ -63,32 +57,10 @@ fun ChangePasswordScreen(
     }
 
     PicaComposeTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+        PicaSecondaryScreen(
+            title = stringResource(R.string.setting_password_title),
+            onBack = onBack
         ) {
-            Surface(shadowElevation = 2.dp, tonalElevation = 2.dp) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                    Text(
-                        text = stringResource(R.string.setting_password_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -102,43 +74,25 @@ fun ChangePasswordScreen(
                     PasswordVisualTransformation()
                 }
 
-                OutlinedTextField(
+                PicaTextField(
                     value = viewModel.password,
                     onValueChange = viewModel::updatePassword,
-                    label = { Text(stringResource(R.string.change_password_new_title)) },
-                    placeholder = { Text(stringResource(R.string.change_password_enter_new_hint)) },
-                    singleLine = true,
-                    isError = passwordErrorRes != null,
+                    label = stringResource(R.string.change_password_new_title),
+                    placeholder = stringResource(R.string.change_password_enter_new_hint),
+                    errorText = passwordErrorRes?.let { stringResource(it) },
                     visualTransformation = transformation,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
-                if (passwordErrorRes != null) {
-                    Text(
-                        text = stringResource(passwordErrorRes),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
 
-                OutlinedTextField(
+                PicaTextField(
                     value = viewModel.passwordConfirm,
                     onValueChange = viewModel::updatePasswordConfirm,
-                    label = { Text(stringResource(R.string.change_password_new_confirm_title)) },
-                    placeholder = { Text(stringResource(R.string.change_password_enter_new_hint)) },
-                    singleLine = true,
-                    isError = passwordConfirmErrorRes != null,
+                    label = stringResource(R.string.change_password_new_confirm_title),
+                    placeholder = stringResource(R.string.change_password_enter_new_hint),
+                    errorText = passwordConfirmErrorRes?.let { stringResource(it) },
                     visualTransformation = transformation,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    modifier = Modifier.fillMaxWidth()
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
-                if (passwordConfirmErrorRes != null) {
-                    Text(
-                        text = stringResource(passwordConfirmErrorRes),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -151,19 +105,15 @@ fun ChangePasswordScreen(
                     Text(text = stringResource(R.string.change_password_show_password))
                 }
 
-                Button(
+                PicaPrimaryButton(
+                    text = if (viewModel.isLoading) {
+                        stringResource(R.string.loading_general)
+                    } else {
+                        stringResource(R.string.change_password_change)
+                    },
                     onClick = viewModel::submit,
-                    enabled = viewModel.canSubmit() && !viewModel.isLoading,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (viewModel.isLoading) {
-                            stringResource(R.string.loading_general)
-                        } else {
-                            stringResource(R.string.change_password_change)
-                        }
-                    )
-                }
+                    enabled = viewModel.canSubmit() && !viewModel.isLoading
+                )
             }
         }
     }
