@@ -1,10 +1,8 @@
 package com.picacomic.fregata.compose.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,17 +11,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaConfirmDialog
+import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
+import com.picacomic.fregata.compose.components.PicaValueListItem
+import com.picacomic.fregata.compose.components.PicaSwitchListItem
 
 enum class SettingsDialog {
     ScreenOrientation,
@@ -121,86 +119,89 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 SettingsSection(title = stringResource(R.string.setting_comic_viewer_title)) {
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_comic_viewer_screen_orientation),
                         value = state.screenOrientationValue,
                         onClick = onScreenOrientation
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_comic_viewer_scroll_direction),
                         value = state.scrollDirectionValue,
                         onClick = onScrollDirection
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_comic_viewer_auto_paging_interval),
                         value = state.autoPagingValue,
                         onClick = onAutoPaging
                     )
-                    SettingsSwitchRow(
+                    PicaSwitchListItem(
                         label = stringResource(R.string.setting_comic_viewer_night_mode),
                         checked = state.nightModeEnabled,
                         onCheckedChange = onNightModeChanged
                     )
-                    SettingsSwitchRow(
+                    PicaSwitchListItem(
                         label = stringResource(R.string.setting_comic_viewer_volume_paging_control),
                         checked = state.volumePagingEnabled,
                         onCheckedChange = onVolumePagingChanged
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_comic_viewer_image_quality),
                         value = state.imageQualityValue,
-                        onClick = onImageQuality
+                        onClick = onImageQuality,
+                        showDivider = false
                     )
                 }
 
                 SettingsSection(title = stringResource(R.string.setting_testing_title)) {
-                    SettingsSwitchRow(
+                    PicaSwitchListItem(
                         label = stringResource(R.string.setting_comic_viewer_testing_version),
                         checked = state.testingEnabled,
-                        onCheckedChange = onTestingChanged
+                        onCheckedChange = onTestingChanged,
+                        showDivider = false
                     )
                 }
 
                 SettingsSection(title = stringResource(R.string.setting_other_title)) {
-                    SettingsSwitchRow(
+                    PicaSwitchListItem(
                         label = stringResource(R.string.setting_performance_enhancement),
                         checked = state.performanceEnabled,
                         onCheckedChange = onPerformanceChanged
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_theme_color),
                         value = state.themeColorValue,
                         onClick = onThemeColor
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.alert_continue_download_comic_title),
                         value = stringResource(R.string.setting_chatroom_open),
                         onClick = onContinueDownload
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = state.apkVersionTitle,
                         value = stringResource(R.string.title_apk_version),
                         onClick = onApkVersion
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = state.cacheTitleValue,
                         value = stringResource(R.string.setting_cache),
                         onClick = onCache
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_faq_title),
                         value = stringResource(R.string.setting_faq),
                         onClick = onFaq
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = state.pinTitleValue,
                         value = state.pinValue,
                         onClick = onPin
                     )
-                    SettingsValueRow(
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_password_title),
                         value = stringResource(R.string.setting_password),
-                        onClick = onPassword
+                        onClick = onPassword,
+                        showDivider = false
                     )
                 }
 
@@ -216,7 +217,7 @@ fun SettingsScreen(
         }
 
         when (state.activeDialog) {
-            SettingsDialog.ScreenOrientation -> SettingsSingleChoiceDialog(
+            SettingsDialog.ScreenOrientation -> PicaSingleChoiceDialog(
                 title = stringResource(R.string.setting_comic_viewer_screen_orientation),
                 options = screenOrientationOptions.toList(),
                 selectedIndex = state.screenOrientationIndex,
@@ -224,7 +225,7 @@ fun SettingsScreen(
                 onDismiss = onDialogDismiss,
             )
 
-            SettingsDialog.ScrollDirection -> SettingsSingleChoiceDialog(
+            SettingsDialog.ScrollDirection -> PicaSingleChoiceDialog(
                 title = stringResource(R.string.setting_comic_viewer_scroll_direction),
                 options = scrollDirectionOptions.toList(),
                 selectedIndex = state.scrollDirectionIndex,
@@ -232,7 +233,7 @@ fun SettingsScreen(
                 onDismiss = onDialogDismiss,
             )
 
-            SettingsDialog.ImageQuality -> SettingsSingleChoiceDialog(
+            SettingsDialog.ImageQuality -> PicaSingleChoiceDialog(
                 title = stringResource(R.string.setting_comic_viewer_image_quality),
                 options = imageQualityOptions.toList(),
                 selectedIndex = state.imageQualityIndex,
@@ -240,7 +241,7 @@ fun SettingsScreen(
                 onDismiss = onDialogDismiss,
             )
 
-            SettingsDialog.ThemeColor -> SettingsSingleChoiceDialog(
+            SettingsDialog.ThemeColor -> PicaSingleChoiceDialog(
                 title = stringResource(R.string.setting_theme_color),
                 options = themeColorOptions.toList(),
                 selectedIndex = state.themeColorIndex,
@@ -248,15 +249,12 @@ fun SettingsScreen(
                 onDismiss = onDialogDismiss,
             )
 
-            SettingsDialog.ThemeColorUnsupported -> AlertDialog(
-                onDismissRequest = onDialogDismiss,
-                title = { Text(text = stringResource(R.string.alert_version_not_supported_title)) },
-                text = { Text(text = stringResource(R.string.alert_version_not_supported)) },
-                confirmButton = {
-                    TextButton(onClick = onDialogDismiss) {
-                        Text(text = stringResource(R.string.ok))
-                    }
-                },
+            SettingsDialog.ThemeColorUnsupported -> PicaConfirmDialog(
+                title = stringResource(R.string.alert_version_not_supported_title),
+                body = stringResource(R.string.alert_version_not_supported),
+                onConfirm = onDialogDismiss,
+                onDismiss = onDialogDismiss,
+                dismissText = null,
             )
 
             SettingsDialog.AutoPaging -> AutoPagingDialog(
@@ -269,44 +267,6 @@ fun SettingsScreen(
             null -> Unit
         }
     }
-}
-
-@Composable
-private fun SettingsSingleChoiceDialog(
-    title: String,
-    options: List<String>,
-    selectedIndex: Int,
-    onSelect: (Int) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                options.forEachIndexed { index, option ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(index) },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = selectedIndex == index,
-                            onClick = { onSelect(index) }
-                        )
-                        Text(text = option)
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(R.string.cancel))
-            }
-        }
-    )
 }
 
 @Composable
@@ -355,7 +315,7 @@ private fun AutoPagingDialog(
 @Composable
 private fun SettingsSection(
     title: String,
-    content:@Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Text(
         text = title,
@@ -366,53 +326,6 @@ private fun SettingsSection(
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.fillMaxWidth(), content = content)
     }
-}
-
-@Composable
-private fun SettingsValueRow(label: String, value: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-    HorizontalDivider()
-}
-
-@Composable
-private fun SettingsSwitchRow(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
-    }
-    HorizontalDivider()
 }
 
 @Preview(showBackground = true)

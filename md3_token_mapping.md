@@ -41,12 +41,17 @@ This means token changes must keep Compose and legacy Fragment pages visually al
 
 The current Compose component baseline includes:
 
-- `PicaTopBar.kt`
-- `PicaButtons.kt`
-- `PicaFields.kt`
-- `PicaSurfaceContainers.kt`
+| 文件 | 导出组件 | 阶段 |
+| --- | --- | --- |
+| `PicaTopBar.kt` | `PicaTopBar` | P1 ✅ |
+| `PicaButtons.kt` | `PicaPrimaryButton` | P1 ✅ |
+| `PicaFields.kt` | `PicaTextField` | P1 ✅ |
+| `PicaSurfaceContainers.kt` | `PicaScreenContainer` / `PicaSecondaryScreen` / `PicaCardSection` | P1 ✅ |
+| `PicaListItem.kt` | `PicaValueListItem` / `PicaSwitchListItem` / `PicaRadioListItem` | P1 ✅ |
+| `PicaDialogs.kt` | `PicaConfirmDialog` / `PicaSingleChoiceDialog` | P1 ✅ |
+| `PicaFeedback.kt` | `PicaLoadingIndicator` / `PicaEmptyState` | P1 ✅ |
 
-These components are the preferred entry point for new Compose pages, but a number of high-interaction secondary pages are now temporarily routed back through legacy Fragments for behavior completeness.
+`SettingsScreen` 中原有的私有组件 `SettingsSingleChoiceDialog` / `SettingsValueRow` / `SettingsSwitchRow` 已替换为公共组件，并删除原私有实现。
 
 ## Secondary Route Status
 
@@ -130,64 +135,70 @@ Only the highest-impact tokens are listed here.
 
 ### Light Pink
 
-| Token | Value |
-| --- | --- |
-| `primary` | `#C43D74` |
-| `primaryContainer` | `#FDE0EC` |
-| `secondary` | `#75565F` |
-| `secondaryContainer` | `#FCCFDF` |
-| `background` | `#FFF5F8` |
-| `surface` | `#FFF5F8` |
-| `surfaceVariant` | `#E8D6DB` |
-| `outline` | `#7E7478` |
+| Token | Compose value | XML color resource | XML value |
+| --- | --- | --- | --- |
+| `primary` | `#C43D74` | `@color/theme_light_primary` | `#FFC43D74` ✅ |
+| `primaryContainer` | `#FDE0EC` | `@color/theme_light_primary_container` | `#FFFDE0EC` ✅ |
+| `secondary` | `#75565F` | `@color/theme_light_secondary` | `#FF75565F` ✅ |
+| `secondaryContainer` | `#FCCFDF` | `@color/theme_light_secondary_container` | `#FFFCCFDF` ✅ |
+| `background` | `#FFF5F8` | `@color/theme_light_surface` | `#FFFFF5F8` ✅ |
+| `surface` | `#FFF5F8` | `@color/theme_light_surface` | `#FFFFF5F8` ✅ |
+| `surfaceVariant` | `#E8D6DB` | `@color/theme_light_surface_variant` | `#FFE8D6DB` ✅ |
+| `onSurface` | `#1F1A1C` | `@color/theme_light_on_surface` | `#FF1F1A1C` ✅ |
+| `onSurfaceVariant` | `#4C4447` | `@color/theme_light_on_surface_variant` | `#FF4C4447` ✅ |
+| `outline` | `#7E7478` | `@color/theme_light_outline` | `#FF7E7478` ✅ |
 
 ### Dark Red
 
-| Token | Value |
-| --- | --- |
-| `primary` | `#F4A6C1` |
-| `primaryContainer` | `#A32E5E` |
-| `secondary` | `#D6A3AF` |
-| `secondaryContainer` | `#6B2347` |
-| `background` | `#1E0F16` |
-| `surface` | `#1E0F16` |
-| `surfaceVariant` | `#4C4447` |
-| `outline` | `#9B8F94` |
+| Token | Compose value | XML color resource | XML value |
+| --- | --- | --- | --- |
+| `primary` | `#F4A6C1` | `@color/theme_dark_primary` | `#FFF4A6C1` ✅ |
+| `primaryContainer` | `#A32E5E` | `@color/theme_dark_primary_container` | `#FFA32E5E` ✅ |
+| `secondary` | `#D6A3AF` | `@color/theme_dark_secondary` | `#FFD6A3AF` ✅ |
+| `secondaryContainer` | `#6B2347` | `@color/theme_dark_secondary_container` | `#FF6B2347` ✅ |
+| `background` | `#1E0F16` | `@color/theme_dark_surface` | `#FF1E0F16` ✅ |
+| `surface` | `#1E0F16` | `@color/theme_dark_surface` | `#FF1E0F16` ✅ |
+| `surfaceVariant` | `#4C4447` | `@color/theme_dark_surface_variant` | `#FF4C4447` ✅ |
+| `onSurface` | `#F1DDE2` | `@color/theme_dark_on_surface` | `#FFF1DDE2` ✅ |
+| `onSurfaceVariant` | `#D1C2C7` | `@color/theme_dark_on_surface_variant` | `#FFD1C2C7` ✅ |
+| `outline` | `#9B8F94` | `@color/theme_dark_outline` | `#FF9B8F94` ✅ |
 
 ### Miracle Neon Light
 
-| Token | Value |
-| --- | --- |
-| `primary` | `#6B3FBF` |
-| `primaryContainer` | `#E8D8FF` |
-| `secondary` | `#C4254A` |
-| `secondaryContainer` | `#FFD9E1` |
-| `tertiary` | `#8A6800` |
-| `background` | `#FBF8FF` |
-| `surface` | `#FBF8FF` |
-| `surfaceVariant` | `#EDE8F5` |
-| `outline` | `#7B7489` |
+| Token | Compose value | XML color resource | XML value |
+| --- | --- | --- | --- |
+| `primary` | `#6B3FBF` | `@color/theme_neon_light_primary` | `#FF6B3FBF` ✅ |
+| `primaryContainer` | `#E8D8FF` | `@color/theme_neon_light_primary_container` | `#FFE8D8FF` ✅ |
+| `secondary` | `#C4254A` | `@color/theme_neon_light_secondary` | `#FFC4254A` ✅ |
+| `secondaryContainer` | `#FFD9E1` | `@color/theme_neon_light_secondary_container` | `#FFFFD9E1` ✅ |
+| `tertiary` | `#8A6800` | `@color/theme_neon_light_tertiary` | `#FF8A6800` ✅ |
+| `background` | `#FBF8FF` | `@color/theme_neon_light_background` | `#FFFBF8FF` ✅ |
+| `surface` | `#FBF8FF` | `@color/theme_neon_light_surface` | `#FFFBF8FF` ✅ |
+| `surfaceVariant` | `#EDE8F5` | `@color/theme_neon_light_surface_variant` | `#FFEDE8F5` ✅ |
+| `onSurface` | `#1C1628` | `@color/theme_neon_light_on_surface` | `#FF1C1628` ✅ |
+| `outline` | `#7B7489` | `@color/theme_neon_light_outline` | `#FF7B7489` ✅ |
 
 ### Miracle Neon Dark
 
-| Token | Value |
-| --- | --- |
-| `primary` | `#C9AEFF` |
-| `primaryContainer` | `#5127A8` |
-| `secondary` | `#FFB1C2` |
-| `secondaryContainer` | `#8F0036` |
-| `tertiary` | `#F5C842` |
-| `background` | `#130F1F` |
-| `surface` | `#130F1F` |
-| `surfaceVariant` | `#4A4458` |
-| `outline` | `#948FA2` |
+| Token | Compose value | XML color resource | XML value |
+| --- | --- | --- | --- |
+| `primary` | `#C9AEFF` | `@color/theme_neon_dark_primary` | `#FFC9AEFF` ✅ |
+| `primaryContainer` | `#5127A8` | `@color/theme_neon_dark_primary_container` | `#FF5127A8` ✅ |
+| `secondary` | `#FFB1C2` | `@color/theme_neon_dark_secondary` | `#FFFFB1C2` ✅ |
+| `secondaryContainer` | `#8F0036` | `@color/theme_neon_dark_secondary_container` | `#FF8F0036` ✅ |
+| `tertiary` | `#F5C842` | `@color/theme_neon_dark_tertiary` | `#FFF5C842` ✅ |
+| `background` | `#130F1F` | `@color/theme_neon_dark_background` | `#FF130F1F` ✅ |
+| `surface` | `#130F1F` | `@color/theme_neon_dark_surface` | `#FF130F1F` ✅ |
+| `surfaceVariant` | `#4A4458` | `@color/theme_neon_dark_surface_variant` | `#FF4A4458` ✅ |
+| `onSurface` | `#E8E0F5` | `@color/theme_neon_dark_on_surface` | `#FFE8E0F5` ✅ |
+| `outline` | `#948FA2` | `@color/theme_neon_dark_outline` | `#FF948FA2` ✅ |
 
 ## Current Gaps
 
 1. Typography is not yet mapped at the same semantic level as color.
 2. Shapes are unified in Compose, but not fully represented in legacy XML styles.
-3. Some legacy XML still uses direct fixed resources such as `@color/colorPrimary`, `@color/colorPrimaryLight`, `@color/peach`, `@color/pinkDark`.
-4. `colorAccent` is still used as a bridge in older XML paths and should eventually be treated as a compatibility alias, not a source of truth.
+3. ~~Some legacy XML still uses direct fixed resources such as `@color/colorPrimary`, `@color/colorPrimaryLight`, `@color/peach`, `@color/pinkDark`.~~ **Fixed (P0)**: `AppTheme` and `AppThemeBlack` now bind to `theme_light_*` / `theme_dark_*` semantic color resources that are aligned with Compose token values.
+4. ~~`colorAccent` is still used as a bridge in older XML paths and should eventually be treated as a compatibility alias, not a source of truth.~~ **Fixed (P0)**: `colorAccent` in `AppTheme` and `AppThemeBlack` now points to the correct MD3 `secondary` color for each theme.
 5. A number of interaction-heavy pages still depend on legacy Fragment implementations, so MD3 visual migration and architecture migration are not yet at the same completion level.
 6. Fragment business logic extraction is only partially started; `ComicDetailFragment` now has a dedicated Fragment ViewModel, but `ComicListFragment` and `CommentFragment` still keep most request logic in Fragment.
 
