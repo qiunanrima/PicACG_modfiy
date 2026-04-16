@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -37,7 +39,9 @@ fun SplashScreen(
     isLoading: Boolean,
     showError: Boolean,
     showOptions: Boolean,
+    sslVerificationDisabled: Boolean,
     onRetry: () -> Unit,
+    onSslVerificationDisabledChanged: (Boolean) -> Unit,
     onServer1: () -> Unit,
     onServer2: () -> Unit,
     onServer3: () -> Unit,
@@ -118,6 +122,28 @@ fun SplashScreen(
                         }
                     }
                 }
+                SplashCard {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = sslVerificationDisabled,
+                            onCheckedChange = onSslVerificationDisabledChanged
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(id = R.string.splash_disable_ssl_verification),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Text(
+                                text = stringResource(id = R.string.splash_disable_ssl_verification_summary),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
@@ -145,7 +171,9 @@ private fun SplashScreenPreview() {
         isLoading = true,
         showError = false,
         showOptions = false,
+        sslVerificationDisabled = false,
         onRetry = {},
+        onSslVerificationDisabledChanged = {},
         onServer1 = {},
         onServer2 = {},
         onServer3 = {}

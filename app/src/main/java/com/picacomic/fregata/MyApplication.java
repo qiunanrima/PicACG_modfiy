@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.orm.SugarApp;
 import com.picacomic.fregata.b.b;
+import com.picacomic.fregata.utils.NetworkSecurityHelper;
 import com.picacomic.fregata.utils.d;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
@@ -17,6 +18,7 @@ public class MyApplication extends SugarApp {
     public static final String TAG = "MyApplication";
     private static MyApplication hk;
     private static Context mAppContext;
+    private static boolean picassoConfigured;
     private d hl;
 
     public native String getStringSigFromNative();
@@ -49,9 +51,19 @@ public class MyApplication extends SugarApp {
         return themeIndex == 0 ? R.style.AppTheme : R.style.AppThemeBlack;
     }
 
-    public static void bw() {
+    public static synchronized void bw() {
+        if (picassoConfigured || mAppContext == null) {
+            return;
+        }
         f.D(TAG, "SET PICASSO INSTANCE");
-        Picasso.setSingletonInstance(new Picasso.Builder(mAppContext).downloader(new com.a.a.a(new OkHttpClient().newBuilder().dns(new b()).build())).build());
+        OkHttpClient.Builder builder = new OkHttpClient().newBuilder().dns(new b());
+        NetworkSecurityHelper.applySslPolicy(builder, mAppContext);
+        try {
+            Picasso.setSingletonInstance(new Picasso.Builder(mAppContext).downloader(new com.a.a.a(builder.build())).build());
+        } catch (IllegalStateException ex) {
+            f.D(TAG, "PICASSO INSTANCE ALREADY INITIALIZED");
+        }
+        picassoConfigured = true;
     }
 
     public static MyApplication bx() {

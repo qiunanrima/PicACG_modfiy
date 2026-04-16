@@ -411,4 +411,12 @@ public class e {
     public static boolean i(Context context, int i) {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putInt("KEY_CHANNEL", i).commit();
     }
+
+    public static boolean isSslVerificationDisabled(Context context) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getBoolean("KEY_DISABLE_SSL_VERIFICATION", false);
+    }
+
+    public static boolean setSslVerificationDisabled(Context context, boolean z) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putBoolean("KEY_DISABLE_SSL_VERIFICATION", z).commit();
+    }
 }

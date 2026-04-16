@@ -244,7 +244,7 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="apk_version_prefix">安卓版本 Ver.</string>
     <string name="app_build_version">45</string>
     <string name="app_name">PicACG</string>
-    <string name="app_version">2.2.1.3.3.4</string>
+    <string name="app_version">1.0.1</string>
     <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
     <string name="backbutton">&lt;&lt;返回</string>
     <string name="bookmarked">已收藏</string>
@@ -601,6 +601,8 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="splash_server_1">分流【 1 】</string>
     <string name="splash_server_2">分流【 2 】</string>
     <string name="splash_server_3">分流【 3 】</string>
+    <string name="splash_disable_ssl_verification">强行关闭 SSL 证书验证</string>
+    <string name="splash_disable_ssl_verification_summary">勾选后，应用内网络请求将跳过证书校验与主机名校验，仅建议在证书异常时临时使用。</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="support_us_ads_title">▼ 拯救哔咔，请点广告 ▼</string>
     <string name="support_us_alipay_account">18659554802</string>

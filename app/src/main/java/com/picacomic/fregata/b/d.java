@@ -1,14 +1,12 @@
 package com.picacomic.fregata.b;
 
 import android.content.Context;
-import android.util.Log;
 import com.picacomic.fregata.MyApplication;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.utils.g;
+import com.picacomic.fregata.utils.NetworkSecurityHelper;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import okhttp3.CertificatePinner;
 import okhttp3.Interceptor;
@@ -87,13 +85,7 @@ public class d {
             }
         });
         new CertificatePinner.Builder().build();
-        try {
-            f fVar = new f();
-            builder.sslSocketFactory(fVar, fVar.systemDefaultTrustManager());
-        } catch (KeyManagementException | NoSuchAlgorithmException e) {
-            Log.d(TAG, "Failed to create Socket connection ");
-            e.printStackTrace();
-        }
+        NetworkSecurityHelper.applySslPolicy(builder, context);
         this.ty = (a) new Retrofit.Builder().baseUrl("https://picaapi.picacomic.com/").addConverterFactory(GsonConverterFactory.create()).client(builder.build()).build().create(a.class);
     }
 

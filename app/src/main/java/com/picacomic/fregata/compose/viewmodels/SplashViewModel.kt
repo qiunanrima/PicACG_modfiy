@@ -27,6 +27,11 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
     var showOptions by mutableStateOf(false)
         private set
 
+    var sslVerificationDisabled by mutableStateOf(
+        com.picacomic.fregata.utils.e.isSslVerificationDisabled(appContext)
+    )
+        private set
+
     var navigateToLoginEvent by mutableIntStateOf(0)
         private set
 
@@ -53,7 +58,13 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
         loadInit(retryCount = 3)
     }
 
+    fun updateSslVerificationDisabled(enabled: Boolean) {
+        com.picacomic.fregata.utils.e.setSslVerificationDisabled(appContext, enabled)
+        sslVerificationDisabled = enabled
+    }
+
     fun selectServer(server: Int) {
+        MyApplication.bw()
         when (server) {
             1 -> {
                 com.picacomic.fregata.utils.e.p(appContext, false)
@@ -63,21 +74,12 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
             2 -> {
                 com.picacomic.fregata.utils.e.p(appContext, true)
                 com.picacomic.fregata.utils.e.i(appContext, 2)
-                try {
-                    MyApplication.bw()
-                    navigateToLoginEvent++
-                } catch (_: Exception) {
-                    restartRequiredEvent++
-                }
+                navigateToLoginEvent++
             }
             3 -> {
                 com.picacomic.fregata.utils.e.p(appContext, true)
                 com.picacomic.fregata.utils.e.i(appContext, 3)
-                try {
-                    navigateToLoginEvent++
-                } catch (_: Exception) {
-                    restartRequiredEvent++
-                }
+                navigateToLoginEvent++
             }
         }
     }

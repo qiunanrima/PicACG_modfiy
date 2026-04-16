@@ -613,7 +613,7 @@ public class g {
     }
 
     public static boolean a(String str, File file, boolean z) throws Exception {
-        Response responseExecute = new OkHttpClient().newCall(new Request.Builder().url(str).header("User-Agent", "okhttp/3.8.1").build()).execute();
+        Response responseExecute = NetworkSecurityHelper.createClient(com.picacomic.fregata.MyApplication.by()).newCall(new Request.Builder().url(str).header("User-Agent", "okhttp/3.8.1").build()).execute();
         if (!responseExecute.isSuccessful()) {
             throw new IOException("Failed to download file: " + responseExecute);
         }
