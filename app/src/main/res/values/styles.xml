@@ -1228,12 +1228,14 @@
         <item name="android:paddingTop">@dimen/padding_2</item>
         <item name="android:paddingBottom">@dimen/padding_2</item>
     </style>
-    <style name="EditTextStandardSingleLinePeach" parent="@style/TextBaseStylePeach">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="EditTextStandardSingleLinePeach" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">@color/peach</item>
+        <item name="android:textColorHint">@color/gray</item>
         <item name="android:singleLine">true</item>
     </style>
-    <style name="EditTextStandardSingleLinePeachSetting" parent="@style/TextBaseStylePeach">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+    <style name="EditTextStandardSingleLinePeachSetting" parent="@style/TextAppearance.Pica.TitleMedium">
+        <item name="android:textColor">@color/peach</item>
+        <item name="android:textColorHint">@color/gray</item>
         <item name="android:textStyle">bold</item>
         <item name="android:singleLine">true</item>
         <item name="android:background">@drawable/md3_input_bg</item>
@@ -1621,177 +1623,248 @@
         <item name="colorControlActivated">@color/pinkDark</item>
         <item name="colorControlNormal">@color/pinkDark</item>
     </style>
+    <style name="TextAppearance.Pica.Base" parent="@style/TextAppearance.AppCompat" />
+    <style name="TextAppearance.Pica.TitleLarge" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_title_1</item>
+    </style>
+    <style name="TextAppearance.Pica.HeadlineSmall" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_title_2</item>
+    </style>
+    <style name="TextAppearance.Pica.TitleMedium" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_title_3</item>
+    </style>
+    <style name="TextAppearance.Pica.TitleSmall" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_content_2</item>
+    </style>
+    <style name="TextAppearance.Pica.BodyLarge" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_content_1</item>
+    </style>
+    <style name="TextAppearance.Pica.BodyMedium" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_content_2</item>
+    </style>
+    <style name="TextAppearance.Pica.BodySmall" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_content_3</item>
+    </style>
+    <style name="TextAppearance.Pica.LabelLarge" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_content_2</item>
+    </style>
+    <style name="TextAppearance.Pica.LabelMedium" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_content_3</item>
+    </style>
+    <style name="TextAppearance.Pica.LabelSmall" parent="@style/TextAppearance.Pica.Base">
+        <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+    </style>
     <style name="TextBaseStyleBlue">
         <item name="android:textColor">@color/blue</item>
         <item name="android:textColorHint">@color/blueLight</item>
     </style>
-    <style name="TextBaseStyleBlueContent1" parent="@style/TextBaseStyleBlue">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStyleBlueContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">@color/blue</item>
+        <item name="android:textColorHint">@color/blueLight</item>
     </style>
-    <style name="TextBaseStyleBlueTitle1" parent="@style/TextBaseStyleBlue">
-        <item name="android:textSize">@dimen/textsize_title_1</item>
+    <style name="TextBaseStyleBlueTitle1" parent="@style/TextAppearance.Pica.TitleLarge">
+        <item name="android:textColor">@color/blue</item>
+        <item name="android:textColorHint">@color/blueLight</item>
     </style>
     <style name="TextBaseStyleGray">
         <item name="android:textColor">?custom_text_black_color_light</item>
         <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayContent1" parent="@style/TextBaseStyleGray">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStyleGrayContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayContent2" parent="@style/TextBaseStyleGray">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="TextBaseStyleGrayContent2" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayContent3" parent="@style/TextBaseStyleGray">
-        <item name="android:textSize">@dimen/textsize_content_3</item>
+    <style name="TextBaseStyleGrayContent3" parent="@style/TextAppearance.Pica.BodySmall">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
     <style name="TextBaseStyleGrayDark">
         <item name="android:textColor">?custom_text_black_color_dark</item>
         <item name="android:textColorHint">@color/gray</item>
     </style>
-    <style name="TextBaseStyleGrayDarkContent1" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStyleGrayDarkContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
     <style name="TextBaseStyleGrayDarkContent1Bold" parent="@style/TextBaseStyleGrayDarkContent1">
         <item name="android:textStyle">bold</item>
     </style>
-    <style name="TextBaseStyleGrayDarkContent2" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="TextBaseStyleGrayDarkContent2" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
     <style name="TextBaseStyleGrayDarkContent2Bold" parent="@style/TextBaseStyleGrayDarkContent2">
         <item name="android:textStyle">bold</item>
     </style>
-    <style name="TextBaseStyleGrayDarkContent3" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_content_3</item>
+    <style name="TextBaseStyleGrayDarkContent3" parent="@style/TextAppearance.Pica.BodySmall">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
-    <style name="TextBaseStyleGrayDarkTimestamp1" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+    <style name="TextBaseStyleGrayDarkTimestamp1" parent="@style/TextAppearance.Pica.LabelSmall">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
-    <style name="TextBaseStyleGrayDarkTitle1" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_title_1</item>
+    <style name="TextBaseStyleGrayDarkTitle1" parent="@style/TextAppearance.Pica.TitleLarge">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
-    <style name="TextBaseStyleGrayDarkTitle2" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_title_2</item>
+    <style name="TextBaseStyleGrayDarkTitle2" parent="@style/TextAppearance.Pica.HeadlineSmall">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
-    <style name="TextBaseStyleGrayDarkTitle3" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+    <style name="TextBaseStyleGrayDarkTitle3" parent="@style/TextAppearance.Pica.TitleMedium">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
     <style name="TextBaseStyleGrayLight">
         <item name="android:textColor">@color/grayLight</item>
         <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayLightContent2" parent="@style/TextBaseStyleGrayLight">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="TextBaseStyleGrayLightContent2" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">@color/grayLight</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayTimestamp1" parent="@style/TextBaseStyleGray">
-        <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+    <style name="TextBaseStyleGrayTimestamp1" parent="@style/TextAppearance.Pica.LabelSmall">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
     <style name="TextBaseStyleGrayTimestamp2" parent="@style/TextBaseStyleGray">
         <item name="android:textSize">@dimen/textsize_timestamp_2</item>
     </style>
-    <style name="TextBaseStyleGrayTitle1" parent="@style/TextBaseStyleGray">
-        <item name="android:textSize">@dimen/textsize_title_1</item>
+    <style name="TextBaseStyleGrayTitle1" parent="@style/TextAppearance.Pica.TitleLarge">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayTitle2" parent="@style/TextBaseStyleGray">
-        <item name="android:textSize">@dimen/textsize_title_2</item>
+    <style name="TextBaseStyleGrayTitle2" parent="@style/TextAppearance.Pica.HeadlineSmall">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayTitle3" parent="@style/TextBaseStyleGray">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+    <style name="TextBaseStyleGrayTitle3" parent="@style/TextAppearance.Pica.TitleMedium">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
     </style>
     <style name="TextBaseStyleOrange">
         <item name="android:textColor">@color/orange</item>
         <item name="android:textColorHint">@color/orangeLight</item>
     </style>
-    <style name="TextBaseStyleOrangeContent1" parent="@style/TextBaseStyleOrange">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStyleOrangeContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">@color/orange</item>
+        <item name="android:textColorHint">@color/orangeLight</item>
     </style>
-    <style name="TextBaseStyleOrangeTitle1" parent="@style/TextBaseStyleOrange">
-        <item name="android:textSize">@dimen/textsize_title_1</item>
+    <style name="TextBaseStyleOrangeTitle1" parent="@style/TextAppearance.Pica.TitleLarge">
+        <item name="android:textColor">@color/orange</item>
+        <item name="android:textColorHint">@color/orangeLight</item>
     </style>
     <style name="TextBaseStylePeach">
         <item name="android:textColor">@color/peach</item>
         <item name="android:textColorHint">@color/gray</item>
     </style>
-    <style name="TextBaseStylePeachTitle1" parent="@style/TextBaseStylePeach">
-        <item name="android:textSize">@dimen/textsize_title_1</item>
+    <style name="TextBaseStylePeachTitle1" parent="@style/TextAppearance.Pica.TitleLarge">
+        <item name="android:textColor">@color/peach</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
-    <style name="TextBaseStylePeachTitle2" parent="@style/TextBaseStylePeach">
-        <item name="android:textSize">@dimen/textsize_title_2</item>
+    <style name="TextBaseStylePeachTitle2" parent="@style/TextAppearance.Pica.HeadlineSmall">
+        <item name="android:textColor">@color/peach</item>
+        <item name="android:textColorHint">@color/gray</item>
     </style>
     <style name="TextBaseStylePink">
         <item name="android:textColor">@color/pink</item>
         <item name="android:textColorHint">@color/pinkLight</item>
     </style>
-    <style name="TextBaseStylePinkContent1" parent="@style/TextBaseStylePink">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStylePinkContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">@color/pink</item>
+        <item name="android:textColorHint">@color/pinkLight</item>
     </style>
     <style name="TextBaseStylePinkContent1Bold" parent="@style/TextBaseStylePinkContent1">
         <item name="android:textStyle">bold</item>
     </style>
-    <style name="TextBaseStylePinkContent2" parent="@style/TextBaseStylePink">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="TextBaseStylePinkContent2" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">@color/pink</item>
+        <item name="android:textColorHint">@color/pinkLight</item>
     </style>
-    <style name="TextBaseStylePinkContent3" parent="@style/TextBaseStylePink">
-        <item name="android:textSize">@dimen/textsize_content_3</item>
+    <style name="TextBaseStylePinkContent3" parent="@style/TextAppearance.Pica.BodySmall">
+        <item name="android:textColor">@color/pink</item>
+        <item name="android:textColorHint">@color/pinkLight</item>
     </style>
     <style name="TextBaseStylePinkDark">
         <item name="android:textColor">@color/pinkDark</item>
         <item name="android:textColorHint">@color/pink</item>
     </style>
-    <style name="TextBaseStylePinkDarkContent1" parent="@style/TextBaseStylePinkDark">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStylePinkDarkContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">@color/pinkDark</item>
+        <item name="android:textColorHint">@color/pink</item>
     </style>
-    <style name="TextBaseStylePinkDarkContent2" parent="@style/TextBaseStylePinkDark">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="TextBaseStylePinkDarkContent2" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">@color/pinkDark</item>
+        <item name="android:textColorHint">@color/pink</item>
     </style>
-    <style name="TextBaseStylePinkDarkContent3" parent="@style/TextBaseStylePinkDark">
-        <item name="android:textSize">@dimen/textsize_content_3</item>
+    <style name="TextBaseStylePinkDarkContent3" parent="@style/TextAppearance.Pica.BodySmall">
+        <item name="android:textColor">@color/pinkDark</item>
+        <item name="android:textColorHint">@color/pink</item>
     </style>
-    <style name="TextBaseStylePinkDarkTitle2" parent="@style/TextBaseStylePinkDark">
-        <item name="android:textSize">@dimen/textsize_title_2</item>
+    <style name="TextBaseStylePinkDarkTitle2" parent="@style/TextAppearance.Pica.HeadlineSmall">
+        <item name="android:textColor">@color/pinkDark</item>
+        <item name="android:textColorHint">@color/pink</item>
     </style>
     <style name="TextBaseStylePinkLight">
         <item name="android:textColor">@color/pinkLight</item>
         <item name="android:textColorHint">@color/white</item>
     </style>
-    <style name="TextBaseStylePinkLightContent1" parent="@style/TextBaseStylePinkLight">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStylePinkLightContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">@color/pinkLight</item>
+        <item name="android:textColorHint">@color/white</item>
     </style>
-    <style name="TextBaseStylePinkLightContent2" parent="@style/TextBaseStylePinkLight">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="TextBaseStylePinkLightContent2" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">@color/pinkLight</item>
+        <item name="android:textColorHint">@color/white</item>
     </style>
-    <style name="TextBaseStylePinkLightTitle3" parent="@style/TextBaseStylePinkLight">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+    <style name="TextBaseStylePinkLightTitle3" parent="@style/TextAppearance.Pica.TitleMedium">
+        <item name="android:textColor">@color/pinkLight</item>
+        <item name="android:textColorHint">@color/white</item>
     </style>
-    <style name="TextBaseStylePinkTitle2" parent="@style/TextBaseStylePink">
-        <item name="android:textSize">@dimen/textsize_title_2</item>
+    <style name="TextBaseStylePinkTitle2" parent="@style/TextAppearance.Pica.HeadlineSmall">
+        <item name="android:textColor">@color/pink</item>
+        <item name="android:textColorHint">@color/pinkLight</item>
     </style>
-    <style name="TextBaseStylePinkTitle3" parent="@style/TextBaseStylePink">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+    <style name="TextBaseStylePinkTitle3" parent="@style/TextAppearance.Pica.TitleMedium">
+        <item name="android:textColor">@color/pink</item>
+        <item name="android:textColorHint">@color/pinkLight</item>
     </style>
     <style name="TextBaseStyleWhite">
         <item name="android:textColor">@color/white</item>
         <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextBaseStylesWhiteContent1" parent="@style/TextBaseStyleWhite">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="TextBaseStylesWhiteContent1" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextBaseStylesWhiteContent2" parent="@style/TextBaseStyleWhite">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+    <style name="TextBaseStylesWhiteContent2" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextBaseStylesWhiteContent3" parent="@style/TextBaseStyleWhite">
-        <item name="android:textSize">@dimen/textsize_content_3</item>
+    <style name="TextBaseStylesWhiteContent3" parent="@style/TextAppearance.Pica.BodySmall">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextBaseStylesWhiteTimestamp1" parent="@style/TextBaseStyleWhite">
-        <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+    <style name="TextBaseStylesWhiteTimestamp1" parent="@style/TextAppearance.Pica.LabelSmall">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextBaseStylesWhiteTitle1" parent="@style/TextBaseStyleWhite">
-        <item name="android:textSize">@dimen/textsize_title_1</item>
+    <style name="TextBaseStylesWhiteTitle1" parent="@style/TextAppearance.Pica.TitleLarge">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextBaseStylesWhiteTitle2" parent="@style/TextBaseStyleWhite">
-        <item name="android:textSize">@dimen/textsize_title_2</item>
+    <style name="TextBaseStylesWhiteTitle2" parent="@style/TextAppearance.Pica.HeadlineSmall">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextBaseStylesWhiteTitle3" parent="@style/TextBaseStyleWhite">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+    <style name="TextBaseStylesWhiteTitle3" parent="@style/TextAppearance.Pica.TitleMedium">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorHint">@color/transparent_white</item>
     </style>
     <style name="TextLabel" parent="@style/TextAppearance.AppCompat">
         <item name="android:textColor">@color/grayDark</item>
@@ -1800,8 +1873,7 @@
         <item name="colorControlActivated">@color/pinkDark</item>
         <item name="colorControlNormal">@color/pinkDark</item>
     </style>
-    <style name="TextViewComicListFilterStyle">
-        <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+    <style name="TextViewComicListFilterStyle" parent="@style/TextAppearance.Pica.LabelSmall">
         <item name="android:textColor">@color/white</item>
         <item name="android:gravity">center</item>
         <item name="android:layout_width">fill_parent</item>

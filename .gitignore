@@ -7,6 +7,7 @@
 *.code-workspace
 .classpath
 .project
+.continue/
 .settings/
 
 # Gradle 和构建相关
@@ -99,3 +100,4 @@ migration_summary.md
 node_modules/
 addtheme/
 
+.continue/agents/new-config.yaml

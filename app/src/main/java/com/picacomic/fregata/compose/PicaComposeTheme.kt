@@ -167,6 +167,7 @@ fun PicaComposeTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         shapes = PicaShapes,
+        typography = PicaTypography,
         content = content
     )
 }

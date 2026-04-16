@@ -129,6 +129,72 @@ These attrs are the current semantic bridge for XML pages:
 | `custom_secondary_overlay_color` | translucent mention/highlight using secondary hue | helper derived from `secondary` |
 | `chatroom_reply_color` | chat reply strip background | theme-specific helper, nearest to `surfaceVariant` |
 
+## Typography Mapping
+
+Typography now follows the same source-of-truth order as color:
+
+1. Compose semantic source: `PicaTypography.kt`
+2. Compose binding: `PicaComposeTheme.kt`
+3. Legacy semantic text appearances: `styles.xml` `TextAppearance.Pica.*`
+4. Legacy compatibility wrappers: `TextBaseStyle*`
+
+Rule:
+
+- Text role and text color are separate concerns.
+- New Compose UI should prefer `MaterialTheme.typography.*`.
+- Legacy XML should prefer semantic `TextAppearance.Pica.*` or wrappers built on them, instead of mixing role names with color names.
+
+### Canonical Typography Roles
+
+| Semantic role | Compose token | XML semantic style | Legacy size source | Typical usage |
+| --- | --- | --- | --- | --- |
+| app bar / page title | `titleLarge` | `TextAppearance.Pica.TitleLarge` | `textsize_title_1` (`22sp`) | top bars, top-level page titles |
+| dialog / strong card title | `headlineSmall` | `TextAppearance.Pica.HeadlineSmall` | `textsize_title_2` (`20sp`) | dialog titles, dense highlighted titles |
+| section title | `titleMedium` | `TextAppearance.Pica.TitleMedium` | `textsize_title_3` (`18sp`) | section headers, grouped list headings |
+| compact title / emphasized label | `titleSmall` | `TextAppearance.Pica.TitleSmall` | `textsize_content_2` (`14sp`) | compact titles, short headings |
+| primary body | `bodyLarge` | `TextAppearance.Pica.BodyLarge` | `textsize_content_1` (`16sp`) | main content, list row label |
+| secondary body | `bodyMedium` | `TextAppearance.Pica.BodyMedium` | `textsize_content_2` (`14sp`) | supporting text, row value |
+| tertiary body | `bodySmall` | `TextAppearance.Pica.BodySmall` | `textsize_content_3` (`12sp`) | hints, helper copy, compact metadata |
+| primary action label | `labelLarge` | `TextAppearance.Pica.LabelLarge` | `textsize_content_2` (`14sp`) | buttons, tabs, segmented controls |
+| compact label | `labelMedium` | `TextAppearance.Pica.LabelMedium` | `textsize_content_3` (`12sp`) | chips, small controls |
+| timestamp / tiny metadata | `labelSmall` | `TextAppearance.Pica.LabelSmall` | `textsize_timestamp_1` (`10sp`) | timestamps, counters, badges |
+
+### Legacy Wrapper Status
+
+The first migration batch now maps these legacy wrappers onto semantic text appearances:
+
+- `TextBaseStyleGrayContent*`
+- `TextBaseStyleGrayDarkContent*`
+- `TextBaseStyleGrayDarkTitle*`
+- `TextBaseStyleGrayTitle*`
+- `TextBaseStyleGrayTimestamp1`
+- `TextBaseStyleGrayDarkTimestamp1`
+- `TextBaseStylesWhiteContent*`
+- `TextBaseStylesWhiteTitle*`
+- `TextBaseStylesWhiteTimestamp1`
+- `TextViewComicListFilterStyle`
+
+The second migration batch extends semantic size mapping to compatibility color wrappers while preserving their original colors:
+
+- `TextBaseStyleBlueContent1`
+- `TextBaseStyleBlueTitle1`
+- `TextBaseStyleOrangeContent1`
+- `TextBaseStyleOrangeTitle1`
+- `TextBaseStylePeachTitle1`
+- `TextBaseStylePeachTitle2`
+- `TextBaseStylePinkContent*`
+- `TextBaseStylePinkTitle*`
+- `TextBaseStylePinkDarkContent*`
+- `TextBaseStylePinkDarkTitle2`
+- `TextBaseStylePinkLightContent*`
+- `TextBaseStylePinkLightTitle3`
+- `EditTextStandardSingleLinePeach`
+- `EditTextStandardSingleLinePeachSetting`
+
+Compatibility rule:
+
+- Color-named wrappers such as `TextBaseStylePink*`, `TextBaseStylePeach*`, `TextBaseStyleBlue*`, `TextBaseStyleOrange*` are still compatibility styles and should be treated as migration debt until their semantic text role is classified.
+
 ## Theme Value Snapshot
 
 Only the highest-impact tokens are listed here.
@@ -195,7 +261,7 @@ Only the highest-impact tokens are listed here.
 
 ## Current Gaps
 
-1. Typography is not yet mapped at the same semantic level as color.
+1. Typography semantic mapping is now started, but line height, font family, and weight parity are still only fully defined on the Compose side.
 2. Shapes are unified in Compose, but not fully represented in legacy XML styles.
 3. ~~Some legacy XML still uses direct fixed resources such as `@color/colorPrimary`, `@color/colorPrimaryLight`, `@color/peach`, `@color/pinkDark`.~~ **Fixed (P0)**: `AppTheme` and `AppThemeBlack` now bind to `theme_light_*` / `theme_dark_*` semantic color resources that are aligned with Compose token values.
 4. ~~`colorAccent` is still used as a bridge in older XML paths and should eventually be treated as a compatibility alias, not a source of truth.~~ **Fixed (P0)**: `colorAccent` in `AppTheme` and `AppThemeBlack` now points to the correct MD3 `secondary` color for each theme.
@@ -212,7 +278,7 @@ Only the highest-impact tokens are listed here.
 
 ## Suggested Next Batch
 
-1. Add typography mapping beside this token map.
+1. Continue typography migration by replacing remaining color-named legacy text wrappers with semantic role wrappers.
 2. Audit remaining direct color references and classify each as:
    - semantic token candidate
    - content-specific fixed color
