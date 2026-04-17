@@ -1,12 +1,16 @@
 package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,64 +45,71 @@ fun LoginScreen(
 ) {
     PicaComposeTheme {
         PicaScreenContainer(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 24.dp)
         ) {
-            Spacer(modifier = Modifier.weight(1f))
-            Image(
-                painter = painterResource(id = R.drawable.splash_title_new),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            PicaCardSection(
-                modifier = Modifier.fillMaxWidth()
+            Spacer(modifier = Modifier.height(32.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                PicaTextField(
-                    value = email,
-                    onValueChange = onEmailChange,
-                    label = stringResource(R.string.login_email),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next
-                    )
+                Image(
+                    painter = painterResource(id = R.drawable.splash_title_new),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                PicaTextField(
-                    value = password,
-                    onValueChange = onPasswordChange,
-                    label = stringResource(R.string.login_password),
-                    visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    )
-                )
-                PicaPrimaryButton(
-                    text = if (isLoading) {
-                        stringResource(R.string.loading_sign_in)
-                    } else {
-                        stringResource(R.string.login_login_button)
-                    },
-                    onClick = { onLogin(email, password) },
-                    enabled = !isLoading
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                PicaCardSection(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    TextButton(onClick = onRegister) {
-                        Text(text = stringResource(R.string.login_register))
-                    }
-                    if (showResendActivation) {
-                        TextButton(onClick = onResendActivation) {
-                            Text(text = stringResource(R.string.login_resend_activation))
+                    PicaTextField(
+                        value = email,
+                        onValueChange = onEmailChange,
+                        label = stringResource(R.string.login_email),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next
+                        )
+                    )
+                    PicaTextField(
+                        value = password,
+                        onValueChange = onPasswordChange,
+                        label = stringResource(R.string.login_password),
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        )
+                    )
+                    PicaPrimaryButton(
+                        text = if (isLoading) {
+                            stringResource(R.string.loading_sign_in)
+                        } else {
+                            stringResource(R.string.login_login_button)
+                        },
+                        onClick = { onLogin(email, password) },
+                        enabled = !isLoading
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = onRegister) {
+                            Text(text = stringResource(R.string.login_register))
                         }
-                    }
-                    TextButton(onClick = onForgotPassword) {
-                        Text(text = stringResource(R.string.login_forget_password))
+                        if (showResendActivation) {
+                            TextButton(onClick = onResendActivation) {
+                                Text(text = stringResource(R.string.login_resend_activation))
+                            }
+                        }
+                        TextButton(onClick = onForgotPassword) {
+                            Text(text = stringResource(R.string.login_forget_password))
+                        }
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

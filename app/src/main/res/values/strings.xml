@@ -244,7 +244,7 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="apk_version_prefix">安卓版本 Ver.</string>
     <string name="app_build_version">45</string>
     <string name="app_name">PicACG</string>
-    <string name="app_version">1.0.1</string>
+    <string name="app_version">2.2.1.3.3.4</string>
     <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
     <string name="backbutton">&lt;&lt;返回</string>
     <string name="bookmarked">已收藏</string>
