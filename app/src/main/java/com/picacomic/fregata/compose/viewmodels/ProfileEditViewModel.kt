@@ -21,6 +21,8 @@ class ProfileEditViewModel(application: Application) : AndroidViewModel(applicat
     var userProfile by mutableStateOf<UserProfileObject?>(null)
     var isLoading by mutableStateOf(false)
     var isSubmitting by mutableStateOf(false)
+    var avatarPreviewUri by mutableStateOf<String?>(null)
+        private set
 
     var updateSuccessEvent by mutableIntStateOf(0)
         private set
@@ -66,18 +68,27 @@ class ProfileEditViewModel(application: Application) : AndroidViewModel(applicat
                 call: Call<GeneralResponse<UserProfileResponse>>,
                 response: Response<GeneralResponse<UserProfileResponse>>
             ) {
+                if (call.isCanceled) return
                 if (loadedUserId != userId) return
                 if (response.code() == 200) {
                     userProfile = response.body()?.data?.user
+                } else {
+                    emitHttpError(response.code(), safeErrorBody(response))
                 }
                 isLoading = false
             }
 
             override fun onFailure(call: Call<GeneralResponse<UserProfileResponse>>, t: Throwable) {
+                if (call.isCanceled) return
                 if (loadedUserId != userId) return
+                emitNetworkError()
                 isLoading = false
             }
         })
+    }
+
+    fun onAvatarCropped(localUri: String) {
+        avatarPreviewUri = localUri
     }
 
     fun updateSlogan(slogan: String) {

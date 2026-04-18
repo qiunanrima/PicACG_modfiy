@@ -1,11 +1,21 @@
 package com.picacomic.fregata.compose.screens
 
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,16 +40,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
+import com.picacomic.fregata.activities.BaseActivity
+import com.picacomic.fregata.activities.ImageCropActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.ProfileEditViewModel
 import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.utils.g
 import com.squareup.picasso.Picasso
+import java.io.File
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 
 @Composable
 fun ProfileEditScreen(
@@ -47,7 +65,84 @@ fun ProfileEditScreen(
     viewModel: ProfileEditViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val lifecycleOwner = LocalLifecycleOwner.current
+    var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val cropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val cropResultUri = result.data?.getStringExtra("CROP_IMAGE_RESULT_URI")
+        if (!cropResultUri.isNullOrEmpty()) {
+            viewModel.onAvatarCropped(cropResultUri)
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
+        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+            putExtra("KEY_ACTION_TYPE", 1)
+            putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
+        }
+        cropLauncher.launch(cropIntent)
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
+        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+            putExtra("KEY_ACTION_TYPE", 1)
+            putExtra("KEY_IMAGE_URI_STRING", cameraUri)
+        }
+        cropLauncher.launch(cropIntent)
+    }
+
+    val onAvatarClick: () -> Unit = {
+        val hasStoragePermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasCameraPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasStoragePermission || !hasCameraPermission) {
+            (activity as? BaseActivity)?.requestPermission()
+        } else {
+            AlertDialog.Builder(context)
+                .setTitle(R.string.alert_dialog_select_title)
+                .setSingleChoiceItems(
+                    context.resources.getStringArray(R.array.alert_dialog_photo_chooser),
+                    0,
+                    null
+                )
+                .setPositiveButton(R.string.ok) { dialogInterface, _ ->
+                    val checked = (dialogInterface as AlertDialog).listView.checkedItemPosition
+                    if (checked == 0) {
+                        val photoFile = File(Environment.getExternalStorageDirectory(), "Pic.jpg")
+                        val photoUri = Uri.fromFile(photoFile)
+                        pendingCameraUri = photoUri.toString()
+                        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                            putExtra("output", photoUri)
+                        }
+                        cameraLauncher.launch(cameraIntent)
+                    } else {
+                        val pickIntent = Intent(Intent.ACTION_PICK).apply {
+                            type = "image/*"
+                        }
+                        galleryLauncher.launch(pickIntent)
+                    }
+                }
+                .show()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadSelfProfile(force = true)
@@ -122,8 +217,14 @@ fun ProfileEditScreen(
                         val sloganEditText = view.findViewById<EditText>(R.id.editText_profile_slogan)
                         val updateButton = view.findViewById<Button>(R.id.button_profile_update)
 
-                        if (avatarView != null && userProfile.avatar != null) {
-                            Picasso.with(view.context).load(g.b(userProfile.avatar)).into(avatarView)
+                        val avatarPath = viewModel.avatarPreviewUri ?: userProfile.avatar?.let { g.b(it) }
+                        if (avatarView != null && !avatarPath.isNullOrBlank()) {
+                            Picasso.with(view.context).load(avatarPath).into(avatarView)
+                        }
+
+                        if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
+                            avatarView?.setOnClickListener { onAvatarClick() }
+                            avatarView?.setTag(R.id.imageView_profile_avatar, true)
                         }
 
                         nameView?.text = displayName(userProfile)

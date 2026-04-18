@@ -1,6 +1,7 @@
 package com.picacomic.fregata.compose.screens
 
 import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,6 +31,8 @@ import com.picacomic.fregata.R
 import com.picacomic.fregata.adapters.NotificationRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.NotificationViewModel
+import com.picacomic.fregata.objects.UserProfileObject
+import com.picacomic.fregata.utils.g
 
 @Composable
 fun NotificationScreen(
@@ -37,13 +41,26 @@ fun NotificationScreen(
     onGameClick: (String) -> Unit = {},
     onCommentClick: (String) -> Unit = {},
     onPicaAppClick: (title: String, link: String) -> Unit = { _, _ -> },
+    onSenderClick: (UserProfileObject) -> Unit = {},
+    onCoverClick: (String) -> Unit = {},
     viewModel: NotificationViewModel = viewModel()
 ) {
     val inPreview = LocalInspectionMode.current
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         if (!inPreview && viewModel.notifications.isEmpty()) {
             viewModel.loadData()
+        }
+    }
+
+    LaunchedEffect(viewModel.errorEvent) {
+        if (inPreview || viewModel.errorEvent <= 0) return@LaunchedEffect
+        val code = viewModel.errorCode
+        if (code != null) {
+            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+        } else {
+            com.picacomic.fregata.b.c(context).dN()
         }
     }
 
@@ -94,8 +111,19 @@ fun NotificationScreen(
                                     androidx.recyclerview.widget.LinearLayoutManager(view.context)
                             }
 
-                            val oldSize = recyclerView.getTag(R.id.recyclerView_compose_content) as? Int
-                            if (recyclerView.adapter == null || oldSize != viewModel.notifications.size) {
+                            val dataKey = buildString {
+                                append(viewModel.notifications.size)
+                                append('|')
+                                append(viewModel.page)
+                                append('|')
+                                append(viewModel.totalPage)
+                                append('|')
+                                append(viewModel.notifications.firstOrNull()?.notificationId.orEmpty())
+                                append('|')
+                                append(viewModel.notifications.lastOrNull()?.notificationId.orEmpty())
+                            }
+                            val oldKey = recyclerView.getTag(R.id.recyclerView_compose_content) as? String
+                            if (recyclerView.adapter == null || oldKey != dataKey) {
                                 recyclerView.adapter = NotificationRecyclerViewAdapter(
                                     view.context,
                                     ArrayList(viewModel.notifications),
@@ -125,16 +153,17 @@ fun NotificationScreen(
                                         }
 
                                         override fun X(i: Int) {
+                                            val sender = viewModel.notifications.getOrNull(i)?.sender ?: return
+                                            onSenderClick(sender)
                                         }
 
                                         override fun Y(i: Int) {
+                                            val cover = viewModel.notifications.getOrNull(i)?.cover ?: return
+                                            onCoverClick(g.b(cover))
                                         }
                                     }
                                 )
-                                recyclerView.setTag(
-                                    R.id.recyclerView_compose_content,
-                                    viewModel.notifications.size
-                                )
+                                recyclerView.setTag(R.id.recyclerView_compose_content, dataKey)
                             }
 
                             if (recyclerView.getTag(R.id.composeView_notification) != true) {

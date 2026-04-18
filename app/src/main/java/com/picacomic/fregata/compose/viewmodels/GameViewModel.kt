@@ -2,6 +2,7 @@ package com.picacomic.fregata.compose.viewmodels
 
 import android.app.Application
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,6 +22,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     var hasMore by mutableStateOf(true)
     var isLoading by mutableStateOf(false)
 
+    var errorEvent by mutableIntStateOf(0)
+        private set
+
+    var errorCode by mutableStateOf<Int?>(null)
+        private set
+
+    var errorBody by mutableStateOf<String?>(null)
+        private set
+
     private var gameCall: Call<GeneralResponse<GameListResponse>>? = null
 
     init {
@@ -38,6 +48,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 call: Call<GeneralResponse<GameListResponse>>,
                 response: Response<GeneralResponse<GameListResponse>>
             ) {
+                if (call.isCanceled) return
                 if (response.code() == 200) {
                     val data = response.body()?.data?.games
                     if (data != null) {
@@ -47,14 +58,47 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                             hasMore = false
                         }
                     }
+                } else {
+                    emitHttpError(response.code(), safeErrorBody(response))
                 }
                 isLoading = false
             }
 
             override fun onFailure(call: Call<GeneralResponse<GameListResponse>>, t: Throwable) {
+                if (call.isCanceled) return
+                emitNetworkError()
                 isLoading = false
             }
         })
+    }
+
+    fun refresh() {
+        gameCall?.cancel()
+        games.clear()
+        page = 1
+        hasMore = true
+        isLoading = false
+        loadData()
+    }
+
+    private fun emitHttpError(code: Int, body: String?) {
+        errorCode = code
+        errorBody = body
+        errorEvent++
+    }
+
+    private fun emitNetworkError() {
+        errorCode = null
+        errorBody = null
+        errorEvent++
+    }
+
+    private fun safeErrorBody(response: Response<*>): String? {
+        return try {
+            response.errorBody()?.string()
+        } catch (_: Exception) {
+            null
+        }
     }
 
     override fun onCleared() {

@@ -371,7 +371,7 @@
     <style name="Base.Theme.AppCompat.CompactMenu" parent="">
         <item name="android:listViewStyle">@style/Widget.AppCompat.ListView.Menu</item>
         <item name="android:windowAnimationStyle">@style/Animation.AppCompat.DropDownUp</item>
-        <item name="android:itemTextAppearance">?android:textAppearanceMedium</item>
+        <item name="android:itemTextAppearance">@style/TextAppearance.Pica.BodyLarge</item>
     </style>
     <style name="Base.Theme.AppCompat.Dialog" parent="@style/Base.V11.Theme.AppCompat.Dialog" />
     <style name="Base.Theme.AppCompat.Dialog.Alert" parent="@style/Base.Theme.AppCompat.Dialog">
@@ -593,14 +593,14 @@
         <item name="spinnerDropDownItemStyle">@style/Widget.AppCompat.DropDownItem.Spinner</item>
         <item name="spinnerStyle">@style/Widget.AppCompat.Spinner</item>
         <item name="switchStyle">@style/Widget.AppCompat.CompoundButton.Switch</item>
-        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.AppCompat.Widget.PopupMenu.Large</item>
-        <item name="textAppearanceListItem">@style/TextAppearance.AppCompat.Subhead</item>
-        <item name="textAppearanceListItemSecondary">@style/TextAppearance.AppCompat.Body1</item>
-        <item name="textAppearanceListItemSmall">@style/TextAppearance.AppCompat.Subhead</item>
-        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.AppCompat.Widget.PopupMenu.Header</item>
-        <item name="textAppearanceSearchResultSubtitle">@style/TextAppearance.AppCompat.SearchResult.Subtitle</item>
-        <item name="textAppearanceSearchResultTitle">@style/TextAppearance.AppCompat.SearchResult.Title</item>
-        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Widget.PopupMenu.Small</item>
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Pica.PopupMenu.Large</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.Pica.ListItem</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Pica.ListItemSecondary</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.Pica.ListItemSmall</item>
+        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.Pica.PopupMenu.Header</item>
+        <item name="textAppearanceSearchResultSubtitle">@style/TextAppearance.Pica.SearchResult.Subtitle</item>
+        <item name="textAppearanceSearchResultTitle">@style/TextAppearance.Pica.SearchResult.Title</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Pica.PopupMenu.Small</item>
         <item name="textColorAlertDialogListItem">@color/abc_primary_text_material_dark</item>
         <item name="textColorError">@color/error_text_material_dark</item>
         <item name="textColorSearchUrl">@color/abc_search_url_text</item>
@@ -729,14 +729,14 @@
         <item name="spinnerDropDownItemStyle">@style/Widget.AppCompat.DropDownItem.Spinner</item>
         <item name="spinnerStyle">@style/Widget.AppCompat.Spinner</item>
         <item name="switchStyle">@style/Widget.AppCompat.CompoundButton.Switch</item>
-        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large</item>
-        <item name="textAppearanceListItem">@style/TextAppearance.AppCompat.Subhead</item>
-        <item name="textAppearanceListItemSecondary">@style/TextAppearance.AppCompat.Body1</item>
-        <item name="textAppearanceListItemSmall">@style/TextAppearance.AppCompat.Subhead</item>
-        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.AppCompat.Widget.PopupMenu.Header</item>
-        <item name="textAppearanceSearchResultSubtitle">@style/TextAppearance.AppCompat.SearchResult.Subtitle</item>
-        <item name="textAppearanceSearchResultTitle">@style/TextAppearance.AppCompat.SearchResult.Title</item>
-        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small</item>
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.Pica.PopupMenu.Large</item>
+        <item name="textAppearanceListItem">@style/TextAppearance.Pica.ListItem</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Pica.ListItemSecondary</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.Pica.ListItemSmall</item>
+        <item name="textAppearancePopupMenuHeader">@style/TextAppearance.Pica.PopupMenu.Header</item>
+        <item name="textAppearanceSearchResultSubtitle">@style/TextAppearance.Pica.SearchResult.Subtitle</item>
+        <item name="textAppearanceSearchResultTitle">@style/TextAppearance.Pica.SearchResult.Title</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.Pica.PopupMenu.Small</item>
         <item name="textColorAlertDialogListItem">@color/abc_primary_text_material_light</item>
         <item name="textColorError">@color/error_text_material_light</item>
         <item name="textColorSearchUrl">@color/abc_search_url_text</item>
@@ -815,9 +815,9 @@
         <item name="contentInsetStart">16.0dip</item>
         <item name="contentInsetStartWithNavigation">@dimen/abc_action_bar_content_inset_with_nav</item>
         <item name="maxButtonHeight">@dimen/abc_action_bar_default_height_material</item>
-        <item name="subtitleTextAppearance">@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle</item>
+        <item name="subtitleTextAppearance">@style/TextAppearance.Pica.Toolbar.Subtitle</item>
         <item name="titleMargin">4.0dip</item>
-        <item name="titleTextAppearance">@style/TextAppearance.Widget.AppCompat.Toolbar.Title</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Pica.Toolbar.Title</item>
     </style>
     <style name="Base.Widget.AppCompat.ActionBar" parent="">
         <item name="android:gravity">center_vertical</item>
@@ -1124,27 +1124,23 @@
         <item name="android:minHeight">10.0dip</item>
     </style>
     <style name="ButtonRoundPink">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+        <item name="android:textAppearance">@style/TextAppearance.Pica.ButtonFilled</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@drawable/button_round_pink_bg</item>
         <item name="android:paddingLeft">@dimen/padding_5</item>
         <item name="android:paddingRight">@dimen/padding_5</item>
         <item name="android:minHeight">0.0dip</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:letterSpacing">0.02</item>
     </style>
     <style name="ButtonSmallRoundPink">
-        <item name="android:textSize">@dimen/textsize_title_3</item>
+        <item name="android:textAppearance">@style/TextAppearance.Pica.ButtonFilledCompact</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@drawable/button_small_round_pink_bg</item>
         <item name="android:paddingLeft">@dimen/padding_3</item>
         <item name="android:paddingRight">@dimen/padding_3</item>
         <item name="android:minHeight">0.0dip</item>
-        <item name="android:textStyle">bold</item>
     </style>
-    <style name="ButtonTransparentBgPinkContent1" parent="@style/TextBaseStylePinkContent1">
+    <style name="ButtonTransparentBgPinkContent1" parent="@style/TextBaseStylePinkContent1Bold">
         <item name="android:background">@color/transparent</item>
-        <item name="android:textStyle">bold</item>
     </style>
     <style name="ButtonTransparentBgPinkContent2" parent="@style/TextBaseStylePinkContent2">
         <item name="android:background">@color/transparent</item>
@@ -1163,7 +1159,9 @@
         <item name="android:background">@drawable/button_tag_bg</item>
         <item name="android:layout_width">fill_parent</item>
     </style>
-    <style name="ButtonTextPrimary" parent="@style/TextBaseStylePinkContent1Bold">
+    <style name="ButtonTextPrimary" parent="@style/TextAppearance.Pica.BodyLargeEmphasized">
+        <item name="android:textColor">@color/pink</item>
+        <item name="android:textColorHint">@color/pinkLight</item>
         <item name="android:background">@color/transparent</item>
         <item name="android:minHeight">48dp</item>
     </style>
@@ -1221,27 +1219,27 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
-    <style name="EditTextStandardSingleLineGrayDark" parent="@style/TextBaseStyleGrayDark">
-        <item name="android:textSize">@dimen/textsize_content_1</item>
+    <style name="EditTextStandardSingleLineGrayDark" parent="@style/TextAppearance.Pica.InputBody">
+        <item name="android:textColor">?custom_text_black_color_dark</item>
+        <item name="android:textColorHint">@color/gray</item>
         <item name="android:singleLine">true</item>
         <item name="android:background">@drawable/md3_input_bg</item>
         <item name="android:paddingTop">@dimen/padding_2</item>
         <item name="android:paddingBottom">@dimen/padding_2</item>
     </style>
-    <style name="EditTextStandardSingleLinePeach" parent="@style/TextAppearance.Pica.BodyMedium">
+    <style name="EditTextStandardSingleLinePeach" parent="@style/TextAppearance.Pica.InputAccent">
         <item name="android:textColor">@color/peach</item>
         <item name="android:textColorHint">@color/gray</item>
         <item name="android:singleLine">true</item>
     </style>
-    <style name="EditTextStandardSingleLinePeachSetting" parent="@style/TextAppearance.Pica.TitleMedium">
+    <style name="EditTextStandardSingleLinePeachSetting" parent="@style/TextAppearance.Pica.InputAccentProminent">
         <item name="android:textColor">@color/peach</item>
         <item name="android:textColorHint">@color/gray</item>
-        <item name="android:textStyle">bold</item>
         <item name="android:singleLine">true</item>
         <item name="android:background">@drawable/md3_input_bg</item>
     </style>
     <style name="FilterButton">
-        <item name="android:textSize">@dimen/textsize_content_2</item>
+        <item name="android:textAppearance">@style/TextAppearance.Pica.FilterChip</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:gravity">center</item>
         <item name="android:paddingLeft">@dimen/size_button_filter_padding_left</item>
@@ -1289,7 +1287,7 @@
         <item name="colorAccent">@color/colorPrimary</item>
     </style>
     <style name="MyTitleTextStyle">
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
+        <item name="android:textAppearance">@style/TextAppearance.Pica.TitleLarge</item>
         <item name="android:textColor">#ffffeb3b</item>
         <item name="android:background">@color/blue</item>
     </style>
@@ -1626,12 +1624,15 @@
     <style name="TextAppearance.Pica.Base" parent="@style/TextAppearance.AppCompat" />
     <style name="TextAppearance.Pica.TitleLarge" parent="@style/TextAppearance.Pica.Base">
         <item name="android:textSize">@dimen/textsize_title_1</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="TextAppearance.Pica.HeadlineSmall" parent="@style/TextAppearance.Pica.Base">
         <item name="android:textSize">@dimen/textsize_title_2</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="TextAppearance.Pica.TitleMedium" parent="@style/TextAppearance.Pica.Base">
         <item name="android:textSize">@dimen/textsize_title_3</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="TextAppearance.Pica.TitleSmall" parent="@style/TextAppearance.Pica.Base">
         <item name="android:textSize">@dimen/textsize_content_2</item>
@@ -1653,6 +1654,34 @@
     </style>
     <style name="TextAppearance.Pica.LabelSmall" parent="@style/TextAppearance.Pica.Base">
         <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+    </style>
+    <style name="TextAppearance.Pica.BodyLargeEmphasized" parent="@style/TextAppearance.Pica.BodyLarge">
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.Pica.BodyMediumEmphasized" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.Pica.ButtonFilled" parent="@style/TextAppearance.Pica.TitleMedium">
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+    <style name="TextAppearance.Pica.ButtonFilledCompact" parent="@style/TextAppearance.Pica.TitleMedium" />
+    <style name="TextAppearance.Pica.InputBody" parent="@style/TextAppearance.Pica.BodyLarge" />
+    <style name="TextAppearance.Pica.InputAccent" parent="@style/TextAppearance.Pica.BodyMedium" />
+    <style name="TextAppearance.Pica.InputAccentProminent" parent="@style/TextAppearance.Pica.TitleMedium" />
+    <style name="TextAppearance.Pica.FilterChip" parent="@style/TextAppearance.Pica.LabelLarge" />
+    <style name="TextAppearance.Pica.ListItem" parent="@style/TextAppearance.Pica.BodyLarge" />
+    <style name="TextAppearance.Pica.ListItemSecondary" parent="@style/TextAppearance.Pica.BodyMedium" />
+    <style name="TextAppearance.Pica.ListItemSmall" parent="@style/TextAppearance.Pica.BodyMedium" />
+    <style name="TextAppearance.Pica.PopupMenu.Header" parent="@style/TextAppearance.Pica.TitleSmall" />
+    <style name="TextAppearance.Pica.PopupMenu.Large" parent="@style/TextAppearance.Pica.BodyLarge" />
+    <style name="TextAppearance.Pica.PopupMenu.Small" parent="@style/TextAppearance.Pica.BodyMedium" />
+    <style name="TextAppearance.Pica.SearchResult.Title" parent="@style/TextAppearance.Pica.TitleSmall" />
+    <style name="TextAppearance.Pica.SearchResult.Subtitle" parent="@style/TextAppearance.Pica.BodySmall" />
+    <style name="TextAppearance.Pica.Toolbar.Title" parent="@style/TextAppearance.Pica.TitleLarge">
+        <item name="android:textColor">?attr/custom_text_black_color</item>
+    </style>
+    <style name="TextAppearance.Pica.Toolbar.Subtitle" parent="@style/TextAppearance.Pica.BodyMedium">
+        <item name="android:textColor">?attr/custom_text_black_color_light</item>
     </style>
     <style name="TextBaseStyleBlue">
         <item name="android:textColor">@color/blue</item>
@@ -1732,7 +1761,9 @@
         <item name="android:textColor">?custom_text_black_color_light</item>
         <item name="android:textColorHint">@color/grayLight</item>
     </style>
-    <style name="TextBaseStyleGrayTimestamp2" parent="@style/TextBaseStyleGray">
+    <style name="TextBaseStyleGrayTimestamp2" parent="@style/TextAppearance.Pica.LabelSmall">
+        <item name="android:textColor">?custom_text_black_color_light</item>
+        <item name="android:textColorHint">@color/grayLight</item>
         <item name="android:textSize">@dimen/textsize_timestamp_2</item>
     </style>
     <style name="TextBaseStyleGrayTitle1" parent="@style/TextAppearance.Pica.TitleLarge">
@@ -1866,7 +1897,7 @@
         <item name="android:textColor">@color/white</item>
         <item name="android:textColorHint">@color/transparent_white</item>
     </style>
-    <style name="TextLabel" parent="@style/TextAppearance.AppCompat">
+    <style name="TextLabel" parent="@style/TextAppearance.Pica.BodyLarge">
         <item name="android:textColor">@color/grayDark</item>
         <item name="android:textColorHint">@color/gray</item>
         <item name="colorAccent">@color/pink</item>

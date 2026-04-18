@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,12 +49,32 @@ fun LeaderboardScreen(
     viewModel: LeaderboardViewModel = viewModel()
 ) {
     val inPreview = LocalInspectionMode.current
+    val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         if (!inPreview) {
             viewModel.loadPopular("H24")
             viewModel.loadKnights()
+        }
+    }
+
+    LaunchedEffect(selectedTab) {
+        if (inPreview) return@LaunchedEffect
+        if (selectedTab == 0 && viewModel.popularComics.isEmpty()) {
+            viewModel.loadPopular(viewModel.popularTime, force = true)
+        } else if (selectedTab == 1 && viewModel.knights.isEmpty()) {
+            viewModel.loadKnights(force = true)
+        }
+    }
+
+    LaunchedEffect(viewModel.errorEvent) {
+        if (inPreview || viewModel.errorEvent <= 0) return@LaunchedEffect
+        val code = viewModel.errorCode
+        if (code != null) {
+            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+        } else {
+            com.picacomic.fregata.b.c(context).dN()
         }
     }
 
@@ -144,11 +165,13 @@ fun LeaderboardScreen(
                             if (recyclerView.layoutManager == null) {
                                 recyclerView.layoutManager = LinearLayoutManager(view.context)
                             }
+                            val currentMode = if (selectedTab == 0) "popular" else "knight"
+                            val oldMode = recyclerView.getTag(R.id.recyclerView_compose_content) as? String
 
                             if (selectedTab == 0) {
                                 val oldKey = recyclerView.getTag(R.id.recyclerView_leaderboard_popular) as? String
                                 val newKey = "${viewModel.popularTime}_${viewModel.popularComics.size}"
-                                if (recyclerView.adapter == null || oldKey != newKey) {
+                                if (recyclerView.adapter == null || oldMode != currentMode || oldKey != newKey) {
                                     val adapter = LeaderboardPopularRecyclerViewAdapter(
                                         view.context,
                                         ArrayList(viewModel.popularComics),
@@ -164,11 +187,12 @@ fun LeaderboardScreen(
                                     adapter.H(viewModel.popularTime)
                                     recyclerView.adapter = adapter
                                     recyclerView.setTag(R.id.recyclerView_leaderboard_popular, newKey)
+                                    recyclerView.setTag(R.id.recyclerView_compose_content, currentMode)
                                 }
                             } else {
                                 val oldKey = recyclerView.getTag(R.id.recyclerView_leaderboard_knight) as? Int
                                 val newKey = viewModel.knights.size
-                                if (recyclerView.adapter == null || oldKey != newKey) {
+                                if (recyclerView.adapter == null || oldMode != currentMode || oldKey != newKey) {
                                     recyclerView.adapter = LeaderboardKnightRecyclerViewAdapter(
                                         view.context,
                                         ArrayList(viewModel.knights),
@@ -184,6 +208,7 @@ fun LeaderboardScreen(
                                         }
                                     )
                                     recyclerView.setTag(R.id.recyclerView_leaderboard_knight, newKey)
+                                    recyclerView.setTag(R.id.recyclerView_compose_content, currentMode)
                                 }
                             }
                         }

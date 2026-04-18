@@ -143,6 +143,7 @@ Rule:
 - Text role and text color are separate concerns.
 - New Compose UI should prefer `MaterialTheme.typography.*`.
 - Legacy XML should prefer semantic `TextAppearance.Pica.*` or wrappers built on them, instead of mixing role names with color names.
+- App-wide text entry points such as Toolbar, popup menu, list item, and search result styles should resolve through `TextAppearance.Pica.*`, not direct `TextAppearance.AppCompat.*`.
 
 ### Canonical Typography Roles
 
@@ -190,6 +191,32 @@ The second migration batch extends semantic size mapping to compatibility color 
 - `TextBaseStylePinkLightTitle3`
 - `EditTextStandardSingleLinePeach`
 - `EditTextStandardSingleLinePeachSetting`
+
+The third migration batch extends typography semantics into legacy theme entry points:
+
+- `Base.Theme.AppCompat.CompactMenu` `android:itemTextAppearance` -> `TextAppearance.Pica.BodyLarge`
+- `Base.V7.Theme.AppCompat` / `Base.V7.Theme.AppCompat.Light`
+  - `textAppearanceLargePopupMenu` -> `TextAppearance.Pica.PopupMenu.Large`
+  - `textAppearanceSmallPopupMenu` -> `TextAppearance.Pica.PopupMenu.Small`
+  - `textAppearancePopupMenuHeader` -> `TextAppearance.Pica.PopupMenu.Header`
+  - `textAppearanceListItem` -> `TextAppearance.Pica.ListItem`
+  - `textAppearanceListItemSecondary` -> `TextAppearance.Pica.ListItemSecondary`
+  - `textAppearanceListItemSmall` -> `TextAppearance.Pica.ListItemSmall`
+  - `textAppearanceSearchResultTitle` -> `TextAppearance.Pica.SearchResult.Title`
+  - `textAppearanceSearchResultSubtitle` -> `TextAppearance.Pica.SearchResult.Subtitle`
+- `Base.V7.Widget.AppCompat.Toolbar`
+  - `titleTextAppearance` -> `TextAppearance.Pica.Toolbar.Title`
+  - `subtitleTextAppearance` -> `TextAppearance.Pica.Toolbar.Subtitle`
+- `TextBaseStyleGrayTimestamp2`
+- `TextLabel`
+
+Current semantic support details:
+
+- `TextAppearance.Pica.TitleLarge`
+- `TextAppearance.Pica.HeadlineSmall`
+- `TextAppearance.Pica.TitleMedium`
+
+now explicitly carry `android:textStyle="bold"` on the XML side, bringing legacy title hierarchy closer to Compose `SemiBold` intent.
 
 Compatibility rule:
 
@@ -261,7 +288,7 @@ Only the highest-impact tokens are listed here.
 
 ## Current Gaps
 
-1. Typography semantic mapping is now started, but line height, font family, and weight parity are still only fully defined on the Compose side.
+1. Typography semantic mapping now covers core semantic roles plus legacy Toolbar/popup/list/search entry points, but line height and font family parity are still only fully defined on the Compose side.
 2. Shapes are unified in Compose, but not fully represented in legacy XML styles.
 3. ~~Some legacy XML still uses direct fixed resources such as `@color/colorPrimary`, `@color/colorPrimaryLight`, `@color/peach`, `@color/pinkDark`.~~ **Fixed (P0)**: `AppTheme` and `AppThemeBlack` now bind to `theme_light_*` / `theme_dark_*` semantic color resources that are aligned with Compose token values.
 4. ~~`colorAccent` is still used as a bridge in older XML paths and should eventually be treated as a compatibility alias, not a source of truth.~~ **Fixed (P0)**: `colorAccent` in `AppTheme` and `AppThemeBlack` now points to the correct MD3 `secondary` color for each theme.
@@ -278,7 +305,7 @@ Only the highest-impact tokens are listed here.
 
 ## Suggested Next Batch
 
-1. Continue typography migration by replacing remaining color-named legacy text wrappers with semantic role wrappers.
+1. Continue typography migration by replacing remaining color-named legacy text wrappers with semantic role wrappers, especially the remaining `TextBaseStylePink*`, `TextBaseStylePeach*`, `TextBaseStyleOrange*`, and chat-specific timestamp/text variants.
 2. Audit remaining direct color references and classify each as:
    - semantic token candidate
    - content-specific fixed color

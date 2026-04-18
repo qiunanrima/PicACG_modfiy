@@ -10,6 +10,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,14 +66,33 @@ fun ComicDetailScreen(
         creatorId: String?,
         creatorName: String?
     ) -> Unit,
+    onCreatorProfileClick: (String) -> Unit = {},
+    onShowImage: (String) -> Unit = {},
     viewModel: ComicDetailViewModel = viewModel()
 ) {
     val inPreview = LocalInspectionMode.current
+    val context = LocalContext.current
 
     LaunchedEffect(comicId, inPreview) {
         if (!inPreview) {
             viewModel.loadComic(comicId)
         }
+    }
+
+    LaunchedEffect(viewModel.errorEvent) {
+        if (inPreview || viewModel.errorEvent <= 0) return@LaunchedEffect
+        val code = viewModel.errorCode
+        if (code != null) {
+            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+        } else {
+            com.picacomic.fregata.b.c(context).dN()
+        }
+    }
+
+    LaunchedEffect(viewModel.messageEvent) {
+        if (inPreview || viewModel.messageEvent <= 0) return@LaunchedEffect
+        val res = viewModel.messageRes ?: return@LaunchedEffect
+        Toast.makeText(context, res, Toast.LENGTH_SHORT).show()
     }
 
     PicaComposeTheme {
@@ -208,15 +229,8 @@ fun ComicDetailScreen(
                                     .placeholder(R.drawable.placeholder_avatar_2).into(creatorAvatar)
                             }
                             creatorAvatar?.setOnClickListener {
-                                if (!creator?.creatorId.isNullOrBlank() && !creator?.name.isNullOrBlank()) {
-                                    onComicListClick(
-                                        null,
-                                        null,
-                                        null,
-                                        null,
-                                        creator?.creatorId,
-                                        creator?.name
-                                    )
+                                if (!creator?.creatorId.isNullOrBlank()) {
+                                    onCreatorProfileClick(creator.creatorId)
                                 }
                             }
                             view.findViewById<ImageView>(R.id.imageView_comic_detail_knight_verified)?.visibility =
@@ -228,6 +242,10 @@ fun ComicDetailScreen(
                                 Picasso.with(context).load(g.b(detail.thumb))
                                     .transform(PicassoTransformations.CARD_COVER)
                                     .placeholder(R.drawable.placeholder_avatar_2).into(coverView)
+                            }
+                            coverView?.setOnClickListener {
+                                val thumb = detail.thumb ?: return@setOnClickListener
+                                onShowImage(g.b(thumb))
                             }
 
                             val bookmarkButton =
@@ -387,6 +405,8 @@ fun ComicDetailScreen(
 
                             val episodesRv =
                                 view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_comic_detail_episode)
+                            val moreEpisodesButton =
+                                view.findViewById<Button>(R.id.button_comic_detail_more_episode)
                             val episodesKey =
                                 viewModel.episodes.joinToString("|") { "${it.episodeId}:${it.order}" }
                             val oldEpisodesKey =
@@ -418,6 +438,11 @@ fun ComicDetailScreen(
                                 )
                                 episodesRv.setTag(R.id.recyclerView_comic_detail_episode, episodesKey)
                             }
+                            moreEpisodesButton?.visibility =
+                                if (viewModel.hasMoreEpisodes) View.VISIBLE else View.GONE
+                            moreEpisodesButton?.setOnClickListener {
+                                viewModel.loadMoreEpisodes()
+                            }
 
                             val recommendationRv =
                                 view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_recommendation)
@@ -448,6 +473,21 @@ fun ComicDetailScreen(
                                     }
                                 )
                                 recommendationRv.setTag(R.id.recyclerView_recommendation, recKey)
+                            }
+
+                            val scrollView =
+                                view.findViewById<androidx.core.widget.NestedScrollView>(R.id.scrollView)
+                            if (scrollView?.getTag(R.id.scrollView) != true) {
+                                scrollView?.setOnScrollChangeListener(
+                                    androidx.core.widget.NestedScrollView.OnScrollChangeListener { nested, _, _, _, _ ->
+                                        val child =
+                                            nested.getChildAt(nested.childCount - 1) ?: return@OnScrollChangeListener
+                                        if (child.bottom - (nested.height + nested.scrollY) == 0) {
+                                            viewModel.loadMoreEpisodes()
+                                        }
+                                    }
+                                )
+                                scrollView?.setTag(R.id.scrollView, true)
                             }
                         }
                     )

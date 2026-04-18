@@ -35,6 +35,7 @@ sealed class Screen(
     object Comment : Screen("comment?comicId={comicId}&gameId={gameId}&commentId={commentId}", R.string.title_comment)
     object PicaApp : Screen("pica_app?title={title}&link={link}", R.string.app_name)
     object PicaAppList : Screen("pica_app_list", R.string.title_pica_app)
+    object AnonymousChat : Screen("anonymous_chat", R.string.title_chatroom)
     object ApkVersionList : Screen("apk_version_list", R.string.title_apk_version)
     object AnnouncementList : Screen("announcement_list", R.string.title_announcement)
     object ProfileEdit : Screen("profile_edit", R.string.edit)

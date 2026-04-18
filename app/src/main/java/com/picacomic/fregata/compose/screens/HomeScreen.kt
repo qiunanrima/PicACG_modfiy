@@ -20,9 +20,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
@@ -46,7 +48,24 @@ fun HomeScreen(
     onComicClick: (String) -> Unit,
     onMoreClick: (String) -> Unit, // category name
 ) {
+    val context = LocalContext.current
     val contentBg = MaterialTheme.colorScheme.surface.toArgb()
+
+    LaunchedEffect(Unit) {
+        if (viewModel.announcements.isEmpty() && viewModel.collections.isEmpty()) {
+            viewModel.loadData()
+        }
+    }
+
+    LaunchedEffect(viewModel.errorEvent) {
+        if (viewModel.errorEvent <= 0) return@LaunchedEffect
+        val code = viewModel.errorCode
+        if (code != null) {
+            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+        } else {
+            com.picacomic.fregata.b.c(context).dN()
+        }
+    }
 
     PicaComposeTheme {
         androidx.compose.foundation.layout.Column(

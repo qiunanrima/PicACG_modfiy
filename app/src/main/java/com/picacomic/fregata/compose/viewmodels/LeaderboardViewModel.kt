@@ -2,6 +2,7 @@ package com.picacomic.fregata.compose.viewmodels
 
 import android.app.Application
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,6 +26,15 @@ class LeaderboardViewModel(application: Application) : AndroidViewModel(applicat
     var isLoadingPopular by mutableStateOf(false)
     var isLoadingKnight by mutableStateOf(false)
 
+    var errorEvent by mutableIntStateOf(0)
+        private set
+
+    var errorCode by mutableStateOf<Int?>(null)
+        private set
+
+    var errorBody by mutableStateOf<String?>(null)
+        private set
+
     private var popularCall: Call<GeneralResponse<LeaderboardResponse>>? = null
     private var knightCall: Call<GeneralResponse<LeaderboardKnightResponse>>? = null
 
@@ -43,14 +53,19 @@ class LeaderboardViewModel(application: Application) : AndroidViewModel(applicat
                 call: Call<GeneralResponse<LeaderboardResponse>>,
                 response: Response<GeneralResponse<LeaderboardResponse>>
             ) {
+                if (call.isCanceled) return
                 if (response.code() == 200) {
                     popularComics.clear()
                     response.body()?.data?.comics?.let { popularComics.addAll(it) }
+                } else {
+                    emitHttpError(response.code(), safeErrorBody(response))
                 }
                 isLoadingPopular = false
             }
 
             override fun onFailure(call: Call<GeneralResponse<LeaderboardResponse>>, t: Throwable) {
+                if (call.isCanceled) return
+                emitNetworkError()
                 isLoadingPopular = false
             }
         })
@@ -70,9 +85,12 @@ class LeaderboardViewModel(application: Application) : AndroidViewModel(applicat
                 call: Call<GeneralResponse<LeaderboardKnightResponse>>,
                 response: Response<GeneralResponse<LeaderboardKnightResponse>>
             ) {
+                if (call.isCanceled) return
                 if (response.code() == 200) {
                     knights.clear()
                     response.body()?.data?.users?.let { knights.addAll(it) }
+                } else {
+                    emitHttpError(response.code(), safeErrorBody(response))
                 }
                 isLoadingKnight = false
             }
@@ -81,9 +99,38 @@ class LeaderboardViewModel(application: Application) : AndroidViewModel(applicat
                 call: Call<GeneralResponse<LeaderboardKnightResponse>>,
                 t: Throwable
             ) {
+                if (call.isCanceled) return
+                emitNetworkError()
                 isLoadingKnight = false
             }
         })
+    }
+
+    fun refreshAll() {
+        popularComics.clear()
+        knights.clear()
+        loadPopular(popularTime, force = true)
+        loadKnights(force = true)
+    }
+
+    private fun emitHttpError(code: Int, body: String?) {
+        errorCode = code
+        errorBody = body
+        errorEvent++
+    }
+
+    private fun emitNetworkError() {
+        errorCode = null
+        errorBody = null
+        errorEvent++
+    }
+
+    private fun safeErrorBody(response: Response<*>): String? {
+        return try {
+            response.errorBody()?.string()
+        } catch (_: Exception) {
+            null
+        }
     }
 
     override fun onCleared() {
