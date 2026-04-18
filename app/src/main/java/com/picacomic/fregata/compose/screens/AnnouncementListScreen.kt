@@ -1,9 +1,15 @@
 package com.picacomic.fregata.compose.screens
 
 import android.view.LayoutInflater
-import android.view.View
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -11,39 +17,56 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.picacomic.fregata.R
-import com.picacomic.fregata.adapters.AnnouncementListRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaSecondaryScreen
 import com.picacomic.fregata.compose.viewmodels.AnnouncementListViewModel
+import com.picacomic.fregata.databinding.ItemAnnouncementCellBinding
+import com.picacomic.fregata.objects.AnnouncementObject
+import com.picacomic.fregata.utils.PicassoTransformations
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
+import com.squareup.picasso.Picasso
 
 @Composable
 fun AnnouncementListScreen(
     onBack: () -> Unit,
-    viewModel: AnnouncementListViewModel = viewModel()
+    viewModel: AnnouncementListViewModel? = null
 ) {
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
+    val listState = rememberLazyListState()
+    val screenViewModel = previewAwareViewModel(viewModel)
 
     LaunchedEffect(inPreview) {
         if (!inPreview) {
-            viewModel.loadMore()
+            screenViewModel?.loadMore()
         }
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
+        }
+    }
+
+    if (!inPreview) {
+        RememberListLoadMore(
+            state = listState,
+            enabled = screenViewModel?.announcements?.isNotEmpty() == true &&
+                screenViewModel?.isLoading != true &&
+                (screenViewModel?.page ?: 0) < (screenViewModel?.totalPage ?: 0),
+        ) {
+            screenViewModel?.loadMore()
         }
     }
 
@@ -54,76 +77,87 @@ fun AnnouncementListScreen(
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 if (inPreview) {
-                    Box(modifier = Modifier.fillMaxSize())
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = stringResource(R.string.title_announcement),
+                            items = listOf("公告一", "公告二", "公告三")
+                        )
+                    }
                 } else {
-                    AndroidView(
-                        factory = { ctx ->
-                            LayoutInflater.from(ctx)
-                                .inflate(R.layout.fragment_announcement_list, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
-                            view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
+                    val vm = screenViewModel
+                    when {
+                        vm == null || (vm.announcements.isEmpty() && vm.isLoading) -> {
+                            PicaLoadingIndicator()
+                        }
 
-                            val recyclerView =
-                                view.findViewById<RecyclerView>(R.id.recyclerView_announcement_list)
-                            if (recyclerView.layoutManager == null) {
-                                recyclerView.layoutManager = LinearLayoutManager(view.context, 1, false)
-                            }
+                        vm.announcements.isEmpty() -> {
+                            PicaEmptyState(message = "暂无内容")
+                        }
 
-                            val dataKey = buildString {
-                                append(viewModel.announcements.size)
-                                append('|')
-                                append(viewModel.page)
-                                append('|')
-                                append(viewModel.totalPage)
-                            }
-                            val oldDataKey =
-                                recyclerView.getTag(R.id.recyclerView_announcement_list) as? String
-                            if (recyclerView.adapter == null || oldDataKey != dataKey) {
-                                recyclerView.adapter = AnnouncementListRecyclerViewAdapter(
-                                    view.context,
-                                    ArrayList(viewModel.announcements),
-                                    object : com.picacomic.fregata.a_pkg.k {
-                                        override fun C(i: Int) {
-                                            val item = viewModel.announcements.getOrNull(i) ?: return
-                                            AlertDialogCenter.showAnnouncementAlertDialog(
-                                                view.context,
-                                                g.b(item.thumb),
-                                                item.title,
-                                                item.content,
-                                                item.createdAt,
-                                                null
-                                            )
-                                        }
+                        else -> {
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(vertical = 8.dp)
+                            ) {
+                                itemsIndexed(
+                                    items = vm.announcements,
+                                    key = { index, item ->
+                                        item.announcementId ?: "announcement_$index"
                                     }
-                                )
-                                recyclerView.setTag(R.id.recyclerView_announcement_list, dataKey)
-                            }
-
-                            if (recyclerView.getTag(R.id.textView_comment_total_page) != true) {
-                                recyclerView.addOnScrollListener(object :
-                                    RecyclerView.OnScrollListener() {
-                                    override fun onScrollStateChanged(
-                                        rv: RecyclerView,
-                                        newState: Int
-                                    ) {
-                                        super.onScrollStateChanged(rv, newState)
-                                        val lm = rv.layoutManager as? LinearLayoutManager ?: return
-                                        if (lm.findLastVisibleItemPosition() == lm.itemCount - 1) {
-                                            viewModel.loadMore()
-                                        }
+                                ) { _, item ->
+                                    AnnouncementListItem(item = item) {
+                                        AlertDialogCenter.showAnnouncementAlertDialog(
+                                            context,
+                                            g.b(item.thumb),
+                                            item.title,
+                                            item.content,
+                                            item.createdAt,
+                                            null
+                                        )
                                     }
-                                })
-                                recyclerView.setTag(R.id.textView_comment_total_page, true)
+                                }
+
+                                if (vm.isLoading) {
+                                    item(key = "loading") {
+                                        ListLoadingFooter()
+                                    }
+                                }
                             }
                         }
-                    )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun AnnouncementListItem(
+    item: AnnouncementObject,
+    onClick: () -> Unit,
+) {
+    AndroidView(
+        factory = { context ->
+            LayoutInflater.from(context).inflate(R.layout.item_announcement_cell, null, false)
+        },
+        modifier = Modifier.fillMaxWidth(),
+        update = { view ->
+            val binding = ItemAnnouncementCellBinding.bind(view)
+            binding.root.setOnClickListener { onClick() }
+            binding.textViewAnnouncementCellTitle.text = item.title.orEmpty()
+            binding.textViewAnnouncementCellDescription.text = item.content.orEmpty()
+            Picasso.with(view.context)
+                .load(g.b(item.thumb))
+                .transform(PicassoTransformations.CARD_COVER)
+                .placeholder(R.drawable.placeholder_avatar_2)
+                .into(binding.imageViewAnnouncementCellImage)
+        }
+    )
 }
 
 @Preview(showBackground = true)

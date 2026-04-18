@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
@@ -116,10 +117,14 @@ fun LoginScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun LoginScreenPreview() {
+private fun LoginScreenPreview(
+    @PreviewParameter(LoginPreviewProvider::class) preview: LoginPreviewModel
+) {
     LoginScreen(
-        email = "",
-        password = "",
+        email = preview.email,
+        password = preview.password,
+        isLoading = preview.isLoading,
+        showResendActivation = preview.showResendActivation,
         onEmailChange = {},
         onPasswordChange = {},
         onLogin = { _, _ -> },

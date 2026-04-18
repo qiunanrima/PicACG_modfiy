@@ -35,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.a_pkg.b
 import com.picacomic.fregata.a_pkg.k
@@ -68,30 +67,33 @@ fun ComicDetailScreen(
     ) -> Unit,
     onCreatorProfileClick: (String) -> Unit = {},
     onShowImage: (String) -> Unit = {},
-    viewModel: ComicDetailViewModel = viewModel()
+    viewModel: ComicDetailViewModel? = null
 ) {
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
+    val screenViewModel = previewAwareViewModel(viewModel)
 
     LaunchedEffect(comicId, inPreview) {
         if (!inPreview) {
-            viewModel.loadComic(comicId)
+            screenViewModel?.loadComic(comicId)
         }
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (inPreview || viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
         }
     }
 
-    LaunchedEffect(viewModel.messageEvent) {
-        if (inPreview || viewModel.messageEvent <= 0) return@LaunchedEffect
-        val res = viewModel.messageRes ?: return@LaunchedEffect
+    LaunchedEffect(screenViewModel?.messageEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.messageEvent <= 0) return@LaunchedEffect
+        val res = vm.messageRes ?: return@LaunchedEffect
         Toast.makeText(context, res, Toast.LENGTH_SHORT).show()
     }
 
@@ -115,7 +117,7 @@ fun ComicDetailScreen(
                         )
                     }
                     Text(
-                        text = viewModel.comicDetail?.title ?: stringResource(R.string.title_comic_detail_default),
+                        text = screenViewModel?.comicDetail?.title ?: stringResource(R.string.title_comic_detail_default),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(start = 8.dp)
                     )
@@ -132,10 +134,11 @@ fun ComicDetailScreen(
                         },
                         modifier = Modifier.fillMaxSize(),
                         update = { view ->
+                            val vm = screenViewModel ?: return@AndroidView
                             view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
                             view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
 
-                            val detail = viewModel.comicDetail ?: return@AndroidView
+                            val detail = vm.comicDetail ?: return@AndroidView
                             val context = view.context
 
                             val titleView = view.findViewById<TextView>(R.id.textView_comic_detail_title)
@@ -258,10 +261,10 @@ fun ComicDetailScreen(
                             likeButton?.setImageResource(
                                 if (detail.isLiked) R.drawable.icon_bookmark_on else R.drawable.icon_bookmark_off
                             )
-                            bookmarkButton?.isEnabled = !viewModel.isActionLoading
-                            likeButton?.isEnabled = !viewModel.isActionLoading
-                            bookmarkButton?.setOnClickListener { viewModel.toggleFavourite() }
-                            likeButton?.setOnClickListener { viewModel.toggleLike() }
+                            bookmarkButton?.isEnabled = !vm.isActionLoading
+                            likeButton?.isEnabled = !vm.isActionLoading
+                            bookmarkButton?.setOnClickListener { vm.toggleFavourite() }
+                            likeButton?.setOnClickListener { vm.toggleLike() }
 
                             val commentButton =
                                 view.findViewById<ImageButton>(R.id.imageButton_comic_detail_comment)
@@ -373,8 +376,8 @@ fun ComicDetailScreen(
                                 )
                             }
                             startReadButton?.setOnClickListener {
-                                val episodeTotal = if (viewModel.episodeTotal > 0) {
-                                    viewModel.episodeTotal
+                                val episodeTotal = if (vm.episodeTotal > 0) {
+                                    vm.episodeTotal
                                 } else {
                                     detail.episodeCount
                                 }
@@ -390,7 +393,7 @@ fun ComicDetailScreen(
                                         fromRecord = true
                                     )
                                 } else {
-                                    val firstEpisodeOrder = viewModel.episodes.firstOrNull()?.order ?: 1
+                                    val firstEpisodeOrder = vm.episodes.firstOrNull()?.order ?: 1
                                     openComicViewer(
                                         context = context,
                                         comicId = comicId,
@@ -408,19 +411,19 @@ fun ComicDetailScreen(
                             val moreEpisodesButton =
                                 view.findViewById<Button>(R.id.button_comic_detail_more_episode)
                             val episodesKey =
-                                viewModel.episodes.joinToString("|") { "${it.episodeId}:${it.order}" }
+                                vm.episodes.joinToString("|") { "${it.episodeId}:${it.order}" }
                             val oldEpisodesKey =
                                 episodesRv?.getTag(R.id.recyclerView_comic_detail_episode) as? String
                             if (episodesRv != null && oldEpisodesKey != episodesKey) {
                                 episodesRv.layoutManager = FullGridLayoutManager(context, 4)
                                 episodesRv.adapter = EpisodeRecyclerViewAdapter(
                                     context,
-                                    ArrayList(viewModel.episodes),
+                                    ArrayList(vm.episodes),
                                     object : k {
                                         override fun C(i: Int) {
-                                            val episode = viewModel.episodes.getOrNull(i) ?: return
-                                            val episodeTotal = if (viewModel.episodeTotal > 0) {
-                                                viewModel.episodeTotal
+                                            val episode = vm.episodes.getOrNull(i) ?: return
+                                            val episodeTotal = if (vm.episodeTotal > 0) {
+                                                vm.episodeTotal
                                             } else {
                                                 detail.episodeCount
                                             }
@@ -439,15 +442,15 @@ fun ComicDetailScreen(
                                 episodesRv.setTag(R.id.recyclerView_comic_detail_episode, episodesKey)
                             }
                             moreEpisodesButton?.visibility =
-                                if (viewModel.hasMoreEpisodes) View.VISIBLE else View.GONE
+                                if (vm.hasMoreEpisodes) View.VISIBLE else View.GONE
                             moreEpisodesButton?.setOnClickListener {
-                                viewModel.loadMoreEpisodes()
+                                vm.loadMoreEpisodes()
                             }
 
                             val recommendationRv =
                                 view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_recommendation)
                             val recKey =
-                                viewModel.recommendations.joinToString("|") { it.comicId ?: "" }
+                                vm.recommendations.joinToString("|") { it.comicId ?: "" }
                             val oldRecKey =
                                 recommendationRv?.getTag(R.id.recyclerView_recommendation) as? String
                             if (recommendationRv != null && oldRecKey != recKey) {
@@ -461,10 +464,10 @@ fun ComicDetailScreen(
                                 }
                                 recommendationRv.adapter = ComicRecommendationRecyclerViewAdapter(
                                     context,
-                                    ArrayList(viewModel.recommendations),
+                                    ArrayList(vm.recommendations),
                                     object : b {
                                         override fun C(i: Int) {
-                                            val item = viewModel.recommendations.getOrNull(i) ?: return
+                                            val item = vm.recommendations.getOrNull(i) ?: return
                                             val targetComicId = item.comicId ?: return
                                             onComicClick(targetComicId)
                                         }
@@ -483,7 +486,7 @@ fun ComicDetailScreen(
                                         val child =
                                             nested.getChildAt(nested.childCount - 1) ?: return@OnScrollChangeListener
                                         if (child.bottom - (nested.height + nested.scrollY) == 0) {
-                                            viewModel.loadMoreEpisodes()
+                                            vm.loadMoreEpisodes()
                                         }
                                     }
                                 )

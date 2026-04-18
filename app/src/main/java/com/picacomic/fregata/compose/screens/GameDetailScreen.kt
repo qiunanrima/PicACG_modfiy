@@ -28,11 +28,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.adapters.GameScreenShotRecyclerViewAdapter
 import com.picacomic.fregata.adapters.GameScreenShotViewPagerAdapter
@@ -47,27 +47,33 @@ fun GameDetailScreen(
     gameId: String,
     onBack: () -> Unit,
     onCommentClick: (String) -> Unit = {},
-    viewModel: GameDetailViewModel = viewModel()
+    viewModel: GameDetailViewModel? = null
 ) {
     val context = LocalContext.current
+    val inPreview = LocalInspectionMode.current
+    val screenViewModel = previewAwareViewModel(viewModel)
 
     LaunchedEffect(gameId) {
-        viewModel.loadGame(gameId, force = true)
+        if (!inPreview) {
+            screenViewModel?.loadGame(gameId, force = true)
+        }
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
         }
     }
 
-    LaunchedEffect(viewModel.messageEvent) {
-        if (viewModel.messageEvent <= 0) return@LaunchedEffect
-        val res = viewModel.messageRes ?: return@LaunchedEffect
+    LaunchedEffect(screenViewModel?.messageEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.messageEvent <= 0) return@LaunchedEffect
+        val res = vm.messageRes ?: return@LaunchedEffect
         Toast.makeText(context, res, Toast.LENGTH_SHORT).show()
     }
 
@@ -88,24 +94,38 @@ fun GameDetailScreen(
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                     Text(
-                        text = viewModel.gameDetail?.title ?: stringResource(R.string.title_game_detail),
+                        text = screenViewModel?.gameDetail?.title ?: stringResource(R.string.title_game_detail),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
             }
             Box(modifier = Modifier.weight(1f)) {
-                AndroidView(
-                    factory = { context ->
-                        LayoutInflater.from(context).inflate(R.layout.fragment_game_detail, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
-                        view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
-                        val detail = viewModel.gameDetail
-                        if (detail != null) {
-                            try {
+                if (inPreview) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = stringResource(R.string.title_game_detail),
+                            items = listOf("游戏标题", "版本更新内容", "截图 / 视频 / 评论入口")
+                        )
+                    }
+                } else {
+                    AndroidView(
+                        factory = { context ->
+                            LayoutInflater.from(context).inflate(R.layout.fragment_game_detail, null, false)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { view ->
+                            val vm = screenViewModel ?: return@AndroidView
+                            view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
+                            view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
+                            val detail = vm.gameDetail
+                            if (detail != null) {
+                                try {
                                 val screenWidth = view.resources.displayMetrics.widthPixels
                                 view.findViewById<View>(R.id.frameLayout_game_detail_banner)?.layoutParams?.height =
                                     (screenWidth * 9) / 16
@@ -141,14 +161,14 @@ fun GameDetailScreen(
                                 }
 
                                 val bannerView = view.findViewById<ImageView>(R.id.imageView_game_detail_banner)
-                                viewModel.bannerScreenshot?.let {
+                                vm.bannerScreenshot?.let {
                                     Picasso.with(view.context).load(g.b(it)).into(bannerView)
                                 }
 
                                 val playButton = view.findViewById<ImageButton>(R.id.imageButton_game_detail_play)
                                 playButton?.visibility =
                                     if (detail.videoLink.isNullOrBlank()) View.GONE else View.VISIBLE
-                                playButton?.setOnClickListener { viewModel.openVideoPopup() }
+                                playButton?.setOnClickListener { vm.openVideoPopup() }
 
                                 view.findViewById<ImageButton>(R.id.imageButton_game_detail_gift)?.setOnClickListener {
                                     AlertDialogCenter.giftNotReady(view.context)
@@ -171,8 +191,8 @@ fun GameDetailScreen(
                                     setImageResource(
                                         if (detail.isLiked) R.drawable.icon_bookmark_on else R.drawable.icon_bookmark_off
                                     )
-                                    isEnabled = !viewModel.isActionLoading
-                                    setOnClickListener { viewModel.toggleLike() }
+                                    isEnabled = !vm.isActionLoading
+                                    setOnClickListener { vm.toggleLike() }
                                 }
 
                                 val descriptionView =
@@ -214,7 +234,7 @@ fun GameDetailScreen(
                                 val screenshotsRv =
                                     view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_game_detail_screenshots)
                                 val screenshotKey =
-                                    viewModel.screenshots.joinToString("|") { g.b(it) }
+                                    vm.screenshots.joinToString("|") { g.b(it) }
                                 val oldScreenshotKey =
                                     screenshotsRv?.getTag(R.id.recyclerView_game_detail_screenshots) as? String
                                 if (screenshotsRv != null && oldScreenshotKey != screenshotKey) {
@@ -224,10 +244,10 @@ fun GameDetailScreen(
                                     }
                                     screenshotsRv.adapter = GameScreenShotRecyclerViewAdapter(
                                         view.context,
-                                        ArrayList(viewModel.screenshots),
+                                        ArrayList(vm.screenshots),
                                         object : com.picacomic.fregata.a_pkg.k {
                                             override fun C(i: Int) {
-                                                viewModel.openScreenshot(i)
+                                                vm.openScreenshot(i)
                                             }
                                         }
                                     )
@@ -241,11 +261,11 @@ fun GameDetailScreen(
                                     view.findViewById<android.widget.VideoView>(R.id.videoView_game_detail)
                                 val popupClose =
                                     view.findViewById<ImageButton>(R.id.imageButton_game_detail_close_popup)
-                                popupClose?.setOnClickListener { viewModel.closePopup() }
+                                popupClose?.setOnClickListener { vm.closePopup() }
                                 popupLayout?.visibility =
-                                    if (viewModel.popupVisible) View.VISIBLE else View.GONE
-                                if (viewModel.popupVisible) {
-                                    if (viewModel.showVideoInPopup) {
+                                    if (vm.popupVisible) View.VISIBLE else View.GONE
+                                if (vm.popupVisible) {
+                                    if (vm.showVideoInPopup) {
                                         viewPager?.visibility = View.GONE
                                         videoView?.visibility = View.VISIBLE
                                         val videoLink = detail.videoLink.orEmpty()
@@ -270,23 +290,24 @@ fun GameDetailScreen(
                                         if (viewPager != null && oldPagerKey != pagerKey) {
                                             viewPager.adapter = GameScreenShotViewPagerAdapter(
                                                 view.context,
-                                                ArrayList(viewModel.screenshots)
+                                                ArrayList(vm.screenshots)
                                             )
                                             viewPager.setTag(R.id.viewPager_game_detail_screenShot, pagerKey)
                                         }
-                                        viewPager?.currentItem = viewModel.selectedScreenshotIndex
+                                        viewPager?.currentItem = vm.selectedScreenshotIndex
                                     }
                                 } else {
                                     videoView?.pause()
                                     videoView?.visibility = View.GONE
                                     viewPager?.visibility = View.GONE
                                 }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }

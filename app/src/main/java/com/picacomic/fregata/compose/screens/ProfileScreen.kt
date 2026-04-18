@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -71,48 +72,63 @@ import kotlin.math.max
 @Composable
 fun ProfileScreen(
     onEdit: () -> Unit,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel? = null
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
     val lifecycleOwner = LocalLifecycleOwner.current
+    val inPreview = LocalInspectionMode.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
+    val screenViewModel = previewAwareViewModel(viewModel)
 
-    val cropLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
-        val cropResultUri = result.data?.getStringExtra("CROP_IMAGE_RESULT_URI")
-        if (!cropResultUri.isNullOrEmpty()) {
-            viewModel.onAvatarCropped(cropResultUri)
+    val cropLauncher = if (inPreview) {
+        null
+    } else {
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+            val cropResultUri = result.data?.getStringExtra("CROP_IMAGE_RESULT_URI")
+            if (!cropResultUri.isNullOrEmpty()) {
+                screenViewModel?.onAvatarCropped(cropResultUri)
+            }
         }
     }
 
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
-        val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
-        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-            putExtra("KEY_ACTION_TYPE", 1)
-            putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
+    val galleryLauncher = if (inPreview) {
+        null
+    } else {
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+            val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
+            val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+                putExtra("KEY_ACTION_TYPE", 1)
+                putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
+            }
+            cropLauncher?.launch(cropIntent)
         }
-        cropLauncher.launch(cropIntent)
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
-        val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
-        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-            putExtra("KEY_ACTION_TYPE", 1)
-            putExtra("KEY_IMAGE_URI_STRING", cameraUri)
+    val cameraLauncher = if (inPreview) {
+        null
+    } else {
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+            val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
+            val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+                putExtra("KEY_ACTION_TYPE", 1)
+                putExtra("KEY_IMAGE_URI_STRING", cameraUri)
+            }
+            cropLauncher?.launch(cropIntent)
         }
-        cropLauncher.launch(cropIntent)
     }
 
-    val onAvatarClick: () -> Unit = {
+    val onAvatarClick: () -> Unit = click@{
+        if (inPreview) return@click
         val hasStoragePermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -141,12 +157,12 @@ fun ProfileScreen(
                         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                             putExtra("output", photoUri)
                         }
-                        cameraLauncher.launch(cameraIntent)
+                        cameraLauncher?.launch(cameraIntent)
                     } else {
                         val pickIntent = Intent(Intent.ACTION_PICK).apply {
                             type = "image/*"
                         }
-                        galleryLauncher.launch(pickIntent)
+                        galleryLauncher?.launch(pickIntent)
                     }
                 }
                 .show()
@@ -154,13 +170,16 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.loadProfile()
+        if (!inPreview) {
+            screenViewModel?.loadProfile()
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.loadProfile(force = true)
+                if (inPreview) return@LifecycleEventObserver
+                screenViewModel?.loadProfile(force = true)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -175,23 +194,24 @@ fun ProfileScreen(
         }
     }
 
-    LaunchedEffect(viewModel.punchInSuccessEvent) {
-        if (viewModel.punchInSuccessEvent > 0) {
+    LaunchedEffect(screenViewModel?.punchInSuccessEvent) {
+        if ((screenViewModel?.punchInSuccessEvent ?: 0) > 0) {
             AlertDialogCenter.punchedIn(context)
         }
     }
 
-    LaunchedEffect(viewModel.levelUpEvent) {
-        if (viewModel.levelUpEvent > 0) {
+    LaunchedEffect(screenViewModel?.levelUpEvent) {
+        if ((screenViewModel?.levelUpEvent ?: 0) > 0) {
             AlertDialogCenter.levelUp(context)
         }
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            c(context, code, viewModel.errorBody).dN()
+            c(context, code, vm.errorBody).dN()
         } else {
             c(context).dN()
         }
@@ -222,74 +242,89 @@ fun ProfileScreen(
             }
 
             Box(modifier = Modifier.weight(1f)) {
-                AndroidView(
-                    factory = { ctx ->
-                        android.view.LayoutInflater.from(ctx)
-                            .inflate(R.layout.layout_profile_compose_content, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { root ->
-                        val avatarView =
-                            root.findViewById<CircleImageView>(R.id.imageView_profile_avatar)
-                        val avatarBlurView =
-                            root.findViewById<ImageView>(R.id.imageView_profile_avatar_blur)
-                        val characterView =
-                            root.findViewById<ImageView>(R.id.imageView_profile_character)
-                        val verifiedView =
-                            root.findViewById<ImageView>(R.id.imageView_profile_verified)
-                        val levelTextView =
-                            root.findViewById<TextView>(R.id.textView_profile_level)
-                        val nameTextView =
-                            root.findViewById<TextView>(R.id.textView_profile_name)
-                        val honorTextView =
-                            root.findViewById<TextView>(R.id.textView_profile_honor)
-                        val sloganTextView =
-                            root.findViewById<TextView>(R.id.textView_profile_slogan)
-                        val punchInTextView =
-                            root.findViewById<TextView>(R.id.textView_profile_punch_in)
-                        val expCircleView =
-                            root.findViewById<ExpCircleView>(R.id.expCircleView_profile)
-                        val tabLayout = root.findViewById<TabLayout>(R.id.tabs)
-                        val viewPager = root.findViewById<ViewPager>(R.id.viewPager_profile)
-
-                        expCircleView?.setGridSize(20)
-
-                        if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
-                            avatarView?.setOnClickListener { onAvatarClick() }
-                            avatarView?.setTag(R.id.imageView_profile_avatar, true)
-                        }
-
-                        if (punchInTextView?.getTag(R.id.textView_profile_punch_in) != true) {
-                            punchInTextView?.setOnClickListener { viewModel.punchIn() }
-                            punchInTextView?.setTag(R.id.textView_profile_punch_in, true)
-                        }
-
-                        bindProfilePager(
-                            root = root,
-                            activity = activity as? FragmentActivity,
-                            viewPager = viewPager,
-                            tabLayout = tabLayout,
-                            userProfile = viewModel.userProfile
-                        )
-
-                        bindProfileHeader(
-                            root = root,
-                            userProfile = viewModel.userProfile,
-                            avatarPreviewUri = viewModel.avatarPreviewUri,
-                            avatarView = avatarView,
-                            avatarBlurView = avatarBlurView,
-                            characterView = characterView,
-                            verifiedView = verifiedView,
-                            levelTextView = levelTextView,
-                            nameTextView = nameTextView,
-                            honorTextView = honorTextView,
-                            sloganTextView = sloganTextView,
-                            punchInTextView = punchInTextView,
-                            expCircleView = expCircleView,
-                            isPunchingIn = viewModel.isPunchingIn
+                if (inPreview) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = "Knight (Lv. 8)",
+                            items = listOf("头衔：哔咔骑士", "签名：今天也在补迁移", "标签页：漫画 / 评论")
                         )
                     }
-                )
+                } else {
+                    AndroidView(
+                        factory = { ctx ->
+                            android.view.LayoutInflater.from(ctx)
+                                .inflate(R.layout.layout_profile_compose_content, null, false)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { root ->
+                            val vm = screenViewModel ?: return@AndroidView
+                            val avatarView =
+                                root.findViewById<CircleImageView>(R.id.imageView_profile_avatar)
+                            val avatarBlurView =
+                                root.findViewById<ImageView>(R.id.imageView_profile_avatar_blur)
+                            val characterView =
+                                root.findViewById<ImageView>(R.id.imageView_profile_character)
+                            val verifiedView =
+                                root.findViewById<ImageView>(R.id.imageView_profile_verified)
+                            val levelTextView =
+                                root.findViewById<TextView>(R.id.textView_profile_level)
+                            val nameTextView =
+                                root.findViewById<TextView>(R.id.textView_profile_name)
+                            val honorTextView =
+                                root.findViewById<TextView>(R.id.textView_profile_honor)
+                            val sloganTextView =
+                                root.findViewById<TextView>(R.id.textView_profile_slogan)
+                            val punchInTextView =
+                                root.findViewById<TextView>(R.id.textView_profile_punch_in)
+                            val expCircleView =
+                                root.findViewById<ExpCircleView>(R.id.expCircleView_profile)
+                            val tabLayout = root.findViewById<TabLayout>(R.id.tabs)
+                            val viewPager = root.findViewById<ViewPager>(R.id.viewPager_profile)
+
+                            expCircleView?.setGridSize(20)
+
+                            if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
+                                avatarView?.setOnClickListener { onAvatarClick() }
+                                avatarView?.setTag(R.id.imageView_profile_avatar, true)
+                            }
+
+                            if (punchInTextView?.getTag(R.id.textView_profile_punch_in) != true) {
+                                punchInTextView?.setOnClickListener { vm.punchIn() }
+                                punchInTextView?.setTag(R.id.textView_profile_punch_in, true)
+                            }
+
+                            bindProfilePager(
+                                root = root,
+                                activity = activity as? FragmentActivity,
+                                viewPager = viewPager,
+                                tabLayout = tabLayout,
+                                userProfile = vm.userProfile
+                            )
+
+                            bindProfileHeader(
+                                root = root,
+                                userProfile = vm.userProfile,
+                                avatarPreviewUri = vm.avatarPreviewUri,
+                                avatarView = avatarView,
+                                avatarBlurView = avatarBlurView,
+                                characterView = characterView,
+                                verifiedView = verifiedView,
+                                levelTextView = levelTextView,
+                                nameTextView = nameTextView,
+                                honorTextView = honorTextView,
+                                sloganTextView = sloganTextView,
+                                punchInTextView = punchInTextView,
+                                expCircleView = expCircleView,
+                                isPunchingIn = vm.isPunchingIn
+                            )
+                        }
+                    )
+                }
             }
         }
     }

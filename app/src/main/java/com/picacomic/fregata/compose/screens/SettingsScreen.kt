@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -332,29 +333,11 @@ private fun SettingsSection(
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsScreenPreview() {
+private fun SettingsScreenPreview(
+    @PreviewParameter(SettingsPreviewProvider::class) state: SettingsState
+) {
     SettingsScreen(
-        state = SettingsState(
-            apkVersionTitle = "1.0.0",
-            screenOrientationIndex = 0,
-            screenOrientationValue = "Portrait",
-            scrollDirectionIndex = 0,
-            scrollDirectionValue = "Top to Bottom",
-            autoPagingIntervalMs = 1000,
-            autoPagingValue = "1000ms",
-            autoPagingDraftIntervalMs = 1000,
-            imageQualityIndex = 3,
-            imageQualityValue = "High",
-            themeColorIndex = 0,
-            themeColorValue = "Default",
-            cacheTitleValue = "20MB",
-            pinTitleValue = "PIN",
-            pinValue = "Off",
-            nightModeEnabled = false,
-            volumePagingEnabled = true,
-            testingEnabled = false,
-            performanceEnabled = true
-        ),
+        state = state,
         onScreenOrientation = {},
         onScrollDirection = {},
         onAutoPaging = {},

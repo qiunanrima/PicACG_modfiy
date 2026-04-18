@@ -1,54 +1,80 @@
 package com.picacomic.fregata.compose.screens
 
 import android.view.LayoutInflater
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.picacomic.fregata.R
-import com.picacomic.fregata.adapters.GameListRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.GameViewModel
+import com.picacomic.fregata.databinding.ItemGameRecyclerViewCellBinding
+import com.picacomic.fregata.objects.GameListObject
+import com.picacomic.fregata.utils.PicassoTransformations
+import com.picacomic.fregata.utils.g
+import com.squareup.picasso.Picasso
 
 @Composable
 fun GameScreen(
-    viewModel: GameViewModel = viewModel(),
+    viewModel: GameViewModel? = null,
     onGameClick: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val inPreview = LocalInspectionMode.current
+    val gridState = rememberLazyGridState()
+    val screenViewModel = previewAwareViewModel(viewModel)
 
     LaunchedEffect(Unit) {
-        if (viewModel.games.isEmpty()) {
-            viewModel.loadData()
+        if (!inPreview && screenViewModel?.games?.isEmpty() == true) {
+            screenViewModel?.loadData()
         }
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
+        }
+    }
+
+    if (!inPreview) {
+        RememberGridLoadMore(
+            state = gridState,
+            enabled = screenViewModel?.games?.isNotEmpty() == true &&
+                screenViewModel?.isLoading != true &&
+                screenViewModel?.hasMore == true,
+        ) {
+            screenViewModel?.loadData()
         }
     }
 
@@ -73,53 +99,90 @@ fun GameScreen(
                 }
             }
             Box(modifier = Modifier.weight(1f)) {
-                AndroidView(
-                    factory = { context ->
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.layout_compose_recycler_content, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        val recyclerView =
-                            view.findViewById<RecyclerView>(R.id.recyclerView_compose_content)
-                        
-                        recyclerView?.let { rv ->
-                            val oldSize = rv.getTag(R.id.composeView_game) as? Int
-                            if (rv.adapter == null || oldSize != viewModel.games.size) {
-                                rv.layoutManager = GridLayoutManager(view.context, 2)
-                                rv.adapter = GameListRecyclerViewAdapter(
-                                    view.context, 
-                                    ArrayList(viewModel.games),
-                                    object : com.picacomic.fregata.a_pkg.k {
-                                        override fun C(i: Int) {
-                                            if (i >= 0 && i < viewModel.games.size) {
-                                                onGameClick(viewModel.games[i].gameId)
-                                            }
-                                        }
-                                    }
-                                )
-                                rv.setTag(R.id.composeView_game, viewModel.games.size)
-                            }
+                if (inPreview) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        PreviewGridPanel(
+                            title = stringResource(R.string.title_game_list),
+                            items = listOf("Game A", "Game B", "Game C", "Game D"),
+                            columns = 2
+                        )
+                    }
+                } else {
+                    val vm = screenViewModel
+                    when {
+                        vm == null || (vm.games.isEmpty() && vm.isLoading) -> {
+                            PicaLoadingIndicator()
+                        }
 
-                            if (rv.getTag(R.id.textView_profile_level) != true) {
-                                rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                                        super.onScrollStateChanged(recyclerView, newState)
-                                        val layoutManager = recyclerView.layoutManager as? GridLayoutManager
-                                            ?: return
-                                        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                                            viewModel.loadData()
-                                        }
+                        vm.games.isEmpty() -> {
+                            PicaEmptyState(message = "暂无内容")
+                        }
+
+                        else -> {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                state = gridState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(4.dp)
+                            ) {
+                                itemsIndexed(
+                                    items = vm.games,
+                                    key = { index, item ->
+                                        item.gameId ?: "game_$index"
                                     }
-                                })
-                                rv.setTag(R.id.textView_profile_level, true)
+                                ) { _, item ->
+                                    GameGridItem(item = item) {
+                                        item.gameId?.let(onGameClick)
+                                    }
+                                }
+
+                                if (vm.isLoading) {
+                                    item(
+                                        key = "loading",
+                                        span = { GridItemSpan(maxLineSpan) }
+                                    ) {
+                                        ListLoadingFooter()
+                                    }
+                                }
                             }
                         }
                     }
-                )
+                }
             }
         }
     }
+}
+
+@Composable
+private fun GameGridItem(
+    item: GameListObject,
+    onClick: () -> Unit,
+) {
+    AndroidView(
+        factory = { context ->
+            LayoutInflater.from(context).inflate(R.layout.item_game_recycler_view_cell, null, false)
+        },
+        modifier = Modifier.fillMaxWidth(),
+        update = { view ->
+            val binding = ItemGameRecyclerViewCellBinding.bind(view)
+            binding.root.setOnClickListener { onClick() }
+            binding.textViewGameRecyclerViewCellTitle.text = item.title.orEmpty()
+            binding.textViewGameRecyclerViewCellPublisher.text = item.publisher.orEmpty()
+            binding.imageViewGameRecyclerViewCellAdult.visibility =
+                if (item.isAdult) View.VISIBLE else View.GONE
+            binding.imageViewGameRecyclerViewCellPicaRecommend.visibility =
+                if (item.isSuggest) View.VISIBLE else View.GONE
+            Picasso.with(view.context)
+                .load(g.b(item.icon))
+                .transform(PicassoTransformations.LARGE_COVER)
+                .placeholder(R.drawable.placeholder_avatar_2)
+                .into(binding.imageViewGameRecyclerViewCellBanner)
+        }
+    )
 }
 
 @Preview(showBackground = true)

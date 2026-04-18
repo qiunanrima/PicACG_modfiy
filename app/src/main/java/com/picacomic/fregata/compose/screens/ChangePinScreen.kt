@@ -12,12 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaPrimaryButton
@@ -28,14 +28,17 @@ import com.picacomic.fregata.compose.viewmodels.ChangePinViewModel
 @Composable
 fun ChangePinScreen(
     onBack: () -> Unit,
-    viewModel: ChangePinViewModel = viewModel()
+    viewModel: ChangePinViewModel? = null
 ) {
     val context = LocalContext.current
-    val pinErrorRes = viewModel.pinErrorRes()
-    val pinConfirmErrorRes = viewModel.pinConfirmErrorRes()
+    val inPreview = LocalInspectionMode.current
+    val screenViewModel = previewAwareViewModel(viewModel)
+    val pinErrorRes = screenViewModel?.pinErrorRes()
+    val pinConfirmErrorRes = screenViewModel?.pinConfirmErrorRes()
 
-    LaunchedEffect(viewModel.clearSuccessEvent) {
-        if (viewModel.clearSuccessEvent <= 0) return@LaunchedEffect
+    LaunchedEffect(screenViewModel?.clearSuccessEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.clearSuccessEvent <= 0) return@LaunchedEffect
         Toast.makeText(
             context,
             R.string.change_pin_cancel_success,
@@ -44,8 +47,9 @@ fun ChangePinScreen(
         onBack()
     }
 
-    LaunchedEffect(viewModel.setSuccessEvent) {
-        if (viewModel.setSuccessEvent <= 0) return@LaunchedEffect
+    LaunchedEffect(screenViewModel?.setSuccessEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.setSuccessEvent <= 0) return@LaunchedEffect
         Toast.makeText(
             context,
             R.string.change_pin_set_success,
@@ -67,8 +71,8 @@ fun ChangePinScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 PicaTextField(
-                    value = viewModel.pin,
-                    onValueChange = viewModel::updatePin,
+                    value = screenViewModel?.pin.orEmpty(),
+                    onValueChange = { screenViewModel?.updatePin(it) },
                     label = stringResource(R.string.change_password_new_title),
                     placeholder = stringResource(R.string.change_password_enter_new_hint),
                     errorText = pinErrorRes?.let { stringResource(it) },
@@ -77,8 +81,8 @@ fun ChangePinScreen(
                 )
 
                 PicaTextField(
-                    value = viewModel.pinConfirm,
-                    onValueChange = viewModel::updatePinConfirm,
+                    value = screenViewModel?.pinConfirm.orEmpty(),
+                    onValueChange = { screenViewModel?.updatePinConfirm(it) },
                     label = stringResource(R.string.change_password_new_confirm_title),
                     placeholder = stringResource(R.string.change_password_enter_new_hint),
                     errorText = pinConfirmErrorRes?.let { stringResource(it) },
@@ -88,13 +92,13 @@ fun ChangePinScreen(
 
                 PicaPrimaryButton(
                     text = stringResource(R.string.change_pin_cancel),
-                    onClick = viewModel::clearPin
+                    onClick = { screenViewModel?.clearPin() }
                 )
 
                 PicaPrimaryButton(
                     text = stringResource(R.string.change_password_change),
-                    onClick = viewModel::savePin,
-                    enabled = viewModel.canSubmit()
+                    onClick = { screenViewModel?.savePin() },
+                    enabled = screenViewModel?.canSubmit() == true
                 )
             }
         }

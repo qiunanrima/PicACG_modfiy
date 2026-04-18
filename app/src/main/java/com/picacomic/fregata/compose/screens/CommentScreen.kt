@@ -26,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.picacomic.fregata.R
@@ -42,30 +41,33 @@ fun CommentScreen(
     onBack: () -> Unit,
     onComicClick: (String) -> Unit = {},
     onGameClick: (String) -> Unit = {},
-    viewModel: CommentViewModel = viewModel()
+    viewModel: CommentViewModel? = null
 ) {
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
+    val screenViewModel = previewAwareViewModel(viewModel)
 
     LaunchedEffect(comicId, gameId, commentId) {
         if (!inPreview) {
-            viewModel.loadComments(comicId, gameId, commentId, page = 1, force = true)
+            screenViewModel?.loadComments(comicId, gameId, commentId, page = 1, force = true)
         }
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (inPreview || viewModel.errorEvent == 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent == 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
         }
     }
 
-    LaunchedEffect(viewModel.messageEvent) {
-        if (inPreview || viewModel.messageEvent == 0) return@LaunchedEffect
-        val text = viewModel.messageText ?: viewModel.messageRes?.let(context::getString) ?: return@LaunchedEffect
+    LaunchedEffect(screenViewModel?.messageEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.messageEvent == 0) return@LaunchedEffect
+        val text = vm.messageText ?: vm.messageRes?.let(context::getString) ?: return@LaunchedEffect
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
     }
 
@@ -107,17 +109,18 @@ fun CommentScreen(
                         },
                         modifier = Modifier.fillMaxSize(),
                         update = { view ->
+                            val vm = screenViewModel ?: return@AndroidView
                             val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView_compose_content)
                             if (recyclerView.layoutManager == null) {
                                 recyclerView.layoutManager = LinearLayoutManager(view.context)
                             }
 
-                            val displayItems = ArrayList(viewModel.commentItems)
+                            val displayItems = ArrayList(vm.commentItems)
                             val replyStateKey = displayItems.joinToString("|") { item ->
                                 "${item.commentId}:${item.currentPage}:${item.totalPage}:${item.arrayList?.size ?: 0}:${item.isTop}:${item.isLiked}:${item.isHide}"
                             }
                             val dataKey =
-                                "${viewModel.currentPage}_${displayItems.size}_${viewModel.topCommentCount}_${viewModel.expandedCommentIndex}_$replyStateKey"
+                                "${vm.currentPage}_${displayItems.size}_${vm.topCommentCount}_${vm.expandedCommentIndex}_$replyStateKey"
                             val oldKey = recyclerView.getTag(R.id.recyclerView_comments) as? String
                             if (recyclerView.adapter == null || oldKey != dataKey) {
                                 var adapterRef: CommentRecyclerViewAdapter? = null
@@ -127,11 +130,11 @@ fun CommentScreen(
                                     }
 
                                     override fun C(i: Int) {
-                                        viewModel.beginReply(i)
+                                        vm.beginReply(i)
                                     }
 
                                     override fun N(i: Int) {
-                                        viewModel.loadReplies(i, reset = false)
+                                        vm.loadReplies(i, reset = false)
                                     }
 
                                     override fun O(i: Int) {
@@ -148,55 +151,55 @@ fun CommentScreen(
                                     override fun P(i: Int) = Unit
 
                                     override fun Q(i: Int) {
-                                        viewModel.toggleCommentLike(i)
+                                        vm.toggleCommentLike(i)
                                     }
 
                                     override fun R(i: Int) = Unit
                                     override fun S(i: Int) {
-                                        viewModel.hideComment(i)
+                                        vm.hideComment(i)
                                     }
 
                                     override fun T(i: Int) {
-                                        viewModel.toggleTop(i)
+                                        vm.toggleTop(i)
                                     }
 
                                     override fun U(i: Int) {
-                                        viewModel.toggleDirtyAvatarForComment(i)
+                                        vm.toggleDirtyAvatarForComment(i)
                                     }
 
                                     override fun V(i: Int) {
-                                        viewModel.reportComment(i)
+                                        vm.reportComment(i)
                                     }
 
                                     override fun f(i: Int, i2: Int) {}
 
                                     override fun g(i: Int, i2: Int) {
-                                        viewModel.toggleReplyLike(i, i2)
+                                        vm.toggleReplyLike(i, i2)
                                     }
 
                                     override fun h(i: Int, i2: Int) {}
                                     override fun i(i: Int, i2: Int) {
-                                        viewModel.hideReply(i, i2)
+                                        vm.hideReply(i, i2)
                                     }
 
                                     override fun j(i: Int, i2: Int) {
-                                        viewModel.reportReply(i, i2)
+                                        vm.reportReply(i, i2)
                                     }
                                 }
                                 val adapter = CommentRecyclerViewAdapter(
                                     view.context,
-                                    viewModel.profileUser,
+                                    vm.profileUser,
                                     "",
                                     displayItems,
                                     callback
                                 )
                                 adapterRef = adapter
-                                adapter.B(viewModel.topCommentCount)
-                                adapter.z(viewModel.displayFloorCount)
+                                adapter.B(vm.topCommentCount)
+                                adapter.z(vm.displayFloorCount)
                                 adapter.a(
-                                    viewModel.expandedCommentIndex,
-                                    displayItems.getOrNull(viewModel.expandedCommentIndex)?.arrayList,
-                                    displayItems.getOrNull(viewModel.expandedCommentIndex)?.let {
+                                    vm.expandedCommentIndex,
+                                    displayItems.getOrNull(vm.expandedCommentIndex)?.arrayList,
+                                    displayItems.getOrNull(vm.expandedCommentIndex)?.let {
                                         it.currentPage < it.totalPage
                                     } == true
                                 )
@@ -209,8 +212,8 @@ fun CommentScreen(
                                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                                         super.onScrollStateChanged(recyclerView, newState)
                                         val lm = recyclerView.layoutManager as? LinearLayoutManager ?: return
-                                        if (lm.findLastVisibleItemPosition() == lm.itemCount - 1 && viewModel.hasMore && !viewModel.isLoading) {
-                                            viewModel.loadComments(comicId, gameId, commentId, page = viewModel.currentPage + 1)
+                                        if (lm.findLastVisibleItemPosition() == lm.itemCount - 1 && vm.hasMore && !vm.isLoading) {
+                                            vm.loadComments(comicId, gameId, commentId, page = vm.currentPage + 1)
                                         }
                                     }
                                 })

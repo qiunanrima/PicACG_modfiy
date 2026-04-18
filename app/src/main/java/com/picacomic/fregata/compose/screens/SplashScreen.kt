@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
@@ -166,12 +167,14 @@ private fun SplashCard(content: @Composable () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun SplashScreenPreview() {
+private fun SplashScreenPreview(
+    @PreviewParameter(SplashPreviewProvider::class) preview: SplashPreviewModel
+) {
     SplashScreen(
-        isLoading = true,
-        showError = false,
-        showOptions = false,
-        sslVerificationDisabled = false,
+        isLoading = preview.isLoading,
+        showError = preview.showError,
+        showOptions = preview.showOptions,
+        sslVerificationDisabled = preview.sslVerificationDisabled,
         onRetry = {},
         onSslVerificationDisabledChanged = {},
         onServer1 = {},

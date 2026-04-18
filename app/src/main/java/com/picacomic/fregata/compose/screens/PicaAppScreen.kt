@@ -4,6 +4,7 @@ import android.webkit.WebView
 import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,19 +46,22 @@ fun PicaAppScreen(
     title: String,
     link: String,
     onBack: () -> Unit,
-    viewModel: PicaAppViewModel = viewModel(),
+    viewModel: PicaAppViewModel? = null,
 ) {
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var hostedWebView by remember { mutableStateOf<WebView?>(null) }
+    val screenViewModel = previewAwareViewModel(viewModel)
 
     LaunchedEffect(title, link) {
-        viewModel.initialize(title, link)
+        if (!inPreview) {
+            screenViewModel?.initialize(title, link)
+        }
     }
 
-    LaunchedEffect(viewModel.invalidLinkEvent) {
-        if (viewModel.invalidLinkEvent > 0) {
+    LaunchedEffect(screenViewModel?.invalidLinkEvent) {
+        if (screenViewModel?.invalidLinkEvent ?: 0 > 0) {
             onBack()
         }
     }
@@ -100,7 +104,7 @@ fun PicaAppScreen(
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                     Text(
-                        text = viewModel.title,
+                        text = screenViewModel?.title?.ifBlank { title } ?: title,
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(start = 8.dp)
                     )
@@ -108,7 +112,18 @@ fun PicaAppScreen(
             }
             Box(modifier = Modifier.weight(1f)) {
                 if (inPreview) {
-                    Box(modifier = Modifier.fillMaxSize())
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = screenViewModel?.title?.ifBlank { title.ifBlank { "Pica App" } }
+                                ?: title.ifBlank { "Pica App" },
+                            items = listOf("WebView 内容区域预览", "站内链接将留在页内", "站外链接将外部打开")
+                        )
+                    }
                 } else {
                     AndroidView(
                         factory = { context ->
@@ -116,6 +131,7 @@ fun PicaAppScreen(
                         },
                         modifier = Modifier.fillMaxSize(),
                         update = { view ->
+                            val vm = screenViewModel ?: return@AndroidView
                             try {
                                 view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
                                 view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
@@ -135,7 +151,7 @@ fun PicaAppScreen(
                                 val webView = container?.getChildAt(0) as? WebView
                                 hostedWebView = webView
                                 val oldLink = webView?.getTag(R.id.linearLayout_web) as? String
-                                val authenticatedLink = viewModel.authenticatedLink
+                                val authenticatedLink = vm.authenticatedLink
                                 if (webView != null && authenticatedLink != null && oldLink != authenticatedLink) {
                                     webView.loadUrl(authenticatedLink)
                                     webView.setTag(R.id.linearLayout_web, authenticatedLink)

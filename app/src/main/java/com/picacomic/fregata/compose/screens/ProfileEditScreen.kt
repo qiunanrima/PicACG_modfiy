@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,48 +64,63 @@ import androidx.compose.runtime.setValue
 @Composable
 fun ProfileEditScreen(
     onBack: () -> Unit,
-    viewModel: ProfileEditViewModel = viewModel()
+    viewModel: ProfileEditViewModel? = null
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
+    val inPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
+    val screenViewModel = previewAwareViewModel(viewModel)
 
-    val cropLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
-        val cropResultUri = result.data?.getStringExtra("CROP_IMAGE_RESULT_URI")
-        if (!cropResultUri.isNullOrEmpty()) {
-            viewModel.onAvatarCropped(cropResultUri)
+    val cropLauncher = if (inPreview) {
+        null
+    } else {
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+            val cropResultUri = result.data?.getStringExtra("CROP_IMAGE_RESULT_URI")
+            if (!cropResultUri.isNullOrEmpty()) {
+                screenViewModel?.onAvatarCropped(cropResultUri)
+            }
         }
     }
 
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
-        val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
-        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-            putExtra("KEY_ACTION_TYPE", 1)
-            putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
+    val galleryLauncher = if (inPreview) {
+        null
+    } else {
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+            val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
+            val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+                putExtra("KEY_ACTION_TYPE", 1)
+                putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
+            }
+            cropLauncher?.launch(cropIntent)
         }
-        cropLauncher.launch(cropIntent)
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
-        val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
-        val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-            putExtra("KEY_ACTION_TYPE", 1)
-            putExtra("KEY_IMAGE_URI_STRING", cameraUri)
+    val cameraLauncher = if (inPreview) {
+        null
+    } else {
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
+            val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
+            val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
+                putExtra("KEY_ACTION_TYPE", 1)
+                putExtra("KEY_IMAGE_URI_STRING", cameraUri)
+            }
+            cropLauncher?.launch(cropIntent)
         }
-        cropLauncher.launch(cropIntent)
     }
 
-    val onAvatarClick: () -> Unit = {
+    val onAvatarClick: () -> Unit = click@{
+        if (inPreview) return@click
         val hasStoragePermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -132,12 +149,12 @@ fun ProfileEditScreen(
                         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                             putExtra("output", photoUri)
                         }
-                        cameraLauncher.launch(cameraIntent)
+                        cameraLauncher?.launch(cameraIntent)
                     } else {
                         val pickIntent = Intent(Intent.ACTION_PICK).apply {
                             type = "image/*"
                         }
-                        galleryLauncher.launch(pickIntent)
+                        galleryLauncher?.launch(pickIntent)
                     }
                 }
                 .show()
@@ -145,13 +162,17 @@ fun ProfileEditScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.loadSelfProfile(force = true)
+        if (!inPreview) {
+            screenViewModel?.loadSelfProfile(force = true)
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.loadSelfProfile(force = true)
+                if (!inPreview) {
+                    screenViewModel?.loadSelfProfile(force = true)
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -160,17 +181,19 @@ fun ProfileEditScreen(
         }
     }
 
-    LaunchedEffect(viewModel.updateSuccessEvent) {
-        if (viewModel.updateSuccessEvent <= 0) return@LaunchedEffect
+    LaunchedEffect(screenViewModel?.updateSuccessEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.updateSuccessEvent <= 0) return@LaunchedEffect
         Toast.makeText(context, R.string.profile_edit_update_success, Toast.LENGTH_SHORT).show()
         onBack()
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
         }
@@ -200,56 +223,71 @@ fun ProfileEditScreen(
                 }
             }
             Box(modifier = Modifier.weight(1f)) {
-                AndroidView(
-                    factory = { context2 ->
-                        LayoutInflater.from(context2).inflate(R.layout.fragment_profile_edit, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
-                        view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
-
-                        val userProfile = viewModel.userProfile ?: return@AndroidView
-                        val avatarView = view.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.imageView_profile_avatar)
-                        val nameView = view.findViewById<TextView>(R.id.textView_profile_name)
-                        val birthdayView = view.findViewById<TextView>(R.id.textView_profile_birth)
-                        val emailView = view.findViewById<TextView>(R.id.textView_profile_email)
-                        val sloganEditText = view.findViewById<EditText>(R.id.editText_profile_slogan)
-                        val updateButton = view.findViewById<Button>(R.id.button_profile_update)
-
-                        val avatarPath = viewModel.avatarPreviewUri ?: userProfile.avatar?.let { g.b(it) }
-                        if (avatarView != null && !avatarPath.isNullOrBlank()) {
-                            Picasso.with(view.context).load(avatarPath).into(avatarView)
-                        }
-
-                        if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
-                            avatarView?.setOnClickListener { onAvatarClick() }
-                            avatarView?.setTag(R.id.imageView_profile_avatar, true)
-                        }
-
-                        nameView?.text = displayName(userProfile)
-
-                        birthdayView?.text = userProfile.birthday
-                            ?.substringBefore("T")
-                            ?.takeIf { it.isNotBlank() }
-                            .orEmpty()
-
-                        emailView?.text = userProfile.email.orEmpty()
-
-                        val slogan = userProfile.slogan.orEmpty()
-                        if (sloganEditText != null && !sloganEditText.isFocused && sloganEditText.text.toString() != slogan) {
-                            sloganEditText.setText(slogan)
-                        }
-
-                        if (updateButton != null && updateButton.getTag(R.id.button_profile_update) != true) {
-                            updateButton.setOnClickListener {
-                                viewModel.updateSlogan(sloganEditText?.text?.toString().orEmpty())
-                            }
-                            updateButton.setTag(R.id.button_profile_update, true)
-                        }
-                        updateButton?.isEnabled = !viewModel.isSubmitting
+                if (inPreview) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = stringResource(R.string.title_profile_edit),
+                            items = listOf("头像", "生日 / 邮箱", "个性签名编辑")
+                        )
                     }
-                )
+                } else {
+                    AndroidView(
+                        factory = { context2 ->
+                            LayoutInflater.from(context2).inflate(R.layout.fragment_profile_edit, null, false)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { view ->
+                            val vm = screenViewModel ?: return@AndroidView
+                            view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
+                            view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
+
+                            val userProfile = vm.userProfile ?: return@AndroidView
+                            val avatarView = view.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.imageView_profile_avatar)
+                            val nameView = view.findViewById<TextView>(R.id.textView_profile_name)
+                            val birthdayView = view.findViewById<TextView>(R.id.textView_profile_birth)
+                            val emailView = view.findViewById<TextView>(R.id.textView_profile_email)
+                            val sloganEditText = view.findViewById<EditText>(R.id.editText_profile_slogan)
+                            val updateButton = view.findViewById<Button>(R.id.button_profile_update)
+
+                            val avatarPath = vm.avatarPreviewUri ?: userProfile.avatar?.let { g.b(it) }
+                            if (avatarView != null && !avatarPath.isNullOrBlank()) {
+                                Picasso.with(view.context).load(avatarPath).into(avatarView)
+                            }
+
+                            if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
+                                avatarView?.setOnClickListener { onAvatarClick() }
+                                avatarView?.setTag(R.id.imageView_profile_avatar, true)
+                            }
+
+                            nameView?.text = displayName(userProfile)
+
+                            birthdayView?.text = userProfile.birthday
+                                ?.substringBefore("T")
+                                ?.takeIf { it.isNotBlank() }
+                                .orEmpty()
+
+                            emailView?.text = userProfile.email.orEmpty()
+
+                            val slogan = userProfile.slogan.orEmpty()
+                            if (sloganEditText != null && !sloganEditText.isFocused && sloganEditText.text.toString() != slogan) {
+                                sloganEditText.setText(slogan)
+                            }
+
+                            if (updateButton != null && updateButton.getTag(R.id.button_profile_update) != true) {
+                                updateButton.setOnClickListener {
+                                    vm.updateSlogan(sloganEditText?.text?.toString().orEmpty())
+                                }
+                                updateButton.setTag(R.id.button_profile_update, true)
+                            }
+                            updateButton?.isEnabled = !vm.isSubmitting
+                        }
+                    )
+                }
             }
         }
     }

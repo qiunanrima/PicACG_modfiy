@@ -17,13 +17,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaPrimaryButton
@@ -34,23 +34,27 @@ import com.picacomic.fregata.compose.viewmodels.ChangePasswordViewModel
 @Composable
 fun ChangePasswordScreen(
     onBack: () -> Unit,
-    viewModel: ChangePasswordViewModel = viewModel()
+    viewModel: ChangePasswordViewModel? = null
 ) {
     val context = LocalContext.current
-    val passwordErrorRes = viewModel.passwordErrorRes()
-    val passwordConfirmErrorRes = viewModel.passwordConfirmErrorRes()
+    val inPreview = LocalInspectionMode.current
+    val screenViewModel = previewAwareViewModel(viewModel)
+    val passwordErrorRes = screenViewModel?.passwordErrorRes()
+    val passwordConfirmErrorRes = screenViewModel?.passwordConfirmErrorRes()
 
-    LaunchedEffect(viewModel.successEvent) {
-        if (viewModel.successEvent <= 0) return@LaunchedEffect
+    LaunchedEffect(screenViewModel?.successEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.successEvent <= 0) return@LaunchedEffect
         Toast.makeText(context, R.string.change_password_success, Toast.LENGTH_SHORT).show()
         onBack()
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
         }
@@ -68,15 +72,15 @@ fun ChangePasswordScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                val transformation = if (viewModel.showPassword) {
+                val transformation = if (screenViewModel?.showPassword == true) {
                     VisualTransformation.None
                 } else {
                     PasswordVisualTransformation()
                 }
 
                 PicaTextField(
-                    value = viewModel.password,
-                    onValueChange = viewModel::updatePassword,
+                    value = screenViewModel?.password.orEmpty(),
+                    onValueChange = { screenViewModel?.updatePassword(it) },
                     label = stringResource(R.string.change_password_new_title),
                     placeholder = stringResource(R.string.change_password_enter_new_hint),
                     errorText = passwordErrorRes?.let { stringResource(it) },
@@ -85,8 +89,8 @@ fun ChangePasswordScreen(
                 )
 
                 PicaTextField(
-                    value = viewModel.passwordConfirm,
-                    onValueChange = viewModel::updatePasswordConfirm,
+                    value = screenViewModel?.passwordConfirm.orEmpty(),
+                    onValueChange = { screenViewModel?.updatePasswordConfirm(it) },
                     label = stringResource(R.string.change_password_new_confirm_title),
                     placeholder = stringResource(R.string.change_password_enter_new_hint),
                     errorText = passwordConfirmErrorRes?.let { stringResource(it) },
@@ -99,20 +103,21 @@ fun ChangePasswordScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = viewModel.showPassword,
-                        onCheckedChange = viewModel::updateShowPassword
+                        checked = screenViewModel?.showPassword == true,
+                        onCheckedChange = { screenViewModel?.updateShowPassword(it) }
                     )
                     Text(text = stringResource(R.string.change_password_show_password))
                 }
 
                 PicaPrimaryButton(
-                    text = if (viewModel.isLoading) {
+                    text = if (screenViewModel?.isLoading == true) {
                         stringResource(R.string.loading_general)
                     } else {
                         stringResource(R.string.change_password_change)
                     },
-                    onClick = viewModel::submit,
-                    enabled = viewModel.canSubmit() && !viewModel.isLoading
+                    onClick = { screenViewModel?.submit() },
+                    enabled = screenViewModel?.canSubmit() == true &&
+                        screenViewModel?.isLoading != true
                 )
             }
         }

@@ -1,14 +1,18 @@
 package com.picacomic.fregata.compose.screens
 
 import android.view.LayoutInflater
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -33,46 +37,54 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.picacomic.fregata.R
-import com.picacomic.fregata.adapters.LeaderboardKnightRecyclerViewAdapter
-import com.picacomic.fregata.adapters.LeaderboardPopularRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.LeaderboardViewModel
+import com.picacomic.fregata.databinding.ItemLeaderboardKnightOrderRecyclerViewCellBinding
+import com.picacomic.fregata.databinding.ItemLeaderboardPopularOrderRecyclerViewCellBinding
+import com.picacomic.fregata.objects.LeaderboardComicListObject
+import com.picacomic.fregata.objects.LeaderboardKnightObject
+import com.picacomic.fregata.utils.PicassoTransformations
+import com.picacomic.fregata.utils.g
+import com.squareup.picasso.Picasso
 
 @Composable
 fun LeaderboardScreen(
     onBack: () -> Unit,
     onComicClick: (String) -> Unit = {},
     onKnightClick: (knightId: String, knightName: String) -> Unit = { _, _ -> },
-    viewModel: LeaderboardViewModel = viewModel()
+    viewModel: LeaderboardViewModel? = null
 ) {
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(0) }
+    val screenViewModel = previewAwareViewModel(viewModel)
 
     LaunchedEffect(Unit) {
         if (!inPreview) {
-            viewModel.loadPopular("H24")
-            viewModel.loadKnights()
+            screenViewModel?.loadPopular("H24")
+            screenViewModel?.loadKnights()
         }
     }
 
     LaunchedEffect(selectedTab) {
+        val vm = screenViewModel ?: return@LaunchedEffect
         if (inPreview) return@LaunchedEffect
-        if (selectedTab == 0 && viewModel.popularComics.isEmpty()) {
-            viewModel.loadPopular(viewModel.popularTime, force = true)
-        } else if (selectedTab == 1 && viewModel.knights.isEmpty()) {
-            viewModel.loadKnights(force = true)
+        if (selectedTab == 0 && vm.popularComics.isEmpty()) {
+            vm.loadPopular(vm.popularTime, force = true)
+        } else if (selectedTab == 1 && vm.knights.isEmpty()) {
+            vm.loadKnights(force = true)
         }
     }
 
-    LaunchedEffect(viewModel.errorEvent) {
-        if (inPreview || viewModel.errorEvent <= 0) return@LaunchedEffect
-        val code = viewModel.errorCode
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
         if (code != null) {
-            com.picacomic.fregata.b.c(context, code, viewModel.errorBody).dN()
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
         } else {
             com.picacomic.fregata.b.c(context).dN()
         }
@@ -127,21 +139,21 @@ fun LeaderboardScreen(
                         ) {
                             LeaderboardTimeButton(
                                 text = stringResource(R.string.leaderboard_tab_popular_24hr),
-                                selected = viewModel.popularTime == "H24"
+                                selected = screenViewModel?.popularTime == "H24"
                             ) {
-                                viewModel.loadPopular("H24", force = true)
+                                screenViewModel?.loadPopular("H24", force = true)
                             }
                             LeaderboardTimeButton(
                                 text = stringResource(R.string.leaderboard_tab_popular_7days),
-                                selected = viewModel.popularTime == "D7"
+                                selected = screenViewModel?.popularTime == "D7"
                             ) {
-                                viewModel.loadPopular("D7", force = true)
+                                screenViewModel?.loadPopular("D7", force = true)
                             }
                             LeaderboardTimeButton(
                                 text = stringResource(R.string.leaderboard_tab_popular_30days),
-                                selected = viewModel.popularTime == "D30"
+                                selected = screenViewModel?.popularTime == "D30"
                             ) {
-                                viewModel.loadPopular("D30", force = true)
+                                screenViewModel?.loadPopular("D30", force = true)
                             }
                         }
                     }
@@ -149,74 +161,189 @@ fun LeaderboardScreen(
             }
 
             Box(modifier = Modifier.weight(1f)) {
+                val vm = screenViewModel
                 if (inPreview) {
-                    Box(modifier = Modifier.fillMaxSize())
-                } else {
-                    AndroidView(
-                        factory = { context ->
-                            LayoutInflater.from(context)
-                                .inflate(R.layout.layout_compose_recycler_content, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            val recyclerView = view.findViewById<androidx.recyclerview.widget.RecyclerView>(
-                                R.id.recyclerView_compose_content
-                            )
-                            if (recyclerView.layoutManager == null) {
-                                recyclerView.layoutManager = LinearLayoutManager(view.context)
-                            }
-                            val currentMode = if (selectedTab == 0) "popular" else "knight"
-                            val oldMode = recyclerView.getTag(R.id.recyclerView_compose_content) as? String
-
-                            if (selectedTab == 0) {
-                                val oldKey = recyclerView.getTag(R.id.recyclerView_leaderboard_popular) as? String
-                                val newKey = "${viewModel.popularTime}_${viewModel.popularComics.size}"
-                                if (recyclerView.adapter == null || oldMode != currentMode || oldKey != newKey) {
-                                    val adapter = LeaderboardPopularRecyclerViewAdapter(
-                                        view.context,
-                                        ArrayList(viewModel.popularComics),
-                                        object : com.picacomic.fregata.a_pkg.k {
-                                            override fun C(i: Int) {
-                                                val item = viewModel.popularComics.getOrNull(i) ?: return
-                                                if (!item.comicId.isNullOrEmpty()) {
-                                                    onComicClick(item.comicId)
-                                                }
-                                            }
-                                        }
-                                    )
-                                    adapter.H(viewModel.popularTime)
-                                    recyclerView.adapter = adapter
-                                    recyclerView.setTag(R.id.recyclerView_leaderboard_popular, newKey)
-                                    recyclerView.setTag(R.id.recyclerView_compose_content, currentMode)
-                                }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = if (selectedTab == 0) {
+                                stringResource(R.string.leaderboard_tab_popular)
                             } else {
-                                val oldKey = recyclerView.getTag(R.id.recyclerView_leaderboard_knight) as? Int
-                                val newKey = viewModel.knights.size
-                                if (recyclerView.adapter == null || oldMode != currentMode || oldKey != newKey) {
-                                    recyclerView.adapter = LeaderboardKnightRecyclerViewAdapter(
-                                        view.context,
-                                        ArrayList(viewModel.knights),
-                                        object : com.picacomic.fregata.a_pkg.k {
-                                            override fun C(i: Int) {
-                                                val item = viewModel.knights.getOrNull(i) ?: return
-                                                val id = item.leaderboardKnightId
-                                                val name = item.name
-                                                if (!id.isNullOrEmpty() && !name.isNullOrEmpty()) {
-                                                    onKnightClick(id, name)
-                                                }
-                                            }
-                                        }
-                                    )
-                                    recyclerView.setTag(R.id.recyclerView_leaderboard_knight, newKey)
-                                    recyclerView.setTag(R.id.recyclerView_compose_content, currentMode)
+                                stringResource(R.string.leaderboard_tab_knight)
+                            },
+                            items = if (selectedTab == 0) {
+                                listOf("热门漫画 A", "热门漫画 B", "热门漫画 C")
+                            } else {
+                                listOf("骑士 Alpha", "骑士 Beta", "骑士 Gamma")
+                            }
+                        )
+                    }
+                } else if (selectedTab == 0) {
+                    when {
+                        vm == null || (vm.popularComics.isEmpty() && vm.isLoadingPopular) -> {
+                            PicaLoadingIndicator()
+                        }
+
+                        vm.popularComics.isEmpty() -> {
+                            PicaEmptyState(message = "暂无内容")
+                        }
+
+                        else -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(vertical = 8.dp)
+                            ) {
+                                itemsIndexed(
+                                    items = vm.popularComics,
+                                    key = { index, item ->
+                                        "${item.comicId ?: "popular"}_$index"
+                                    }
+                                ) { index, item ->
+                                    LeaderboardPopularItem(
+                                        item = item,
+                                        index = index,
+                                        time = vm.popularTime
+                                    ) {
+                                        item.comicId?.let(onComicClick)
+                                    }
                                 }
                             }
                         }
-                    )
+                    }
+                } else {
+                    when {
+                        vm == null || (vm.knights.isEmpty() && vm.isLoadingKnight) -> {
+                            PicaLoadingIndicator()
+                        }
+
+                        vm.knights.isEmpty() -> {
+                            PicaEmptyState(message = "暂无内容")
+                        }
+
+                        else -> {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(vertical = 8.dp)
+                            ) {
+                                itemsIndexed(
+                                    items = vm.knights,
+                                    key = { index, item ->
+                                        "${item.leaderboardKnightId ?: "knight"}_$index"
+                                    }
+                                ) { index, item ->
+                                    LeaderboardKnightItem(
+                                        item = item,
+                                        index = index
+                                    ) {
+                                        val id = item.leaderboardKnightId
+                                        val name = item.name
+                                        if (!id.isNullOrEmpty() && !name.isNullOrEmpty()) {
+                                            onKnightClick(id, name)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun LeaderboardPopularItem(
+    item: LeaderboardComicListObject,
+    index: Int,
+    time: String,
+    onClick: () -> Unit,
+) {
+    val layoutRes = when (index) {
+        0 -> R.layout.item_leaderboard_popular_1st_recycler_view_cell
+        1 -> R.layout.item_leaderboard_popular_2nd_recycler_view_cell
+        2 -> R.layout.item_leaderboard_popular_3rd_recycler_view_cell
+        else -> R.layout.item_leaderboard_popular_order_recycler_view_cell
+    }
+
+    AndroidView(
+        factory = { context ->
+            LayoutInflater.from(context).inflate(layoutRes, null, false)
+        },
+        modifier = Modifier.fillMaxWidth(),
+        update = { view ->
+            val binding = ItemLeaderboardPopularOrderRecyclerViewCellBinding.bind(view)
+            binding.root.setOnClickListener { onClick() }
+            binding.textViewLeaderboardPopularOrderRecyclerViewCellOrder.text = (index + 1).toString()
+            binding.textViewLeaderboardPopularOrderRecyclerViewCellName.text = item.title.orEmpty()
+            binding.textViewLeaderboardPopularOrderRecyclerViewCellAuthor.text = item.author.orEmpty()
+            binding.textViewLeaderboardPopularOrderRecyclerViewCellCategory.text =
+                item.categories?.toString().orEmpty()
+            binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCount.text =
+                item.leaderboardCount.toString()
+            when (time) {
+                "D7" -> binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCountTitle
+                    .setText(R.string.leaderboard_view_count_title_7days)
+
+                "D30" -> binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCountTitle
+                    .setText(R.string.leaderboard_view_count_title_30days)
+
+                else -> binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCountTitle
+                    .setText(R.string.leaderboard_view_count_title_24hr)
+            }
+            Picasso.with(view.context)
+                .load(g.b(item.thumb))
+                .transform(PicassoTransformations.CARD_COVER)
+                .placeholder(R.drawable.placeholder_avatar_2)
+                .into(binding.imageViewLeaderboardPopularOrderRecyclerViewCellImage)
+        }
+    )
+}
+
+@Composable
+private fun LeaderboardKnightItem(
+    item: LeaderboardKnightObject,
+    index: Int,
+    onClick: () -> Unit,
+) {
+    val layoutRes = when (index) {
+        0 -> R.layout.item_leaderboard_knight_1st_recycler_view_cell
+        1 -> R.layout.item_leaderboard_knight_2nd_recycler_view_cell
+        2 -> R.layout.item_leaderboard_knight_3rd_recycler_view_cell
+        else -> R.layout.item_leaderboard_knight_order_recycler_view_cell
+    }
+
+    AndroidView(
+        factory = { context ->
+            LayoutInflater.from(context).inflate(layoutRes, null, false)
+        },
+        modifier = Modifier.fillMaxWidth(),
+        update = { view ->
+            val binding = ItemLeaderboardKnightOrderRecyclerViewCellBinding.bind(view)
+            binding.root.setOnClickListener { onClick() }
+            binding.textViewLeaderboardKnightOrderRecyclerViewCellOrder.text = (index + 1).toString()
+            binding.textViewLeaderboardKnightOrderRecyclerViewCellLevel.text = item.level.toString()
+            binding.textViewLeaderboardKnightOrderRecyclerViewCellName.text = item.name.orEmpty()
+            binding.textViewLeaderboardKnightOrderRecyclerViewCellComic.text =
+                item.comicsUploaded.toString()
+            if (!item.character.isNullOrBlank()) {
+                Picasso.with(view.context)
+                    .load(item.character)
+                    .into(binding.imageViewLeaderboardKnightOrderRecyclerViewCellUserThumbVerified)
+                binding.imageViewLeaderboardKnightOrderRecyclerViewCellUserThumbVerified.visibility =
+                    View.VISIBLE
+            } else {
+                binding.imageViewLeaderboardKnightOrderRecyclerViewCellUserThumbVerified.visibility =
+                    View.GONE
+            }
+            Picasso.with(view.context)
+                .load(g.b(item.avatar))
+                .placeholder(R.drawable.placeholder_avatar_2)
+                .into(binding.imageViewLeaderboardKnightOrderRecyclerViewCellAvatar)
+        }
+    )
 }
 
 @Composable

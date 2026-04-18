@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
 import com.picacomic.fregata.adapters.CategoryRecyclerViewAdapter
 import com.picacomic.fregata.utils.FullGridLayoutManager
@@ -28,10 +27,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -51,7 +52,7 @@ import com.picacomic.fregata.utils.g
  */
 @Composable
 fun CategoryScreen(
-    viewModel: CategoryViewModel = viewModel(),
+    viewModel: CategoryViewModel? = null,
     onSearch: (String) -> Unit,
     onCategoryClick: (String) -> Unit,
     onWebCategoryClick: (title: String, link: String) -> Unit = { _, _ -> },
@@ -64,6 +65,19 @@ fun CategoryScreen(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     val inPreview = LocalInspectionMode.current
+    val context = LocalContext.current
+    val screenViewModel = previewAwareViewModel(viewModel)
+
+    LaunchedEffect(screenViewModel?.errorEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
+        if (code != null) {
+            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
+        } else {
+            com.picacomic.fregata.b.c(context).dN()
+        }
+    }
 
     PicaComposeTheme {
         Column(
@@ -111,110 +125,140 @@ fun CategoryScreen(
                     }
                 }
             }
-            if (inPreview) {
-                Box(modifier = Modifier.fillMaxSize())
-            } else {
-                AndroidView(
-                    factory = { context ->
-                        LayoutInflater.from(context)
-                            .inflate(R.layout.layout_category_compose_content, null, false)
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                    update = { view ->
-                        val recyclerView =
-                            view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_category)
-                        val tagsTitle =
-                            view.findViewById<TextView>(R.id.textView_category_tags_title)
-                        val tagsContainer =
-                            view.findViewById<LinearLayout>(R.id.linearLayout_category_tag_list)
-                        val keywordsTitle =
-                            view.findViewById<TextView>(R.id.textView_category_keywords_title)
-                        val keywordsContainer =
-                            view.findViewById<LinearLayout>(R.id.linearLayout_category_keywords_list)
+            Box(modifier = Modifier.weight(1f)) {
+                if (inPreview) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewGridPanel(
+                            title = stringResource(R.string.category_list_title),
+                            items = listOf(
+                                stringResource(R.string.category_title_support),
+                                stringResource(R.string.category_title_leaderboard),
+                                stringResource(R.string.category_title_game),
+                                stringResource(R.string.category_title_love_pica),
+                                stringResource(R.string.category_title_latest),
+                                stringResource(R.string.category_title_random),
+                            ),
+                            columns = 3
+                        )
+                        PreviewListPanel(
+                            title = stringResource(R.string.category_keywords_list_title),
+                            items = listOf("原神", "作者:Knight", "标签:校园")
+                        )
+                    }
+                } else {
+                    AndroidView(
+                        factory = { context ->
+                            LayoutInflater.from(context)
+                                .inflate(R.layout.layout_category_compose_content, null, false)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { view ->
+                            val vm = screenViewModel ?: return@AndroidView
+                            val scrollView =
+                                view.findViewById<androidx.core.widget.NestedScrollView>(R.id.scrollView)
+                            val recyclerView =
+                                view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_category)
+                            val tagsTitle =
+                                view.findViewById<TextView>(R.id.textView_category_tags_title)
+                            val tagsContainer =
+                                view.findViewById<LinearLayout>(R.id.linearLayout_category_tag_list)
+                            val keywordsTitle =
+                                view.findViewById<TextView>(R.id.textView_category_keywords_title)
+                            val keywordsContainer =
+                                view.findViewById<LinearLayout>(R.id.linearLayout_category_keywords_list)
 
-                        val defaultCategories = buildDefaultCategories(view)
-                        val categoriesSnapshot = ArrayList(viewModel.categories)
-                        val defaultSize = defaultCategories.size
+                            scrollView.isFillViewport = true
 
-                        if (recyclerView.layoutManager == null) {
-                            recyclerView.layoutManager = FullGridLayoutManager(view.context, 3)
-                            recyclerView.isNestedScrollingEnabled = false
-                        }
-                        recyclerView.adapter = CategoryRecyclerViewAdapter(
-                            view.context,
-                            defaultCategories,
-                            categoriesSnapshot,
-                            object : com.picacomic.fregata.a_pkg.k {
-                                override fun C(i: Int) {
-                                    when (i) {
-                                        1 -> onLeaderboardClick()
-                                        2 -> onGameClick()
-                                        4 -> onLovePicaClick()
-                                        5 -> onForumClick()
-                                        6 -> onLatestClick()
-                                        7 -> onRandomClick()
-                                        else -> {
-                                            if (i < defaultSize) {
-                                                return
-                                            }
-                                            val realIndex = i - defaultSize
-                                            if (realIndex in categoriesSnapshot.indices) {
-                                                val category = categoriesSnapshot[realIndex]
-                                                val title = category.title ?: return
-                                                val link = category.link
-                                                if (category.isWeb && !link.isNullOrEmpty()) {
-                                                    onWebCategoryClick(title, link)
-                                                } else {
-                                                    onCategoryClick(title)
+                            val defaultCategories = buildDefaultCategories(view)
+                            val categoriesSnapshot = ArrayList(vm.categories)
+                            val defaultSize = defaultCategories.size
+
+                            if (recyclerView.layoutManager == null) {
+                                recyclerView.layoutManager = FullGridLayoutManager(view.context, 3)
+                                recyclerView.isNestedScrollingEnabled = false
+                            }
+                            recyclerView.adapter = CategoryRecyclerViewAdapter(
+                                view.context,
+                                defaultCategories,
+                                categoriesSnapshot,
+                                object : com.picacomic.fregata.a_pkg.k {
+                                    override fun C(i: Int) {
+                                        when (i) {
+                                            1 -> onLeaderboardClick()
+                                            2 -> onGameClick()
+                                            4 -> onLovePicaClick()
+                                            5 -> onForumClick()
+                                            6 -> onLatestClick()
+                                            7 -> onRandomClick()
+                                            else -> {
+                                                if (i < defaultSize) {
+                                                    return
+                                                }
+                                                val realIndex = i - defaultSize
+                                                if (realIndex in categoriesSnapshot.indices) {
+                                                    val category = categoriesSnapshot[realIndex]
+                                                    val title = category.title ?: return
+                                                    val link = category.link
+                                                    if (category.isWeb && !link.isNullOrEmpty()) {
+                                                        onWebCategoryClick(title, link)
+                                                    } else {
+                                                        onCategoryClick(title)
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        )
+                            )
 
-                        tagsTitle.visibility = View.GONE
-                        tagsContainer.visibility = View.GONE
+                            tagsTitle.visibility = View.GONE
+                            tagsContainer.visibility = View.GONE
 
-                        keywordsContainer.removeAllViews()
-                        if (viewModel.keywords.isEmpty()) {
-                            keywordsTitle.visibility = View.GONE
-                            keywordsContainer.visibility = View.GONE
-                        } else {
-                            keywordsTitle.visibility = View.VISIBLE
-                            keywordsContainer.visibility = View.VISIBLE
-                            val buttons = Array(viewModel.keywords.size) { index ->
-                                LegacyButton(view.context, null, R.style.KeywordButton).apply {
-                                    setTextColor(
-                                        ResourcesCompat.getColor(
+                            keywordsContainer.removeAllViews()
+                            if (vm.keywords.isEmpty()) {
+                                keywordsTitle.visibility = View.GONE
+                                keywordsContainer.visibility = View.GONE
+                            } else {
+                                keywordsTitle.visibility = View.VISIBLE
+                                keywordsContainer.visibility = View.VISIBLE
+                                val buttons = Array(vm.keywords.size) { index ->
+                                    LegacyButton(view.context, null, R.style.KeywordButton).apply {
+                                        setTextColor(
+                                            ResourcesCompat.getColor(
+                                                view.resources,
+                                                R.color.orangeDark,
+                                                view.context.theme
+                                            )
+                                        )
+                                        background = ResourcesCompat.getDrawable(
                                             view.resources,
-                                            R.color.orangeDark,
+                                            R.drawable.button_keyword_bg,
                                             view.context.theme
                                         )
-                                    )
-                                    background = ResourcesCompat.getDrawable(
-                                        view.resources,
-                                        R.drawable.button_keyword_bg,
-                                        view.context.theme
-                                    )
-                                    text = viewModel.keywords[index]
-                                    tag = viewModel.keywords[index]
-                                    setOnClickListener { keywordView ->
-                                        val keyword = keywordView.tag as? String ?: return@setOnClickListener
-                                        onSearch(keyword)
+                                        text = vm.keywords[index]
+                                        tag = vm.keywords[index]
+                                        setOnClickListener { keywordView ->
+                                            val keyword = keywordView.tag as? String
+                                                ?: return@setOnClickListener
+                                            onSearch(keyword)
+                                        }
                                     }
                                 }
-                            }
-                            val activity = view.context as? Activity
-                            if (activity != null) {
-                                g.a(keywordsContainer, buttons, activity, null)
-                            } else {
-                                buttons.forEach { keywordsContainer.addView(it) }
+                                val activity = view.context as? Activity
+                                if (activity != null) {
+                                    g.a(keywordsContainer, buttons, activity, null)
+                                } else {
+                                    buttons.forEach { keywordsContainer.addView(it) }
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
@@ -280,6 +324,10 @@ private fun CategoryScreenPreview() {
     CategoryScreen(
         onSearch = {},
         onCategoryClick = {},
-        onWebCategoryClick = { _, _ -> }
+        onWebCategoryClick = { _, _ -> },
+        onLovePicaClick = {},
+        onForumClick = {},
+        onLatestClick = {},
+        onRandomClick = {}
     )
 }
