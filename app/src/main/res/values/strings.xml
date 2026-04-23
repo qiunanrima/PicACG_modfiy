@@ -680,4 +680,5 @@ http://line.me/ti/p/%40ztj0743u"</string>
     <string name="toast_remove_all_comment_failed">删除失败，请重试</string>
     <string name="toast_remove_all_comment_success">已删除此用户的所有留言</string>
     <string name="update">更新</string>
+    <string name="back">返回</string>
 </resources>

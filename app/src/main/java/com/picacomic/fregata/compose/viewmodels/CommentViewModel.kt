@@ -103,6 +103,9 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     var messageText by mutableStateOf<String?>(null)
         private set
 
+    var submitSuccessEvent by mutableIntStateOf(0)
+        private set
+
     private var requestKey: String? = null
     private var mode = MODE_COMIC
     private var comicId: String? = null
@@ -208,6 +211,24 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
         replyingToIndex = -1
     }
 
+    fun selectComment(index: Int) {
+        val item = commentItems.getOrNull(index) ?: return
+        if (replyingToCommentId.equals(item.commentId, ignoreCase = true) && replyMode) {
+            cancelReplyMode()
+            expandedCommentIndex = -1
+            return
+        }
+
+        replyMode = true
+        replyingToCommentId = item.commentId
+        replyingToIndex = index
+        expandedCommentIndex = index
+
+        if (item.childsCount > 0 && item.arrayList.isNullOrEmpty()) {
+            loadReplies(index, reset = true)
+        }
+    }
+
     fun toggleReplies(index: Int) {
         val item = commentItems.getOrNull(index) ?: return
         if (expandedCommentIndex == index) {
@@ -277,21 +298,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun beginReply(index: Int) {
-        val item = commentItems.getOrNull(index) ?: return
-        if (replyingToCommentId.equals(item.commentId, ignoreCase = true) && replyMode) {
-            cancelReplyMode()
-            expandedCommentIndex = -1
-            return
-        }
-
-        replyMode = true
-        replyingToCommentId = item.commentId
-        replyingToIndex = index
-        expandedCommentIndex = index
-
-        if (item.childsCount > 0 && item.arrayList.isNullOrEmpty()) {
-            loadReplies(index, reset = true)
-        }
+        selectComment(index)
     }
 
     fun toggleCommentLike(index: Int) {
@@ -506,6 +513,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
                 if (call.isCanceled) return
                 if (response.code() == 200) {
                     cancelReplyMode()
+                    submitSuccessEvent++
                     refresh()
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
@@ -542,6 +550,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
                 if (response.code() == 200) {
                     loadReplies(rootIndex, reset = true)
                     cancelReplyMode()
+                    submitSuccessEvent++
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
                 }

@@ -8,24 +8,19 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -37,6 +32,14 @@ import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.ComicListViewModel
 import com.picacomic.fregata.utils.views.AlertDialogCenter
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextOverflow
 
 private val ComicFilterBackgrounds = intArrayOf(
     R.drawable.button_filter_forbidden_bg,
@@ -52,6 +55,7 @@ private val ComicFilterBackgrounds = intArrayOf(
 /**
  * Comic List screen. Wraps the legacy [R.layout.fragment_comic_list].
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicListScreen(
     category: String? = null,
@@ -124,101 +128,112 @@ fun ComicListScreen(
     }
 
     PicaComposeTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Surface(shadowElevation = 2.dp, tonalElevation = 2.dp) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = screenViewModel?.title ?: stringResource(R.string.title_search),
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
-                    }
-                    Text(
-                        text = screenViewModel?.title ?: stringResource(R.string.title_search),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp)
-                    )
-                    if (canSort) {
-                        TextButton(
-                            onClick = {
-                                val vm = screenViewModel ?: return@TextButton
-                                if (isFavourite) {
-                                    AlertDialogCenter.sortingFavouriteOptions(
-                                        context,
-                                        vm.favouriteSortingIndex
-                                    ) { dialog: DialogInterface, which: Int ->
-                                        vm.setFavouriteSorting(which)
-                                        dialog.dismiss()
-                                    }
-                                } else {
-                                    AlertDialogCenter.sortingAdvancedOptions(
-                                        context,
-                                        vm.advancedSortingIndex
-                                    ) { dialog: DialogInterface, which: Int ->
-                                        vm.setAdvancedSorting(which)
-                                        dialog.dismiss()
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back)
+                            )
+                        }
+                    },
+                    actions = {
+                        if (canSort) {
+                            TextButton(
+                                onClick = {
+                                    val vm = screenViewModel ?: return@TextButton
+                                    if (isFavourite) {
+                                        AlertDialogCenter.sortingFavouriteOptions(
+                                            context,
+                                            vm.favouriteSortingIndex
+                                        ) { dialog: DialogInterface, which: Int ->
+                                            vm.setFavouriteSorting(which)
+                                            dialog.dismiss()
+                                        }
+                                    } else {
+                                        AlertDialogCenter.sortingAdvancedOptions(
+                                            context,
+                                            vm.advancedSortingIndex
+                                        ) { dialog: DialogInterface, which: Int ->
+                                            vm.setAdvancedSorting(which)
+                                            dialog.dismiss()
+                                        }
                                     }
                                 }
+                            ) {
+                                Text(text = stringResource(R.string.sorting_title))
                             }
-                        ) {
-                            Text(text = stringResource(R.string.sorting_title))
                         }
-                    }
-                    if (canPickAdvancedCategories) {
-                        TextButton(
-                            onClick = {
-                                val vm = screenViewModel ?: return@TextButton
-                                val checked = vm.advancedCategorySelections.toBooleanArray()
-                                AlertDialogCenter.sortingAdvancedCategoriesOptions(
-                                    context,
-                                    vm.advancedCategoryTitles.toTypedArray(),
-                                    checked,
-                                    DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
-                                        vm.setAdvancedCategorySelected(which, isChecked)
-                                    },
-                                    DialogInterface.OnClickListener { dialog, _ ->
-                                        vm.applyAdvancedCategorySelection()
-                                        dialog.dismiss()
-                                    }
-                                )
+                        if (canPickAdvancedCategories) {
+                            TextButton(
+                                onClick = {
+                                    val vm = screenViewModel ?: return@TextButton
+                                    val checked = vm.advancedCategorySelections.toBooleanArray()
+                                    AlertDialogCenter.sortingAdvancedCategoriesOptions(
+                                        context,
+                                        vm.advancedCategoryTitles.toTypedArray(),
+                                        checked,
+                                        DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
+                                            vm.setAdvancedCategorySelected(which, isChecked)
+                                        },
+                                        DialogInterface.OnClickListener { dialog, _ ->
+                                            vm.applyAdvancedCategorySelection()
+                                            dialog.dismiss()
+                                        }
+                                    )
+                                }
+                            ) {
+                                Text(text = stringResource(R.string.title_category))
                             }
-                        ) {
-                            Text(text = stringResource(R.string.title_category))
                         }
-                    }
-                    if (isRecent) {
-                        TextButton(
-                            onClick = {
-                                val vm = screenViewModel ?: return@TextButton
-                                AlertDialogCenter.showCustomAlertDialog(
-                                    context,
-                                    R.drawable.icon_exclamation_error,
-                                    R.string.alert_clear_all_recent_title,
-                                    R.string.alert_clear_all_recent_message,
-                                    View.OnClickListener {
-                                        vm.clearRecentView()
-                                    },
-                                    null
-                                )
+                        if (isRecent) {
+                            TextButton(
+                                onClick = {
+                                    val vm = screenViewModel ?: return@TextButton
+                                    AlertDialogCenter.showCustomAlertDialog(
+                                        context,
+                                        R.drawable.icon_exclamation_error,
+                                        R.string.alert_clear_all_recent_title,
+                                        R.string.alert_clear_all_recent_message,
+                                        View.OnClickListener {
+                                            vm.clearRecentView()
+                                        },
+                                        null
+                                    )
+                                }
+                            ) {
+                                Text(text = stringResource(R.string.action_clear_recent))
                             }
-                        ) {
-                            Text(text = stringResource(R.string.action_clear_recent))
                         }
-                    }
-                }
-            }
-            Box(modifier = Modifier.weight(1f)) {
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    scrollBehavior = scrollBehavior
+                )
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
                 if (inPreview) {
                     Box(modifier = Modifier.fillMaxSize())
                 } else {

@@ -179,6 +179,7 @@
     <dimen name="size_button_small_round_pink_width_padding">12.0dip</dimen>
     <dimen name="size_button_tag_corner_radius">20.0dip</dimen>
     <dimen name="size_button_tag_height">24.0dip</dimen>
+    <dimen name="size_button_text_tag_height">32.0dip</dimen>
     <dimen name="size_card_style_edge_width">1.0px</dimen>
     <dimen name="size_card_style_shadow_height">2.0dip</dimen>
     <dimen name="size_chatroom_channel_show_width">50.0dip</dimen>
@@ -220,7 +221,7 @@
     <dimen name="size_text_count_bg_corner_radius">8.0dip</dimen>
     <dimen name="text_min_width_size_level">40.0dip</dimen>
     <dimen name="text_min_width_size_reply">30.0dip</dimen>
-    <item type="dimen" name="textsize_button_tag">@dimen/textsize_timestamp_1</item>
+    <dimen name="textsize_button_tag">12.0sp</dimen>
     <dimen name="textsize_content_1">16.0sp</dimen>
     <dimen name="textsize_content_2">14.0sp</dimen>
     <dimen name="textsize_content_3">12.0sp</dimen>

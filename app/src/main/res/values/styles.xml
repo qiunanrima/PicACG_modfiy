@@ -1269,14 +1269,17 @@
         <item name="android:adjustViewBounds">true</item>
     </style>
     <style name="KeywordButton">
-        <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+        <item name="android:textSize">@dimen/textsize_button_tag</item>
         <item name="android:textColor">@color/orangeDark</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/button_keyword_bg</item>
+        <item name="android:paddingLeft">@dimen/padding_3</item>
+        <item name="android:paddingRight">@dimen/padding_3</item>
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">@dimen/size_button_tag_height</item>
+        <item name="android:layout_height">@dimen/size_button_text_tag_height</item>
         <item name="android:layout_margin">@dimen/padding_3</item>
-        <item name="android:minHeight">@dimen/size_button_tag_height</item>
+        <item name="android:minWidth">@dimen/size_button_text_tag_height</item>
+        <item name="android:minHeight">@dimen/size_button_text_tag_height</item>
     </style>
     <style name="MyAlertDialogStyle" parent="@style/Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:textColorPrimary">@color/grayDark</item>
@@ -1507,14 +1510,17 @@
         <item name="tabTextColor">@color/gray</item>
     </style>
     <style name="TagButtonPink">
-        <item name="android:textSize">@dimen/textsize_timestamp_1</item>
+        <item name="android:textSize">@dimen/textsize_button_tag</item>
         <item name="android:textColor">@color/pinkDark</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/button_tag_bg</item>
+        <item name="android:paddingLeft">@dimen/padding_3</item>
+        <item name="android:paddingRight">@dimen/padding_3</item>
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">@dimen/size_button_tag_height</item>
+        <item name="android:layout_height">@dimen/size_button_text_tag_height</item>
         <item name="android:layout_margin">@dimen/padding_3</item>
-        <item name="android:minHeight">@dimen/size_button_tag_height</item>
+        <item name="android:minWidth">@dimen/size_button_text_tag_height</item>
+        <item name="android:minHeight">@dimen/size_button_text_tag_height</item>
     </style>
     <style name="TextAppearance.AppCompat" parent="@style/Base.TextAppearance.AppCompat" />
     <style name="TextAppearance.AppCompat.Body1" parent="@style/Base.TextAppearance.AppCompat.Body1" />

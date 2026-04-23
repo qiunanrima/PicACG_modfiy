@@ -2,24 +2,29 @@ package com.picacomic.fregata.compose.screens
 
 import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -32,7 +37,23 @@ import com.picacomic.fregata.R
 import com.picacomic.fregata.adapters.CommentRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.CommentViewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Button
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommentScreen(
     comicId: String? = null,
@@ -46,6 +67,8 @@ fun CommentScreen(
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
+    val focusManager = LocalFocusManager.current
+    var inputText by rememberSaveable(comicId, gameId, commentId) { mutableStateOf("") }
 
     LaunchedEffect(comicId, gameId, commentId) {
         if (!inPreview) {
@@ -71,34 +94,69 @@ fun CommentScreen(
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
     }
 
+    LaunchedEffect(screenViewModel?.submitSuccessEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.submitSuccessEvent == 0) return@LaunchedEffect
+        inputText = ""
+        focusManager.clearFocus()
+    }
+
     PicaComposeTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Surface(shadowElevation = 2.dp, tonalElevation = 2.dp) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.title_comment),
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
-                    }
-                    Text(
-                        text = stringResource(R.string.title_comment),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(start = 8.dp)
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    scrollBehavior = scrollBehavior
+                )
+            },
+            bottomBar = {
+                if (!inPreview && screenViewModel?.inputBarVisible == true) {
+                    CommentInputBar(
+                        value = inputText,
+                        onValueChange = { inputText = it.take(100) },
+                        replyMode = screenViewModel.replyMode,
+                        isPosting = screenViewModel.isPosting,
+                        onCancelReply = {
+                            screenViewModel.cancelReplyMode()
+                            focusManager.clearFocus()
+                        },
+                        onSubmit = {
+                            screenViewModel.submitComment(inputText)
+                        },
+                        focusManager = focusManager
                     )
                 }
-            }
-
-            Box(modifier = Modifier.weight(1f)) {
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
                 if (inPreview) {
                     Box(modifier = Modifier.fillMaxSize())
                 } else {
@@ -130,7 +188,7 @@ fun CommentScreen(
                                     }
 
                                     override fun C(i: Int) {
-                                        vm.beginReply(i)
+                                        vm.selectComment(i)
                                     }
 
                                     override fun N(i: Int) {
@@ -234,4 +292,69 @@ private fun CommentScreenPreview() {
         comicId = "preview",
         onBack = {}
     )
+}
+
+@Composable
+private fun CommentInputBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    replyMode: Boolean,
+    isPosting: Boolean,
+    onCancelReply: () -> Unit,
+    onSubmit: () -> Unit,
+    focusManager: FocusManager
+) {
+    val submitText = stringResource(if (replyMode) R.string.comment_reply else R.string.comment_send)
+    val hintText = stringResource(if (replyMode) R.string.comment_reply_edit_hint else R.string.comment_edit_hint)
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (replyMode) {
+                TextButton(
+                    onClick = onCancelReply,
+                    enabled = !isPosting
+                ) {
+                    Text(text = stringResource(R.string.comment_reply_cancel))
+                }
+            }
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(min = 56.dp),
+                enabled = !isPosting,
+                placeholder = {
+                    Text(text = hintText)
+                },
+                maxLines = 4,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                keyboardActions = KeyboardActions(
+                    onSend = {
+                        onSubmit()
+                        focusManager.clearFocus()
+                    }
+                )
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Button(
+                onClick = {
+                    onSubmit()
+                    focusManager.clearFocus()
+                },
+                enabled = !isPosting
+            ) {
+                Text(text = submitText)
+            }
+        }
+    }
 }

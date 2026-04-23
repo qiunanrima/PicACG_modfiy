@@ -95,6 +95,7 @@ fun SplashScreen(
                     }
                 }
                 if (showOptions) {
+                    Spacer(modifier = Modifier.height(24.dp))
                     SplashCard {
                         Button(
                             onClick = onServer1,
@@ -123,6 +124,7 @@ fun SplashScreen(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(24.dp))
                 SplashCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),

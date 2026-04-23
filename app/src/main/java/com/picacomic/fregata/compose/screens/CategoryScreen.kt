@@ -5,11 +5,8 @@ import android.view.View
 import android.widget.Button as LegacyButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,12 +15,13 @@ import com.picacomic.fregata.adapters.CategoryRecyclerViewAdapter
 import com.picacomic.fregata.utils.FullGridLayoutManager
 import androidx.core.content.res.ResourcesCompat
 import android.view.LayoutInflater
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -43,6 +40,12 @@ import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.objects.DefaultCategoryObject
 import com.picacomic.fregata.utils.g
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 
 /**
  * Category screen. The legacy XML content (RecyclerView, tags, keywords) is embedded
@@ -50,6 +53,7 @@ import com.picacomic.fregata.utils.g
  *
  * @param onSearch  Called with the query string when the user submits.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryScreen(
     viewModel: CategoryViewModel? = null,
@@ -80,52 +84,64 @@ fun CategoryScreen(
     }
 
     PicaComposeTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Surface(shadowElevation = 2.dp, tonalElevation = 2.dp) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                // MD3: custom search header as a Surface-based top bar
+                androidx.compose.material3.Surface(
+                    shadowElevation = 0.dp,
+                    tonalElevation = 2.dp,
+                    color = MaterialTheme.colorScheme.surface
                 ) {
-                    Text(
-                        text = stringResource(R.string.title_category),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 14.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        OutlinedTextField(
-                            value = query,
-                            onValueChange = { query = it },
-                            label = { Text(text = stringResource(R.string.search_hint)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            keyboardActions = KeyboardActions(
-                                onSearch = {
+                        Text(
+                            text = stringResource(R.string.title_category),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = query,
+                                onValueChange = { query = it },
+                                label = { Text(text = stringResource(R.string.search_hint)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                keyboardActions = KeyboardActions(
+                                    onSearch = {
+                                        val submitted = query.trim()
+                                        if (submitted.isNotEmpty()) onSearch(submitted)
+                                    }
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Button(
+                                onClick = {
                                     val submitted = query.trim()
                                     if (submitted.isNotEmpty()) onSearch(submitted)
                                 }
-                            ),
-                            modifier = Modifier.weight(1f)
-                        )
-                        Button(
-                            onClick = {
-                                val submitted = query.trim()
-                                if (submitted.isNotEmpty()) onSearch(submitted)
+                            ) {
+                                Text(text = stringResource(R.string.action_search))
                             }
-                        ) {
-                            Text(text = stringResource(R.string.action_search))
                         }
                     }
                 }
-            }
-            Box(modifier = Modifier.weight(1f)) {
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
                 if (inPreview) {
                     Column(
                         modifier = Modifier

@@ -11,27 +11,30 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -51,6 +54,7 @@ import com.squareup.picasso.Picasso
 /**
  * Comic Detail screen. Wraps the legacy [R.layout.fragment_comic_detail].
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComicDetailScreen(
     comicId: String,
@@ -98,34 +102,81 @@ fun ComicDetailScreen(
     }
 
     PicaComposeTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Surface(shadowElevation = 2.dp, tonalElevation = 2.dp) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+        // MD3: 使用 pinnedScrollBehavior 让 TopAppBar 在滚动时保持固定
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                // MD3 标准 TopAppBar
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = screenViewModel?.comicDetail?.title
+                                ?: stringResource(R.string.title_comic_detail_default),
+                            style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                // MD3: 使用 AutoMirrored 变体支持 RTL 布局
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back)
+                            )
+                        }
+                    },
+                    // MD3: TopAppBar 颜色跟随 colorScheme，滚动后自动显示 surfaceContainer 背景
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    scrollBehavior = scrollBehavior
+                )
+            },
+            // MD3: Scaffold 自动处理背景色，无需手动 background modifier
+            containerColor = MaterialTheme.colorScheme.background
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                if (inPreview) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = "漫画信息",
+                            items = listOf(
+                                "封面 / 标题 / 作者",
+                                "简介 / 分类 / 汉化组",
+                                "浏览 / 点赞 / 评论"
+                            )
+                        )
+                        PreviewGridPanel(
+                            title = "章节",
+                            items = listOf("第1话", "第2话", "第3话", "第4话"),
+                            columns = 4
+                        )
+                        PreviewListPanel(
+                            title = "标签",
+                            items = listOf("短篇", "校园", "纯爱", "推荐作品")
+                        )
+                        PreviewGridPanel(
+                            title = "猜你喜欢",
+                            items = listOf("推荐A", "推荐B", "推荐C"),
+                            columns = 3,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    Text(
-                        text = screenViewModel?.comicDetail?.title ?: stringResource(R.string.title_comic_detail_default),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                if (inPreview) {
-                    Box(modifier = Modifier.fillMaxSize())
                 } else {
                     AndroidView(
                         factory = { context ->
@@ -156,28 +207,14 @@ fun ComicDetailScreen(
                                 view.findViewById<TextView>(R.id.textView_comic_detail_author)
                             authorView?.text = detail.author ?: ""
                             authorView?.setOnClickListener {
-                                onComicListClick(
-                                    null,
-                                    null,
-                                    detail.author,
-                                    null,
-                                    null,
-                                    null
-                                )
+                                onComicListClick(null, null, detail.author, null, null, null)
                             }
 
                             val translateView =
                                 view.findViewById<TextView>(R.id.textView_comic_detail_translate)
                             translateView?.text = detail.chineseTeam ?: ""
                             translateView?.setOnClickListener {
-                                onComicListClick(
-                                    null,
-                                    null,
-                                    null,
-                                    detail.chineseTeam,
-                                    null,
-                                    null
-                                )
+                                onComicListClick(null, null, null, detail.chineseTeam, null, null)
                             }
 
                             view.findViewById<TextView>(R.id.textView_comic_detail_description)?.text =
@@ -197,14 +234,7 @@ fun ComicDetailScreen(
                             view.findViewById<View>(R.id.linearLayout_comic_detail_category)?.setOnClickListener {
                                 val firstCategory = detail.categories?.firstOrNull()
                                 if (!firstCategory.isNullOrBlank()) {
-                                    onComicListClick(
-                                        firstCategory,
-                                        null,
-                                        null,
-                                        null,
-                                        null,
-                                        null
-                                    )
+                                    onComicListClick(firstCategory, null, null, null, null, null)
                                 }
                             }
 
@@ -214,12 +244,8 @@ fun ComicDetailScreen(
                                 setOnClickListener {
                                     if (!creator?.creatorId.isNullOrBlank() && !creator?.name.isNullOrBlank()) {
                                         onComicListClick(
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            creator?.creatorId,
-                                            creator?.name
+                                            null, null, null, null,
+                                            creator?.creatorId, creator?.name
                                         )
                                     }
                                 }
@@ -287,7 +313,8 @@ fun ComicDetailScreen(
                                 }
                             }
                             descControl?.setOnClickListener {
-                                val isCollapsed = (descView?.getTag(R.id.textView_comic_detail_description) as? Boolean) == true
+                                val isCollapsed =
+                                    (descView?.getTag(R.id.textView_comic_detail_description) as? Boolean) == true
                                 if (isCollapsed) {
                                     descView?.setSingleLine(false)
                                     descView?.setTag(R.id.textView_comic_detail_description, false)
@@ -311,14 +338,7 @@ fun ComicDetailScreen(
                                     Button(context, null, R.style.TagButtonPink).apply {
                                         text = tagName
                                         setOnClickListener {
-                                            onComicListClick(
-                                                null,
-                                                tagName,
-                                                null,
-                                                null,
-                                                null,
-                                                null
-                                            )
+                                            onComicListClick(null, tagName, null, null, null, null)
                                         }
                                     }
                                 }?.toTypedArray() ?: emptyArray()
@@ -484,7 +504,8 @@ fun ComicDetailScreen(
                                 scrollView?.setOnScrollChangeListener(
                                     androidx.core.widget.NestedScrollView.OnScrollChangeListener { nested, _, _, _, _ ->
                                         val child =
-                                            nested.getChildAt(nested.childCount - 1) ?: return@OnScrollChangeListener
+                                            nested.getChildAt(nested.childCount - 1)
+                                                ?: return@OnScrollChangeListener
                                         if (child.bottom - (nested.height + nested.scrollY) == 0) {
                                             vm.loadMoreEpisodes()
                                         }
@@ -531,4 +552,3 @@ private fun ComicDetailScreenPreview() {
         onComicListClick = { _, _, _, _, _, _ -> }
     )
 }
-
