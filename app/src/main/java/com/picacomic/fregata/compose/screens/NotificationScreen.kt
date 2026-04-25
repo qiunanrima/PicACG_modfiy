@@ -31,6 +31,7 @@ import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.NotificationViewModel
 import com.picacomic.fregata.databinding.ItemNotificationCellBinding
 import com.picacomic.fregata.objects.NotificationObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.utils.PicassoTransformations
 import com.picacomic.fregata.utils.g
@@ -60,6 +61,7 @@ fun NotificationScreen(
     val context = LocalContext.current
     val listState = rememberLazyListState()
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewNotifications = if (inPreview) notificationPreviewItems() else emptyList()
 
     LaunchedEffect(Unit) {
         if (!inPreview && screenViewModel?.notifications?.isEmpty() == true) {
@@ -135,7 +137,9 @@ fun NotificationScreen(
                     ) {
                         PreviewListPanel(
                             title = stringResource(R.string.title_notification),
-                            items = listOf("系统通知", "游戏更新", "漫画评论提醒")
+                            items = previewNotifications.map {
+                                "${it.title} · ${it.redirectType}"
+                            }
                         )
                     }
                 } else {
@@ -210,6 +214,25 @@ fun NotificationScreen(
             }
         }
     }
+}
+
+private fun notificationPreviewItems(): List<NotificationObject> {
+    val cover = ThumbnailObject("https://storage1.picacomic.com", "notification-cover.jpg", "notification-cover.jpg")
+    val senderAvatar = ThumbnailObject("https://storage1.picacomic.com", "sender-avatar.jpg", "sender-avatar.jpg")
+    val sender = UserProfileObject().apply {
+        setUserId("user-1")
+        setName("系统管理员")
+        setTitle("骑士")
+        setLevel(9)
+        setExp(1200)
+        setVerified(true)
+        setAvatar(senderAvatar)
+    }
+    return listOf(
+        NotificationObject("noti-1", "系统通知", "今晚 23:00 进行维护。", null, "system", null, true, cover, sender, "2026-04-25T10:00:00.000Z"),
+        NotificationObject("noti-2", "漫画评论提醒", "有人回复了你的评论。", "comment-1", "comment", null, false, cover, sender, "2026-04-25T09:30:00.000Z"),
+        NotificationObject("noti-3", "游戏更新", "CLANNAD 资源已更新。", "game-1", "game", null, false, cover, sender, "2026-04-24T18:00:00.000Z")
+    )
 }
 
 @Composable

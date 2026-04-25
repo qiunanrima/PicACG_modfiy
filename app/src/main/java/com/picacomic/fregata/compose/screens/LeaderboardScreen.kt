@@ -42,6 +42,7 @@ import com.picacomic.fregata.databinding.ItemLeaderboardKnightOrderRecyclerViewC
 import com.picacomic.fregata.databinding.ItemLeaderboardPopularOrderRecyclerViewCellBinding
 import com.picacomic.fregata.objects.LeaderboardComicListObject
 import com.picacomic.fregata.objects.LeaderboardKnightObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.PicassoTransformations
 import com.picacomic.fregata.utils.g
 import com.squareup.picasso.Picasso
@@ -66,6 +67,8 @@ fun LeaderboardScreen(
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(0) }
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewPopular = if (inPreview) leaderboardPopularPreview() else emptyList()
+    val previewKnights = if (inPreview) leaderboardKnightPreview() else emptyList()
 
     LaunchedEffect(Unit) {
         if (!inPreview) {
@@ -188,9 +191,13 @@ fun LeaderboardScreen(
                                 stringResource(R.string.leaderboard_tab_knight)
                             },
                             items = if (selectedTab == 0) {
-                                listOf("热门漫画 A", "热门漫画 B", "热门漫画 C")
+                                previewPopular.mapIndexed { index, item ->
+                                    "${index + 1}. ${item.title} · ${item.leaderboardCount}"
+                                }
                             } else {
-                                listOf("骑士 Alpha", "骑士 Beta", "骑士 Gamma")
+                                previewKnights.mapIndexed { index, item ->
+                                    "${index + 1}. ${item.name} · Lv.${item.level}"
+                                }
                             }
                         )
                     }
@@ -265,6 +272,24 @@ fun LeaderboardScreen(
             }
         }
     }
+}
+
+private fun leaderboardPopularPreview(): List<LeaderboardComicListObject> {
+    val cover = ThumbnailObject("https://storage1.picacomic.com", "leaderboard-cover.jpg", "leaderboard-cover.jpg")
+    return listOf(
+        LeaderboardComicListObject("comic-1", "(C94)  ホカホカJS温泉 [中国翻訳]", "アカタマ", 316, 26, 1, 31020, 5200, true, arrayListOf("短篇", "妹妹系"), cover),
+        LeaderboardComicListObject("comic-2", "【明日方舟】凛冬の拘束调教（上篇）", "大阿卡纳XIV", 4779, 18, 1, 120000, 4100, false, arrayListOf("短篇"), cover),
+        LeaderboardComicListObject("comic-3", "嗶咔漢化精选", "翻译组联合", 680, 20, 1, 22000, 3900, true, arrayListOf("推荐作品"), cover)
+    )
+}
+
+private fun leaderboardKnightPreview(): List<LeaderboardKnightObject> {
+    val avatar = ThumbnailObject("https://storage1.picacomic.com", "knight-avatar.jpg", "knight-avatar.jpg")
+    return listOf(
+        LeaderboardKnightObject("knight-1", "黎欧", "m", "https://www.picacomic.com/characters/frame_knight_1000.png?r=3", avatar, arrayListOf("knight"), 68, 465280, 128, false),
+        LeaderboardKnightObject("knight-2", "南裡裡", "f", null, avatar, arrayListOf("mage"), 52, 240000, 96, true),
+        LeaderboardKnightObject("knight-3", "Miracle", "bot", null, avatar, arrayListOf("bot"), 41, 160000, 72, false)
+    )
 }
 
 @Composable

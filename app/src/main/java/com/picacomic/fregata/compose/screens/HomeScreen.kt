@@ -30,12 +30,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
-import androidx.compose.material3.CenterAlignedTopAppBar
+import com.picacomic.fregata.objects.AnnouncementObject
+import com.picacomic.fregata.objects.CollectionObject
+import com.picacomic.fregata.objects.ComicListObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
+import java.util.ArrayList
 
 /**
  * Home screen. The legacy XML scrollable content (announcements, comic collections)
@@ -58,6 +63,7 @@ fun HomeScreen(
     val inPreview = LocalInspectionMode.current
     val contentBg = MaterialTheme.colorScheme.surface.toArgb()
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewState = if (inPreview) homePreviewState() else null
 
     LaunchedEffect(Unit) {
         if (!inPreview &&
@@ -84,7 +90,7 @@ fun HomeScreen(
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                CenterAlignedTopAppBar(
+                TopAppBar(
                     title = {
                         Text(
                             text = stringResource(R.string.title_home),
@@ -102,7 +108,7 @@ fun HomeScreen(
                             }
                         }
                     },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
                     ),
@@ -125,12 +131,14 @@ fun HomeScreen(
                     ) {
                         PreviewListPanel(
                             title = stringResource(R.string.title_notification),
-                            items = listOf("系统通知", "更新公告", "维护提醒")
+                            items = previewState?.announcements?.map { it.title ?: "" }.orEmpty()
                         )
-                        PreviewListPanel(
-                            title = "推荐书单",
-                            items = listOf("最新更新", "本周热门", "猜你喜欢")
-                        )
+                        previewState?.collections?.forEach { collection ->
+                            PreviewListPanel(
+                                title = collection.title ?: "",
+                                items = collection.comics?.take(3)?.map { it.title ?: "" }.orEmpty()
+                            )
+                        }
                     }
                 } else {
                     AndroidView(
@@ -194,6 +202,36 @@ fun HomeScreen(
             }
         }
     }
+}
+
+private data class HomePreviewState(
+    val announcements: List<AnnouncementObject>,
+    val collections: List<CollectionObject>
+)
+
+private fun homePreviewState(): HomePreviewState {
+    val cover = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "home-preview.jpg",
+        "home-preview.jpg"
+    )
+    val comics = arrayListOf(
+        ComicListObject("comic-1", "(C94)  ホカホカJS温泉 [中国翻訳]", "アカタマ", 316, 26, 1, true, arrayListOf("短篇"), cover),
+        ComicListObject("comic-2", "【明日方舟】凛冬の拘束调教（上篇）", "大阿卡纳XIV", 4779, 18, 1, false, arrayListOf("短篇"), cover),
+        ComicListObject("comic-3", "嗶咔漢化精选", "翻译组联合", 680, 20, 1, true, arrayListOf("推荐作品"), cover)
+    )
+    return HomePreviewState(
+        announcements = listOf(
+            AnnouncementObject("ann-1", "系统维护公告", "今晚 23:00 - 24:00 短暂维护", "2026-04-24T10:00:00.000Z", cover),
+            AnnouncementObject("ann-2", "版本更新", "新增 Compose 页面预览", "2026-04-23T08:00:00.000Z", cover),
+            AnnouncementObject("ann-3", "活动提醒", "本周热门榜单已刷新", "2026-04-22T12:00:00.000Z", cover)
+        ),
+        collections = listOf(
+            CollectionObject("最新更新", ArrayList(comics)),
+            CollectionObject("本周热门", ArrayList(comics.reversed())),
+            CollectionObject("猜你喜欢", ArrayList(comics))
+        )
+    )
 }
 
 @Preview(showBackground = true)

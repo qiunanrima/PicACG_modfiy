@@ -1,36 +1,46 @@
 package com.picacomic.fregata.compose.screens
 
-import android.view.LayoutInflater
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaSecondaryScreen
 import com.picacomic.fregata.compose.viewmodels.AnnouncementListViewModel
-import com.picacomic.fregata.databinding.ItemAnnouncementCellBinding
 import com.picacomic.fregata.objects.AnnouncementObject
-import com.picacomic.fregata.utils.PicassoTransformations
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-import com.squareup.picasso.Picasso
 
 @Composable
 fun AnnouncementListScreen(
@@ -41,10 +51,11 @@ fun AnnouncementListScreen(
     val inPreview = LocalInspectionMode.current
     val listState = rememberLazyListState()
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewAnnouncements = if (inPreview) announcementPreviewItems() else emptyList()
 
     LaunchedEffect(inPreview) {
         if (!inPreview) {
-            screenViewModel?.loadMore()
+            screenViewModel?.loadInitial()
         }
     }
 
@@ -59,12 +70,25 @@ fun AnnouncementListScreen(
         }
     }
 
+    LaunchedEffect(screenViewModel?.openAnnouncementEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.openAnnouncementEvent <= 0) return@LaunchedEffect
+        val announcement = vm.selectedAnnouncement ?: return@LaunchedEffect
+        AlertDialogCenter.showAnnouncementAlertDialog(
+            context,
+            g.b(announcement.thumb),
+            announcement.title,
+            announcement.content,
+            announcement.createdAt,
+            null
+        )
+        vm.clearSelectedAnnouncement()
+    }
+
     if (!inPreview) {
         RememberListLoadMore(
             state = listState,
-            enabled = screenViewModel?.announcements?.isNotEmpty() == true &&
-                screenViewModel?.isLoading != true &&
-                (screenViewModel?.page ?: 0) < (screenViewModel?.totalPage ?: 0),
+            enabled = screenViewModel?.canLoadMore() == true,
         ) {
             screenViewModel?.loadMore()
         }
@@ -84,7 +108,9 @@ fun AnnouncementListScreen(
                     ) {
                         PreviewListPanel(
                             title = stringResource(R.string.title_announcement),
-                            items = listOf("公告一", "公告二", "公告三")
+                            items = previewAnnouncements.map {
+                                "${it.title} · ${it.createdAt?.substringBefore('T').orEmpty()}"
+                            }
                         )
                     }
                 } else {
@@ -110,16 +136,10 @@ fun AnnouncementListScreen(
                                         item.announcementId ?: "announcement_$index"
                                     }
                                 ) { _, item ->
-                                    AnnouncementListItem(item = item) {
-                                        AlertDialogCenter.showAnnouncementAlertDialog(
-                                            context,
-                                            g.b(item.thumb),
-                                            item.title,
-                                            item.content,
-                                            item.createdAt,
-                                            null
-                                        )
-                                    }
+                                    AnnouncementListItem(
+                                        item = item,
+                                        onClick = { vm.onAnnouncementClick(item) }
+                                    )
                                 }
 
                                 if (vm.isLoading) {
@@ -136,27 +156,83 @@ fun AnnouncementListScreen(
     }
 }
 
+private fun announcementPreviewItems(): List<AnnouncementObject> {
+    val cover = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "announcement-preview.jpg",
+        "announcement-preview.jpg"
+    )
+    return listOf(
+        AnnouncementObject("ann-1", "系统维护公告", "今晚 23:00 - 24:00 短暂维护", "2026-04-25T10:00:00.000Z", cover),
+        AnnouncementObject("ann-2", "版本更新", "Compose 页面预览已补齐", "2026-04-24T08:00:00.000Z", cover),
+        AnnouncementObject("ann-3", "活动提醒", "本周热门榜单已刷新", "2026-04-23T12:00:00.000Z", cover)
+    )
+}
+
 @Composable
 private fun AnnouncementListItem(
     item: AnnouncementObject,
     onClick: () -> Unit,
 ) {
-    AndroidView(
-        factory = { context ->
-            LayoutInflater.from(context).inflate(R.layout.item_announcement_cell, null, false)
-        },
-        modifier = Modifier.fillMaxWidth(),
-        update = { view ->
-            val binding = ItemAnnouncementCellBinding.bind(view)
-            binding.root.setOnClickListener { onClick() }
-            binding.textViewAnnouncementCellTitle.text = item.title.orEmpty()
-            binding.textViewAnnouncementCellDescription.text = item.content.orEmpty()
-            Picasso.with(view.context)
-                .load(g.b(item.thumb))
-                .transform(PicassoTransformations.CARD_COVER)
-                .placeholder(R.drawable.placeholder_avatar_2)
-                .into(binding.imageViewAnnouncementCellImage)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AnnouncementThumb(
+                imageUrl = g.b(item.thumb),
+                size = 88.dp
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp)
+            ) {
+                Text(
+                    text = item.title.orEmpty(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = item.content.orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun AnnouncementThumb(
+    imageUrl: String?,
+    size: Dp,
+) {
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = null,
+        modifier = Modifier.size(size),
+        placeholder = painterResource(R.drawable.placeholder_avatar_2),
+        error = painterResource(R.drawable.placeholder_avatar_2),
+        fallback = painterResource(R.drawable.placeholder_avatar_2),
+        contentScale = ContentScale.Crop
     )
 }
 

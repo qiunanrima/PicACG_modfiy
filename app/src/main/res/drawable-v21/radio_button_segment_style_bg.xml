@@ -3,13 +3,13 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_checked="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/colorPrimary" />
+            <solid android:color="?colorPrimary" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <solid android:color="?custom_background_color" />
-            <stroke android:width="@dimen/size_radio_button_segment_style_stroke_width" android:color="@color/colorPrimary" />
+            <stroke android:width="@dimen/size_radio_button_segment_style_stroke_width" android:color="?colorOutline" />
         </shape>
     </item>
 </selector>

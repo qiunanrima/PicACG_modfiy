@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.picacomic.fregata.objects.ThumbnailObject
+import com.picacomic.fregata.objects.UserProfileObject
 
 internal data class SplashPreviewModel(
     val isLoading: Boolean,
@@ -270,5 +272,28 @@ internal fun PreviewChatPanel(
                 }
             }
         }
+    }
+}
+
+internal fun profilePreviewUser(): UserProfileObject {
+    val avatar = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "profile-avatar.jpg",
+        "profile-avatar.jpg"
+    )
+    return UserProfileObject().apply {
+        setUserId("user-preview")
+        setEmail("knight@picacomic.com")
+        setName("Knight")
+        setTitle("哔咔骑士")
+        setBirthday("2000-01-01")
+        setGender("bot")
+        setSlogan("今天也在补 Compose 迁移。")
+        setRole("knight")
+        setLevel(8)
+        setExp(1280)
+        setPunched(false)
+        setVerified(true)
+        setAvatar(avatar)
     }
 }

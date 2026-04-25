@@ -1,34 +1,42 @@
 package com.picacomic.fregata.compose.screens
 
-import android.view.LayoutInflater
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaSecondaryScreen
 import com.picacomic.fregata.compose.viewmodels.PicaAppListViewModel
-import com.picacomic.fregata.databinding.ItemChatroomListCellBinding
 import com.picacomic.fregata.objects.PicaAppObject
-import com.picacomic.fregata.utils.PicassoTransformations
 import com.picacomic.fregata.utils.a
-import com.squareup.picasso.Picasso
 
 @Composable
 fun PicaAppListScreen(
@@ -39,6 +47,7 @@ fun PicaAppListScreen(
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewApps = if (inPreview) picaAppPreviewItems() else emptyList()
 
     LaunchedEffect(inPreview) {
         if (!inPreview) {
@@ -71,7 +80,7 @@ fun PicaAppListScreen(
                     ) {
                         PreviewListPanel(
                             title = stringResource(R.string.title_pica_app),
-                            items = listOf("嗶咔萌約", "哔咔小程序 A", "哔咔小程序 B")
+                            items = previewApps.map { "${it.title} · ${it.description}" }
                         )
                     }
                 } else {
@@ -119,28 +128,66 @@ fun PicaAppListScreen(
     }
 }
 
+private fun picaAppPreviewItems(): List<PicaAppObject> {
+    return listOf(
+        PicaAppObject("嗶咔萌約", "https://app.picacomic.com/date", "https://static.picacomic.com/date.jpg", "官方推荐的站内活动入口"),
+        PicaAppObject("哔咔小程序 A", "https://app.picacomic.com/a", "https://static.picacomic.com/a.jpg", "查看本周专题内容"),
+        PicaAppObject("哔咔小程序 B", "https://app.picacomic.com/b", "https://static.picacomic.com/b.jpg", "跳转外部 H5 页面")
+    )
+}
+
 @Composable
 private fun PicaAppListItem(
     item: PicaAppObject,
     onClick: () -> Unit,
 ) {
-    AndroidView(
-        factory = { context ->
-            LayoutInflater.from(context).inflate(R.layout.item_chatroom_list_cell, null, false)
-        },
-        modifier = Modifier.fillMaxWidth(),
-        update = { view ->
-            val binding = ItemChatroomListCellBinding.bind(view)
-            binding.root.setOnClickListener { onClick() }
-            binding.textViewChatroomListCellTitle.text = item.title.orEmpty()
-            binding.textViewChatroomListCellDescription.text = item.description.orEmpty()
-            Picasso.with(view.context)
-                .load(item.icon)
-                .transform(PicassoTransformations.CARD_COVER)
-                .placeholder(R.drawable.placeholder_avatar_2)
-                .into(binding.imageViewChatroomListCellImage)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = item.icon,
+                contentDescription = null,
+                modifier = Modifier.size(80.dp),
+                placeholder = painterResource(R.drawable.placeholder_avatar_2),
+                error = painterResource(R.drawable.placeholder_avatar_2),
+                fallback = painterResource(R.drawable.placeholder_avatar_2),
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp)
+            ) {
+                Text(
+                    text = item.title.orEmpty(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = item.description.orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
-    )
+    }
 }
 
 @Preview(showBackground = true)

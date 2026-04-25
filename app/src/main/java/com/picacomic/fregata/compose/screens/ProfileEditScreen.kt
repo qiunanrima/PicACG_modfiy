@@ -46,6 +46,7 @@ import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.activities.ImageCropActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.ProfileEditViewModel
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.utils.g
 import com.squareup.picasso.Picasso
@@ -75,6 +76,7 @@ fun ProfileEditScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewProfile = if (inPreview) profilePreviewUser() else null
 
     val cropLauncher = if (inPreview) {
         null
@@ -249,7 +251,12 @@ fun ProfileEditScreen(
                     ) {
                         PreviewListPanel(
                             title = stringResource(R.string.title_profile_edit),
-                            items = listOf("头像", "生日 / 邮箱", "个性签名编辑")
+                            items = listOf(
+                                "昵称：${previewProfile?.name.orEmpty()}",
+                                "生日：${previewProfile?.birthday.orEmpty()}",
+                                "邮箱：${previewProfile?.email.orEmpty()}",
+                                "签名：${previewProfile?.slogan.orEmpty()}"
+                            )
                         )
                     }
                 } else {

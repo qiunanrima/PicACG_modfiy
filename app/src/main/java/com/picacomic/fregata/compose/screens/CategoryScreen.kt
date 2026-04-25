@@ -39,6 +39,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.objects.DefaultCategoryObject
+import com.picacomic.fregata.objects.CategoryObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -71,6 +73,7 @@ fun CategoryScreen(
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewState = if (inPreview) categoryPreviewState() else null
 
     LaunchedEffect(screenViewModel?.errorEvent) {
         val vm = screenViewModel ?: return@LaunchedEffect
@@ -90,7 +93,7 @@ fun CategoryScreen(
             topBar = {
                 // MD3: custom search header as a Surface-based top bar
                 androidx.compose.material3.Surface(
-                    shadowElevation = 0.dp,
+                    shadowElevation = 2.dp,
                     tonalElevation = 2.dp,
                     color = MaterialTheme.colorScheme.surface
                 ) {
@@ -158,12 +161,12 @@ fun CategoryScreen(
                                 stringResource(R.string.category_title_love_pica),
                                 stringResource(R.string.category_title_latest),
                                 stringResource(R.string.category_title_random),
-                            ),
+                            ) + previewState.orEmpty().mapNotNull { it.title },
                             columns = 3
                         )
                         PreviewListPanel(
                             title = stringResource(R.string.category_keywords_list_title),
-                            items = listOf("原神", "作者:Knight", "标签:校园")
+                            items = categoryKeywordPreviewItems()
                         )
                     }
                 } else {
@@ -278,6 +281,58 @@ fun CategoryScreen(
             }
         }
     }
+}
+
+private fun categoryPreviewState(): List<CategoryObject> {
+    return listOf(
+        CategoryObject(
+            "5821859b5f6b9a4f93dbf6e9",
+            "嗶咔漢化",
+            "未知",
+            ThumbnailObject(
+                "https://storage1.picacomic.com",
+                "f541d9aa-e4fd-411d-9e76-c912ffc514d1.png",
+                "translate.png"
+            ),
+            false,
+            null
+        ),
+        CategoryObject(
+            "5821859b5f6b9a4f93dbf6ea",
+            "短篇",
+            "大家都在看",
+            ThumbnailObject(
+                "https://storage1.picacomic.com",
+                "short.png",
+                "short.png"
+            ),
+            false,
+            null
+        ),
+        CategoryObject(
+            "5821859b5f6b9a4f93dbf6eb",
+            "長篇",
+            "热门连载",
+            ThumbnailObject(
+                "https://storage1.picacomic.com",
+                "long.png",
+                "long.png"
+            ),
+            false,
+            null
+        )
+    )
+}
+
+private fun categoryKeywordPreviewItems(): List<String> {
+    return listOf(
+        "C96",
+        "嗶咔團長推薦",
+        "肥宅",
+        "校園",
+        "校服",
+        "冰菓"
+    )
 }
 
 private fun buildDefaultCategories(view: View): ArrayList<DefaultCategoryObject> {

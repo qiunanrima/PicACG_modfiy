@@ -205,7 +205,11 @@ class MainActivity : BaseActivity() {
                 }
             )
             { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = innerPadding.calculateBottomPadding())
+                ) {
                     NavHost(
                         navController = navController,
                         startDestination = Screen.Home.route,
@@ -292,11 +296,11 @@ class MainActivity : BaseActivity() {
                                     navController.navigate(Screen.Game.route)
                                 },
                                 onLovePicaClick = {
-                                    navController.navigate(Screen.PicaAppList.route)
+                                    navController.navigate(Screen.LovePicaContainer.route)
                                 },
                                 onForumClick = {
                                     navController.navigate(
-                                        Screen.createCommentRoute(commentId = "5822a6e3ad7ede654696e482")
+                                        Screen.createCommentRoute(comicId = "5822a6e3ad7ede654696e482")
                                     )
                                 },
                                 onLatestClick = {
@@ -529,6 +533,12 @@ class MainActivity : BaseActivity() {
                             PicaAppScreen(
                                 title = title,
                                 link = link,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(Screen.LovePicaContainer.route) {
+                            LovePicaContainerScreen(
                                 onBack = { navController.popBackStack() }
                             )
                         }

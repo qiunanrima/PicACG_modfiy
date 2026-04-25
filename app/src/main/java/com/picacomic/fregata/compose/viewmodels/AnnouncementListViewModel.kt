@@ -37,8 +37,20 @@ class AnnouncementListViewModel(application: Application) : AndroidViewModel(app
     var errorBody by mutableStateOf<String?>(null)
         private set
 
+    var selectedAnnouncement by mutableStateOf<AnnouncementObject?>(null)
+        private set
+
+    var openAnnouncementEvent by mutableIntStateOf(0)
+        private set
+
     private val appContext = getApplication<Application>()
     private var announcementsCall: Call<GeneralResponse<AnnouncementsResponse>>? = null
+
+    fun loadInitial() {
+        if (announcements.isEmpty() && !isLoading) {
+            loadMore()
+        }
+    }
 
     fun loadMore() {
         if (isLoading || page >= totalPage) return
@@ -76,12 +88,26 @@ class AnnouncementListViewModel(application: Application) : AndroidViewModel(app
         })
     }
 
+    fun canLoadMore(): Boolean {
+        return announcements.isNotEmpty() && !isLoading && page < totalPage
+    }
+
+    fun onAnnouncementClick(item: AnnouncementObject) {
+        selectedAnnouncement = item
+        openAnnouncementEvent++
+    }
+
+    fun clearSelectedAnnouncement() {
+        selectedAnnouncement = null
+    }
+
     fun refresh() {
         announcementsCall?.cancel()
         announcements = emptyList()
         page = 0
         totalPage = 1
         isLoading = false
+        selectedAnnouncement = null
         loadMore()
     }
 
@@ -110,4 +136,3 @@ class AnnouncementListViewModel(application: Application) : AndroidViewModel(app
         super.onCleared()
     }
 }
-

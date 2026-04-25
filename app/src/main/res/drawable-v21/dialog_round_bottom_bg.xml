@@ -3,7 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape>
-            <solid android:color="@color/colorPrimary" />
+            <solid android:color="?colorOutline" />
             <corners android:bottomLeftRadius="@dimen/size_dialog_corner_radius" android:bottomRightRadius="@dimen/size_dialog_corner_radius" />
         </shape>
     </item>

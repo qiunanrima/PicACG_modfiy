@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +32,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.ComicListViewModel
+import com.picacomic.fregata.objects.ComicListObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.views.AlertDialogCenter
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -74,6 +77,7 @@ fun ComicListScreen(
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewState = if (inPreview) comicListPreviewState(category, keywords, tags, author, translate, creatorName) else null
     val isFavourite = category == "CATEGORY_USER_FAVOURITE"
     val isRecent = category == "CATEGORY_RECENT_VIEW"
     val isAdvancedSearch = !keywords.isNullOrBlank()
@@ -135,7 +139,7 @@ fun ComicListScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = screenViewModel?.title ?: stringResource(R.string.title_search),
+                            text = screenViewModel?.title ?: previewState?.title ?: stringResource(R.string.title_search),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -235,7 +239,24 @@ fun ComicListScreen(
                     .padding(innerPadding)
             ) {
                 if (inPreview) {
-                    Box(modifier = Modifier.fillMaxSize())
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewGridPanel(
+                            title = "筛选状态",
+                            items = previewState?.filterLabels.orEmpty(),
+                            columns = 3
+                        )
+                        PreviewListPanel(
+                            title = "漫画列表",
+                            items = previewState?.comics?.map {
+                                "${it.title} · ${it.author} · ${it.likesCount}赞"
+                            }.orEmpty()
+                        )
+                    }
                 } else {
                     AndroidView(
                         factory = { context ->
@@ -390,6 +411,79 @@ fun ComicListScreen(
     }
 }
 
+private data class ComicListPreviewState(
+    val title: String,
+    val filterLabels: List<String>,
+    val comics: List<ComicListObject>
+)
+
+private fun comicListPreviewState(
+    category: String?,
+    keywords: String?,
+    tags: String?,
+    author: String?,
+    translate: String?,
+    creatorName: String?
+): ComicListPreviewState {
+    val cover = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "tobeimg/sample-cover.jpg",
+        "cover.jpg"
+    )
+    val comics = listOf(
+        ComicListObject(
+            "5d56e4370bcf57397e60576b",
+            "(C94)  ホカホカJS温泉 [中国翻訳]",
+            "アカタマ (桜吹雪ねる)",
+            316,
+            26,
+            1,
+            true,
+            arrayListOf("短篇", "妹妹系"),
+            cover
+        ),
+        ComicListObject(
+            "5d09f7701edbf52f24b2819d",
+            "【明日方舟】凛冬の拘束调教（上篇）",
+            "大阿卡纳XIV",
+            4779,
+            18,
+            1,
+            false,
+            arrayListOf("短篇"),
+            cover
+        ),
+        ComicListObject(
+            "rec-3",
+            "嗶咔漢化精选",
+            "翻译组联合",
+            680,
+            20,
+            1,
+            true,
+            arrayListOf("推荐作品"),
+            cover
+        )
+    )
+    val title = when {
+        !keywords.isNullOrBlank() -> "搜索 $keywords"
+        !tags.isNullOrBlank() -> "搜索 $tags"
+        !author.isNullOrBlank() -> "搜索 $author"
+        !translate.isNullOrBlank() -> "搜索 $translate"
+        !creatorName.isNullOrBlank() -> "搜索 $creatorName"
+        category == "CATEGORY_USER_FAVOURITE" -> "已收藏"
+        category == "CATEGORY_RECENT_VIEW" -> "最近观看"
+        category == "CATEGORY_RANDOM" -> "随便看"
+        !category.isNullOrBlank() -> category
+        else -> "搜索"
+    }
+    return ComicListPreviewState(
+        title = title,
+        filterLabels = listOf("禁书", "日漫", "BL", "重口", "纯爱", "伪娘", "扶她", "韩漫"),
+        comics = comics
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun ComicListScreenPreview() {
@@ -399,4 +493,3 @@ private fun ComicListScreenPreview() {
         onComicClick = {}
     )
 }
-

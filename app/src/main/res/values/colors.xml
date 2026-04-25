@@ -22,6 +22,13 @@
     <color name="theme_light_outline">#FF7E7478</color>
     <color name="theme_light_primary_overlay">#4DC43D74</color>
     <color name="theme_light_secondary_overlay">#4D75565F</color>
+    <color name="theme_light_episode_downloaded">#FF3B6B90</color>
+    <color name="theme_light_episode_downloaded_outline">#FF2F5572</color>
+    <color name="theme_light_episode_downloading">#FF4E7A62</color>
+    <color name="theme_light_episode_downloading_outline">#FF3D604D</color>
+    <color name="theme_light_keyword_container">#FFFFF1E7</color>
+    <color name="theme_light_keyword_outline">#FFB56D2F</color>
+    <color name="theme_light_keyword_text">#FF8A541F</color>
 
     <!-- Dark Red theme semantic colors (aligned with Compose md_theme_dark_*) -->
     <color name="theme_dark_primary">#FFF4A6C1</color>
@@ -38,6 +45,13 @@
     <color name="theme_dark_outline">#FF9B8F94</color>
     <color name="theme_dark_primary_overlay">#4DF4A6C1</color>
     <color name="theme_dark_secondary_overlay">#4DD6A3AF</color>
+    <color name="theme_dark_episode_downloaded">#FF3B6B90</color>
+    <color name="theme_dark_episode_downloaded_outline">#FF7DAFD3</color>
+    <color name="theme_dark_episode_downloading">#FF4E7A62</color>
+    <color name="theme_dark_episode_downloading_outline">#FF92C5A4</color>
+    <color name="theme_dark_keyword_container">#FF3A281C</color>
+    <color name="theme_dark_keyword_outline">#FFF0C1A7</color>
+    <color name="theme_dark_keyword_text">#FFFFD8C2</color>
 
     <color name="md3_outline">#FF86737B</color>
     <color name="md3_outline_variant">#FFD7C1CA</color>
@@ -69,6 +83,13 @@
     <color name="theme_neon_light_outline">#FF7B7489</color>
     <color name="theme_neon_light_primary_overlay">#4D6B3FBF</color>
     <color name="theme_neon_light_secondary_overlay">#4DC4254A</color>
+    <color name="theme_neon_light_episode_downloaded">#FF3B6B90</color>
+    <color name="theme_neon_light_episode_downloaded_outline">#FF2F5572</color>
+    <color name="theme_neon_light_episode_downloading">#FF4E7A62</color>
+    <color name="theme_neon_light_episode_downloading_outline">#FF3D604D</color>
+    <color name="theme_neon_light_keyword_container">#FFFFF3D6</color>
+    <color name="theme_neon_light_keyword_outline">#FF8A6800</color>
+    <color name="theme_neon_light_keyword_text">#FF6F5200</color>
     <color name="theme_neon_dark_primary">#FFC9AEFF</color>
     <color name="theme_neon_dark_primary_dark">#FF3A0096</color>
     <color name="theme_neon_dark_primary_container">#FF5127A8</color>
@@ -83,6 +104,13 @@
     <color name="theme_neon_dark_outline">#FF948FA2</color>
     <color name="theme_neon_dark_primary_overlay">#4DC9AEFF</color>
     <color name="theme_neon_dark_secondary_overlay">#4DFFB1C2</color>
+    <color name="theme_neon_dark_episode_downloaded">#FF3B6B90</color>
+    <color name="theme_neon_dark_episode_downloaded_outline">#FFA7C9E7</color>
+    <color name="theme_neon_dark_episode_downloading">#FF4E7A62</color>
+    <color name="theme_neon_dark_episode_downloading_outline">#FF9ED4B0</color>
+    <color name="theme_neon_dark_keyword_container">#FF342B12</color>
+    <color name="theme_neon_dark_keyword_outline">#FFF5C842</color>
+    <color name="theme_neon_dark_keyword_text">#FFFFE38A</color>
 
     <color name="abc_search_url_text_normal">#FF3F6F93</color>
     <color name="abc_search_url_text_pressed">#FF295576</color>

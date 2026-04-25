@@ -61,7 +61,5 @@ fun AnonymousChatScreen(
 @Preview(showBackground = true)
 @Composable
 private fun AnonymousChatScreenPreview() {
-    PicaComposeTheme {
-        Box(modifier = Modifier.fillMaxSize())
-    }
+    AnonymousChatScreen(onBack = {})
 }

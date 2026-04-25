@@ -2,5 +2,5 @@
 <shape android:shape="rectangle"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <solid android:color="?custom_background_color" />
-    <stroke android:width="@dimen/size_radio_button_segment_style_stroke_width" android:color="@color/colorPrimary" />
+    <stroke android:width="@dimen/size_radio_button_segment_style_stroke_width" android:color="?colorOutline" />
 </shape>

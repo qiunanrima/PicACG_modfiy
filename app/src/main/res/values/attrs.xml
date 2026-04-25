@@ -15,6 +15,13 @@
     <attr name="custom_secondary_container_color" format="reference|color" />
     <attr name="custom_primary_overlay_color" format="reference|color" />
     <attr name="custom_secondary_overlay_color" format="reference|color" />
+    <attr name="custom_episode_downloaded_color" format="reference|color" />
+    <attr name="custom_episode_downloaded_outline_color" format="reference|color" />
+    <attr name="custom_episode_downloading_color" format="reference|color" />
+    <attr name="custom_episode_downloading_outline_color" format="reference|color" />
+    <attr name="custom_keyword_container_color" format="reference|color" />
+    <attr name="custom_keyword_outline_color" format="reference|color" />
+    <attr name="custom_keyword_text_color" format="reference|color" />
     <attr name="custom_text_black_color" format="reference|color" />
     <attr name="custom_text_black_color_dark" format="reference|color" />
     <attr name="custom_text_black_color_light" format="reference|color" />

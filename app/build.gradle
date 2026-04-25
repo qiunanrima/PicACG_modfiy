@@ -112,6 +112,7 @@ dependencies {
     // 其他未混淆UI库
     // Picasso - 图片加载库
     implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'io.coil-kt:coil-compose:2.7.0'
     
     // CircleImageView - 圆形头像
     implementation 'de.hdodenhof:circleimageview:2.2.0'

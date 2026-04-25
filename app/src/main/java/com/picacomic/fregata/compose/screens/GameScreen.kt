@@ -32,6 +32,7 @@ import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.GameViewModel
 import com.picacomic.fregata.databinding.ItemGameRecyclerViewCellBinding
 import com.picacomic.fregata.objects.GameListObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.PicassoTransformations
 import com.picacomic.fregata.utils.g
 import com.squareup.picasso.Picasso
@@ -52,6 +53,7 @@ fun GameScreen(
     val inPreview = LocalInspectionMode.current
     val gridState = rememberLazyGridState()
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewGames = if (inPreview) gamePreviewList() else emptyList()
 
     LaunchedEffect(Unit) {
         if (!inPreview && screenViewModel?.games?.isEmpty() == true) {
@@ -117,8 +119,14 @@ fun GameScreen(
                     ) {
                         PreviewGridPanel(
                             title = stringResource(R.string.title_game_list),
-                            items = listOf("Game A", "Game B", "Game C", "Game D"),
+                            items = previewGames.map { "${it.title} ${it.version}" },
                             columns = 2
+                        )
+                        PreviewListPanel(
+                            title = "平台 / 标签",
+                            items = previewGames.map {
+                                "${it.title} · ${if (it.isAndroid) "Android" else ""}${if (it.isIos) "/iOS" else ""} · ${if (it.isAdult) "成人" else "全年龄"}"
+                            }
                         )
                     }
                 } else {
@@ -137,7 +145,9 @@ fun GameScreen(
                                 columns = GridCells.Fixed(2),
                                 state = gridState,
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(4.dp)
+                                contentPadding = PaddingValues(4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 itemsIndexed(
                                     items = vm.games,
@@ -165,6 +175,20 @@ fun GameScreen(
             }
         }
     }
+}
+
+private fun gamePreviewList(): List<GameListObject> {
+    val icon = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "a7fe934b-a0c3-466e-8d38-4345c1ecf559.jpg",
+        "0608_1.jpg"
+    )
+    return listOf(
+        GameListObject("58296dee1cc00b5d50b1b5fe", "機動戰隊", "2.1", "即时弹道运算引擎打造热血像素机甲格斗手游", 16036, true, false, false, true, icon),
+        GameListObject("5d511f6779f8d4028e63c0a7", "戀花綻放櫻飛時", "1.0.0", "ぱれっと", 858, false, true, true, true, icon),
+        GameListObject("game-3", "CLANNAD", "1.0.0", "Key", 2205, false, false, true, true, icon),
+        GameListObject("game-4", "像素地牢", "0.9.8", "独立开发", 320, false, false, false, true, icon)
+    )
 }
 
 @Composable

@@ -14,11 +14,15 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +50,21 @@ import com.picacomic.fregata.activities.ComicViewerActivity
 import com.picacomic.fregata.adapters.ComicRecommendationRecyclerViewAdapter
 import com.picacomic.fregata.adapters.EpisodeRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaActionItem
+import com.picacomic.fregata.compose.components.PicaActionRow
+import com.picacomic.fregata.compose.components.PicaCardSection
+import com.picacomic.fregata.compose.components.PicaEpisodeGridItem
+import com.picacomic.fregata.compose.components.PicaEpisodeGridItemState
+import com.picacomic.fregata.compose.components.PicaRecommendationCard
+import com.picacomic.fregata.compose.components.PicaSectionHeader
+import com.picacomic.fregata.compose.components.PicaStatRow
+import com.picacomic.fregata.compose.components.PicaTag
 import com.picacomic.fregata.compose.viewmodels.ComicDetailViewModel
+import com.picacomic.fregata.objects.ComicDetailObject
+import com.picacomic.fregata.objects.ComicEpisodeObject
+import com.picacomic.fregata.objects.ComicListObject
+import com.picacomic.fregata.objects.CreatorObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.FullGridLayoutManager
 import com.picacomic.fregata.utils.PicassoTransformations
 import com.picacomic.fregata.utils.g
@@ -76,6 +95,8 @@ fun ComicDetailScreen(
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewState = if (inPreview) comicDetailPreviewState() else null
+    val previewDetail = previewState?.comicDetail
 
     LaunchedEffect(comicId, inPreview) {
         if (!inPreview) {
@@ -113,6 +134,7 @@ fun ComicDetailScreen(
                     title = {
                         Text(
                             text = screenViewModel?.comicDetail?.title
+                                ?: previewDetail?.title
                                 ?: stringResource(R.string.title_comic_detail_default),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
@@ -147,35 +169,158 @@ fun ComicDetailScreen(
                     .padding(innerPadding)
             ) {
                 if (inPreview) {
+                    val detail = previewDetail
+                    val previewEpisodes = previewState?.episodes.orEmpty()
+                    val previewRecommendations = previewState?.recommendations.orEmpty()
+                    val categoryText = detail?.categories?.joinToString(" ").orEmpty()
+                    val tagList = detail?.tags.orEmpty()
+                    val creatorName = detail?.creator?.name.orEmpty()
+                    val canComment = detail?.isAllowComment == true
+                    val totalEpisodes = previewState?.episodeTotal ?: detail?.episodeCount ?: 0
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        PreviewListPanel(
-                            title = "漫画信息",
-                            items = listOf(
-                                "封面 / 标题 / 作者",
-                                "简介 / 分类 / 汉化组",
-                                "浏览 / 点赞 / 评论"
+                        PicaCardSection {
+                            PicaSectionHeader(
+                                title = "漫画信息",
+                                supportingText = "README info response + ComicDetailViewModel state"
+                            )
+                            PicaStatRow(label = "作者", value = detail?.author.orEmpty())
+                            PicaStatRow(label = "汉化", value = detail?.chineseTeam.orEmpty())
+                            PicaStatRow(label = "骑士", value = creatorName)
+                            PicaStatRow(
+                                label = "分类",
+                                value = categoryText,
+                                supportingText = "页数 ${detail?.pagesCount ?: 0} / 浏览 ${detail?.viewsCount ?: 0}"
+                            )
+                            PicaStatRow(
+                                label = "简介",
+                                value = detail?.description.orEmpty(),
+                                supportingText = "点赞 ${detail?.likesCount ?: 0} / 评论 ${if (canComment) detail?.commentsCount ?: 0 else "禁"}"
+                            )
+                        }
+                        if (tagList.isNotEmpty()) {
+                            PicaCardSection {
+                                PicaSectionHeader(
+                                    title = "标签",
+                                    actionLabel = if (tagList.size > 3) "展开" else null,
+                                    onActionClick = {}
+                                )
+                                tagList.chunked(3).forEachIndexed { rowIndex, tags ->
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        tags.forEachIndexed { index, tag ->
+                                            PicaTag(
+                                                text = tag,
+                                                onClick = {},
+                                                selected = rowIndex == 0 && index == 0
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        PicaActionRow(
+                            primaryText = if (previewState?.fromHistory == true) "继续阅读" else "开始阅读",
+                            primarySupportingText = if (previewState?.fromHistory == true) {
+                                "从 ${previewState.historyEpisodeTitle} P.${previewState.historyPage} 开始"
+                            } else {
+                                "从第 ${previewEpisodes.firstOrNull()?.order ?: 1} 话开始"
+                            },
+                            onPrimaryClick = {},
+                            actions = listOf(
+                                PicaActionItem(
+                                    icon = Icons.Filled.Home,
+                                    contentDescription = "comment",
+                                    count = if (canComment) (detail?.commentsCount ?: 0).toString() else "禁",
+                                    onClick = {}
+                                ),
+                                PicaActionItem(
+                                    icon = Icons.Filled.Person,
+                                    contentDescription = "like",
+                                    count = (detail?.likesCount ?: 0).toString(),
+                                    onClick = {}
+                                )
                             )
                         )
-                        PreviewGridPanel(
-                            title = "章节",
-                            items = listOf("第1话", "第2话", "第3话", "第4话"),
-                            columns = 4
-                        )
-                        PreviewListPanel(
-                            title = "标签",
-                            items = listOf("短篇", "校园", "纯爱", "推荐作品")
-                        )
-                        PreviewGridPanel(
-                            title = "猜你喜欢",
-                            items = listOf("推荐A", "推荐B", "推荐C"),
-                            columns = 3,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        PicaCardSection {
+                            PicaSectionHeader(
+                                title = "章节",
+                                supportingText = "已加载 ${previewEpisodes.size} / 共 $totalEpisodes 话",
+                                actionLabel = if (previewState?.hasMoreEpisodes == true) "更多" else null,
+                                onActionClick = {}
+                            )
+                            previewEpisodes.chunked(3).forEach { rowEpisodes ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    rowEpisodes.forEach { episode ->
+                                        val state = when {
+                                            episode.isSelected -> PicaEpisodeGridItemState.Selected
+                                            episode.status > 0 -> PicaEpisodeGridItemState.Downloaded
+                                            else -> PicaEpisodeGridItemState.Default
+                                        }
+                                        val subtitle = when {
+                                            episode.isSelected -> "阅读中"
+                                            episode.status > 0 -> "已下载"
+                                            else -> episode.title ?: "待阅读"
+                                        }
+                                        PicaEpisodeGridItem(
+                                            title = "第 ${episode.order} 话",
+                                            subtitle = subtitle,
+                                            state = state,
+                                            onClick = {},
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                    repeat(3 - rowEpisodes.size) {
+                                        Box(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            }
+                        }
+                        if (previewRecommendations.isNotEmpty()) {
+                            PicaCardSection {
+                                PicaSectionHeader(title = "猜你喜欢")
+                                previewRecommendations.chunked(3).forEach { rowRecommendations ->
+                                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        rowRecommendations.forEachIndexed { index, item ->
+                                            if (index == 1) {
+                                                PicaRecommendationCard(
+                                                    title = item.title ?: "",
+                                                    supportingText = item.categories?.joinToString(" ").orEmpty(),
+                                                    onClick = {},
+                                                    modifier = Modifier.weight(1f),
+                                                    thumbnail = {
+                                                        Box(
+                                                            modifier = Modifier.fillMaxSize(),
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            Icon(
+                                                                imageVector = Icons.Filled.Category,
+                                                                contentDescription = null,
+                                                                modifier = Modifier.padding(20.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                )
+                                            } else {
+                                                PicaRecommendationCard(
+                                                    title = item.title ?: "",
+                                                    supportingText = item.categories?.joinToString(" ").orEmpty(),
+                                                    onClick = {},
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                            }
+                                        }
+                                        repeat(3 - rowRecommendations.size) {
+                                            Box(modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else {
                     AndroidView(
@@ -539,6 +684,118 @@ private fun openComicViewer(
         putExtra("EXTRA_KEY_VIEW_FROM_RECORD", fromRecord)
     }
     context.startActivity(intent)
+}
+
+private data class ComicDetailPreviewState(
+    val comicDetail: ComicDetailObject,
+    val episodes: List<ComicEpisodeObject>,
+    val episodeTotal: Int,
+    val hasMoreEpisodes: Boolean,
+    val recommendations: List<ComicListObject>,
+    val fromHistory: Boolean,
+    val historyEpisodeTitle: String,
+    val historyPage: Int,
+)
+
+private fun comicDetailPreviewState(): ComicDetailPreviewState {
+    val creatorAvatar = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "bf30b2bc-5127-4144-86f0-b496b102c6d3.jpg",
+        "avatar.jpg"
+    )
+    val creator = CreatorObject(
+        "593019d53f532059f297efa7",
+        "黎欧",
+        "m",
+        creatorAvatar
+    )
+    val cover = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "tobeimg/IrEYXQ_4J8Iq7JRpV9kMOYEqfhk15lxR7i9LmEbeU6U/fill/300/400/sm/0/aHR0cHM6Ly9zdG9yYWdlMS5waWNhY29taWMuY29tL3N0YXRpYy8xZDFkYjBhMC04NzY0LTQ5ZWEtYmUwYS0zMTRiZWUyYzQ1ZDcuanBn.jpg",
+        "01.jpg"
+    )
+    val comicDetail = ComicDetailObject(
+        "5d56e4370bcf57397e60576b",
+        "(C94)  ホカホカJS温泉 [中国翻訳]",
+        "アカタマ (桜吹雪ねる)",
+        "这猥琐大叔",
+        "D.E練習漢化",
+        creator,
+        cover,
+        arrayListOf("短篇", "妹妹系"),
+        arrayListOf("C94", "温泉", "中国翻訳", "短篇"),
+        31,
+        26,
+        24,
+        316,
+        31020,
+        true,
+        false,
+        false,
+        true,
+        true,
+        "2019-08-16T17:13:27.191Z",
+        "2019-08-16T16:52:17.433Z"
+    )
+
+    val episodes = listOf(
+        ComicEpisodeObject("ep-1", "第1話", 1, "2019-08-16T16:56:04.516Z").apply {
+            setStatus(1)
+        },
+        ComicEpisodeObject("ep-2", "第2話", 2, "2019-08-17T16:56:04.516Z").apply {
+            setSelected(true)
+        },
+        ComicEpisodeObject("ep-3", "第3話", 3, "2019-08-18T16:56:04.516Z"),
+        ComicEpisodeObject("ep-4", "第4話", 4, "2019-08-19T16:56:04.516Z"),
+        ComicEpisodeObject("ep-5", "第5話", 5, "2019-08-20T16:56:04.516Z"),
+    )
+
+    val recommendations = listOf(
+        ComicListObject(
+            "5d09f7701edbf52f24b2819d",
+            "【明日方舟】凛冬の拘束调教（上篇）",
+            "大阿卡纳XIV",
+            4779,
+            18,
+            1,
+            false,
+            arrayListOf("短篇"),
+            cover
+        ),
+        ComicListObject(
+            "rec-2",
+            "大家都在看・夏日温泉",
+            "匿名作者",
+            1024,
+            32,
+            2,
+            true,
+            arrayListOf("校园", "恋爱"),
+            cover
+        ),
+        ComicListObject(
+            "rec-3",
+            "嗶咔漢化精选",
+            "翻译组联合",
+            680,
+            20,
+            1,
+            true,
+            arrayListOf("推荐作品"),
+            cover
+        )
+    )
+
+    return ComicDetailPreviewState(
+        comicDetail = comicDetail,
+        episodes = episodes,
+        episodeTotal = 24,
+        hasMoreEpisodes = true,
+        recommendations = recommendations,
+        fromHistory = true,
+        historyEpisodeTitle = "第2話",
+        historyPage = 8
+    )
 }
 
 @Preview(showBackground = true)

@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,8 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -69,6 +70,7 @@ fun CommentScreen(
     val screenViewModel = previewAwareViewModel(viewModel)
     val focusManager = LocalFocusManager.current
     var inputText by rememberSaveable(comicId, gameId, commentId) { mutableStateOf("") }
+    val previewState = if (inPreview) commentPreviewState(gameId != null) else null
 
     LaunchedEffect(comicId, gameId, commentId) {
         if (!inPreview) {
@@ -133,7 +135,17 @@ fun CommentScreen(
                 )
             },
             bottomBar = {
-                if (!inPreview && screenViewModel?.inputBarVisible == true) {
+                if (inPreview) {
+                    CommentInputBar(
+                        value = "这本不错",
+                        onValueChange = {},
+                        replyMode = previewState?.replyMode == true,
+                        isPosting = false,
+                        onCancelReply = {},
+                        onSubmit = {},
+                        focusManager = focusManager
+                    )
+                } else if (screenViewModel?.inputBarVisible == true) {
                     CommentInputBar(
                         value = inputText,
                         onValueChange = { inputText = it.take(100) },
@@ -158,7 +170,17 @@ fun CommentScreen(
                     .padding(innerPadding)
             ) {
                 if (inPreview) {
-                    Box(modifier = Modifier.fillMaxSize())
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        PreviewListPanel(
+                            title = if (gameId != null) "游戏评论" else "漫画评论",
+                            items = previewState?.items.orEmpty()
+                        )
+                    }
                 } else {
                     AndroidView(
                         factory = { context ->
@@ -283,6 +305,31 @@ fun CommentScreen(
             }
         }
     }
+}
+
+private data class CommentPreviewState(
+    val replyMode: Boolean,
+    val items: List<String>
+)
+
+private fun commentPreviewState(isGame: Boolean): CommentPreviewState {
+    val items = if (isGame) {
+        listOf(
+            "LittleMA: 这作流程好长但是值回票价 · 258赞 · 12回复",
+            "南裡裡: 京阿尼纪念作，建议配合动画一起补 · 98赞 · 4回复",
+            "游客: 安卓链接还能下吗 · 3赞 · 0回复"
+        )
+    } else {
+        listOf(
+            "LittleMA: 看的我键盘侠想把她妈大腿塞那男的马眼里 · 0赞 · 0回复",
+            "嗶咔骑士: 汉化质量不错，封面有欺诈感 · 12赞 · 3回复",
+            "匿名用户: 第2话开始节奏才起来 · 4赞 · 1回复"
+        )
+    }
+    return CommentPreviewState(
+        replyMode = true,
+        items = items
+    )
 }
 
 @Preview(showBackground = true)

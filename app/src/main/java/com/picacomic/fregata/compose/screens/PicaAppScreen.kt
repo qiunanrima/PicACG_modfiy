@@ -130,6 +130,8 @@ fun PicaAppScreen(
                     .padding(innerPadding)
             ) {
                 if (inPreview) {
+                    val previewTitle = screenViewModel?.title?.ifBlank { title.ifBlank { "Pica App" } }
+                        ?: title.ifBlank { "Pica App" }
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -137,9 +139,12 @@ fun PicaAppScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         PreviewListPanel(
-                            title = screenViewModel?.title?.ifBlank { title.ifBlank { "Pica App" } }
-                                ?: title.ifBlank { "Pica App" },
-                            items = listOf("WebView 内容区域预览", "站内链接将留在页内", "站外链接将外部打开")
+                            title = previewTitle,
+                            items = listOf(
+                                "目标链接：${link.ifBlank { "https://www.example.com" }}",
+                                "WebView 内容区域预览",
+                                "站内链接将留在页内，站外链接将外部打开"
+                            )
                         )
                     }
                 } else {
@@ -189,9 +194,8 @@ fun PicaAppScreen(
 @Composable
 private fun PicaAppScreenPreview() {
     PicaAppScreen(
-        title = "Pica App",
-        link = "https://www.example.com",
+        title = "嗶咔萌約",
+        link = "https://app.picacomic.com/date",
         onBack = {}
     )
 }
-

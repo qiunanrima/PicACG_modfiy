@@ -32,6 +32,8 @@ import com.picacomic.fregata.adapters.GameScreenShotRecyclerViewAdapter
 import com.picacomic.fregata.adapters.GameScreenShotViewPagerAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.GameDetailViewModel
+import com.picacomic.fregata.objects.GameDetailObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
 import com.squareup.picasso.Picasso
@@ -43,6 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
+import java.util.ArrayList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +58,7 @@ fun GameDetailScreen(
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewState = if (inPreview) gameDetailPreviewState() else null
 
     LaunchedEffect(gameId) {
         if (!inPreview) {
@@ -88,7 +92,7 @@ fun GameDetailScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = screenViewModel?.gameDetail?.title ?: stringResource(R.string.title_game_detail),
+                            text = screenViewModel?.gameDetail?.title ?: previewState?.detail?.title ?: stringResource(R.string.title_game_detail),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -127,7 +131,17 @@ fun GameDetailScreen(
                     ) {
                         PreviewListPanel(
                             title = stringResource(R.string.title_game_detail),
-                            items = listOf("游戏标题", "版本更新内容", "截图 / 视频 / 评论入口")
+                            items = listOf(
+                                "${previewState?.detail?.title} · ${previewState?.detail?.publisher}",
+                                "版本 ${previewState?.detail?.version} · 下载 ${previewState?.detail?.downloadsCount}",
+                                "评论 ${previewState?.detail?.commentsCount} · 点赞 ${previewState?.detail?.likesCount}",
+                                "视频 ${if (previewState?.detail?.videoLink.isNullOrBlank()) "无" else "有"} · 截图 ${previewState?.screenshots?.size ?: 0}"
+                            )
+                        )
+                        PreviewGridPanel(
+                            title = "截图",
+                            items = previewState?.screenshots?.mapIndexed { index, _ -> "截图 ${index + 1}" }.orEmpty(),
+                            columns = 2
                         )
                     }
                 } else {
@@ -330,6 +344,48 @@ fun GameDetailScreen(
     }
 }
 
+private data class GameDetailPreviewState(
+    val detail: GameDetailObject,
+    val screenshots: List<ThumbnailObject>
+)
+
+private fun gameDetailPreviewState(): GameDetailPreviewState {
+    val icon = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "5d8d36d0-f0f7-4935-a9d7-1f9a0dd26fb7.jpg",
+        "icon.jpg"
+    )
+    val screenshots = listOf(
+        ThumbnailObject("https://storage1.picacomic.com", "ec29f500-ddad-4dbd-99b8-fc39d0cc2f23.jpg", "shot1.jpg"),
+        ThumbnailObject("https://storage1.picacomic.com", "6557ade1-74b7-4089-82b8-d2e86d0304d1.jpg", "shot2.jpg"),
+        ThumbnailObject("https://storage1.picacomic.com", "93292827-0ab3-4814-a195-eb8290a605ec.jpg", "shot3.jpg")
+    )
+    val detail = GameDetailObject(
+        "5d354f5b30dda25b3b542dbb",
+        "CLANNAD",
+        "1.0.0",
+        "Key",
+        icon,
+        "纪念版资源上架，修复部分设备闪退问题。",
+        "【Key 20th Anniversary】本游戏需要 ONS 模拟器游玩，全线约 40 小时。",
+        "https://game.eroge.xyz/cl.mp4",
+        2205,
+        258,
+        2205,
+        false,
+        false,
+        false,
+        true,
+        true,
+        763f,
+        763f,
+        arrayListOf("https://game.eroge.xyz/hhh.php?id=95"),
+        arrayListOf("https://game.eroge.xyz/hhh.php?id=95"),
+        ArrayList(screenshots)
+    )
+    return GameDetailPreviewState(detail = detail, screenshots = screenshots)
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun GameDetailScreenPreview() {
@@ -338,4 +394,3 @@ private fun GameDetailScreenPreview() {
         onBack = {}
     )
 }
-

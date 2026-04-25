@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ripple android:color="@color/colorPrimaryDark"
+<ripple android:color="?custom_primary_overlay_color"
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/size_button_episode_corner_radius" />
-            <solid android:color="@color/colorPrimary" />
-            <stroke android:width="1.0px" android:color="@color/colorPrimaryDark" />
+            <solid android:color="?custom_episode_downloading_color" />
+            <stroke android:width="1.0px" android:color="?custom_episode_downloading_outline_color" />
         </shape>
     </item>
 </ripple>

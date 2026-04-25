@@ -58,6 +58,7 @@ import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.viewmodels.ProfileViewModel
 import com.picacomic.fregata.objects.UserBasicObject
 import com.picacomic.fregata.objects.UserProfileObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
 import com.picacomic.fregata.utils.views.ExpCircleView
@@ -85,6 +86,7 @@ fun ProfileScreen(
     val inPreview = LocalInspectionMode.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
     val screenViewModel = previewAwareViewModel(viewModel)
+    val previewProfile = if (inPreview) profilePreviewUser() else null
 
     val cropLauncher = if (inPreview) {
         null
@@ -263,8 +265,13 @@ fun ProfileScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         PreviewListPanel(
-                            title = "Knight (Lv. 8)",
-                            items = listOf("头衔：哔咔骑士", "签名：今天也在补迁移", "标签页：漫画 / 评论")
+                            title = "${previewProfile?.name.orEmpty()} (Lv. ${previewProfile?.level ?: 0})",
+                            items = listOf(
+                                "头衔：${previewProfile?.title.orEmpty()}",
+                                "签名：${previewProfile?.slogan.orEmpty()}",
+                                "邮箱：${previewProfile?.email.orEmpty()}",
+                                "标签页：漫画 / 评论"
+                            )
                         )
                     }
                 } else {

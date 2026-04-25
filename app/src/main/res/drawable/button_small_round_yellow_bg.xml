@@ -6,7 +6,7 @@
             <corners android:radius="@dimen/size_button_small_round_pink_corner_radius" />
             <size android:height="@dimen/size_button_small_round_pink_height" />
             <padding android:left="@dimen/size_button_small_round_pink_width_padding" android:right="@dimen/size_button_small_round_pink_width_padding" />
-            <solid android:color="@color/colorAccent" />
+            <solid android:color="?colorSecondary" />
         </shape>
     </item>
 </selector>
