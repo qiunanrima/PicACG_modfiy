@@ -1,10 +1,108 @@
-# picacomic
+# Picacg官方app修改版
 
-- 批评某位开发者，居然用这个来牟利，不怕被请去喝茶，而且态度还极端恶劣。
-- 隔壁被pica查水表了，我整理一下api
-- pica目录下有[python](./pica)实现，但是需要修改headers和secretKey，才能正常运行
+[![API](https://img.shields.io/badge/API-23%2B-green.svg)](https://android-arsenal.com/api?level=23)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-purple.svg)](https://kotlinlang.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## 验证
+PicaComic 是一款功能完整的 Android 漫画浏览应用，支持漫画推荐、分类浏览、用户评论、社交聊天等功能。项目采用 **Jetpack Compose + Fragment 混合架构**，正在进行全面的现代化迁移。
+
+## 📱 功能特性
+
+- **漫画浏览系统** — 主页推荐、分类浏览、标签检索、强大搜索引擎
+- **漫画详情展示** — 作品详情、章节列表、图片查看器、下载管理  
+- **社交互动功能** — 评论系统、点赞收藏、用户排行榜、作品推荐
+- **实时社区交流** — Socket.IO 驱动的匿名聊天、聊天室、游戏互动
+- **用户中心** — 登录注册、个人资料编辑、PIN 码/密码管理、个性化设置
+- **后台下载服务** — 漫画离线下载、进度管理、智能缓存
+- **系统运维功能** — 版本检查、应用市场、公告通知、设置配置
+
+## 🛠 技术栈
+
+| 层次 | 技术选型 |
+|------|---------|
+| **语言** | Kotlin 2.2.21 + Java 17 |
+| **UI 框架** | Jetpack Compose + Fragment XML (迁移中) |
+| **Build 工具** | Gradle 8.12.0 |
+| **网络请求** | Retrofit2 3.0.0 + OkHttp3 5.3.2 |
+| **实时通信** | Socket.IO 2.1.2 |
+| **JSON 解析** | Gson 2.10.1 |
+| **图片加载** | Picasso 2.5.2 + Coil 2.7.0 |
+| **数据存储** | Sugar ORM 1.5 |
+| **Design 系统** | Material3 + Material Design Icons |
+
+
+## 🚀 开发指南
+
+### 环境要求
+- **JDK**: Java 17+
+- **Android SDK**: API 23+ (minSdk)，API 26 (targetSdk)
+- **Android Studio**: 2024.1+
+- **Gradle**: 8.12.0
+
+### 项目配置
+1. **克隆项目**
+   ```bash
+   git clone <repository>
+   cd picacg_orginal
+   ```
+
+2. **配置 local.properties**
+   ```properties
+   sdk.dir=/path/to/android/sdk
+   ```
+
+3. **配置签名文件** (用于 Release 构建)
+   - 编辑 [app/build.gradle](app/build.gradle) 中的 `signingConfigs` 字段
+   - 指向你的签名密钥库文件
+
+### 编译和运行
+
+**Debug 构建**
+```bash
+./gradlew assembleDebug
+```
+
+**Release 构建**
+```bash
+./gradlew assembleRelease
+```
+
+**运行单元测试**
+```bash
+./gradlew test
+```
+
+**Android 设备测试**
+```bash
+./gradlew installDebug
+```
+
+### 架构迁移规范
+
+项目正在从 Fragment + XML 迁移到 Jetpack Compose。新功能必须：
+- ✅ 使用 Compose Screen，不再创建 XML Layout
+- ✅ 采用 ViewModel 驱动数据流
+- ✅ 遵循 Material3 设计标准
+- ⚠️ 暂时保留 Fragment 兼容层，避免新创建 Fragment
+
+详见 [migration_summary.md](migration_summary.md)。
+
+## 📋 版本信息
+
+| 属性 | 值 |
+|------|-----|
+| 应用版本 | 2.2.1.3.3.4 |
+| Build 号 | 44 |
+| 包名 | `com.picacomic.fregata` |
+| minSdk | 23 (Android 6.0) |
+| targetSdk | 26 (Android 8.0) |
+| ABI | armeabi-v7a (32 位) |
+
+## 📚 API 文档参考
+
+完整的后端 API 文档见下方附录。本节包含 Pica 服务的核心接口规范。
+
+### 验证
 
 ``` golang
 
