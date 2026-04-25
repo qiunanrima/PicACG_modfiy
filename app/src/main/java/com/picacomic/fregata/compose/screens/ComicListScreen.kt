@@ -1,64 +1,66 @@
 package com.picacomic.fregata.compose.screens
 
 import android.content.DialogInterface
-import android.view.LayoutInflater
-import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaComicListCard
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.ComicListViewModel
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextOverflow
 
-private val ComicFilterBackgrounds = intArrayOf(
-    R.drawable.button_filter_forbidden_bg,
-    R.drawable.button_filter_japanese_bg,
-    R.drawable.button_filter_bl_bg,
-    R.drawable.button_filter_heavy_bg,
-    R.drawable.button_filter_pure_love_bg,
-    R.drawable.button_filter_fake_girl_bg,
-    R.drawable.button_filter_futari_bg,
-    R.drawable.button_filter_webtoon_bg
-)
+private val filterLabels = listOf("Forbidden", "JP", "BL", "Heavy", "Pure", "Trap", "Futari", "Webtoon")
 
-/**
- * Comic List screen. Wraps the legacy [R.layout.fragment_comic_list].
- */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ComicListScreen(
     category: String? = null,
@@ -72,32 +74,22 @@ fun ComicListScreen(
     creatorName: String? = null,
     onBack: () -> Unit,
     onComicClick: (String) -> Unit,
-    viewModel: ComicListViewModel? = null
+    viewModel: ComicListViewModel? = null,
 ) {
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
+    val listState = rememberLazyListState()
     val previewState = if (inPreview) comicListPreviewState(category, keywords, tags, author, translate, creatorName) else null
     val isFavourite = category == "CATEGORY_USER_FAVOURITE"
     val isRecent = category == "CATEGORY_RECENT_VIEW"
     val isAdvancedSearch = !keywords.isNullOrBlank()
     val canSort = isFavourite || isAdvancedSearch
-    val canPickAdvancedCategories =
-        isAdvancedSearch && screenViewModel?.advancedCategoryTitles?.isNotEmpty() == true
+    var pageText by rememberSaveable(category, keywords, tags, author, translate, creatorId) {
+        mutableStateOf("1")
+    }
 
-    // Initialize viewModel with params
-    LaunchedEffect(
-        category,
-        keywords,
-        tags,
-        author,
-        finished,
-        sorting,
-        translate,
-        creatorId,
-        creatorName,
-        inPreview
-    ) {
+    LaunchedEffect(category, keywords, tags, author, finished, sorting, translate, creatorId, creatorName, inPreview) {
         if (!inPreview) {
             screenViewModel?.init(
                 category = category,
@@ -108,8 +100,14 @@ fun ComicListScreen(
                 sorting = sorting,
                 translate = translate,
                 creatorId = creatorId,
-                creatorName = creatorName
+                creatorName = creatorName,
             )
+        }
+    }
+
+    LaunchedEffect(screenViewModel?.pageJumpBase) {
+        if (!inPreview) {
+            pageText = (screenViewModel?.pageJumpBase ?: 1).toString()
         }
     }
 
@@ -131,6 +129,16 @@ fun ComicListScreen(
         Toast.makeText(context, res, Toast.LENGTH_SHORT).show()
     }
 
+    if (!inPreview) {
+        val vm = screenViewModel
+        RememberListLoadMore(
+            state = listState,
+            enabled = vm?.comics?.isNotEmpty() == true && !vm.isLoading && vm.hasMore,
+        ) {
+            vm?.loadData()
+        }
+    }
+
     PicaComposeTheme {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
@@ -142,26 +150,23 @@ fun ComicListScreen(
                             text = screenViewModel?.title ?: previewState?.title ?: stringResource(R.string.title_search),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back)
-                            )
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     },
                     actions = {
                         if (canSort) {
-                            TextButton(
+                            IconButton(
                                 onClick = {
-                                    val vm = screenViewModel ?: return@TextButton
+                                    val vm = screenViewModel ?: return@IconButton
                                     if (isFavourite) {
                                         AlertDialogCenter.sortingFavouriteOptions(
                                             context,
-                                            vm.favouriteSortingIndex
+                                            vm.favouriteSortingIndex,
                                         ) { dialog: DialogInterface, which: Int ->
                                             vm.setFavouriteSorting(which)
                                             dialog.dismiss()
@@ -169,242 +174,146 @@ fun ComicListScreen(
                                     } else {
                                         AlertDialogCenter.sortingAdvancedOptions(
                                             context,
-                                            vm.advancedSortingIndex
+                                            vm.advancedSortingIndex,
                                         ) { dialog: DialogInterface, which: Int ->
                                             vm.setAdvancedSorting(which)
                                             dialog.dismiss()
                                         }
                                     }
-                                }
+                                },
                             ) {
-                                Text(text = stringResource(R.string.sorting_title))
+                                Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.sorting_title))
                             }
                         }
-                        if (canPickAdvancedCategories) {
-                            TextButton(
+                        if (isAdvancedSearch && screenViewModel?.advancedCategoryTitles?.isNotEmpty() == true) {
+                            IconButton(
                                 onClick = {
-                                    val vm = screenViewModel ?: return@TextButton
-                                    val checked = vm.advancedCategorySelections.toBooleanArray()
+                                    val vm = screenViewModel ?: return@IconButton
                                     AlertDialogCenter.sortingAdvancedCategoriesOptions(
                                         context,
                                         vm.advancedCategoryTitles.toTypedArray(),
-                                        checked,
+                                        vm.advancedCategorySelections.toBooleanArray(),
                                         DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
                                             vm.setAdvancedCategorySelected(which, isChecked)
                                         },
                                         DialogInterface.OnClickListener { dialog, _ ->
                                             vm.applyAdvancedCategorySelection()
                                             dialog.dismiss()
-                                        }
+                                        },
                                     )
-                                }
+                                },
                             ) {
-                                Text(text = stringResource(R.string.title_category))
+                                Icon(Icons.Filled.FilterAlt, contentDescription = stringResource(R.string.title_category))
                             }
                         }
                         if (isRecent) {
-                            TextButton(
-                                onClick = {
-                                    val vm = screenViewModel ?: return@TextButton
-                                    AlertDialogCenter.showCustomAlertDialog(
-                                        context,
-                                        R.drawable.icon_exclamation_error,
-                                        R.string.alert_clear_all_recent_title,
-                                        R.string.alert_clear_all_recent_message,
-                                        View.OnClickListener {
-                                            vm.clearRecentView()
-                                        },
-                                        null
-                                    )
-                                }
-                            ) {
-                                Text(text = stringResource(R.string.action_clear_recent))
+                            IconButton(onClick = { screenViewModel?.clearRecentView() }) {
+                                Icon(Icons.Filled.ClearAll, contentDescription = stringResource(R.string.action_clear_recent))
                             }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
-            Box(
+            val comics = if (inPreview) previewState?.comics.orEmpty() else screenViewModel?.comics.orEmpty()
+            LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                if (inPreview) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        PreviewGridPanel(
-                            title = "筛选状态",
-                            items = previewState?.filterLabels.orEmpty(),
-                            columns = 3
-                        )
-                        PreviewListPanel(
-                            title = "漫画列表",
-                            items = previewState?.comics?.map {
-                                "${it.title} · ${it.author} · ${it.likesCount}赞"
-                            }.orEmpty()
-                        )
-                    }
-                } else {
-                    AndroidView(
-                        factory = { context ->
-                            LayoutInflater.from(context)
-                                .inflate(R.layout.fragment_comic_list, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            val vm = screenViewModel ?: return@AndroidView
-                            view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
-
-                            val recyclerView =
-                                view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_comic_list)
-                            val emptyView =
-                                view.findViewById<android.widget.FrameLayout>(R.id.frameLayout_comic_list_no_comics)
-                            val pageInput =
-                                view.findViewById<EditText>(R.id.editText_comic_list_current_page)
-                            val totalPageView =
-                                view.findViewById<TextView>(R.id.textView_comic_list_total_page)
-                            emptyView?.visibility =
-                                if (vm.comics.isEmpty()) View.VISIBLE else View.GONE
-                            totalPageView?.text = vm.totalPage.toString()
-                            if (pageInput != null && !pageInput.isFocused) {
-                                pageInput.setText(vm.pageJumpBase.toString())
-                            }
-
-                            if (recyclerView.layoutManager == null) {
-                                recyclerView.layoutManager =
-                                    androidx.recyclerview.widget.LinearLayoutManager(view.context)
-                            }
-
-                            if (recyclerView.adapter == null) {
-                                recyclerView.adapter = com.picacomic.fregata.adapters.ComicListRecyclerViewAdapter(
-                                    view.context,
-                                    ArrayList(vm.comics),
-                                    object : com.picacomic.fregata.a_pkg.b {
-                                        override fun C(i: Int) {
-                                            val realIndex = i - (i / 21)
-                                            if (realIndex >= 0 && realIndex < vm.comics.size) {
-                                                val comicId = vm.comics[realIndex].comicId
-                                                if (!comicId.isNullOrBlank()) {
-                                                    onComicClick(comicId)
-                                                }
-                                            }
-                                        }
-
-                                        override fun I(i: Int) = Unit
-                                    }
+                item(key = "filters") {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            filterLabels.forEachIndexed { index, label ->
+                                val selected = screenViewModel?.filterStates?.getOrNull(index) == true
+                                FilterChip(
+                                    selected = selected,
+                                    onClick = { screenViewModel?.toggleFilter(index) },
+                                    label = { Text(label) },
                                 )
-                            }
-
-                            val dataKey = buildString {
-                                append(vm.comics.size)
-                                append('|')
-                                append(vm.comics.firstOrNull()?.comicId.orEmpty())
-                                append('|')
-                                append(vm.comics.lastOrNull()?.comicId.orEmpty())
-                                append('|')
-                                append(vm.page)
-                                append('|')
-                                append(vm.totalPage)
-                            }
-                            val oldDataKey =
-                                recyclerView.getTag(R.id.recyclerView_comic_list) as? String
-                            if (oldDataKey != dataKey) {
-                                (recyclerView.adapter as? com.picacomic.fregata.adapters.ComicListRecyclerViewAdapter)
-                                    ?.setData(ArrayList(vm.comics))
-                                recyclerView.setTag(R.id.recyclerView_comic_list, dataKey)
-                            }
-
-                            val filterButtons = intArrayOf(
-                                R.id.button_comic_list_filter_forbidden,
-                                R.id.button_comic_list_filter_japanese,
-                                R.id.button_comic_list_filter_bl,
-                                R.id.button_comic_list_filter_heavy,
-                                R.id.button_comic_list_filter_pure_love,
-                                R.id.button_comic_list_filter_fake_girl,
-                                R.id.button_comic_list_filter_futari,
-                                R.id.button_comic_list_filter_webtoon
-                            )
-                            filterButtons.forEachIndexed { index, buttonId ->
-                                val button = view.findViewById<Button>(buttonId)
-                                button?.setBackgroundResource(
-                                    if (vm.filterStates.getOrNull(index) == true) {
-                                        R.drawable.button_filter_selected_bg
-                                    } else {
-                                        ComicFilterBackgrounds[index]
-                                    }
-                                )
-                                if (button?.getTag(buttonId) != true) {
-                                    button?.setOnClickListener {
-                                        val selected = vm.toggleFilter(index)
-                                        button.setBackgroundResource(
-                                            if (selected) R.drawable.button_filter_selected_bg
-                                            else ComicFilterBackgrounds[index]
-                                        )
-                                        (recyclerView.adapter as? com.picacomic.fregata.adapters.ComicListRecyclerViewAdapter)
-                                            ?.a(index, selected)
-                                    }
-                                    button?.setTag(buttonId, true)
-                                }
-                            }
-                            (recyclerView.adapter as? com.picacomic.fregata.adapters.ComicListRecyclerViewAdapter)
-                                ?.let { adapter ->
-                                    vm.filterStates.forEachIndexed { index, selected ->
-                                        adapter.a(index, selected)
-                                    }
-                                }
-
-                            if (pageInput?.getTag(R.id.editText_comic_list_current_page) != true) {
-                                pageInput?.setOnEditorActionListener { textView, actionId, _ ->
-                                    if (actionId != EditorInfo.IME_ACTION_DONE &&
-                                        actionId != EditorInfo.IME_ACTION_GO &&
-                                        actionId != EditorInfo.IME_ACTION_SEARCH &&
-                                        actionId != EditorInfo.IME_NULL
-                                    ) {
-                                        return@setOnEditorActionListener false
-                                    }
-                                    val targetPage = textView?.text?.toString()?.toIntOrNull()
-                                        ?: vm.pageJumpBase
-                                    vm.jumpToPage(targetPage)
-                                    true
-                                }
-                                pageInput?.setTag(R.id.editText_comic_list_current_page, true)
-                            }
-
-                            if (recyclerView.getTag(R.id.textView_comic_list_total_page) != true) {
-                                recyclerView.addOnScrollListener(object :
-                                    androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
-                                    override fun onScrollStateChanged(
-                                        rv: androidx.recyclerview.widget.RecyclerView,
-                                        newState: Int
-                                    ) {
-                                        super.onScrollStateChanged(rv, newState)
-                                        val layoutManager =
-                                            rv.layoutManager as? androidx.recyclerview.widget.LinearLayoutManager
-                                                ?: return
-                                        pageInput?.hint =
-                                            (vm.pageJumpBase + (layoutManager.findFirstVisibleItemPosition() / 21)).toString()
-                                        if (layoutManager.findLastVisibleItemPosition() == layoutManager.itemCount - 1) {
-                                            vm.loadData()
-                                        }
-                                    }
-                                })
-                                recyclerView.setTag(R.id.textView_comic_list_total_page, true)
                             }
                         }
-                    )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            OutlinedTextField(
+                                value = pageText,
+                                onValueChange = { pageText = it.filter(Char::isDigit).take(5) },
+                                label = { Text("Page / ${screenViewModel?.totalPage ?: previewState?.totalPage ?: 1}") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                                keyboardActions = KeyboardActions(
+                                    onGo = {
+                                        screenViewModel?.jumpToPage(pageText.toIntOrNull() ?: 1)
+                                    },
+                                ),
+                                modifier = Modifier.weight(1f),
+                            )
+                            Button(
+                                onClick = {
+                                    screenViewModel?.jumpToPage(pageText.toIntOrNull() ?: 1)
+                                },
+                                modifier = Modifier.padding(top = 8.dp),
+                            ) {
+                                Text("Go")
+                            }
+                        }
+                        if (screenViewModel?.selectedAdvancedCategories?.isNotEmpty() == true) {
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                screenViewModel.selectedAdvancedCategories.forEach { category ->
+                                    AssistChip(onClick = {}, label = { Text(category) })
+                                }
+                            }
+                        }
+                    }
+                }
+
+                when {
+                    !inPreview && screenViewModel?.isLoading == true && comics.isEmpty() -> {
+                        item(key = "loading") { PicaLoadingIndicator() }
+                    }
+
+                    comics.isEmpty() -> {
+                        item(key = "empty") { PicaEmptyState(message = "No comics") }
+                    }
+
+                    else -> {
+                        itemsIndexed(
+                            items = comics,
+                            key = { index, item -> item.comicId ?: "comic_$index" },
+                        ) { _, item ->
+                            PicaComicListCard(
+                                title = item.title.orEmpty(),
+                                subtitle = item.author.orEmpty(),
+                                thumbnail = item.thumb,
+                                likes = item.likesCount,
+                                pages = item.pagesCount,
+                                episodes = item.episodeCount,
+                                categories = item.categories.orEmpty(),
+                                onClick = {
+                                    val comicId = item.comicId
+                                    if (!comicId.isNullOrBlank()) onComicClick(comicId)
+                                },
+                            )
+                        }
+                    }
+                }
+
+                if (!inPreview && screenViewModel?.isLoading == true && comics.isNotEmpty()) {
+                    item(key = "footer") { ListLoadingFooter() }
                 }
             }
         }
@@ -413,8 +322,8 @@ fun ComicListScreen(
 
 private data class ComicListPreviewState(
     val title: String,
-    val filterLabels: List<String>,
-    val comics: List<ComicListObject>
+    val totalPage: Int,
+    val comics: List<ComicListObject>,
 )
 
 private fun comicListPreviewState(
@@ -423,73 +332,32 @@ private fun comicListPreviewState(
     tags: String?,
     author: String?,
     translate: String?,
-    creatorName: String?
+    creatorName: String?,
 ): ComicListPreviewState {
-    val cover = ThumbnailObject(
-        "https://storage1.picacomic.com",
-        "tobeimg/sample-cover.jpg",
-        "cover.jpg"
-    )
+    val cover = ThumbnailObject("https://storage1.picacomic.com", "cover.jpg", "cover.jpg")
     val comics = listOf(
-        ComicListObject(
-            "5d56e4370bcf57397e60576b",
-            "(C94)  ホカホカJS温泉 [中国翻訳]",
-            "アカタマ (桜吹雪ねる)",
-            316,
-            26,
-            1,
-            true,
-            arrayListOf("短篇", "妹妹系"),
-            cover
-        ),
-        ComicListObject(
-            "5d09f7701edbf52f24b2819d",
-            "【明日方舟】凛冬の拘束调教（上篇）",
-            "大阿卡纳XIV",
-            4779,
-            18,
-            1,
-            false,
-            arrayListOf("短篇"),
-            cover
-        ),
-        ComicListObject(
-            "rec-3",
-            "嗶咔漢化精选",
-            "翻译组联合",
-            680,
-            20,
-            1,
-            true,
-            arrayListOf("推荐作品"),
-            cover
-        )
+        ComicListObject("comic-1", "Hot spring story", "Akatama", 316, 26, 1, true, arrayListOf("Short"), cover),
+        ComicListObject("comic-2", "Arknights winter", "Arcana XIV", 4779, 18, 1, false, arrayListOf("Short"), cover),
+        ComicListObject("comic-3", "Pica selected", "Team", 680, 20, 1, true, arrayListOf("Pick"), cover),
     )
     val title = when {
-        !keywords.isNullOrBlank() -> "搜索 $keywords"
-        !tags.isNullOrBlank() -> "搜索 $tags"
-        !author.isNullOrBlank() -> "搜索 $author"
-        !translate.isNullOrBlank() -> "搜索 $translate"
-        !creatorName.isNullOrBlank() -> "搜索 $creatorName"
-        category == "CATEGORY_USER_FAVOURITE" -> "已收藏"
-        category == "CATEGORY_RECENT_VIEW" -> "最近观看"
-        category == "CATEGORY_RANDOM" -> "随便看"
+        !keywords.isNullOrBlank() -> "Search $keywords"
+        !tags.isNullOrBlank() -> "Search $tags"
+        !author.isNullOrBlank() -> "Search $author"
+        !translate.isNullOrBlank() -> "Search $translate"
+        !creatorName.isNullOrBlank() -> "Search $creatorName"
         !category.isNullOrBlank() -> category
-        else -> "搜索"
+        else -> "Search"
     }
-    return ComicListPreviewState(
-        title = title,
-        filterLabels = listOf("禁书", "日漫", "BL", "重口", "纯爱", "伪娘", "扶她", "韩漫"),
-        comics = comics
-    )
+    return ComicListPreviewState(title = title, totalPage = 12, comics = comics)
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ComicListScreenPreview() {
     ComicListScreen(
-        category = "CATEGORY_LATEST",
+        category = "Latest",
         onBack = {},
-        onComicClick = {}
+        onComicClick = {},
     )
 }

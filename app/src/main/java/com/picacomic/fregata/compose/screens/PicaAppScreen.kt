@@ -1,8 +1,6 @@
 package com.picacomic.fregata.compose.screens
 
 import android.webkit.WebView
-import android.view.LayoutInflater
-import android.view.View
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -149,33 +147,20 @@ fun PicaAppScreen(
                     }
                 } else {
                     AndroidView(
-                        factory = { context ->
-                            LayoutInflater.from(context).inflate(R.layout.fragment_pica_app, null, false)
+                        factory = { viewContext ->
+                            WebView(viewContext).apply {
+                                g.k(this)
+                                settings.javaScriptCanOpenWindowsAutomatically = true
+                            }
                         },
                         modifier = Modifier.fillMaxSize(),
-                        update = { view ->
+                        update = { webView ->
                             val vm = screenViewModel ?: return@AndroidView
                             try {
-                                view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
-                                view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
-                                val container = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_web)
-                                if (container != null && container.childCount == 0) {
-                                    val webView = WebView(view.context)
-                                    g.k(webView)
-                                    webView.settings.javaScriptCanOpenWindowsAutomatically = true
-                                    container.addView(
-                                        webView,
-                                        android.widget.LinearLayout.LayoutParams(
-                                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT
-                                        )
-                                    )
-                                }
-                                val webView = container?.getChildAt(0) as? WebView
                                 hostedWebView = webView
-                                val oldLink = webView?.getTag(R.id.linearLayout_web) as? String
+                                val oldLink = webView.getTag(R.id.linearLayout_web) as? String
                                 val authenticatedLink = vm.authenticatedLink
-                                if (webView != null && authenticatedLink != null && oldLink != authenticatedLink) {
+                                if (authenticatedLink != null && oldLink != authenticatedLink) {
                                     webView.loadUrl(authenticatedLink)
                                     webView.setTag(R.id.linearLayout_web, authenticatedLink)
                                 }

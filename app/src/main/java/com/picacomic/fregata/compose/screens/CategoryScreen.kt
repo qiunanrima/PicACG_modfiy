@@ -1,61 +1,66 @@
 package com.picacomic.fregata.compose.screens
 
-import android.app.Activity
-import android.view.View
-import android.widget.Button as LegacyButton
-import android.widget.LinearLayout
-import android.widget.TextView
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
-import com.picacomic.fregata.adapters.CategoryRecyclerViewAdapter
-import com.picacomic.fregata.utils.FullGridLayoutManager
-import androidx.core.content.res.ResourcesCompat
-import android.view.LayoutInflater
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
-import com.picacomic.fregata.objects.DefaultCategoryObject
+import com.picacomic.fregata.compose.components.PicaInfoChip
+import com.picacomic.fregata.compose.components.PicaRemoteImage
+import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
 import com.picacomic.fregata.objects.CategoryObject
 import com.picacomic.fregata.objects.ThumbnailObject
-import com.picacomic.fregata.utils.g
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 
-/**
- * Category screen. The legacy XML content (RecyclerView, tags, keywords) is embedded
- * via [AndroidView]. Pure-Compose header with search bar sits on top.
- *
- * @param onSearch  Called with the query string when the user submits.
- */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CategoryScreen(
     viewModel: CategoryViewModel? = null,
@@ -91,26 +96,24 @@ fun CategoryScreen(
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                // MD3: custom search header as a Surface-based top bar
-                androidx.compose.material3.Surface(
-                    shadowElevation = 2.dp,
+                Surface(
                     tonalElevation = 2.dp,
-                    color = MaterialTheme.colorScheme.surface
+                    color = MaterialTheme.colorScheme.surface,
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Text(
                             text = stringResource(R.string.title_category),
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             OutlinedTextField(
                                 value = query,
@@ -122,15 +125,15 @@ fun CategoryScreen(
                                     onSearch = {
                                         val submitted = query.trim()
                                         if (submitted.isNotEmpty()) onSearch(submitted)
-                                    }
+                                    },
                                 ),
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
                             )
                             Button(
                                 onClick = {
                                     val submitted = query.trim()
                                     if (submitted.isNotEmpty()) onSearch(submitted)
-                                }
+                                },
                             ) {
                                 Text(text = stringResource(R.string.action_search))
                             }
@@ -138,255 +141,213 @@ fun CategoryScreen(
                     }
                 }
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
-            Box(
+            val categories = if (inPreview) previewState.orEmpty() else screenViewModel?.categories.orEmpty()
+            val keywords = if (inPreview) categoryKeywordPreviewItems() else screenViewModel?.keywords.orEmpty()
+            val defaultActions = listOf(
+                CategoryAction(stringResource(R.string.category_title_leaderboard), Icons.Filled.VolunteerActivism, onLeaderboardClick),
+                CategoryAction(stringResource(R.string.category_title_game), Icons.Filled.SportsEsports, onGameClick),
+                CategoryAction(stringResource(R.string.category_title_love_pica), Icons.Filled.VolunteerActivism, onLovePicaClick),
+                CategoryAction(stringResource(R.string.category_title_pica_forum), Icons.Filled.Forum, onForumClick),
+                CategoryAction(stringResource(R.string.category_title_latest), Icons.Filled.NewReleases, onLatestClick),
+                CategoryAction(stringResource(R.string.category_title_random), Icons.Filled.Shuffle, onRandomClick),
+            )
+
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
-                if (inPreview) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        PreviewGridPanel(
-                            title = stringResource(R.string.category_list_title),
-                            items = listOf(
-                                stringResource(R.string.category_title_support),
-                                stringResource(R.string.category_title_leaderboard),
-                                stringResource(R.string.category_title_game),
-                                stringResource(R.string.category_title_love_pica),
-                                stringResource(R.string.category_title_latest),
-                                stringResource(R.string.category_title_random),
-                            ) + previewState.orEmpty().mapNotNull { it.title },
-                            columns = 3
-                        )
-                        PreviewListPanel(
-                            title = stringResource(R.string.category_keywords_list_title),
-                            items = categoryKeywordPreviewItems()
+
+                if (keywords.isNotEmpty()) {
+                    item(key = "keywords_title") {
+                        Text(
+                            text = stringResource(R.string.category_keywords_list_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
                         )
                     }
-                } else {
-                    AndroidView(
-                        factory = { context ->
-                            LayoutInflater.from(context)
-                                .inflate(R.layout.layout_category_compose_content, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            val vm = screenViewModel ?: return@AndroidView
-                            val scrollView =
-                                view.findViewById<androidx.core.widget.NestedScrollView>(R.id.scrollView)
-                            val recyclerView =
-                                view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_category)
-                            val tagsTitle =
-                                view.findViewById<TextView>(R.id.textView_category_tags_title)
-                            val tagsContainer =
-                                view.findViewById<LinearLayout>(R.id.linearLayout_category_tag_list)
-                            val keywordsTitle =
-                                view.findViewById<TextView>(R.id.textView_category_keywords_title)
-                            val keywordsContainer =
-                                view.findViewById<LinearLayout>(R.id.linearLayout_category_keywords_list)
-
-                            scrollView.isFillViewport = true
-
-                            val defaultCategories = buildDefaultCategories(view)
-                            val categoriesSnapshot = ArrayList(vm.categories)
-                            val defaultSize = defaultCategories.size
-
-                            if (recyclerView.layoutManager == null) {
-                                recyclerView.layoutManager = FullGridLayoutManager(view.context, 3)
-                                recyclerView.isNestedScrollingEnabled = false
+                    item(key = "keywords") {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            keywords.forEach { keyword ->
+                                PicaInfoChip(
+                                    text = keyword,
+                                    onClick = { onSearch(keyword) },
+                                )
                             }
-                            recyclerView.adapter = CategoryRecyclerViewAdapter(
-                                view.context,
-                                defaultCategories,
-                                categoriesSnapshot,
-                                object : com.picacomic.fregata.a_pkg.k {
-                                    override fun C(i: Int) {
-                                        when (i) {
-                                            1 -> onLeaderboardClick()
-                                            2 -> onGameClick()
-                                            4 -> onLovePicaClick()
-                                            5 -> onForumClick()
-                                            6 -> onLatestClick()
-                                            7 -> onRandomClick()
-                                            else -> {
-                                                if (i < defaultSize) {
-                                                    return
-                                                }
-                                                val realIndex = i - defaultSize
-                                                if (realIndex in categoriesSnapshot.indices) {
-                                                    val category = categoriesSnapshot[realIndex]
-                                                    val title = category.title ?: return
-                                                    val link = category.link
-                                                    if (category.isWeb && !link.isNullOrEmpty()) {
-                                                        onWebCategoryClick(title, link)
-                                                    } else {
-                                                        onCategoryClick(title)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            )
+                        }
+                    }
+                }
 
-                            tagsTitle.visibility = View.GONE
-                            tagsContainer.visibility = View.GONE
-
-                            keywordsContainer.removeAllViews()
-                            if (vm.keywords.isEmpty()) {
-                                keywordsTitle.visibility = View.GONE
-                                keywordsContainer.visibility = View.GONE
-                            } else {
-                                keywordsTitle.visibility = View.VISIBLE
-                                keywordsContainer.visibility = View.VISIBLE
-                                val buttons = Array(vm.keywords.size) { index ->
-                                    LegacyButton(view.context, null, R.style.KeywordButton).apply {
-                                        setTextColor(
-                                            ResourcesCompat.getColor(
-                                                view.resources,
-                                                R.color.orangeDark,
-                                                view.context.theme
-                                            )
-                                        )
-                                        background = ResourcesCompat.getDrawable(
-                                            view.resources,
-                                            R.drawable.button_keyword_bg,
-                                            view.context.theme
-                                        )
-                                        text = vm.keywords[index]
-                                        tag = vm.keywords[index]
-                                        setOnClickListener { keywordView ->
-                                            val keyword = keywordView.tag as? String
-                                                ?: return@setOnClickListener
-                                            onSearch(keyword)
-                                        }
-                                    }
+                item(key = "default_actions") {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        defaultActions.chunked(3).forEach { rowItems ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                rowItems.forEach { item ->
+                                    CategoryActionCard(
+                                        item = item,
+                                        modifier = Modifier.weight(1f),
+                                    )
                                 }
-                                val activity = view.context as? Activity
-                                if (activity != null) {
-                                    g.a(keywordsContainer, buttons, activity, null)
-                                } else {
-                                    buttons.forEach { keywordsContainer.addView(it) }
+                                repeat(3 - rowItems.size) {
+                                    Box(modifier = Modifier.weight(1f))
                                 }
                             }
                         }
+                    }
+                }
+
+                item(key = "category_title") {
+                    Text(
+                        text = stringResource(R.string.category_list_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
+
+                categories.chunked(2).forEachIndexed { rowIndex, rowCategories ->
+                    item(key = "category_row_$rowIndex") {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            rowCategories.forEach { category ->
+                                RemoteCategoryCard(
+                                    category = category,
+                                    onClick = {
+                                        val title = category.title.orEmpty()
+                                        val link = category.link
+                                        if (category.isWeb && !link.isNullOrBlank()) {
+                                            onWebCategoryClick(title, link)
+                                        } else if (title.isNotBlank()) {
+                                            onCategoryClick(title)
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            repeat(2 - rowCategories.size) {
+                                Box(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
+
+
             }
+        }
+    }
+}
+
+private data class CategoryAction(
+    val title: String,
+    val icon: ImageVector,
+    val onClick: () -> Unit,
+)
+
+@Composable
+private fun CategoryActionCard(
+    item: CategoryAction,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = item.onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .padding(8.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = item.title,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RemoteCategoryCard(
+    category: CategoryObject,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            PicaRemoteImage(
+                thumbnail = category.thumb,
+                contentDescription = category.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .clip(MaterialTheme.shapes.small),
+            )
+            Text(
+                text = category.title.orEmpty(),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = category.description.orEmpty(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
 
 private fun categoryPreviewState(): List<CategoryObject> {
     return listOf(
-        CategoryObject(
-            "5821859b5f6b9a4f93dbf6e9",
-            "嗶咔漢化",
-            "未知",
-            ThumbnailObject(
-                "https://storage1.picacomic.com",
-                "f541d9aa-e4fd-411d-9e76-c912ffc514d1.png",
-                "translate.png"
-            ),
-            false,
-            null
-        ),
-        CategoryObject(
-            "5821859b5f6b9a4f93dbf6ea",
-            "短篇",
-            "大家都在看",
-            ThumbnailObject(
-                "https://storage1.picacomic.com",
-                "short.png",
-                "short.png"
-            ),
-            false,
-            null
-        ),
-        CategoryObject(
-            "5821859b5f6b9a4f93dbf6eb",
-            "長篇",
-            "热门连载",
-            ThumbnailObject(
-                "https://storage1.picacomic.com",
-                "long.png",
-                "long.png"
-            ),
-            false,
-            null
-        )
+        CategoryObject("1", "PicACG", "Translated picks", ThumbnailObject("https://storage1.picacomic.com", "translate.png", "translate.png"), false, null),
+        CategoryObject("2", "Short", "Fast reads", ThumbnailObject("https://storage1.picacomic.com", "short.png", "short.png"), false, null),
+        CategoryObject("3", "Long", "Serial works", ThumbnailObject("https://storage1.picacomic.com", "long.png", "long.png"), false, null),
+        CategoryObject("4", "Web", "Partner link", ThumbnailObject("https://storage1.picacomic.com", "web.png", "web.png"), true, "https://www.picacomic.com"),
+        CategoryObject("5", "Small monster", "No cropped cards", ThumbnailObject("https://storage1.picacomic.com", "monster.png", "monster.png"), false, null),
+        CategoryObject("6", "Store", "Responsive row", ThumbnailObject("https://storage1.picacomic.com", "store.png", "store.png"), false, null),
     )
 }
 
 private fun categoryKeywordPreviewItems(): List<String> {
-    return listOf(
-        "C96",
-        "嗶咔團長推薦",
-        "肥宅",
-        "校園",
-        "校服",
-        "冰菓"
-    )
-}
-
-private fun buildDefaultCategories(view: View): ArrayList<DefaultCategoryObject> {
-    val resources = view.resources
-    return arrayListOf(
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_support),
-            resources.getString(R.string.category_title_support),
-            R.drawable.cat_support
-        ),
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_leaderboard),
-            resources.getString(R.string.category_title_leaderboard),
-            R.drawable.cat_leaderboard
-        ),
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_game),
-            resources.getString(R.string.category_title_game),
-            R.drawable.cat_game
-        ),
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_ads),
-            resources.getString(R.string.category_title_ads),
-            R.drawable.cat_love_pica
-        ),
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_love_pica),
-            resources.getString(R.string.category_title_love_pica),
-            R.drawable.cat_love_pica
-        ),
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_pica_forum),
-            resources.getString(R.string.category_title_pica_forum),
-            R.drawable.cat_forum
-        ),
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_latest),
-            resources.getString(R.string.category_title_latest),
-            R.drawable.cat_latest
-        ),
-        DefaultCategoryObject(
-            "",
-            resources.getString(R.string.category_title_random),
-            resources.getString(R.string.category_title_random),
-            R.drawable.cat_random
-        )
-    )
+    return listOf("C96", "Pica pick", "School", "Uniform", "Ice", "Daily")
 }
 
 @Preview(showBackground = true)
@@ -396,9 +357,5 @@ private fun CategoryScreenPreview() {
         onSearch = {},
         onCategoryClick = {},
         onWebCategoryClick = { _, _ -> },
-        onLovePicaClick = {},
-        onForumClick = {},
-        onLatestClick = {},
-        onRandomClick = {}
     )
 }

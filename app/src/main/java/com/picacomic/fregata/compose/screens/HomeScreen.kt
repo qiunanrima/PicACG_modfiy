@@ -1,55 +1,53 @@
 package com.picacomic.fregata.compose.screens
 
-import android.view.View
+import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import com.picacomic.fregata.compose.viewmodels.HomeViewModel
-import com.picacomic.fregata.holders.AnnouncementContainerView
-import com.picacomic.fregata.holders.ComicCollectionView
-
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaComicListCard
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
+import com.picacomic.fregata.compose.components.PicaSectionHeader
+import com.picacomic.fregata.compose.components.PicaTwoLineCard
+import com.picacomic.fregata.compose.viewmodels.HomeViewModel
+import com.picacomic.fregata.compose.viewmodels.ProfileViewModel
 import com.picacomic.fregata.objects.AnnouncementObject
 import com.picacomic.fregata.objects.CollectionObject
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.ThumbnailObject
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextOverflow
-import java.util.ArrayList
-
-/**
- * Home screen. The legacy XML scrollable content (announcements, comic collections)
- * is embedded via [AndroidView]. A Compose top-bar with notification badge sits above.
- *
- * @param legacyContentView  Inflated [R.layout.layout_home_compose_content].
- * @param hasNotification    Whether to show the notification badge dot.
- * @param onNotification     Called when the notification button is tapped.
- */
+import com.picacomic.fregata.utils.g
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,20 +55,21 @@ fun HomeScreen(
     viewModel: HomeViewModel? = null,
     onNotification: () -> Unit,
     onComicClick: (String) -> Unit,
-    onMoreClick: (String) -> Unit, // category name
+    onMoreClick: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
-    val contentBg = MaterialTheme.colorScheme.surface.toArgb()
     val screenViewModel = previewAwareViewModel(viewModel)
+    val punchInViewModel: ProfileViewModel? = if (inPreview) null else viewModel(key = "home_auto_punch_in")
     val previewState = if (inPreview) homePreviewState() else null
 
     LaunchedEffect(Unit) {
-        if (!inPreview &&
-            screenViewModel?.announcements?.isEmpty() == true &&
-            screenViewModel?.collections?.isEmpty() == true
-        ) {
-            screenViewModel?.loadData()
+        val vm = screenViewModel
+        if (!inPreview && vm != null && vm.announcements.isEmpty() && vm.collections.isEmpty()) {
+            vm.loadData()
+        }
+        if (!inPreview) {
+            punchInViewModel?.punchInIfNeeded()
         }
     }
 
@@ -85,6 +84,18 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(punchInViewModel?.punchInSuccessEvent) {
+        val vm = punchInViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.punchInSuccessEvent <= 0) return@LaunchedEffect
+        Toast.makeText(context, R.string.alert_punch_in_success, Toast.LENGTH_SHORT).show()
+    }
+
+    LaunchedEffect(punchInViewModel?.errorEvent) {
+        val vm = punchInViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        Toast.makeText(context, R.string.alert_general_error, Toast.LENGTH_SHORT).show()
+    }
+
     PicaComposeTheme {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
@@ -96,109 +107,128 @@ fun HomeScreen(
                             text = stringResource(R.string.title_home),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                     actions = {
-                        BadgedBox(
-                            badge = { if (screenViewModel?.hasNotification == true) Badge() }
-                        ) {
-                            TextButton(onClick = onNotification) {
-                                Text(text = stringResource(R.string.title_notification))
+                        IconButton(onClick = onNotification) {
+                            BadgedBox(
+                                badge = {
+                                    if (screenViewModel?.hasNotification == true) {
+                                        Badge()
+                                    }
+                                },
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.title_notification).take(1),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
                             }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
+            val announcements = if (inPreview) previewState?.announcements.orEmpty() else screenViewModel?.announcements.orEmpty()
+            val collections = if (inPreview) previewState?.collections.orEmpty() else screenViewModel?.collections.orEmpty()
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
             ) {
-                if (inPreview) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        PreviewListPanel(
-                            title = stringResource(R.string.title_notification),
-                            items = previewState?.announcements?.map { it.title ?: "" }.orEmpty()
-                        )
-                        previewState?.collections?.forEach { collection ->
-                            PreviewListPanel(
-                                title = collection.title ?: "",
-                                items = collection.comics?.take(3)?.map { it.title ?: "" }.orEmpty()
-                            )
-                        }
+                when {
+                    !inPreview && screenViewModel?.isLoading == true && collections.isEmpty() -> {
+                        PicaLoadingIndicator()
                     }
-                } else {
-                    AndroidView(
-                        factory = { context ->
-                            android.view.LayoutInflater.from(context).inflate(R.layout.layout_home_compose_content, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            val vm = screenViewModel ?: return@AndroidView
-                            val scrollView = view as? androidx.core.widget.NestedScrollView
-                            scrollView?.setBackgroundColor(contentBg)
-                            (scrollView?.getChildAt(0) as? android.view.ViewGroup)?.setBackgroundColor(contentBg)
 
-                            val announcementsContainer = view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_announcements)
-                            val collectionContainers = listOf(
-                                view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_collection_1),
-                                view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_collection_2),
-                                view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_collection_3),
-                                view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_collection_4),
-                                view.findViewById<android.widget.LinearLayout>(R.id.linearLayout_home_collection_5)
-                            )
+                    collections.isEmpty() && announcements.isEmpty() -> {
+                        PicaEmptyState(message = "No content")
+                    }
 
-                            // Render Announcements
-                            announcementsContainer?.removeAllViews()
-                            if (vm.announcements.isNotEmpty() && announcementsContainer != null) {
-                                val announcementView = AnnouncementContainerView(view.context, ArrayList(vm.announcements), 0, { onNotification() }, { onNotification() })
-                                announcementView.textView_title?.setText(R.string.title_notification)
-                                announcementsContainer.addView(announcementView)
-                                announcementsContainer.visibility = View.GONE//这里别动
-                            } else {
-                                announcementsContainer?.visibility = View.GONE
-                            }
-
-                            // Render Collections
-                            collectionContainers.forEach { it?.removeAllViews() }
-                            vm.collections.take(5).forEachIndexed { index, collection ->
-                                try {
-                                    val baseTag = (index * 10) + 10000
-                                    val collectionView = ComicCollectionView(
-                                        view.context, 
-                                        ArrayList(collection.comics), 
-                                        baseTag, 
-                                        { v ->
-                                            val tag = v.tag as? Int ?: return@ComicCollectionView
-                                            val comicIndex = tag - baseTag
-                                            if (comicIndex >= 0 && comicIndex < collection.comics.size) {
-                                                onComicClick(collection.comics[comicIndex].comicId)
-                                            }
-                                        }, 
-                                        { onMoreClick(collection.title) }
-                                    )
-                                    collectionView.textView_title?.text = collection.title
-                                    collectionContainers[index]?.addView(collectionView)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(18.dp),
+                        ) {
+                            if (announcements.isNotEmpty()) {
+                                item(key = "announcements") {
+                                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                        PicaSectionHeader(
+                                            title = stringResource(R.string.title_notification),
+                                            actionLabel = stringResource(R.string.more),
+                                            onActionClick = onNotification,
+                                        )
+                                        announcements.take(3).forEach { announcement ->
+                                            PicaTwoLineCard(
+                                                title = announcement.title.orEmpty(),
+                                                body = announcement.content.orEmpty(),
+                                                supporting = g.B(context, announcement.createdAt),
+                                                onClick = onNotification,
+                                            )
+                                        }
+                                    }
                                 }
                             }
+
+                            items(
+                                items = collections,
+                                key = { it.title.orEmpty() },
+                            ) { collection ->
+                                HomeCollectionRow(
+                                    collection = collection,
+                                    onMoreClick = onMoreClick,
+                                    onComicClick = onComicClick,
+                                )
+                            }
                         }
-                    )
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeCollectionRow(
+    collection: CollectionObject,
+    onMoreClick: (String) -> Unit,
+    onComicClick: (String) -> Unit,
+) {
+    val comics = collection.comics.orEmpty()
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        PicaSectionHeader(
+            title = collection.title.orEmpty(),
+            actionLabel = stringResource(R.string.more),
+            onActionClick = { onMoreClick(collection.title.orEmpty()) },
+        )
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            comics.take(8).forEach { comic ->
+                PicaComicListCard(
+                    title = comic.title.orEmpty(),
+                    subtitle = comic.author.orEmpty(),
+                    thumbnail = comic.thumb,
+                    likes = comic.likesCount,
+                    pages = comic.pagesCount,
+                    episodes = comic.episodeCount,
+                    categories = comic.categories.orEmpty(),
+                    coverWidth = 72.dp,
+                    onClick = {
+                        val comicId = comic.comicId
+                        if (!comicId.isNullOrBlank()) onComicClick(comicId)
+                    },
+                    modifier = Modifier.width(240.dp),
+                )
             }
         }
     }
@@ -206,31 +236,25 @@ fun HomeScreen(
 
 private data class HomePreviewState(
     val announcements: List<AnnouncementObject>,
-    val collections: List<CollectionObject>
+    val collections: List<CollectionObject>,
 )
 
 private fun homePreviewState(): HomePreviewState {
-    val cover = ThumbnailObject(
-        "https://storage1.picacomic.com",
-        "home-preview.jpg",
-        "home-preview.jpg"
-    )
+    val cover = ThumbnailObject("https://storage1.picacomic.com", "home-preview.jpg", "home-preview.jpg")
     val comics = arrayListOf(
-        ComicListObject("comic-1", "(C94)  ホカホカJS温泉 [中国翻訳]", "アカタマ", 316, 26, 1, true, arrayListOf("短篇"), cover),
-        ComicListObject("comic-2", "【明日方舟】凛冬の拘束调教（上篇）", "大阿卡纳XIV", 4779, 18, 1, false, arrayListOf("短篇"), cover),
-        ComicListObject("comic-3", "嗶咔漢化精选", "翻译组联合", 680, 20, 1, true, arrayListOf("推荐作品"), cover)
+        ComicListObject("comic-1", "Hot spring story", "Akatama", 316, 26, 1, true, arrayListOf("Short"), cover),
+        ComicListObject("comic-2", "Arknights winter", "Arcana XIV", 4779, 18, 1, false, arrayListOf("Short"), cover),
+        ComicListObject("comic-3", "Pica selected", "Team", 680, 20, 1, true, arrayListOf("Pick"), cover),
     )
     return HomePreviewState(
         announcements = listOf(
-            AnnouncementObject("ann-1", "系统维护公告", "今晚 23:00 - 24:00 短暂维护", "2026-04-24T10:00:00.000Z", cover),
-            AnnouncementObject("ann-2", "版本更新", "新增 Compose 页面预览", "2026-04-23T08:00:00.000Z", cover),
-            AnnouncementObject("ann-3", "活动提醒", "本周热门榜单已刷新", "2026-04-22T12:00:00.000Z", cover)
+            AnnouncementObject("ann-1", "Maintenance", "Short maintenance tonight.", "2026-04-24T10:00:00.000Z", cover),
+            AnnouncementObject("ann-2", "Update", "Compose screens refreshed.", "2026-04-23T08:00:00.000Z", cover),
         ),
         collections = listOf(
-            CollectionObject("最新更新", ArrayList(comics)),
-            CollectionObject("本周热门", ArrayList(comics.reversed())),
-            CollectionObject("猜你喜欢", ArrayList(comics))
-        )
+            CollectionObject("Latest", ArrayList(comics)),
+            CollectionObject("Popular", ArrayList(comics.reversed())),
+        ),
     )
 }
 
@@ -240,6 +264,6 @@ private fun HomeScreenPreview() {
     HomeScreen(
         onNotification = {},
         onComicClick = {},
-        onMoreClick = {}
+        onMoreClick = {},
     )
 }

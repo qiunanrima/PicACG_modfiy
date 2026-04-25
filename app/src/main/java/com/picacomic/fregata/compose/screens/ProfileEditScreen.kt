@@ -8,34 +8,36 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -45,11 +47,10 @@ import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.activities.ImageCropActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaRemoteImage
+import com.picacomic.fregata.compose.components.PicaSectionHeader
 import com.picacomic.fregata.compose.viewmodels.ProfileEditViewModel
-import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.objects.UserProfileObject
-import com.picacomic.fregata.utils.g
-import com.squareup.picasso.Picasso
 import java.io.File
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,6 +76,7 @@ fun ProfileEditScreen(
     val inPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var sloganText by rememberSaveable { mutableStateOf("") }
     val screenViewModel = previewAwareViewModel(viewModel)
     val previewProfile = if (inPreview) profilePreviewUser() else null
 
@@ -204,6 +206,12 @@ fun ProfileEditScreen(
         }
     }
 
+    LaunchedEffect(screenViewModel?.userProfile?.slogan) {
+        if (!inPreview) {
+            sloganText = screenViewModel?.userProfile?.slogan.orEmpty()
+        }
+    }
+
     PicaComposeTheme {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
@@ -242,78 +250,99 @@ fun ProfileEditScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                if (inPreview) {
-                    Column(
+                val userProfile = if (inPreview) previewProfile else screenViewModel?.userProfile
+                val displaySlogan = if (inPreview) userProfile?.slogan.orEmpty() else sloganText
+                if (inPreview || userProfile != null) {
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        contentPadding = PaddingValues(0.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        PreviewListPanel(
-                            title = stringResource(R.string.title_profile_edit),
-                            items = listOf(
-                                "昵称：${previewProfile?.name.orEmpty()}",
-                                "生日：${previewProfile?.birthday.orEmpty()}",
-                                "邮箱：${previewProfile?.email.orEmpty()}",
-                                "签名：${previewProfile?.slogan.orEmpty()}"
-                            )
-                        )
+                        item {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = MaterialTheme.shapes.large,
+                                tonalElevation = 1.dp,
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    PicaSectionHeader(title = stringResource(R.string.title_profile_edit))
+                                    Box(
+                                        modifier = Modifier
+                                            .size(96.dp)
+                                            .clip(MaterialTheme.shapes.extraLarge)
+                                            .clickable(onClick = onAvatarClick),
+                                    ) {
+                                        PicaRemoteImage(
+                                            thumbnail = userProfile?.avatar,
+                                            contentDescription = userProfile?.name,
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    }
+                                    ProfileEditInfoRow("Name", userProfile?.let(::displayName).orEmpty())
+                                    ProfileEditInfoRow("Birthday", userProfile?.birthday?.substringBefore("T").orEmpty())
+                                    ProfileEditInfoRow("Email", userProfile?.email.orEmpty())
+                                }
+                            }
+                        }
+                        item {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = MaterialTheme.shapes.large,
+                                tonalElevation = 1.dp,
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    OutlinedTextField(
+                                        value = displaySlogan,
+                                        onValueChange = { sloganText = it },
+                                        label = { Text("Slogan") },
+                                        minLines = 3,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = !inPreview && screenViewModel?.isSubmitting != true,
+                                    )
+                                    Button(
+                                        onClick = { screenViewModel?.updateSlogan(sloganText) },
+                                        enabled = !inPreview && screenViewModel?.isSubmitting != true,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Text(text = stringResource(R.string.update))
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else {
-                    AndroidView(
-                        factory = { context2 ->
-                            LayoutInflater.from(context2).inflate(R.layout.fragment_profile_edit, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            val vm = screenViewModel ?: return@AndroidView
-                            view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
-                            view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
-
-                            val userProfile = vm.userProfile ?: return@AndroidView
-                            val avatarView = view.findViewById<de.hdodenhof.circleimageview.CircleImageView>(R.id.imageView_profile_avatar)
-                            val nameView = view.findViewById<TextView>(R.id.textView_profile_name)
-                            val birthdayView = view.findViewById<TextView>(R.id.textView_profile_birth)
-                            val emailView = view.findViewById<TextView>(R.id.textView_profile_email)
-                            val sloganEditText = view.findViewById<EditText>(R.id.editText_profile_slogan)
-                            val updateButton = view.findViewById<Button>(R.id.button_profile_update)
-
-                            val avatarPath = vm.avatarPreviewUri ?: userProfile.avatar?.let { g.b(it) }
-                            if (avatarView != null && !avatarPath.isNullOrBlank()) {
-                                Picasso.with(view.context).load(avatarPath).into(avatarView)
-                            }
-
-                            if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
-                                avatarView?.setOnClickListener { onAvatarClick() }
-                                avatarView?.setTag(R.id.imageView_profile_avatar, true)
-                            }
-
-                            nameView?.text = displayName(userProfile)
-
-                            birthdayView?.text = userProfile.birthday
-                                ?.substringBefore("T")
-                                ?.takeIf { it.isNotBlank() }
-                                .orEmpty()
-
-                            emailView?.text = userProfile.email.orEmpty()
-
-                            val slogan = userProfile.slogan.orEmpty()
-                            if (sloganEditText != null && !sloganEditText.isFocused && sloganEditText.text.toString() != slogan) {
-                                sloganEditText.setText(slogan)
-                            }
-
-                            if (updateButton != null && updateButton.getTag(R.id.button_profile_update) != true) {
-                                updateButton.setOnClickListener {
-                                    vm.updateSlogan(sloganEditText?.text?.toString().orEmpty())
-                                }
-                                updateButton.setTag(R.id.button_profile_update, true)
-                            }
-                            updateButton?.isEnabled = !vm.isSubmitting
-                        }
-                    )
+                    com.picacomic.fregata.compose.components.PicaLoadingIndicator()
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileEditInfoRow(
+    label: String,
+    value: String,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value.ifBlank { "-" },
+            style = MaterialTheme.typography.bodyLarge,
+        )
     }
 }
 

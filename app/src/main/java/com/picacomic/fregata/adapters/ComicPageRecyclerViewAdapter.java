@@ -53,9 +53,9 @@ public class ComicPageRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
 
     @Override // androidx.recyclerview.widget.RecyclerView.Adapter
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        //if (i == 2) {
-            //return new AdvertisementListViewHolder(this.mLayoutInflater.inflate(R.layout.item_advertisement_list_cell, viewGroup, false));
-        //}
+        if (i == 2) {
+            return new AdvertisementListViewHolder(this.mLayoutInflater.inflate(R.layout.item_advertisement_list_cell, viewGroup, false));
+        }
         return new ComicPageViewHolder(this.mLayoutInflater.inflate(R.layout.item_comic_page_recycler_view_cell, viewGroup, false));
     }
 

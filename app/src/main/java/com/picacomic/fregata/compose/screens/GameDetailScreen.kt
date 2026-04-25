@@ -1,51 +1,63 @@
 package com.picacomic.fregata.compose.screens
 
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.MediaController
-import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
-import com.picacomic.fregata.adapters.GameScreenShotRecyclerViewAdapter
-import com.picacomic.fregata.adapters.GameScreenShotViewPagerAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaInfoChip
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
+import com.picacomic.fregata.compose.components.PicaMetricRow
+import com.picacomic.fregata.compose.components.PicaRemoteImage
+import com.picacomic.fregata.compose.components.PicaSectionHeader
 import com.picacomic.fregata.compose.viewmodels.GameDetailViewModel
 import com.picacomic.fregata.objects.GameDetailObject
 import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-import com.squareup.picasso.Picasso
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextOverflow
-import java.util.ArrayList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +65,7 @@ fun GameDetailScreen(
     gameId: String,
     onBack: () -> Unit,
     onCommentClick: (String) -> Unit = {},
-    viewModel: GameDetailViewModel? = null
+    viewModel: GameDetailViewModel? = null,
 ) {
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
@@ -61,20 +73,14 @@ fun GameDetailScreen(
     val previewState = if (inPreview) gameDetailPreviewState() else null
 
     LaunchedEffect(gameId) {
-        if (!inPreview) {
-            screenViewModel?.loadGame(gameId, force = true)
-        }
+        if (!inPreview) screenViewModel?.loadGame(gameId, force = true)
     }
 
     LaunchedEffect(screenViewModel?.errorEvent) {
         val vm = screenViewModel ?: return@LaunchedEffect
         if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
         val code = vm.errorCode
-        if (code != null) {
-            com.picacomic.fregata.b.c(context, code, vm.errorBody).dN()
-        } else {
-            com.picacomic.fregata.b.c(context).dN()
-        }
+        if (code != null) com.picacomic.fregata.b.c(context, code, vm.errorBody).dN() else com.picacomic.fregata.b.c(context).dN()
     }
 
     LaunchedEffect(screenViewModel?.messageEvent) {
@@ -95,249 +101,177 @@ fun GameDetailScreen(
                             text = screenViewModel?.gameDetail?.title ?: previewState?.detail?.title ?: stringResource(R.string.title_game_detail),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back)
-                            )
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                if (inPreview) {
-                    Column(
+            val detail = if (inPreview) previewState?.detail else screenViewModel?.gameDetail
+            val screenshots = if (inPreview) previewState?.screenshots.orEmpty() else screenViewModel?.screenshots.orEmpty()
+            when {
+                !inPreview && screenViewModel?.isLoading == true && detail == null -> PicaLoadingIndicator()
+                detail == null -> PicaEmptyState(message = "No game detail")
+                else -> {
+                    GameDetailContent(
+                        detail = detail,
+                        screenshots = screenshots,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        PreviewListPanel(
-                            title = stringResource(R.string.title_game_detail),
-                            items = listOf(
-                                "${previewState?.detail?.title} · ${previewState?.detail?.publisher}",
-                                "版本 ${previewState?.detail?.version} · 下载 ${previewState?.detail?.downloadsCount}",
-                                "评论 ${previewState?.detail?.commentsCount} · 点赞 ${previewState?.detail?.likesCount}",
-                                "视频 ${if (previewState?.detail?.videoLink.isNullOrBlank()) "无" else "有"} · 截图 ${previewState?.screenshots?.size ?: 0}"
-                            )
-                        )
-                        PreviewGridPanel(
-                            title = "截图",
-                            items = previewState?.screenshots?.mapIndexed { index, _ -> "截图 ${index + 1}" }.orEmpty(),
-                            columns = 2
-                        )
-                    }
-                } else {
-                    AndroidView(
-                        factory = { context ->
-                            LayoutInflater.from(context).inflate(R.layout.fragment_game_detail, null, false)
+                            .padding(innerPadding),
+                        onDownload = {
+                            val link = detail.androidLinks?.firstOrNull()
+                            if (link.isNullOrBlank()) AlertDialogCenter.downloadNotReady(context) else g.A(context, link)
                         },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            val vm = screenViewModel ?: return@AndroidView
-                            view.findViewById<View>(R.id.appbar)?.visibility = View.GONE
-                            view.findViewById<View>(R.id.toolbar)?.visibility = View.GONE
-                            val detail = vm.gameDetail
-                            if (detail != null) {
-                                try {
-                                val screenWidth = view.resources.displayMetrics.widthPixels
-                                view.findViewById<View>(R.id.frameLayout_game_detail_banner)?.layoutParams?.height =
-                                    (screenWidth * 9) / 16
-                                view.findViewById<View>(R.id.recyclerView_game_detail_screenshots)?.layoutParams?.height =
-                                    (screenWidth * 9) / 16
+                        onComment = { onCommentClick(gameId) },
+                        onLike = { screenViewModel?.toggleLike() },
+                        onVideo = {
+                            val link = detail.videoLink
+                            if (!link.isNullOrBlank()) g.A(context, link)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
 
-                                view.findViewById<TextView>(R.id.textView_game_detail_title)?.text = detail.title
-                                view.findViewById<TextView>(R.id.textView_game_detail_publisher)?.text = detail.publisher
-                                view.findViewById<TextView>(R.id.textView_game_detail_description)?.text = detail.description
-                                view.findViewById<TextView>(R.id.textView_game_detail_version_description)?.text = detail.updateContent
-                                view.findViewById<TextView>(R.id.textView_game_detail_version_title)?.text = detail.version
-                                view.findViewById<TextView>(R.id.textView_game_detail_size)?.text =
-                                    detail.androidSize.toString()
-                                view.findViewById<TextView>(R.id.textView_game_detail_comment_count)?.text =
-                                    detail.commentsCount.toString()
-                                view.findViewById<TextView>(R.id.textView_game_detail_like_count)?.text =
-                                    detail.likesCount.toString()
-                                view.findViewById<TextView>(R.id.textView_game_detail_downloaded)?.text =
-                                    detail.downloadsCount.toString()
-
-                                view.findViewById<ImageView>(R.id.imageView_game_detail_recommend)?.visibility =
-                                    if (detail.isSuggest) View.VISIBLE else View.GONE
-                                view.findViewById<ImageView>(R.id.imageView_game_detail_adult)?.visibility =
-                                    if (detail.isAdult) View.VISIBLE else View.GONE
-                                view.findViewById<ImageView>(R.id.imageView_game_detail_android)?.visibility =
-                                    if (detail.isAndroid) View.VISIBLE else View.GONE
-                                view.findViewById<ImageView>(R.id.imageView_game_detail_ios)?.visibility =
-                                    if (detail.isIos) View.VISIBLE else View.GONE
-
-                                val iconView = view.findViewById<ImageView>(R.id.imageView_game_detail_icon)
-                                if (iconView != null && detail.icon != null) {
-                                    Picasso.with(view.context).load(g.b(detail.icon)).into(iconView)
-                                }
-
-                                val bannerView = view.findViewById<ImageView>(R.id.imageView_game_detail_banner)
-                                vm.bannerScreenshot?.let {
-                                    Picasso.with(view.context).load(g.b(it)).into(bannerView)
-                                }
-
-                                val playButton = view.findViewById<ImageButton>(R.id.imageButton_game_detail_play)
-                                playButton?.visibility =
-                                    if (detail.videoLink.isNullOrBlank()) View.GONE else View.VISIBLE
-                                playButton?.setOnClickListener { vm.openVideoPopup() }
-
-                                view.findViewById<ImageButton>(R.id.imageButton_game_detail_gift)?.setOnClickListener {
-                                    AlertDialogCenter.giftNotReady(view.context)
-                                }
-
-                                view.findViewById<android.widget.Button>(R.id.button_game_detail_download)?.setOnClickListener {
-                                    val link = detail.androidLinks?.firstOrNull()
-                                    if (link.isNullOrBlank()) {
-                                        AlertDialogCenter.downloadNotReady(view.context)
-                                    } else {
-                                        g.A(view.context, link)
-                                    }
-                                }
-
-                                view.findViewById<ImageButton>(R.id.imageButton_game_detail_comment)?.setOnClickListener {
-                                    onCommentClick(gameId)
-                                }
-
-                                view.findViewById<ImageButton>(R.id.imageButton_game_detail_like)?.apply {
-                                    setImageResource(
-                                        if (detail.isLiked) R.drawable.icon_bookmark_on else R.drawable.icon_bookmark_off
-                                    )
-                                    isEnabled = !vm.isActionLoading
-                                    setOnClickListener { vm.toggleLike() }
-                                }
-
-                                val descriptionView =
-                                    view.findViewById<TextView>(R.id.textView_game_detail_description)
-                                val descriptionToggle =
-                                    view.findViewById<ImageButton>(R.id.imageButton_game_detail_description_height_control)
-                                descriptionToggle?.setOnClickListener {
-                                    val collapsed =
-                                        (descriptionView?.getTag(R.id.textView_game_detail_description) as? Boolean) == true
-                                    if (collapsed) {
-                                        descriptionView?.setSingleLine(false)
-                                        descriptionView?.setTag(R.id.textView_game_detail_description, false)
-                                        descriptionToggle.setImageResource(R.drawable.icon_expand)
-                                    } else {
-                                        descriptionView?.setSingleLine()
-                                        descriptionView?.setTag(R.id.textView_game_detail_description, true)
-                                        descriptionToggle.setImageResource(R.drawable.icon_collapse)
-                                    }
-                                }
-
-                                val versionDescriptionView =
-                                    view.findViewById<TextView>(R.id.textView_game_detail_version_description)
-                                val versionToggle =
-                                    view.findViewById<ImageButton>(R.id.imageButton_game_detail_version_description_height_control)
-                                versionToggle?.setOnClickListener {
-                                    val collapsed =
-                                        (versionDescriptionView?.getTag(R.id.textView_game_detail_version_description) as? Boolean) == true
-                                    if (collapsed) {
-                                        versionDescriptionView?.setSingleLine(false)
-                                        versionDescriptionView?.setTag(R.id.textView_game_detail_version_description, false)
-                                        versionToggle.setImageResource(R.drawable.icon_expand)
-                                    } else {
-                                        versionDescriptionView?.setSingleLine()
-                                        versionDescriptionView?.setTag(R.id.textView_game_detail_version_description, true)
-                                        versionToggle.setImageResource(R.drawable.icon_collapse)
-                                    }
-                                }
-
-                                val screenshotsRv =
-                                    view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerView_game_detail_screenshots)
-                                val screenshotKey =
-                                    vm.screenshots.joinToString("|") { g.b(it) }
-                                val oldScreenshotKey =
-                                    screenshotsRv?.getTag(R.id.recyclerView_game_detail_screenshots) as? String
-                                if (screenshotsRv != null && oldScreenshotKey != screenshotKey) {
-                                    if (screenshotsRv.layoutManager == null) {
-                                        screenshotsRv.layoutManager =
-                                            androidx.recyclerview.widget.LinearLayoutManager(view.context, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
-                                    }
-                                    screenshotsRv.adapter = GameScreenShotRecyclerViewAdapter(
-                                        view.context,
-                                        ArrayList(vm.screenshots),
-                                        object : com.picacomic.fregata.a_pkg.k {
-                                            override fun C(i: Int) {
-                                                vm.openScreenshot(i)
-                                            }
-                                        }
-                                    )
-                                    screenshotsRv.setTag(R.id.recyclerView_game_detail_screenshots, screenshotKey)
-                                }
-
-                                val popupLayout = view.findViewById<View>(R.id.relativeLayout_game_detail_popup)
-                                val viewPager =
-                                    view.findViewById<androidx.viewpager.widget.ViewPager>(R.id.viewPager_game_detail_screenShot)
-                                val videoView =
-                                    view.findViewById<android.widget.VideoView>(R.id.videoView_game_detail)
-                                val popupClose =
-                                    view.findViewById<ImageButton>(R.id.imageButton_game_detail_close_popup)
-                                popupClose?.setOnClickListener { vm.closePopup() }
-                                popupLayout?.visibility =
-                                    if (vm.popupVisible) View.VISIBLE else View.GONE
-                                if (vm.popupVisible) {
-                                    if (vm.showVideoInPopup) {
-                                        viewPager?.visibility = View.GONE
-                                        videoView?.visibility = View.VISIBLE
-                                        val videoLink = detail.videoLink.orEmpty()
-                                        if (videoLink.isNotBlank()) {
-                                            val oldVideo = videoView?.getTag(R.id.videoView_game_detail) as? String
-                                            if (oldVideo != videoLink) {
-                                                videoView?.setVideoPath(videoLink)
-                                                videoView?.setTag(R.id.videoView_game_detail, videoLink)
-                                                val controller = MediaController(view.context)
-                                                controller.setAnchorView(videoView)
-                                                videoView?.setMediaController(controller)
-                                            }
-                                            videoView?.start()
-                                        }
-                                    } else {
-                                        videoView?.pause()
-                                        videoView?.visibility = View.GONE
-                                        viewPager?.visibility = View.VISIBLE
-                                        val pagerKey = screenshotKey
-                                        val oldPagerKey =
-                                            viewPager?.getTag(R.id.viewPager_game_detail_screenShot) as? String
-                                        if (viewPager != null && oldPagerKey != pagerKey) {
-                                            viewPager.adapter = GameScreenShotViewPagerAdapter(
-                                                view.context,
-                                                ArrayList(vm.screenshots)
-                                            )
-                                            viewPager.setTag(R.id.viewPager_game_detail_screenShot, pagerKey)
-                                        }
-                                        viewPager?.currentItem = vm.selectedScreenshotIndex
-                                    }
-                                } else {
-                                    videoView?.pause()
-                                    videoView?.visibility = View.GONE
-                                    viewPager?.visibility = View.GONE
-                                }
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
+@Composable
+private fun GameDetailContent(
+    detail: GameDetailObject,
+    screenshots: List<ThumbnailObject>,
+    modifier: Modifier,
+    onDownload: () -> Unit,
+    onComment: () -> Unit,
+    onLike: () -> Unit,
+    onVideo: () -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item {
+            PicaRemoteImage(
+                thumbnail = screenshots.firstOrNull() ?: detail.icon,
+                contentDescription = detail.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16f / 9f)
+                    .clip(MaterialTheme.shapes.large),
+            )
+        }
+        item {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = 1.dp,
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        PicaRemoteImage(
+                            thumbnail = detail.icon,
+                            contentDescription = detail.title,
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(MaterialTheme.shapes.medium),
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = detail.title.orEmpty(),
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(
+                                text = "${detail.publisher.orEmpty()} · ${detail.version.orEmpty()}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                if (detail.isAndroid) PicaInfoChip("Android")
+                                if (detail.isIos) PicaInfoChip("iOS")
+                                if (detail.isAdult) PicaInfoChip("Adult")
                             }
                         }
+                    }
+                    PicaMetricRow(
+                        metrics = listOf(
+                            "Likes" to detail.likesCount.toString(),
+                            "Comments" to detail.commentsCount.toString(),
+                            "Downloads" to detail.downloadsCount.toString(),
+                        ),
                     )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = onDownload, modifier = Modifier.weight(1f)) {
+                            Icon(Icons.Filled.Download, contentDescription = null)
+                            Text("Download")
+                        }
+                        IconButton(onClick = onComment) {
+                            Icon(Icons.Filled.Comment, contentDescription = stringResource(R.string.title_comment))
+                        }
+                        IconButton(onClick = onLike) {
+                            Icon(Icons.Filled.Favorite, contentDescription = "Like")
+                        }
+                        if (!detail.videoLink.isNullOrBlank()) {
+                            IconButton(onClick = onVideo) {
+                                Icon(Icons.Filled.PlayArrow, contentDescription = "Video")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        item {
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = 1.dp,
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    PicaSectionHeader(title = "Description")
+                    Text(text = detail.description.orEmpty(), style = MaterialTheme.typography.bodyMedium)
+                    PicaSectionHeader(title = "Update")
+                    Text(text = detail.updateContent.orEmpty(), style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        }
+        if (screenshots.isNotEmpty()) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PicaSectionHeader(title = "Screenshots")
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        screenshots.forEach { shot ->
+                            PicaRemoteImage(
+                                thumbnail = shot,
+                                contentDescription = detail.title,
+                                modifier = Modifier
+                                    .width(220.dp)
+                                    .aspectRatio(16f / 9f)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .clickable {},
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -346,29 +280,24 @@ fun GameDetailScreen(
 
 private data class GameDetailPreviewState(
     val detail: GameDetailObject,
-    val screenshots: List<ThumbnailObject>
+    val screenshots: List<ThumbnailObject>,
 )
 
 private fun gameDetailPreviewState(): GameDetailPreviewState {
-    val icon = ThumbnailObject(
-        "https://storage1.picacomic.com",
-        "5d8d36d0-f0f7-4935-a9d7-1f9a0dd26fb7.jpg",
-        "icon.jpg"
-    )
+    val icon = ThumbnailObject("https://storage1.picacomic.com", "icon.jpg", "icon.jpg")
     val screenshots = listOf(
-        ThumbnailObject("https://storage1.picacomic.com", "ec29f500-ddad-4dbd-99b8-fc39d0cc2f23.jpg", "shot1.jpg"),
-        ThumbnailObject("https://storage1.picacomic.com", "6557ade1-74b7-4089-82b8-d2e86d0304d1.jpg", "shot2.jpg"),
-        ThumbnailObject("https://storage1.picacomic.com", "93292827-0ab3-4814-a195-eb8290a605ec.jpg", "shot3.jpg")
+        ThumbnailObject("https://storage1.picacomic.com", "shot1.jpg", "shot1.jpg"),
+        ThumbnailObject("https://storage1.picacomic.com", "shot2.jpg", "shot2.jpg"),
     )
     val detail = GameDetailObject(
-        "5d354f5b30dda25b3b542dbb",
+        "game-1",
         "CLANNAD",
         "1.0.0",
         "Key",
         icon,
-        "纪念版资源上架，修复部分设备闪退问题。",
-        "【Key 20th Anniversary】本游戏需要 ONS 模拟器游玩，全线约 40 小时。",
-        "https://game.eroge.xyz/cl.mp4",
+        "Fixes and resource update.",
+        "A visual novel classic.",
+        "https://example.com/video.mp4",
         2205,
         258,
         2205,
@@ -379,18 +308,15 @@ private fun gameDetailPreviewState(): GameDetailPreviewState {
         true,
         763f,
         763f,
-        arrayListOf("https://game.eroge.xyz/hhh.php?id=95"),
-        arrayListOf("https://game.eroge.xyz/hhh.php?id=95"),
-        ArrayList(screenshots)
+        arrayListOf("https://example.com/ios"),
+        arrayListOf("https://example.com/android"),
+        ArrayList(screenshots),
     )
-    return GameDetailPreviewState(detail = detail, screenshots = screenshots)
+    return GameDetailPreviewState(detail, screenshots)
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun GameDetailScreenPreview() {
-    GameDetailScreen(
-        gameId = "preview",
-        onBack = {}
-    )
+    GameDetailScreen(gameId = "preview", onBack = {})
 }

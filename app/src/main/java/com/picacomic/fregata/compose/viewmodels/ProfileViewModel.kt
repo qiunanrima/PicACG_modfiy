@@ -135,6 +135,15 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         })
     }
 
+    fun punchInIfNeeded() {
+        if (isPunchingIn) return
+        if (userProfile == null) {
+            loadCachedProfile()
+        }
+        if (userProfile?.isPunched == true) return
+        punchIn()
+    }
+
     fun onAvatarCropped(localUri: String) {
         avatarPreviewUri = localUri
         loadProfile(force = true)
@@ -145,6 +154,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         val updated = Gson().fromJson(Gson().toJson(current), UserProfileObject::class.java)
         updated.setPunched(true)
         userProfile = updated
+        e.i(context, Gson().toJson(updated))
     }
 
     private fun safeErrorBody(response: Response<*>): String? {

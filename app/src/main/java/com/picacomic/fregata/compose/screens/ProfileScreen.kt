@@ -1,7 +1,6 @@
 package com.picacomic.fregata.compose.screens
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
@@ -9,22 +8,34 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
-import android.text.TextUtils
-import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -34,66 +45,71 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
 import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.activities.ImageCropActivity
-import com.picacomic.fregata.adapters.ProfileFragmentPagerAdapter
 import com.picacomic.fregata.b.c
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaComicListCard
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaImageUrl
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
+import com.picacomic.fregata.compose.components.PicaMetricRow
+import com.picacomic.fregata.compose.components.PicaRemoteImage
+import com.picacomic.fregata.compose.components.PicaSectionHeader
+import com.picacomic.fregata.compose.components.PicaUserAvatar
+import com.picacomic.fregata.compose.viewmodels.CommentViewModel
+import com.picacomic.fregata.compose.viewmodels.ProfileComicViewModel
 import com.picacomic.fregata.compose.viewmodels.ProfileViewModel
+import com.picacomic.fregata.objects.ComicListObject
+import com.picacomic.fregata.objects.CommentWithReplyObject
+import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.objects.UserBasicObject
 import com.picacomic.fregata.objects.UserProfileObject
-import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-import com.picacomic.fregata.utils.views.ExpCircleView
-import com.squareup.picasso.Picasso
-import com.squareup.picasso.Target
-import de.hdodenhof.circleimageview.CircleImageView
 import java.io.File
 import kotlin.math.max
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onEdit: () -> Unit,
-    viewModel: ProfileViewModel? = null
+    onComicClick: (String) -> Unit = {},
+    onGameClick: (String) -> Unit = {},
+    onComicListClick: (String) -> Unit = {},
+    viewModel: ProfileViewModel? = null,
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
     val lifecycleOwner = LocalLifecycleOwner.current
     val inPreview = LocalInspectionMode.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedTab by rememberSaveable { mutableStateOf(0) }
     val screenViewModel = previewAwareViewModel(viewModel)
-    val previewProfile = if (inPreview) profilePreviewUser() else null
+    val profileComicViewModel: ProfileComicViewModel? = if (inPreview) null else viewModel()
+    val profileCommentViewModel: CommentViewModel? = if (inPreview) null else viewModel(key = "profile_comments")
+    val previewProfile = if (inPreview) profileScreenPreviewUser() else null
 
     val cropLauncher = if (inPreview) {
         null
     } else {
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) { result ->
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
             val cropResultUri = result.data?.getStringExtra("CROP_IMAGE_RESULT_URI")
             if (!cropResultUri.isNullOrEmpty()) {
@@ -105,32 +121,30 @@ fun ProfileScreen(
     val galleryLauncher = if (inPreview) {
         null
     } else {
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) { result ->
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
             val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
-            val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-                putExtra("KEY_ACTION_TYPE", 1)
-                putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
-            }
-            cropLauncher?.launch(cropIntent)
+            cropLauncher?.launch(
+                Intent(context, ImageCropActivity::class.java).apply {
+                    putExtra("KEY_ACTION_TYPE", 1)
+                    putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
+                },
+            )
         }
     }
 
     val cameraLauncher = if (inPreview) {
         null
     } else {
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) { result ->
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
             val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
-            val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-                putExtra("KEY_ACTION_TYPE", 1)
-                putExtra("KEY_IMAGE_URI_STRING", cameraUri)
-            }
-            cropLauncher?.launch(cropIntent)
+            cropLauncher?.launch(
+                Intent(context, ImageCropActivity::class.java).apply {
+                    putExtra("KEY_ACTION_TYPE", 1)
+                    putExtra("KEY_IMAGE_URI_STRING", cameraUri)
+                },
+            )
         }
     }
 
@@ -138,72 +152,73 @@ fun ProfileScreen(
         if (inPreview) return@click
         val hasStoragePermission = ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
         ) == PackageManager.PERMISSION_GRANTED
         val hasCameraPermission = ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.CAMERA
+            Manifest.permission.CAMERA,
         ) == PackageManager.PERMISSION_GRANTED
 
         if (!hasStoragePermission || !hasCameraPermission) {
             (activity as? BaseActivity)?.requestPermission()
-        } else {
-            AlertDialog.Builder(context)
-                .setTitle(R.string.alert_dialog_select_title)
-                .setSingleChoiceItems(
-                    context.resources.getStringArray(R.array.alert_dialog_photo_chooser),
-                    0,
-                    null
-                )
-                .setPositiveButton(R.string.ok) { dialogInterface, _ ->
-                    val checked = (dialogInterface as AlertDialog).listView.checkedItemPosition
-                    if (checked == 0) {
-                        val photoFile = File(Environment.getExternalStorageDirectory(), "Pic.jpg")
-                        val photoUri = Uri.fromFile(photoFile)
-                        pendingCameraUri = photoUri.toString()
-                        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                            putExtra("output", photoUri)
-                        }
-                        cameraLauncher?.launch(cameraIntent)
-                    } else {
-                        val pickIntent = Intent(Intent.ACTION_PICK).apply {
-                            type = "image/*"
-                        }
-                        galleryLauncher?.launch(pickIntent)
-                    }
-                }
-                .show()
+            return@click
         }
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.alert_dialog_select_title)
+            .setSingleChoiceItems(context.resources.getStringArray(R.array.alert_dialog_photo_chooser), 0, null)
+            .setPositiveButton(R.string.ok) { dialogInterface, _ ->
+                val checked = (dialogInterface as AlertDialog).listView.checkedItemPosition
+                if (checked == 0) {
+                    val photoUri = Uri.fromFile(File(Environment.getExternalStorageDirectory(), "Pic.jpg"))
+                    pendingCameraUri = photoUri.toString()
+                    cameraLauncher?.launch(
+                        Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                            putExtra("output", photoUri)
+                        },
+                    )
+                } else {
+                    galleryLauncher?.launch(
+                        Intent(Intent.ACTION_PICK).apply {
+                            type = "image/*"
+                        },
+                    )
+                }
+            }
+            .show()
     }
 
     LaunchedEffect(Unit) {
         if (!inPreview) {
             screenViewModel?.loadProfile()
+            profileComicViewModel?.load()
+        }
+    }
+
+    LaunchedEffect(screenViewModel?.userProfile?.userId) {
+        val profile = screenViewModel?.userProfile ?: return@LaunchedEffect
+        if (!inPreview) {
+            profileCommentViewModel?.init(
+                userId = profile.userId,
+                userBasic = UserBasicObject(profile),
+                force = true,
+            )
         }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                if (inPreview) return@LifecycleEventObserver
+            if (event == Lifecycle.Event.ON_RESUME && !inPreview) {
                 screenViewModel?.loadProfile(force = true)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    DisposableEffect(activity) {
-        onDispose {
-            clearProfilePagerFragments((activity as? FragmentActivity)?.supportFragmentManager)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(screenViewModel?.punchInSuccessEvent) {
         if ((screenViewModel?.punchInSuccessEvent ?: 0) > 0) {
-            AlertDialogCenter.punchedIn(context)
+            android.widget.Toast.makeText(context, R.string.alert_punch_in_success, android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -217,11 +232,21 @@ fun ProfileScreen(
         val vm = screenViewModel ?: return@LaunchedEffect
         if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
         val code = vm.errorCode
-        if (code != null) {
-            c(context, code, vm.errorBody).dN()
-        } else {
-            c(context).dN()
-        }
+        if (code != null) c(context, code, vm.errorBody).dN() else c(context).dN()
+    }
+
+    LaunchedEffect(profileComicViewModel?.errorEvent) {
+        val vm = profileComicViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
+        if (code != null) c(context, code, vm.errorBody).dN() else c(context).dN()
+    }
+
+    LaunchedEffect(profileCommentViewModel?.errorEvent) {
+        val vm = profileCommentViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
+        val code = vm.errorCode
+        if (code != null) c(context, code, vm.errorBody).dN() else c(context).dN()
     }
 
     PicaComposeTheme {
@@ -235,7 +260,7 @@ fun ProfileScreen(
                             text = stringResource(R.string.title_profile),
                             style = MaterialTheme.typography.titleLarge,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     },
                     actions = {
@@ -245,268 +270,361 @@ fun ProfileScreen(
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
-            Box(
+            val profile = if (inPreview) previewProfile else screenViewModel?.userProfile
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                if (inPreview) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                item {
+                    ProfileHeader(
+                        profile = profile,
+                        avatarPreviewUri = screenViewModel?.avatarPreviewUri,
+                        isPunchingIn = screenViewModel?.isPunchingIn == true,
+                        onAvatarClick = onAvatarClick,
+                        onPunchIn = { screenViewModel?.punchIn() },
+                    )
+                }
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = MaterialTheme.shapes.large,
+                        tonalElevation = 1.dp,
                     ) {
-                        PreviewListPanel(
-                            title = "${previewProfile?.name.orEmpty()} (Lv. ${previewProfile?.level ?: 0})",
-                            items = listOf(
-                                "头衔：${previewProfile?.title.orEmpty()}",
-                                "签名：${previewProfile?.slogan.orEmpty()}",
-                                "邮箱：${previewProfile?.email.orEmpty()}",
-                                "标签页：漫画 / 评论"
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            PicaSectionHeader(title = stringResource(R.string.title_profile))
+                            Text(
+                                text = profile?.slogan.orEmpty().ifBlank { "No slogan" },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            Text(
+                                text = profile?.email.orEmpty(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+                item {
+                    TabRow(selectedTabIndex = selectedTab) {
+                        Tab(
+                            selected = selectedTab == 0,
+                            onClick = { selectedTab = 0 },
+                            text = { Text(text = stringResource(R.string.comic)) },
+                        )
+                        Tab(
+                            selected = selectedTab == 1,
+                            onClick = { selectedTab = 1 },
+                            text = { Text(text = stringResource(R.string.comment)) },
+                        )
+                    }
+                }
+                if (selectedTab == 0) {
+                    item {
+                        ProfileComicSection(
+                            title = stringResource(R.string.bookmarked),
+                            total = profileComicViewModel?.bookmarkedTotal?.toLong() ?: 0L,
+                            comics = profileComicViewModel?.bookmarkedComics.orEmpty(),
+                            loading = profileComicViewModel?.isLoading == true,
+                            onMore = { onComicListClick("CATEGORY_USER_FAVOURITE") },
+                            onComicClick = onComicClick,
+                        )
+                    }
+                    item {
+                        ProfileComicSection(
+                            title = stringResource(R.string.recent_view),
+                            total = profileComicViewModel?.recentTotal ?: 0L,
+                            comics = profileComicViewModel?.recentComics.orEmpty(),
+                            loading = false,
+                            onMore = { onComicListClick("CATEGORY_RECENT_VIEW") },
+                            onComicClick = onComicClick,
+                        )
+                    }
+                    item {
+                        ProfileComicSection(
+                            title = stringResource(R.string.downloaded),
+                            total = profileComicViewModel?.downloadedTotal ?: 0L,
+                            comics = profileComicViewModel?.downloadedComics.orEmpty(),
+                            loading = false,
+                            onMore = { onComicListClick("CATEGORY_DOWNLOADED") },
+                            onComicClick = onComicClick,
                         )
                     }
                 } else {
-                    AndroidView(
-                        factory = { ctx ->
-                            android.view.LayoutInflater.from(ctx)
-                                .inflate(R.layout.layout_profile_compose_content, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { root ->
-                            val vm = screenViewModel ?: return@AndroidView
-                            val avatarView =
-                                root.findViewById<CircleImageView>(R.id.imageView_profile_avatar)
-                            val avatarBlurView =
-                                root.findViewById<ImageView>(R.id.imageView_profile_avatar_blur)
-                            val characterView =
-                                root.findViewById<ImageView>(R.id.imageView_profile_character)
-                            val verifiedView =
-                                root.findViewById<ImageView>(R.id.imageView_profile_verified)
-                            val levelTextView =
-                                root.findViewById<TextView>(R.id.textView_profile_level)
-                            val nameTextView =
-                                root.findViewById<TextView>(R.id.textView_profile_name)
-                            val honorTextView =
-                                root.findViewById<TextView>(R.id.textView_profile_honor)
-                            val sloganTextView =
-                                root.findViewById<TextView>(R.id.textView_profile_slogan)
-                            val punchInTextView =
-                                root.findViewById<TextView>(R.id.textView_profile_punch_in)
-                            val expCircleView =
-                                root.findViewById<ExpCircleView>(R.id.expCircleView_profile)
-                            val tabLayout = root.findViewById<TabLayout>(R.id.tabs)
-                            val viewPager = root.findViewById<ViewPager>(R.id.viewPager_profile)
-
-                            expCircleView?.setGridSize(20)
-
-                            if (avatarView?.getTag(R.id.imageView_profile_avatar) != true) {
-                                avatarView?.setOnClickListener { onAvatarClick() }
-                                avatarView?.setTag(R.id.imageView_profile_avatar, true)
-                            }
-
-                            if (punchInTextView?.getTag(R.id.textView_profile_punch_in) != true) {
-                                punchInTextView?.setOnClickListener { vm.punchIn() }
-                                punchInTextView?.setTag(R.id.textView_profile_punch_in, true)
-                            }
-
-                            bindProfilePager(
-                                root = root,
-                                activity = activity as? FragmentActivity,
-                                viewPager = viewPager,
-                                tabLayout = tabLayout,
-                                userProfile = vm.userProfile
-                            )
-
-                            bindProfileHeader(
-                                root = root,
-                                userProfile = vm.userProfile,
-                                avatarPreviewUri = vm.avatarPreviewUri,
-                                avatarView = avatarView,
-                                avatarBlurView = avatarBlurView,
-                                characterView = characterView,
-                                verifiedView = verifiedView,
-                                levelTextView = levelTextView,
-                                nameTextView = nameTextView,
-                                honorTextView = honorTextView,
-                                sloganTextView = sloganTextView,
-                                punchInTextView = punchInTextView,
-                                expCircleView = expCircleView,
-                                isPunchingIn = vm.isPunchingIn
-                            )
+                    val comments = profileCommentViewModel?.commentItems.orEmpty()
+                    when {
+                        profileCommentViewModel?.isLoading == true && comments.isEmpty() -> {
+                            item { PicaLoadingIndicator() }
                         }
-                    )
+
+                        comments.isEmpty() -> {
+                            item { PicaEmptyState(message = "No comments") }
+                        }
+
+                        else -> {
+                            comments.forEachIndexed { index, comment ->
+                                item(key = comment.commentId ?: "profile_comment_$index") {
+                                    ProfileCommentCard(
+                                        comment = comment,
+                                        profileUser = profileCommentViewModel?.profileUser,
+                                        floor = (profileCommentViewModel?.displayFloorCount ?: comments.size) - index,
+                                        onOpenTarget = {
+                                            val comicId = comment.comicId?.comicId
+                                            val gameId = comment.gameId?.gameId
+                                            if (!comicId.isNullOrBlank()) onComicClick(comicId)
+                                            if (!gameId.isNullOrBlank()) onGameClick(gameId)
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-private fun bindProfileHeader(
-    root: View,
-    userProfile: UserProfileObject?,
+@Composable
+private fun ProfileHeader(
+    profile: UserProfileObject?,
     avatarPreviewUri: String?,
-    avatarView: CircleImageView?,
-    avatarBlurView: ImageView?,
-    characterView: ImageView?,
-    verifiedView: ImageView?,
-    levelTextView: TextView?,
-    nameTextView: TextView?,
-    honorTextView: TextView?,
-    sloganTextView: TextView?,
-    punchInTextView: TextView?,
-    expCircleView: ExpCircleView?,
-    isPunchingIn: Boolean
+    isPunchingIn: Boolean,
+    onAvatarClick: () -> Unit,
+    onPunchIn: () -> Unit,
 ) {
-    if (userProfile == null) {
-        punchInTextView?.visibility = View.GONE
-        return
-    }
-
-    val avatarPath = avatarPreviewUri ?: userProfile.avatar?.let { g.b(it) }
-    if (!avatarPath.isNullOrEmpty()) {
-        loadAvatar(root, avatarPath, avatarView, avatarBlurView)
-    }
-
-    if (!userProfile.character.isNullOrEmpty()) {
-        Picasso.with(root.context).load(userProfile.character).into(characterView)
-        characterView?.visibility = View.VISIBLE
-    } else {
-        characterView?.visibility = View.GONE
-    }
-
-    verifiedView?.visibility = if (userProfile.isVerified) View.VISIBLE else View.GONE
-
-    val nextExp = max(1, expForLevel(userProfile.level + 1))
-    levelTextView?.text = "${userProfile.level} (${userProfile.exp}/$nextExp)"
-    nameTextView?.apply {
-        maxLines = 1
-        ellipsize = TextUtils.TruncateAt.END
-        text = displayName(userProfile)
-    }
-    honorTextView?.text = userProfile.title.orEmpty()
-    sloganTextView?.text = userProfile.slogan.orEmpty()
-    punchInTextView?.visibility = if (userProfile.isPunched) View.GONE else View.VISIBLE
-    punchInTextView?.isEnabled = !isPunchingIn
-
-    val angle = (userProfile.exp * 360f) / nextExp.toFloat()
-    animateExpCircle(root, expCircleView, angle)
-}
-
-private fun bindProfilePager(
-    root: View,
-    activity: FragmentActivity?,
-    viewPager: ViewPager?,
-    tabLayout: TabLayout?,
-    userProfile: UserProfileObject?
-) {
-    if (activity == null || viewPager == null || tabLayout == null) return
-
-    val profileKey = userProfile?.userId ?: "__profile_no_user__"
-    val oldProfileKey = root.getTag(R.id.viewPager_profile) as? String
-    if (oldProfileKey == profileKey && viewPager.adapter != null) return
-
-    clearProfilePagerFragments(activity.supportFragmentManager)
-    viewPager.adapter = null
-    val userBasicObject = userProfile?.let { UserBasicObject(it) }
-    viewPager.adapter = ProfileFragmentPagerAdapter(activity.supportFragmentManager, userBasicObject)
-    viewPager.offscreenPageLimit = 2
-    tabLayout.setupWithViewPager(viewPager)
-    tabLayout.getTabAt(0)?.setText(R.string.comic)
-    if (userBasicObject != null) {
-        tabLayout.getTabAt(1)?.setText(R.string.comment)
-    }
-    root.setTag(R.id.viewPager_profile, profileKey)
-}
-
-private fun displayName(userProfile: UserProfileObject): String {
-    val raw = userProfile.name.orEmpty().trim()
-    if (raw.isEmpty()) return ""
-    // Guard against corrupted profile payload that occasionally injects debug text.
-    if (raw.contains("SocketAddress", ignoreCase = true)) {
-        return userProfile.title.orEmpty().ifEmpty { "" }
-    }
-    return raw
-}
-
-private fun clearProfilePagerFragments(fragmentManager: FragmentManager?) {
-    if (fragmentManager == null || fragmentManager.isStateSaved) return
-    try {
-        val transaction = fragmentManager.beginTransaction()
-        var changed = false
-        for (index in 0..2) {
-            val tag = "android:switcher:${R.id.viewPager_profile}:$index"
-            val fragment = fragmentManager.findFragmentByTag(tag)
-            if (fragment != null) {
-                transaction.remove(fragment)
-                changed = true
-            }
-        }
-        if (changed) {
-            transaction.commitNowAllowingStateLoss()
-        }
-    } catch (_: Exception) {
-    }
-}
-
-private fun loadAvatar(
-    root: View,
-    avatarPath: String,
-    avatarView: CircleImageView?,
-    avatarBlurView: ImageView?
-) {
-    Picasso.with(root.context).load(avatarPath).into(avatarView)
-    val blurTarget = object : Target {
-        override fun onBitmapLoaded(
-            bitmap: android.graphics.Bitmap?,
-            from: Picasso.LoadedFrom?
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (bitmap != null && avatarBlurView != null) {
-                avatarBlurView.setImageBitmap(g.a(bitmap, 0.5f, 5))
+            Box(
+                modifier = Modifier
+                    .size(112.dp)
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .clickable(onClick = onAvatarClick),
+            ) {
+                PicaRemoteImage(
+                    thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
+                    contentDescription = profile?.name,
+                    modifier = Modifier.fillMaxSize(),
+                )
+                if (!avatarPreviewUri.isNullOrBlank()) {
+                    PicaImageUrl(
+                        imageUrl = avatarPreviewUri,
+                        contentDescription = profile?.name,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+            Text(
+                text = displayName(profile),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = profile?.title.orEmpty().ifBlank { profile?.role.orEmpty() },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            PicaMetricRow(
+                metrics = listOf(
+                    "Level" to (profile?.level ?: 0).toString(),
+                    "EXP" to "${profile?.exp ?: 0}/${expForLevel((profile?.level ?: 0) + 1)}",
+                    "Role" to profile?.role.orEmpty().ifBlank { "-" },
+                ),
+            )
+            if (profile?.isPunched != true) {
+                Button(
+                    onClick = onPunchIn,
+                    enabled = !isPunchingIn && profile != null,
+                ) {
+                    Text(text = stringResource(R.string.profile_punch_in))
+                }
             }
         }
-
-        override fun onBitmapFailed(errorDrawable: android.graphics.drawable.Drawable?) {}
-
-        override fun onPrepareLoad(placeHolderDrawable: android.graphics.drawable.Drawable?) {}
     }
-    // Keep a strong reference to avoid Picasso target GC.
-    root.setTag(R.id.imageView_profile_avatar_blur, blurTarget)
-    Picasso.with(root.context).load(avatarPath).into(blurTarget)
 }
 
-private fun animateExpCircle(root: View, expCircleView: ExpCircleView?, targetAngle: Float) {
-    if (expCircleView == null) return
-
-    val lastAngle = root.getTag(R.id.expCircleView_profile) as? Float
-    if (lastAngle != null && kotlin.math.abs(lastAngle - targetAngle) < 0.1f) {
-        return
-    }
-
-    (root.getTag(R.id.textView_profile_level) as? ValueAnimator)?.cancel()
-
-    val animator = ValueAnimator.ofFloat(0f, targetAngle).apply {
-        duration = 1000L
-        addUpdateListener { animation ->
-            expCircleView.setAngle(animation.animatedValue as Float)
+@Composable
+private fun ProfileComicSection(
+    title: String,
+    total: Long,
+    comics: List<ComicListObject>,
+    loading: Boolean,
+    onMore: () -> Unit,
+    onComicClick: (String) -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PicaSectionHeader(
+                title = title,
+                supportingText = total.toString(),
+                actionLabel = stringResource(R.string.more),
+                onActionClick = onMore,
+            )
+            when {
+                loading && comics.isEmpty() -> PicaLoadingIndicator()
+                comics.isEmpty() -> PicaEmptyState(message = "No comics")
+                else -> {
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        comics.take(8).forEach { comic ->
+                            PicaComicListCard(
+                                title = comic.title.orEmpty(),
+                                subtitle = comic.author.orEmpty(),
+                                thumbnail = comic.thumb,
+                                likes = comic.likesCount,
+                                pages = comic.pagesCount,
+                                episodes = comic.episodeCount,
+                                categories = comic.categories.orEmpty(),
+                                coverWidth = 72.dp,
+                                onClick = {
+                                    val comicId = comic.comicId
+                                    if (!comicId.isNullOrBlank()) onComicClick(comicId)
+                                },
+                                modifier = Modifier.width(240.dp),
+                            )
+                        }
+                    }
+                }
+            }
         }
-        start()
     }
-    root.setTag(R.id.textView_profile_level, animator)
-    root.setTag(R.id.expCircleView_profile, targetAngle)
+}
+
+@Composable
+private fun ProfileCommentCard(
+    comment: CommentWithReplyObject,
+    profileUser: UserBasicObject?,
+    floor: Int,
+    onOpenTarget: () -> Unit,
+) {
+    val context = LocalContext.current
+    val name = profileUser?.name ?: comment.user?.name
+    val level = profileUser?.level ?: comment.user?.level ?: 0
+    val avatar = profileUser?.avatar ?: comment.user?.avatar
+    val targetTitle = comment.comicId?.title?.takeIf { it.isNotBlank() }
+        ?: comment.gameId?.title?.takeIf { it.isNotBlank() }
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PicaUserAvatar(
+                thumbnail = avatar,
+                name = name,
+                modifier = Modifier.size(42.dp),
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = name.orEmpty().ifBlank { "Anonymous" },
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "#${floor.coerceAtLeast(0)} · Lv.$level · ${g.B(context, comment.createdAt)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = comment.content.orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                if (!targetTitle.isNullOrBlank()) {
+                    TextButton(onClick = onOpenTarget) {
+                        Text(
+                            text = stringResource(R.string.comment_profile_view_content_prefix) +
+                                targetTitle +
+                                stringResource(R.string.comment_profile_view_content_suffix),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                Text(
+                    text = "赞好 ${comment.likesCount} · ${stringResource(R.string.comment_reply)} ${comment.childsCount}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+private fun displayName(profile: UserProfileObject?): String {
+    val raw = profile?.name.orEmpty().trim()
+    if (raw.contains("SocketAddress", ignoreCase = true)) {
+        return profile?.title.orEmpty().ifBlank { "Profile" }
+    }
+    return raw.ifBlank { "Profile" }
 }
 
 private fun expForLevel(level: Int): Int {
     val n = (level * 2) - 1
-    return ((n * n) - 1) * 25
+    return max(1, ((n * n) - 1) * 25)
+}
+
+private fun profileScreenPreviewUser(): UserProfileObject {
+    return UserProfileObject(
+        "user-1",
+        "knight@example.com",
+        "Miracle Knight",
+        "Knight",
+        "2000-01-01",
+        "bot",
+        "Compose profile preview",
+        "member",
+        null,
+        arrayListOf(),
+        "2026-04-25",
+        1280,
+        12,
+        false,
+        true,
+        ThumbnailObject("https://storage1.picacomic.com", "avatar.jpg", "avatar.jpg"),
+    )
 }
 
 @Preview(showBackground = true)

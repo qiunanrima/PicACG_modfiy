@@ -1,17 +1,30 @@
 package com.picacomic.fregata.compose.screens
 
-import android.view.LayoutInflater
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
@@ -31,15 +45,23 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.picacomic.fregata.R
-import com.picacomic.fregata.adapters.CommentRecyclerViewAdapter
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaImageUrl
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
+import com.picacomic.fregata.compose.components.PicaRemoteImage
 import com.picacomic.fregata.compose.viewmodels.CommentViewModel
+import com.picacomic.fregata.objects.CommentObject
+import com.picacomic.fregata.objects.CommentWithReplyObject
+import com.picacomic.fregata.objects.ThumbnailObject
+import com.picacomic.fregata.objects.UserBasicObject
+import com.picacomic.fregata.objects.UserProfileObject
+import com.picacomic.fregata.utils.g
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Button
@@ -53,6 +75,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +93,9 @@ fun CommentScreen(
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
     val focusManager = LocalFocusManager.current
+    val listState = rememberLazyListState()
     var inputText by rememberSaveable(comicId, gameId, commentId) { mutableStateOf("") }
+    var pendingAction by remember { mutableStateOf<CommentAction?>(null) }
     val previewState = if (inPreview) commentPreviewState(gameId != null) else null
 
     LaunchedEffect(comicId, gameId, commentId) {
@@ -103,8 +129,44 @@ fun CommentScreen(
         focusManager.clearFocus()
     }
 
+    if (!inPreview) {
+        val vm = screenViewModel
+        RememberListLoadMore(
+            state = listState,
+            enabled = vm?.commentItems?.isNotEmpty() == true && !vm.isLoading && vm.hasMore,
+        ) {
+            vm?.loadComments(comicId, gameId, commentId, page = vm.currentPage + 1)
+        }
+    }
+
     PicaComposeTheme {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+        pendingAction?.let { action ->
+            CommentActionDialog(
+                action = action,
+                onDismiss = { pendingAction = null },
+                onConfirm = {
+                    val vm = screenViewModel ?: return@CommentActionDialog
+                    when (action.kind) {
+                        CommentActionKind.Report -> {
+                            if (action.replyIndex >= 0) vm.j(action.rootIndex, action.replyIndex) else vm.V(action.rootIndex)
+                        }
+                        CommentActionKind.Hide -> {
+                            if (action.replyIndex >= 0) vm.i(action.rootIndex, action.replyIndex) else vm.S(action.rootIndex)
+                        }
+                        CommentActionKind.Dirty -> {
+                            if (action.replyIndex >= 0) {
+                                vm.toggleDirtyAvatarForReply(action.rootIndex, action.replyIndex)
+                            } else {
+                                vm.U(action.rootIndex)
+                            }
+                        }
+                        CommentActionKind.Top -> vm.T(action.rootIndex)
+                    }
+                    pendingAction = null
+                }
+            )
+        }
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -182,129 +244,465 @@ fun CommentScreen(
                         )
                     }
                 } else {
-                    AndroidView(
-                        factory = { context ->
-                            LayoutInflater.from(context)
-                                .inflate(R.layout.layout_compose_recycler_content, null, false)
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        update = { view ->
-                            val vm = screenViewModel ?: return@AndroidView
-                            val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView_compose_content)
-                            if (recyclerView.layoutManager == null) {
-                                recyclerView.layoutManager = LinearLayoutManager(view.context)
-                            }
-
-                            val displayItems = ArrayList(vm.commentItems)
-                            val replyStateKey = displayItems.joinToString("|") { item ->
-                                "${item.commentId}:${item.currentPage}:${item.totalPage}:${item.arrayList?.size ?: 0}:${item.isTop}:${item.isLiked}:${item.isHide}"
-                            }
-                            val dataKey =
-                                "${vm.currentPage}_${displayItems.size}_${vm.topCommentCount}_${vm.expandedCommentIndex}_$replyStateKey"
-                            val oldKey = recyclerView.getTag(R.id.recyclerView_comments) as? String
-                            if (recyclerView.adapter == null || oldKey != dataKey) {
-                                var adapterRef: CommentRecyclerViewAdapter? = null
-                                val callback = object : com.picacomic.fregata.a_pkg.e {
-                                    override fun A(i: Int) {
-                                        adapterRef?.A(i)
-                                    }
-
-                                    override fun C(i: Int) {
-                                        vm.selectComment(i)
-                                    }
-
-                                    override fun N(i: Int) {
-                                        vm.loadReplies(i, reset = false)
-                                    }
-
-                                    override fun O(i: Int) {
-                                        val current = displayItems.getOrNull(i) ?: return
-                                        val comic = current.comicId?.comicId
-                                        val game = current.gameId?.gameId
-                                        if (!comic.isNullOrEmpty()) {
-                                            onComicClick(comic)
-                                        } else if (!game.isNullOrEmpty()) {
-                                            onGameClick(game)
-                                        }
-                                    }
-
-                                    override fun P(i: Int) = Unit
-
-                                    override fun Q(i: Int) {
-                                        vm.toggleCommentLike(i)
-                                    }
-
-                                    override fun R(i: Int) = Unit
-                                    override fun S(i: Int) {
-                                        vm.hideComment(i)
-                                    }
-
-                                    override fun T(i: Int) {
-                                        vm.toggleTop(i)
-                                    }
-
-                                    override fun U(i: Int) {
-                                        vm.toggleDirtyAvatarForComment(i)
-                                    }
-
-                                    override fun V(i: Int) {
-                                        vm.reportComment(i)
-                                    }
-
-                                    override fun f(i: Int, i2: Int) {}
-
-                                    override fun g(i: Int, i2: Int) {
-                                        vm.toggleReplyLike(i, i2)
-                                    }
-
-                                    override fun h(i: Int, i2: Int) {}
-                                    override fun i(i: Int, i2: Int) {
-                                        vm.hideReply(i, i2)
-                                    }
-
-                                    override fun j(i: Int, i2: Int) {
-                                        vm.reportReply(i, i2)
-                                    }
+                    val vm = screenViewModel
+                    when {
+                        vm == null || (vm.commentItems.isEmpty() && vm.isLoading) -> PicaLoadingIndicator()
+                        vm.commentItems.isEmpty() -> PicaEmptyState(message = "No comments")
+                        else -> {
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                itemsIndexed(
+                                    items = vm.commentItems,
+                                    key = { index, item -> item.commentId ?: "comment_$index" },
+                                ) { index, item ->
+                                    CommentCard(
+                                        context = context,
+                                        item = item,
+                                        index = index,
+                                        floor = vm.displayFloorCount - index,
+                                        expanded = vm.expandedCommentIndex == index,
+                                        adminMode = vm.adminMode,
+                                        profileUser = vm.profileUser,
+                                        isProfileMode = vm.isProfileMode,
+                                        onClick = { vm.C(index) },
+                                        onOpenTarget = {
+                                            when (val target = vm.O(index)) {
+                                                is CommentViewModel.CommentTarget.Comic -> onComicClick(target.comicId)
+                                                is CommentViewModel.CommentTarget.Game -> onGameClick(target.gameId)
+                                                null -> Unit
+                                            }
+                                        },
+                                        onLike = { vm.Q(index) },
+                                        onHide = { pendingAction = CommentAction(CommentActionKind.Hide, index) },
+                                        onTop = { pendingAction = CommentAction(CommentActionKind.Top, index) },
+                                        onDirty = { pendingAction = CommentAction(CommentActionKind.Dirty, index) },
+                                        onReport = { pendingAction = CommentAction(CommentActionKind.Report, index) },
+                                        onLoadMoreReplies = { vm.N(index) },
+                                        onReplyLike = { replyIndex -> vm.g(index, replyIndex) },
+                                        onReplyHide = { replyIndex ->
+                                            pendingAction = CommentAction(CommentActionKind.Hide, index, replyIndex)
+                                        },
+                                        onReplyReport = { replyIndex ->
+                                            pendingAction = CommentAction(CommentActionKind.Report, index, replyIndex)
+                                        },
+                                        onReplyDirty = { replyIndex ->
+                                            pendingAction = CommentAction(CommentActionKind.Dirty, index, replyIndex)
+                                        },
+                                    )
                                 }
-                                val adapter = CommentRecyclerViewAdapter(
-                                    view.context,
-                                    vm.profileUser,
-                                    "",
-                                    displayItems,
-                                    callback
-                                )
-                                adapterRef = adapter
-                                adapter.B(vm.topCommentCount)
-                                adapter.z(vm.displayFloorCount)
-                                adapter.a(
-                                    vm.expandedCommentIndex,
-                                    displayItems.getOrNull(vm.expandedCommentIndex)?.arrayList,
-                                    displayItems.getOrNull(vm.expandedCommentIndex)?.let {
-                                        it.currentPage < it.totalPage
-                                    } == true
-                                )
-                                recyclerView.adapter = adapter
-                                recyclerView.setTag(R.id.recyclerView_comments, dataKey)
-                            }
-
-                            if (recyclerView.getTag(R.id.linearLayout_comment_page) != true) {
-                                recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                                        super.onScrollStateChanged(recyclerView, newState)
-                                        val lm = recyclerView.layoutManager as? LinearLayoutManager ?: return
-                                        if (lm.findLastVisibleItemPosition() == lm.itemCount - 1 && vm.hasMore && !vm.isLoading) {
-                                            vm.loadComments(comicId, gameId, commentId, page = vm.currentPage + 1)
-                                        }
-                                    }
-                                })
-                                recyclerView.setTag(R.id.linearLayout_comment_page, true)
+                                if (vm.isLoading) {
+                                    item(key = "loading") { ListLoadingFooter() }
+                                }
                             }
                         }
-                    )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun CommentCard(
+    context: android.content.Context,
+    item: CommentWithReplyObject,
+    index: Int,
+    floor: Int,
+    expanded: Boolean,
+    adminMode: Boolean,
+    profileUser: UserBasicObject?,
+    isProfileMode: Boolean,
+    onClick: () -> Unit,
+    onOpenTarget: () -> Unit,
+    onLike: () -> Unit,
+    onHide: () -> Unit,
+    onTop: () -> Unit,
+    onDirty: () -> Unit,
+    onReport: () -> Unit,
+    onLoadMoreReplies: () -> Unit,
+    onReplyLike: (Int) -> Unit,
+    onReplyHide: (Int) -> Unit,
+    onReplyReport: (Int) -> Unit,
+    onReplyDirty: (Int) -> Unit,
+) {
+    val user = displayUser(item, profileUser, isProfileMode)
+    val targetTitle = item.comicId?.title?.takeIf { it.isNotBlank() }
+        ?: item.gameId?.title?.takeIf { it.isNotBlank() }
+    val profileNoReply = if (item.comicId != null) {
+        stringResource(R.string.comment_profile_no_reply_comic)
+    } else {
+        stringResource(R.string.comment_profile_no_reply_game)
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = if (item.isTop) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                CommentAvatar(
+                    thumbnail = user.avatar,
+                    name = user.name,
+                    character = user.character,
+                    modifier = Modifier.size(42.dp),
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = user.name.ifBlank { "Anonymous" },
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        Text(
+                            text = "#${floor.coerceAtLeast(0)}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (user.title.isNotBlank()) {
+                            Text(
+                                text = user.title,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        Text(
+                            text = "Lv.${user.level}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = g.B(context, item.createdAt),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                IconButton(onClick = onReport, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.comment_option_title),
+                    )
+                }
+            }
+            if (item.isTop || index < 0) {
+                AssistChip(
+                    onClick = {},
+                    label = {
+                        Text(
+                            text = stringResource(R.string.comment_top_comment_title_prefix) +
+                                floor.coerceAtLeast(0) +
+                                stringResource(R.string.comment_top_comment_title_suffix),
+                        )
+                    },
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+                )
+            }
+            if (isProfileMode && !targetTitle.isNullOrBlank()) {
+                TextButton(onClick = onOpenTarget) {
+                    Text(
+                        text = stringResource(R.string.comment_profile_view_content_prefix) +
+                            targetTitle +
+                            stringResource(R.string.comment_profile_view_content_suffix),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            Text(
+                text = item.content.orEmpty(),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TextButton(onClick = onLike) {
+                    Text(if (item.isLiked) "已赞 ${item.likesCount}" else "赞好 ${item.likesCount}")
+                }
+                TextButton(onClick = onClick) {
+                    Text("${stringResource(R.string.comment_reply)} ${item.childsCount}")
+                }
+                if (!isProfileMode && (item.comicId != null || item.gameId != null)) {
+                    TextButton(onClick = onOpenTarget) {
+                        Text(stringResource(R.string.more))
+                    }
+                }
+                TextButton(onClick = onReport) {
+                    Text(stringResource(R.string.comment_option_title))
+                }
+                if (adminMode) {
+                    TextButton(onClick = onDirty) { Text(stringResource(R.string.comment_tool_dirty)) }
+                    TextButton(onClick = onTop) { Text(stringResource(R.string.comment_tool_top)) }
+                    if (!item.isHide) {
+                        TextButton(onClick = onHide) { Text(stringResource(R.string.comment_tool_hide)) }
+                    }
+                }
+            }
+            if (expanded && item.arrayList?.isNotEmpty() == true) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                item.arrayList.forEachIndexed { index, reply ->
+                    ReplyRow(
+                        context = context,
+                        reply = reply,
+                        floor = item.childsCount - index,
+                        adminMode = adminMode,
+                        onLike = { onReplyLike(index) },
+                        onReport = { onReplyReport(index) },
+                        onHide = { onReplyHide(index) },
+                        onDirty = { onReplyDirty(index) },
+                    )
+                }
+                if (item.currentPage < item.totalPage) {
+                    TextButton(onClick = onLoadMoreReplies) {
+                        Text(stringResource(R.string.comment_view_more_reply))
+                    }
+                }
+            } else if (expanded && item.childsCount > 0) {
+                TextButton(onClick = onLoadMoreReplies) {
+                    Text(stringResource(R.string.comment_view_more_reply))
+                }
+            } else if (expanded && item.childsCount == 0) {
+                Text(
+                    text = if (isProfileMode) profileNoReply else stringResource(R.string.comment_no_reply),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 4.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReplyRow(
+    context: android.content.Context,
+    reply: CommentObject,
+    floor: Int,
+    adminMode: Boolean,
+    onLike: () -> Unit,
+    onReport: () -> Unit,
+    onHide: () -> Unit,
+    onDirty: () -> Unit,
+) {
+    val user = displayUser(reply.user)
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        shape = MaterialTheme.shapes.small,
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CommentAvatar(
+                    thumbnail = user.avatar,
+                    name = user.name,
+                    character = user.character,
+                    modifier = Modifier.size(34.dp),
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = user.name.ifBlank { "Anonymous" },
+                            style = MaterialTheme.typography.labelLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        Text(
+                            text = "#${floor.coerceAtLeast(0)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (user.title.isNotBlank()) {
+                            Text(
+                                text = user.title,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        Text(
+                            text = "Lv.${user.level}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = g.B(context, reply.createdAt),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                IconButton(onClick = onReport, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.comment_option_title),
+                    )
+                }
+            }
+            Text(text = reply.content.orEmpty(), style = MaterialTheme.typography.bodySmall)
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TextButton(onClick = onLike) {
+                    Text(if (reply.isLiked) "已赞 ${reply.likesCount}" else "赞好 ${reply.likesCount}")
+                }
+                TextButton(onClick = onReport) {
+                    Text(stringResource(R.string.comment_option_title))
+                }
+                if (adminMode) {
+                    TextButton(onClick = onDirty) { Text(stringResource(R.string.comment_tool_dirty)) }
+                    if (!reply.isHide) {
+                        TextButton(onClick = onHide) { Text(stringResource(R.string.comment_tool_hide)) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CommentAvatar(
+    thumbnail: ThumbnailObject?,
+    name: String,
+    character: String?,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        PicaRemoteImage(
+            thumbnail = thumbnail,
+            contentDescription = name,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(MaterialTheme.shapes.small),
+            fallbackIcon = Icons.Filled.Person,
+        )
+        if (!character.isNullOrBlank()) {
+            PicaImageUrl(
+                imageUrl = character,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+}
+
+private data class CommentDisplayUser(
+    val name: String,
+    val title: String,
+    val level: Int,
+    val avatar: ThumbnailObject?,
+    val character: String?,
+)
+
+private fun displayUser(
+    item: CommentWithReplyObject,
+    profileUser: UserBasicObject?,
+    profileMode: Boolean,
+): CommentDisplayUser {
+    if (profileMode && profileUser != null) {
+        return CommentDisplayUser(
+            name = profileUser.name.orEmpty(),
+            title = "",
+            level = profileUser.level,
+            avatar = profileUser.avatar,
+            character = profileUser.character,
+        )
+    }
+    return displayUser(item.user)
+}
+
+private fun displayUser(user: UserProfileObject?): CommentDisplayUser {
+    return CommentDisplayUser(
+        name = user?.name.orEmpty(),
+        title = user?.title.orEmpty(),
+        level = user?.level ?: 0,
+        avatar = user?.avatar,
+        character = user?.character,
+    )
+}
+
+private enum class CommentActionKind {
+    Report,
+    Hide,
+    Dirty,
+    Top,
+}
+
+private data class CommentAction(
+    val kind: CommentActionKind,
+    val rootIndex: Int,
+    val replyIndex: Int = -1,
+)
+
+@Composable
+private fun CommentActionDialog(
+    action: CommentAction,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    val title = when (action.kind) {
+        CommentActionKind.Report -> stringResource(R.string.alert_report_comment_title)
+        CommentActionKind.Hide -> stringResource(R.string.alert_hide_comment_title)
+        CommentActionKind.Dirty -> stringResource(R.string.comment_tool_dirty)
+        CommentActionKind.Top -> stringResource(R.string.comment_tool_top)
+    }
+    val message = when (action.kind) {
+        CommentActionKind.Report -> stringResource(R.string.alert_report_comment)
+        CommentActionKind.Hide -> stringResource(R.string.alert_hide_comment)
+        CommentActionKind.Dirty -> stringResource(R.string.comment_tool_dirty)
+        CommentActionKind.Top -> stringResource(R.string.comment_tool_top)
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = title) },
+        text = { Text(text = message) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = stringResource(R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        },
+    )
 }
 
 private data class CommentPreviewState(

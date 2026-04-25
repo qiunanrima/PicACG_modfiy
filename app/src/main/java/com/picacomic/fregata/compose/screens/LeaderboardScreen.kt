@@ -1,7 +1,5 @@
 package com.picacomic.fregata.compose.screens
 
-import android.view.LayoutInflater
-import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
@@ -32,20 +31,18 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
+import com.picacomic.fregata.compose.components.PicaRankBadge
+import com.picacomic.fregata.compose.components.PicaRemoteImage
+import com.picacomic.fregata.compose.components.PicaTwoLineCard
+import com.picacomic.fregata.compose.components.PicaUserAvatar
 import com.picacomic.fregata.compose.viewmodels.LeaderboardViewModel
-import com.picacomic.fregata.databinding.ItemLeaderboardKnightOrderRecyclerViewCellBinding
-import com.picacomic.fregata.databinding.ItemLeaderboardPopularOrderRecyclerViewCellBinding
 import com.picacomic.fregata.objects.LeaderboardComicListObject
 import com.picacomic.fregata.objects.LeaderboardKnightObject
 import com.picacomic.fregata.objects.ThumbnailObject
-import com.picacomic.fregata.utils.PicassoTransformations
-import com.picacomic.fregata.utils.g
-import com.squareup.picasso.Picasso
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -299,44 +296,27 @@ private fun LeaderboardPopularItem(
     time: String,
     onClick: () -> Unit,
 ) {
-    val layoutRes = when (index) {
-        0 -> R.layout.item_leaderboard_popular_1st_recycler_view_cell
-        1 -> R.layout.item_leaderboard_popular_2nd_recycler_view_cell
-        2 -> R.layout.item_leaderboard_popular_3rd_recycler_view_cell
-        else -> R.layout.item_leaderboard_popular_order_recycler_view_cell
+    val countLabel = when (time) {
+        "D7" -> stringResource(R.string.leaderboard_view_count_title_7days)
+        "D30" -> stringResource(R.string.leaderboard_view_count_title_30days)
+        else -> stringResource(R.string.leaderboard_view_count_title_24hr)
     }
-
-    AndroidView(
-        factory = { context ->
-            LayoutInflater.from(context).inflate(layoutRes, null, false)
+    PicaTwoLineCard(
+        title = item.title.orEmpty(),
+        body = item.author.orEmpty(),
+        supporting = "${item.categories?.joinToString(" / ").orEmpty()} · $countLabel ${item.leaderboardCount}",
+        onClick = onClick,
+        leading = {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                PicaRankBadge(rank = index + 1)
+                PicaRemoteImage(
+                    thumbnail = item.thumb,
+                    contentDescription = item.title,
+                    modifier = Modifier.size(64.dp),
+                )
+            }
         },
         modifier = Modifier.fillMaxWidth(),
-        update = { view ->
-            val binding = ItemLeaderboardPopularOrderRecyclerViewCellBinding.bind(view)
-            binding.root.setOnClickListener { onClick() }
-            binding.textViewLeaderboardPopularOrderRecyclerViewCellOrder.text = (index + 1).toString()
-            binding.textViewLeaderboardPopularOrderRecyclerViewCellName.text = item.title.orEmpty()
-            binding.textViewLeaderboardPopularOrderRecyclerViewCellAuthor.text = item.author.orEmpty()
-            binding.textViewLeaderboardPopularOrderRecyclerViewCellCategory.text =
-                item.categories?.toString().orEmpty()
-            binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCount.text =
-                item.leaderboardCount.toString()
-            when (time) {
-                "D7" -> binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCountTitle
-                    .setText(R.string.leaderboard_view_count_title_7days)
-
-                "D30" -> binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCountTitle
-                    .setText(R.string.leaderboard_view_count_title_30days)
-
-                else -> binding.textViewLeaderboardPopularOrderRecyclerViewCellViewCountTitle
-                    .setText(R.string.leaderboard_view_count_title_24hr)
-            }
-            Picasso.with(view.context)
-                .load(g.b(item.thumb))
-                .transform(PicassoTransformations.CARD_COVER)
-                .placeholder(R.drawable.placeholder_avatar_2)
-                .into(binding.imageViewLeaderboardPopularOrderRecyclerViewCellImage)
-        }
     )
 }
 
@@ -346,41 +326,22 @@ private fun LeaderboardKnightItem(
     index: Int,
     onClick: () -> Unit,
 ) {
-    val layoutRes = when (index) {
-        0 -> R.layout.item_leaderboard_knight_1st_recycler_view_cell
-        1 -> R.layout.item_leaderboard_knight_2nd_recycler_view_cell
-        2 -> R.layout.item_leaderboard_knight_3rd_recycler_view_cell
-        else -> R.layout.item_leaderboard_knight_order_recycler_view_cell
-    }
-
-    AndroidView(
-        factory = { context ->
-            LayoutInflater.from(context).inflate(layoutRes, null, false)
+    PicaTwoLineCard(
+        title = item.name.orEmpty(),
+        body = "Lv.${item.level} · ${item.exp} EXP",
+        supporting = "${item.comicsUploaded} comics",
+        onClick = onClick,
+        leading = {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                PicaRankBadge(rank = index + 1)
+                PicaUserAvatar(
+                    thumbnail = item.avatar,
+                    name = item.name,
+                    modifier = Modifier.size(54.dp),
+                )
+            }
         },
         modifier = Modifier.fillMaxWidth(),
-        update = { view ->
-            val binding = ItemLeaderboardKnightOrderRecyclerViewCellBinding.bind(view)
-            binding.root.setOnClickListener { onClick() }
-            binding.textViewLeaderboardKnightOrderRecyclerViewCellOrder.text = (index + 1).toString()
-            binding.textViewLeaderboardKnightOrderRecyclerViewCellLevel.text = item.level.toString()
-            binding.textViewLeaderboardKnightOrderRecyclerViewCellName.text = item.name.orEmpty()
-            binding.textViewLeaderboardKnightOrderRecyclerViewCellComic.text =
-                item.comicsUploaded.toString()
-            if (!item.character.isNullOrBlank()) {
-                Picasso.with(view.context)
-                    .load(item.character)
-                    .into(binding.imageViewLeaderboardKnightOrderRecyclerViewCellUserThumbVerified)
-                binding.imageViewLeaderboardKnightOrderRecyclerViewCellUserThumbVerified.visibility =
-                    View.VISIBLE
-            } else {
-                binding.imageViewLeaderboardKnightOrderRecyclerViewCellUserThumbVerified.visibility =
-                    View.GONE
-            }
-            Picasso.with(view.context)
-                .load(g.b(item.avatar))
-                .placeholder(R.drawable.placeholder_avatar_2)
-                .into(binding.imageViewLeaderboardKnightOrderRecyclerViewCellAvatar)
-        }
     )
 }
 

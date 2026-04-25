@@ -82,8 +82,14 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     var adminMode by mutableStateOf(false)
         private set
 
+    var adminToolsIndex by mutableIntStateOf(-1)
+        private set
+
     var profileUser by mutableStateOf<UserBasicObject?>(null)
         private set
+
+    val isProfileMode: Boolean
+        get() = mode == MODE_PROFILE
 
     var errorEvent by mutableIntStateOf(0)
         private set
@@ -206,9 +212,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun cancelReplyMode() {
-        replyMode = false
-        replyingToCommentId = null
-        replyingToIndex = -1
+        D(false)
     }
 
     fun selectComment(index: Int) {
@@ -219,7 +223,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
             return
         }
 
-        replyMode = true
+        D(true)
         replyingToCommentId = item.commentId
         replyingToIndex = index
         expandedCommentIndex = index
@@ -334,6 +338,138 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     fun toggleTop(index: Int) {
         val item = commentItems.getOrNull(index) ?: return
         val commentId = item.commentId ?: return
+        ac(commentId)
+    }
+
+    fun toggleDirtyAvatarForComment(index: Int) {
+        val userId = commentItems.getOrNull(index)?.user?.userId ?: return
+        ab(userId)
+    }
+
+    fun toggleDirtyAvatarForReply(rootIndex: Int, replyIndex: Int) {
+        val userId = commentItems.getOrNull(rootIndex)?.arrayList?.getOrNull(replyIndex)?.user?.userId ?: return
+        ab(userId)
+    }
+
+    fun C(reset: Boolean) {
+        loadRootComments(reset)
+    }
+
+    fun C(index: Int) {
+        selectComment(index)
+    }
+
+    fun D(enabled: Boolean) {
+        replyMode = enabled
+        if (!enabled) {
+            replyingToCommentId = null
+            replyingToIndex = -1
+        }
+    }
+
+    fun N(index: Int) {
+        val item = commentItems.getOrNull(index) ?: return
+        if (item.currentPage < item.totalPage) {
+            a(item.commentId.orEmpty(), index, false)
+        }
+    }
+
+    fun O(index: Int): CommentTarget? {
+        val item = commentItems.getOrNull(index) ?: return null
+        item.comicId?.comicId?.takeIf { it.isNotBlank() }?.let {
+            return CommentTarget.Comic(it)
+        }
+        item.gameId?.gameId?.takeIf { it.isNotBlank() }?.let {
+            return CommentTarget.Game(it)
+        }
+        return null
+    }
+
+    fun P(index: Int): UserProfileObject? = commentItems.getOrNull(index)?.user
+
+    fun f(rootIndex: Int, replyIndex: Int): UserProfileObject? =
+        commentItems.getOrNull(rootIndex)?.arrayList?.getOrNull(replyIndex)?.user
+
+    fun Q(index: Int) {
+        toggleCommentLike(index)
+    }
+
+    fun g(rootIndex: Int, replyIndex: Int) {
+        toggleReplyLike(rootIndex, replyIndex)
+    }
+
+    fun R(index: Int): UserProfileObject? = P(index)
+
+    fun h(rootIndex: Int, replyIndex: Int): UserProfileObject? = f(rootIndex, replyIndex)
+
+    fun S(index: Int) {
+        hideComment(index)
+    }
+
+    fun i(rootIndex: Int, replyIndex: Int) {
+        hideReply(rootIndex, replyIndex)
+    }
+
+    fun A(index: Int) {
+        adminToolsIndex = if (adminToolsIndex == index) -1 else index
+    }
+
+    fun T(index: Int) {
+        val commentId = commentItems.getOrNull(index)?.commentId ?: return
+        ac(commentId)
+    }
+
+    fun U(index: Int) {
+        val userId = commentItems.getOrNull(index)?.user?.userId ?: return
+        ab(userId)
+    }
+
+    fun V(index: Int) {
+        k(index, -1)
+    }
+
+    fun j(rootIndex: Int, replyIndex: Int) {
+        k(rootIndex, replyIndex)
+    }
+
+    fun k(rootIndex: Int, replyIndex: Int) {
+        if (replyIndex >= 0) {
+            reportReply(rootIndex, replyIndex)
+        } else {
+            reportComment(rootIndex)
+        }
+    }
+
+    fun db(content: String) {
+        postRootComment(content.trim())
+    }
+
+    fun dc(content: String) {
+        postReply(content.trim())
+    }
+
+    fun a(commentId: String, index: Int, reset: Boolean) {
+        if (commentId.isBlank()) return
+        loadReplies(index, reset)
+    }
+
+    fun aa(commentId: String) {
+        sendLikeAction(commentId)
+    }
+
+    fun a(commentId: String, rootIndex: Int, replyIndex: Int) {
+        performHide(commentId, rootIndex, replyIndex)
+    }
+
+    fun b(commentId: String, rootIndex: Int, replyIndex: Int) {
+        performReport(commentId, rootIndex, replyIndex)
+    }
+
+    fun ab(userId: String) {
+        toggleDirtyAvatar(userId)
+    }
+
+    fun ac(commentId: String) {
         val context = getApplication<Application>()
         val api = d(context).dO()
         val auth = e.z(context)
@@ -347,9 +483,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
             ) {
                 if (call.isCanceled) return
                 if (response.code() == 200) {
-                    updateRootItem(index) { root ->
-                        root.isTop = response.body()?.data?.isTop ?: root.isTop
-                    }
+                    b(commentId, response.body()?.data?.isTop == true)
                     emitMessageText("修改置頂成功！更新介面需重新進入。")
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
@@ -363,14 +497,12 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
         })
     }
 
-    fun toggleDirtyAvatarForComment(index: Int) {
-        val userId = commentItems.getOrNull(index)?.user?.userId ?: return
-        toggleDirtyAvatar(userId)
+    fun a(userId: String, dirty: Boolean) {
+        applyDirtyState(userId, dirty)
     }
 
-    fun toggleDirtyAvatarForReply(rootIndex: Int, replyIndex: Int) {
-        val userId = commentItems.getOrNull(rootIndex)?.arrayList?.getOrNull(replyIndex)?.user?.userId ?: return
-        toggleDirtyAvatar(userId)
+    fun b(commentId: String, top: Boolean) {
+        applyTopState(commentId, top)
     }
 
     private fun loadRootComments(reset: Boolean) {
@@ -602,8 +734,17 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
             }
         }
 
+        aa(targetId)
+    }
+
+    private fun sendLikeAction(commentId: String) {
+        if (commentId.isBlank()) return
+        val context = getApplication<Application>()
+        val api = d(context).dO()
+        val auth = e.z(context)
+
         likeCall?.cancel()
-        likeCall = api.v(auth, targetId)
+        likeCall = api.v(auth, commentId)
         likeCall?.enqueue(object : Callback<GeneralResponse<ActionResponse>> {
             override fun onResponse(
                 call: Call<GeneralResponse<ActionResponse>>,
@@ -753,6 +894,16 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
         commentItems = updated
     }
 
+    private fun applyTopState(targetCommentId: String, isTop: Boolean) {
+        val updated = commentItems.toMutableList()
+        updated.forEach { root ->
+            if (root.commentId == targetCommentId) {
+                root.isTop = isTop
+            }
+        }
+        commentItems = updated
+    }
+
     private fun updateRootItem(index: Int, block: (CommentWithReplyObject) -> Unit) {
         val updated = commentItems.toMutableList()
         val item = updated.getOrNull(index) ?: return
@@ -814,6 +965,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
         isLoading = false
         isPosting = false
         expandedCommentIndex = -1
+        adminToolsIndex = -1
         cancelReplyMode()
     }
 
@@ -859,5 +1011,10 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
         topCall?.cancel()
         dirtyCall?.cancel()
         super.onCleared()
+    }
+
+    sealed class CommentTarget {
+        data class Comic(val comicId: String) : CommentTarget()
+        data class Game(val gameId: String) : CommentTarget()
     }
 }

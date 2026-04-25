@@ -55,7 +55,7 @@ public class ComicListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerV
             case 1:
                 return new ComicListEmptyHolder(this.mLayoutInflater.inflate(R.layout.item_comic_list_empty_recycler_view_cell, viewGroup, false));
             case 2:
-                //return new AdvertisementListViewHolder(this.mLayoutInflater.inflate(R.layout.item_advertisement_list_cell, viewGroup, false));
+                return new AdvertisementListViewHolder(this.mLayoutInflater.inflate(R.layout.item_advertisement_list_cell, viewGroup, false));
             default:
                 return new ComicListViewHolder(this.context, this.mLayoutInflater.inflate(R.layout.item_comic_list_recycler_view_cell, viewGroup, false), this.jq);
         }

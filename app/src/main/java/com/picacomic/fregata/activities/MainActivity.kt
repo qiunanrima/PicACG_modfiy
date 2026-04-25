@@ -163,6 +163,7 @@ class MainActivity : BaseActivity() {
 
         PicaComposeTheme {
             Scaffold(
+                contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                 bottomBar = {
                     if (showBottomBar) {
                         NavigationBar(
@@ -319,7 +320,18 @@ class MainActivity : BaseActivity() {
                             })
                         }
                         composable(Screen.Profile.route) {
-                            ProfileScreen(onEdit = { navController.navigate(Screen.ProfileEdit.route) })
+                            ProfileScreen(
+                                onEdit = { navController.navigate(Screen.ProfileEdit.route) },
+                                onComicClick = { id ->
+                                    navController.navigate(Screen.createComicDetailRoute(id))
+                                },
+                                onGameClick = { id ->
+                                    navController.navigate(Screen.createGameDetailRoute(id))
+                                },
+                                onComicListClick = { category ->
+                                    navController.navigate(Screen.createComicListRoute(category = category))
+                                }
+                            )
                         }
                         composable(Screen.Settings.route) {
                             val settingsViewModel: com.picacomic.fregata.compose.viewmodels.SettingsViewModel =
