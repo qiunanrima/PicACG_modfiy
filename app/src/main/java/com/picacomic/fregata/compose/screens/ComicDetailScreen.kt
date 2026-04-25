@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -405,7 +406,7 @@ private fun ComicDetailContent(
                         onClick = { if (canComment) onCommentClick(comicId) },
                     ),
                     PicaActionItem(
-                        icon = Icons.Filled.Person,
+                        icon = Icons.Filled.Favorite,
                         contentDescription = "likes",
                         count = (detail?.likesCount ?: 0).toString(),
                         enabled = detail != null && !isActionLoading,

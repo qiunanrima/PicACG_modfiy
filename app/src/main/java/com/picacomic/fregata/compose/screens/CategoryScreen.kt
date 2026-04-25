@@ -1,6 +1,7 @@
 package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,21 +12,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.NewReleases
-import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material.icons.filled.VolunteerActivism
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -41,10 +47,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -55,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaInfoChip
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRemoteImage
 import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
 import com.picacomic.fregata.objects.CategoryObject
@@ -79,6 +87,7 @@ fun CategoryScreen(
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
     val previewState = if (inPreview) categoryPreviewState() else null
+    val gridState = rememberLazyGridState()
 
     LaunchedEffect(screenViewModel?.errorEvent) {
         val vm = screenViewModel ?: return@LaunchedEffect
@@ -127,6 +136,19 @@ fun CategoryScreen(
                                         if (submitted.isNotEmpty()) onSearch(submitted)
                                     },
                                 ),
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            val submitted = query.trim()
+                                            if (submitted.isNotEmpty()) onSearch(submitted)
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Search,
+                                            contentDescription = stringResource(R.string.action_search),
+                                        )
+                                    }
+                                },
                                 modifier = Modifier.weight(1f),
                             )
                             Button(
@@ -146,36 +168,60 @@ fun CategoryScreen(
             val categories = if (inPreview) previewState.orEmpty() else screenViewModel?.categories.orEmpty()
             val keywords = if (inPreview) categoryKeywordPreviewItems() else screenViewModel?.keywords.orEmpty()
             val defaultActions = listOf(
-                CategoryAction(stringResource(R.string.category_title_leaderboard), Icons.Filled.VolunteerActivism, onLeaderboardClick),
-                CategoryAction(stringResource(R.string.category_title_game), Icons.Filled.SportsEsports, onGameClick),
-                CategoryAction(stringResource(R.string.category_title_love_pica), Icons.Filled.VolunteerActivism, onLovePicaClick),
-                CategoryAction(stringResource(R.string.category_title_pica_forum), Icons.Filled.Forum, onForumClick),
-                CategoryAction(stringResource(R.string.category_title_latest), Icons.Filled.NewReleases, onLatestClick),
-                CategoryAction(stringResource(R.string.category_title_random), Icons.Filled.Shuffle, onRandomClick),
+                CategoryAction(stringResource(R.string.category_title_support), R.drawable.cat_support, onLovePicaClick),
+                CategoryAction(stringResource(R.string.category_title_leaderboard), R.drawable.cat_leaderboard, onLeaderboardClick),
+                CategoryAction(stringResource(R.string.category_title_game), R.drawable.cat_game, onGameClick),
+                CategoryAction(stringResource(R.string.category_title_love_pica), R.drawable.cat_love_pica, onLovePicaClick),
+                CategoryAction(stringResource(R.string.category_title_pica_forum), R.drawable.cat_forum, onForumClick),
+                CategoryAction(stringResource(R.string.category_title_latest), R.drawable.cat_latest, onLatestClick),
+                CategoryAction(stringResource(R.string.category_title_random), R.drawable.cat_random, onRandomClick),
             )
 
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 156.dp),
+                state = gridState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                item(key = "default_title", span = { GridItemSpan(maxLineSpan) }) {
+                    Text(
+                        text = stringResource(R.string.title_category),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+
+                item(key = "default_actions", span = { GridItemSpan(maxLineSpan) }) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        defaultActions.forEach { item ->
+                            CategoryActionCard(item = item)
+                        }
+                    }
+                }
 
                 if (keywords.isNotEmpty()) {
-                    item(key = "keywords_title") {
+                    item(key = "keywords_title", span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             text = stringResource(R.string.category_keywords_list_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
-                    item(key = "keywords") {
+                    item(key = "keywords", span = { GridItemSpan(maxLineSpan) }) {
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            keywords.forEach { keyword ->
+                            keywords.take(18).forEach { keyword ->
                                 PicaInfoChip(
                                     text = keyword,
                                     onClick = { onSearch(keyword) },
@@ -185,28 +231,7 @@ fun CategoryScreen(
                     }
                 }
 
-                item(key = "default_actions") {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        defaultActions.chunked(3).forEach { rowItems ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                rowItems.forEach { item ->
-                                    CategoryActionCard(
-                                        item = item,
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                }
-                                repeat(3 - rowItems.size) {
-                                    Box(modifier = Modifier.weight(1f))
-                                }
-                            }
-                        }
-                    }
-                }
-
-                item(key = "category_title") {
+                item(key = "category_title", span = { GridItemSpan(maxLineSpan) }) {
                     Text(
                         text = stringResource(R.string.category_list_title),
                         style = MaterialTheme.typography.titleMedium,
@@ -214,35 +239,29 @@ fun CategoryScreen(
                     )
                 }
 
-                categories.chunked(2).forEachIndexed { rowIndex, rowCategories ->
-                    item(key = "category_row_$rowIndex") {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        ) {
-                            rowCategories.forEach { category ->
-                                RemoteCategoryCard(
-                                    category = category,
-                                    onClick = {
-                                        val title = category.title.orEmpty()
-                                        val link = category.link
-                                        if (category.isWeb && !link.isNullOrBlank()) {
-                                            onWebCategoryClick(title, link)
-                                        } else if (title.isNotBlank()) {
-                                            onCategoryClick(title)
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                            repeat(2 - rowCategories.size) {
-                                Box(modifier = Modifier.weight(1f))
-                            }
-                        }
+                if (!inPreview && screenViewModel?.isLoading == true && categories.isEmpty()) {
+                    item(key = "loading", span = { GridItemSpan(maxLineSpan) }) {
+                        PicaLoadingIndicator(modifier = Modifier.fillMaxWidth().height(160.dp))
                     }
                 }
 
-
+                items(
+                    items = categories,
+                    key = { it.title.orEmpty() },
+                ) { category ->
+                    RemoteCategoryCard(
+                        category = category,
+                        onClick = {
+                            val title = category.title.orEmpty()
+                            val link = category.link
+                            if (category.isWeb && !link.isNullOrBlank()) {
+                                onWebCategoryClick(title, link)
+                            } else if (title.isNotBlank()) {
+                                onCategoryClick(title)
+                            }
+                        }
+                    )
+                }
             }
         }
     }
@@ -250,7 +269,7 @@ fun CategoryScreen(
 
 private data class CategoryAction(
     val title: String,
-    val icon: ImageVector,
+    val iconRes: Int,
     val onClick: () -> Unit,
 )
 
@@ -261,6 +280,7 @@ private fun CategoryActionCard(
 ) {
     Card(
         modifier = modifier
+            .width(112.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = item.onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -268,18 +288,19 @@ private fun CategoryActionCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f)
-                .padding(8.dp),
+                .height(108.dp)
+                .padding(10.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Icon(
-                    imageVector = item.icon,
+                    painter = painterResource(item.iconRes),
                     contentDescription = item.title,
                     tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(42.dp),
                 )
                 Text(
                     text = item.title,
@@ -314,8 +335,9 @@ private fun RemoteCategoryCard(
                 contentDescription = category.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
+                    .aspectRatio(1.22f)
                     .clip(MaterialTheme.shapes.small),
+                contentScale = ContentScale.Crop,
             )
             Text(
                 text = category.title.orEmpty(),
