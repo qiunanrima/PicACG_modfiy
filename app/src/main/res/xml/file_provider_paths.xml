@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- 用于相机拍照临时文件（存放在 app-specific 外部缓存目录） -->
+    <external-cache-path name="camera_photos" path="." />
+    <!-- 用于图片裁剪临时文件（存放在 app 内部缓存目录） -->
+    <cache-path name="crop_images" path="." />
+    <!-- 兼容 AgentWeb 下载缓存 -->
+    <external-cache-path name="agenweb_files" path="agentweb-cache" />
+    <!-- 兼容录音文件（存放在 app-specific 外部文件目录） -->
+    <external-files-path name="audio_records" path="." />
+</paths>

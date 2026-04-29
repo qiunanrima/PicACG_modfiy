@@ -5,8 +5,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Environment
+import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -51,7 +50,7 @@ import com.picacomic.fregata.compose.components.PicaRemoteImage
 import com.picacomic.fregata.compose.components.PicaSectionHeader
 import com.picacomic.fregata.compose.viewmodels.ProfileEditViewModel
 import com.picacomic.fregata.objects.UserProfileObject
-import java.io.File
+import com.picacomic.fregata.utils.FileProviderHelper
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -128,16 +127,12 @@ fun ProfileEditScreen(
 
     val onAvatarClick: () -> Unit = click@{
         if (inPreview) return@click
-        val hasStoragePermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
         val hasCameraPermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
 
-        if (!hasStoragePermission || !hasCameraPermission) {
+        if (!hasCameraPermission) {
             (activity as? BaseActivity)?.requestPermission()
         } else {
             AlertDialog.Builder(context)
@@ -150,16 +145,21 @@ fun ProfileEditScreen(
                 .setPositiveButton(R.string.ok) { dialogInterface, _ ->
                     val checked = (dialogInterface as AlertDialog).listView.checkedItemPosition
                     if (checked == 0) {
-                        val photoFile = File(Environment.getExternalStorageDirectory(), "Pic.jpg")
-                        val photoUri = Uri.fromFile(photoFile)
+                        val photoFile = FileProviderHelper.getCameraOutputFile(context)
+                        val photoUri = FileProviderHelper.getUriForFile(context, photoFile)
                         pendingCameraUri = photoUri.toString()
                         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                            putExtra("output", photoUri)
+                            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                         }
                         cameraLauncher?.launch(cameraIntent)
                     } else {
-                        val pickIntent = Intent(Intent.ACTION_PICK).apply {
-                            type = "image/*"
+                        val pickIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            Intent(MediaStore.ACTION_PICK_IMAGES)
+                        } else {
+                            Intent(Intent.ACTION_PICK).apply {
+                                type = "image/*"
+                            }
                         }
                         galleryLauncher?.launch(pickIntent)
                     }

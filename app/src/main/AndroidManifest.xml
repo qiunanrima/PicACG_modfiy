@@ -3,19 +3,31 @@
     platformBuildVersionCode="44"
     platformBuildVersionName="2.2.1.3.3.4">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 网络 -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- 存储：Android 9 及以下才需要写权限；Android 10+ 改用 app-specific 目录 -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <!-- Android 13+ 细粒度媒体权限，用于相册选图 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- 硬件相关 -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- 悬浮窗（聊天室功能，Android 10+ 受限） -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
-    <uses-permission-sdk-23 android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission-sdk-23 android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission-sdk-23 android:name="android.permission.WRITE_SETTINGS" />
+    <!-- 系统设置写入 -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application
         android:name="com.picacomic.fregata.MyApplication"
@@ -24,8 +36,11 @@
         android:icon="@drawable/logo_round"
         android:label="@string/app_name"
         android:largeHeap="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+
         <meta-data
             android:name="DATABASE"
             android:value="com_picacomic_fregata.db" />
@@ -41,35 +56,50 @@
 
         <activity
             android:name="com.picacomic.fregata.DemoLoginActivity"
+            android:exported="false"
             android:label="@string/app_name" />
         <activity
             android:name="com.picacomic.fregata.activities.LoginActivity"
+            android:exported="false"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
-        <activity android:name="com.picacomic.fregata.activities.BaseActivity" />
+        <activity
+            android:name="com.picacomic.fregata.activities.BaseActivity"
+            android:exported="false" />
         <activity
             android:name="com.picacomic.fregata.activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="false"
             android:label="@string/title_activity_main" />
         <activity
             android:name="com.picacomic.fregata.activities.ComicViewerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="false"
             android:label="@string/title_activity_comic_viewer"
             android:screenOrientation="sensorPortrait"
             android:theme="@style/AppTheme" />
-        <activity android:name="com.picacomic.fregata.activities.ImageCropActivity" />
-        <activity android:name="com.picacomic.fregata.activities.PopupActivity" />
+        <activity
+            android:name="com.picacomic.fregata.activities.ImageCropActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.picacomic.fregata.activities.PopupActivity"
+            android:exported="false" />
 
         <service
             android:name="com.picacomic.fregata.services.ChatroomService"
             android:enabled="true"
-            android:exported="true" />
-        <service android:name="com.picacomic.fregata.services.DownloadService" />
+            android:exported="false" />
+        <service
+            android:name="com.picacomic.fregata.services.DownloadService"
+            android:exported="false" />
 
+        <!-- SplashActivity 本身不导出，通过 activity-alias 启动 -->
         <activity
             android:name="com.picacomic.fregata.activities.SplashActivity"
+            android:exported="false"
             android:label="@string/app_name"
             android:screenOrientation="sensorPortrait" />
+
         <activity-alias
             android:name="com.picacomic.fregata.alias.Default"
             android:enabled="true"
@@ -94,7 +124,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-        <receiver android:name="com.just.agentweb.download.NotificationCancelReceiver" />
+
+        <!-- FileProvider：Android 7+ 跨 App 安全 Uri 共享（相机、裁剪） -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
+
+        <receiver
+            android:name="com.just.agentweb.download.NotificationCancelReceiver"
+            android:exported="false" />
         <activity
             android:name="com.just.agentweb.ActionActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

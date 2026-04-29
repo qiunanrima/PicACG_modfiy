@@ -1,7 +1,9 @@
 package com.picacomic.fregata.activities
 
+import android.Manifest
 import android.annotation.TargetApi
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -249,32 +251,30 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     fun requestPermission() {
-        if (Build.VERSION.SDK_INT >= 21) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    "android.permission.WRITE_EXTERNAL_STORAGE"
-                ) != 0
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf<String>("android.permission.WRITE_EXTERNAL_STORAGE"),
-                    PointerIconCompat.TYPE_CONTEXT_MENU
-                )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return
+        }
+
+        val permissions = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
             }
-            if (ContextCompat.checkSelfPermission(this, "android.permission.RECORD_AUDIO") != 0) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf<String>("android.permission.RECORD_AUDIO"),
-                    PointerIconCompat.TYPE_HELP
-                )
-            }
-            if (ContextCompat.checkSelfPermission(this, "android.permission.CAMERA") != 0) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf<String>("android.permission.CAMERA"),
-                    PointerIconCompat.TYPE_CONTEXT_MENU
-                )
-            }
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.RECORD_AUDIO)
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.CAMERA)
+        }
+
+        if (permissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                permissions.distinct().toTypedArray(),
+                PointerIconCompat.TYPE_CONTEXT_MENU
+            )
         }
     }
 

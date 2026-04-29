@@ -5,12 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import com.picacomic.fregata.databinding.FragmentCropImageBinding;
+import com.picacomic.fregata.utils.FileProviderHelper;
 import com.isseiaoki.simplecropview.CropImageView;
 import com.isseiaoki.simplecropview.b.b;
 import com.isseiaoki.simplecropview.b.c;
@@ -103,7 +103,7 @@ public class CropImageFragment extends BaseFragment {
         this.imageButton_done.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.CropImageFragment.4
             @Override // android.view.View.OnClickListener
             public void onClick(View view) {
-                CropImageFragment.this.oE = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), "croped-image.jpg"));
+                CropImageFragment.this.oE = Uri.fromFile(FileProviderHelper.getCropOutputFile(getContext()));
                 CropImageFragment.this.bB();
                 RectF actualCropRect = CropImageFragment.this.mCropView.getActualCropRect();
                 if (CropImageFragment.this.oG != 1) {

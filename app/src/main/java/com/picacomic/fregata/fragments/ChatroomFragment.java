@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Environment;
 import android.speech.tts.TextToSpeech;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.core.content.ContextCompat;
@@ -511,7 +510,15 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             });
         }
     };
-    private final String mFileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/audiorecordtest.3gp";
+    // Android 10+ 不再允许写入公共外部存储，改用 app-specific 外部文件目录
+    private String mFileName = null;
+    private String getAudioFileName() {
+        if (mFileName == null) {
+            mFileName = com.picacomic.fregata.utils.FileProviderHelper
+                    .getAudioRecordFile(getActivity()).getAbsolutePath();
+        }
+        return mFileName;
+    }
     int ls = 0;
 
     @Deprecated
@@ -813,9 +820,8 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
                     ChatroomFragment.this.gridView_emojiList.setVisibility(8);
                 }
                 ((BaseActivity) ChatroomFragment.this.getActivity()).requestPermission();
-                int iCheckSelfPermission = ContextCompat.checkSelfPermission(ChatroomFragment.this.getActivity(), "android.permission.WRITE_EXTERNAL_STORAGE");
                 int iCheckSelfPermission2 = ContextCompat.checkSelfPermission(ChatroomFragment.this.getActivity(), "android.permission.RECORD_AUDIO");
-                if (iCheckSelfPermission == 0 && iCheckSelfPermission2 == 0) {
+                if (iCheckSelfPermission2 == 0) {
                     switch (motionEvent.getAction()) {
                         case 0:
                             ChatroomFragment.this.editText_textbox.setText(R.string.chatroom_recording);
@@ -1776,10 +1782,11 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
             return;
         }
         stopRecording();
-        String strAB = g.aB(this.mFileName);
+        String audioFileName = getAudioFileName();
+        String strAB = g.aB(audioFileName);
         if (strAB != null && this.lc != 0 && this.lb != 0 && this.lc - this.lb >= 1000) {
             P(strAB);
-            MediaPlayer.create(getActivity(), Uri.parse(this.mFileName)).getDuration();
+            MediaPlayer.create(getActivity(), Uri.parse(audioFileName)).getDuration();
         }
         this.lb = 0L;
         this.lc = 0L;
@@ -1804,7 +1811,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
     private void cw() {
         this.ii = new MediaPlayer();
         try {
-            this.ii.setDataSource(this.mFileName);
+            this.ii.setDataSource(getAudioFileName());
             this.ii.prepare();
             this.ii.start();
             this.ii.getDuration();
@@ -1872,7 +1879,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
         this.la = new MediaRecorder();
         this.la.setAudioSource(1);
         this.la.setOutputFormat(1);
-        this.la.setOutputFile(this.mFileName);
+        this.la.setOutputFile(getAudioFileName());
         this.la.setAudioEncoder(3);
         try {
             this.la.prepare();
@@ -1915,7 +1922,7 @@ public class ChatroomFragment extends BaseImagePickFragment implements TextToSpe
 
     @Override // com.picacomic.fregata.a_pkg.a
     public void D(int i) {
-        g.G(((ChatMessageObject) this.arrayList.get(i)).getAudio(), this.mFileName);
+        g.G(((ChatMessageObject) this.arrayList.get(i)).getAudio(), getAudioFileName());
         u(true);
     }
 

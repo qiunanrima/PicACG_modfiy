@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -229,36 +228,29 @@ public class ComicDownloadFragment extends BaseFragment implements k {
         this.button_download.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ComicDownloadFragment.3
             @Override // android.view.View.OnClickListener
             public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(ComicDownloadFragment.this.getActivity(), "android.permission.WRITE_EXTERNAL_STORAGE") == 0) {
-                    if (ComicDownloadFragment.this.ig != null) {
-                        int i = 0;
-                        for (int i2 = 0; i2 < ComicDownloadFragment.this.ig.size(); i2++) {
-                            if (ComicDownloadFragment.this.ig.get(i2).isSelected()) {
-                                ComicDownloadFragment.this.J(i2);
-                                ComicDownloadFragment.this.ig.get(i2).setStatus(1);
-                                ComicDownloadFragment.this.ig.get(i2).setSelected(false);
-                                i++;
-                            }
+                if (ComicDownloadFragment.this.ig != null) {
+                    int i = 0;
+                    for (int i2 = 0; i2 < ComicDownloadFragment.this.ig.size(); i2++) {
+                        if (ComicDownloadFragment.this.ig.get(i2).isSelected()) {
+                            ComicDownloadFragment.this.J(i2);
+                            ComicDownloadFragment.this.ig.get(i2).setStatus(1);
+                            ComicDownloadFragment.this.ig.get(i2).setSelected(false);
+                            i++;
                         }
-                        if (i > 0) {
-                            DbComicDetailObject dbComicDetailObjectAw = b.aw(ComicDownloadFragment.this.comicId);
-                            if (dbComicDetailObjectAw != null) {
-                                dbComicDetailObjectAw.setDownloadStatus(4);
-                                dbComicDetailObjectAw.setDownloadedAt(System.currentTimeMillis());
-                                dbComicDetailObjectAw.save();
-                            } else {
-                                f.D(ComicDownloadFragment.TAG, "Some ERROR must occur as DbComicDetailObject must NOT be null!");
-                            }
-                        }
-                        ComicDownloadFragment.this.nd.notifyDataSetChanged();
-                        return;
                     }
+                    if (i > 0) {
+                        DbComicDetailObject dbComicDetailObjectAw = b.aw(ComicDownloadFragment.this.comicId);
+                        if (dbComicDetailObjectAw != null) {
+                            dbComicDetailObjectAw.setDownloadStatus(4);
+                            dbComicDetailObjectAw.setDownloadedAt(System.currentTimeMillis());
+                            dbComicDetailObjectAw.save();
+                        } else {
+                            f.D(ComicDownloadFragment.TAG, "Some ERROR must occur as DbComicDetailObject must NOT be null!");
+                        }
+                    }
+                    ComicDownloadFragment.this.nd.notifyDataSetChanged();
                     return;
                 }
-                if (ComicDownloadFragment.this.getActivity() == null || !(ComicDownloadFragment.this.getActivity() instanceof BaseActivity)) {
-                    return;
-                }
-                ((BaseActivity) ComicDownloadFragment.this.getActivity()).requestPermission();
             }
         });
         this.button_manage.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.fragments.ComicDownloadFragment.4

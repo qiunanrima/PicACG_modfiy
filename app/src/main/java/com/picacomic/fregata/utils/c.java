@@ -1,6 +1,5 @@
 package com.picacomic.fregata.utils;
 
-import android.os.Environment;
 import com.picacomic.fregata.MyApplication;
 import java.io.File;
 
@@ -13,21 +12,36 @@ public class c {
         return "";
     }
 
+    /**
+     * 获取本地根目录。
+     * 使用 app-specific 外部目录，无需公共存储权限。
+     */
     public static String dY() {
         f.D(TAG, "LOCAL DIRECTORY");
-        return Environment.getExternalStorageDirectory().toString();
+        File externalFilesDir = MyApplication.by().getExternalFilesDir(null);
+        if (externalFilesDir != null) {
+            if (!externalFilesDir.exists()) {
+                externalFilesDir.mkdirs();
+            }
+            return externalFilesDir.getAbsolutePath();
+        }
+        return MyApplication.by().getFilesDir().getAbsolutePath();
     }
 
+    /**
+     * 获取 /Android/data/<packageName>/files 目录。
+     * 使用 getExternalFilesDir，无需 WRITE_EXTERNAL_STORAGE 权限。
+     */
     public static String dZ() {
-        File file = new File(Environment.getExternalStorageDirectory().toString() + "/Android/data/" + MyApplication.by().getPackageName() + "/files");
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        if (file.canWrite()) {
+        File externalFilesDir = MyApplication.by().getExternalFilesDir(null);
+        if (externalFilesDir != null) {
+            if (!externalFilesDir.exists()) {
+                externalFilesDir.mkdirs();
+            }
             f.D(TAG, "LOCAL DIRECTORY ANDROID/DATA");
-            return Environment.getExternalStorageDirectory().toString() + "/Android/data/" + MyApplication.by().getPackageName() + "/files";
+            return externalFilesDir.getAbsolutePath();
         }
-        return dY();
+        return MyApplication.by().getFilesDir().getAbsolutePath();
     }
 
     public static String ea() {
