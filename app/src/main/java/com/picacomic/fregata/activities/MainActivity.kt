@@ -53,14 +53,6 @@ import com.google.gson.Gson
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.b.d
-import com.picacomic.fregata.compose.views.OnIntChangedListener
-import com.picacomic.fregata.compose.views.PicaMainBottomBarComposeView
-import com.picacomic.fregata.databinding.ActivityMainBinding
-import com.picacomic.fregata.fragments.CategoryFragment
-import com.picacomic.fregata.fragments.GameFragment
-import com.picacomic.fregata.fragments.HomeFragment
-import com.picacomic.fregata.fragments.ProfileFragment
-import com.picacomic.fregata.fragments.SettingFragment
 import com.picacomic.fregata.objects.requests.AdjustExpBody
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.objects.responses.InitialResponse
@@ -84,22 +76,6 @@ import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.navigation.Screen
 import com.picacomic.fregata.compose.navigation.navItems
 import com.picacomic.fregata.compose.screens.*
-import com.picacomic.fregata.compose.views.LegacyFragmentHost
-import com.picacomic.fregata.fragments.AnnouncementListFragment
-import com.picacomic.fregata.fragments.ApkVersionListFragment
-import com.picacomic.fregata.fragments.ChangePasswordFragment
-import com.picacomic.fregata.fragments.ChangePinFragment
-import com.picacomic.fregata.fragments.ComicDetailFragment
-import com.picacomic.fregata.fragments.ComicListFragment
-import com.picacomic.fregata.fragments.CommentFragment
-import com.picacomic.fregata.fragments.GameDetailFragment
-import com.picacomic.fregata.fragments.LeaderboardContainerFragment
-import com.picacomic.fregata.fragments.NotificationFragment
-import com.picacomic.fregata.fragments.PicaAppFragment
-import com.picacomic.fregata.fragments.PicaAppListFragment
-import com.picacomic.fregata.objects.ComicListObject
-import com.picacomic.fregata.fragments.ProfileEditFragment
-import com.picacomic.fregata.objects.UserProfileObject
 
 /* JADX INFO: loaded from: classes.dex */
 class MainActivity : BaseActivity() {

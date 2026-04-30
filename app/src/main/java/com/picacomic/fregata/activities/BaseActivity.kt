@@ -21,13 +21,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.PointerIconCompat
 import androidx.lifecycle.ViewModelProvider
 import com.picacomic.fregata.a_pkg.i
-import com.picacomic.fregata.fragments.ChatroomContainerFragment
-import com.picacomic.fregata.fragments.ChatroomFragment
-import com.picacomic.fregata.fragments.CustomPicaAppContainerFragment
-import com.picacomic.fregata.fragments.ProgressDialogFragment
-import com.picacomic.fregata.fragments.ProgressLoadingFragment
 import com.picacomic.fregata.compose.screens.ImagePopupDialogContent
 import com.picacomic.fregata.compose.screens.LockDialogContent
+import com.picacomic.fregata.compose.screens.ProgressDialogContent
+import com.picacomic.fregata.compose.screens.ProgressLoadingContent
 import com.picacomic.fregata.compose.screens.ProfilePopupDialogContent
 import com.picacomic.fregata.compose.screens.TitleEditDialogContent
 import com.picacomic.fregata.compose.viewmodels.ProfilePopupViewModel
@@ -44,6 +41,8 @@ open class BaseActivity : AppCompatActivity() {
     private var hn: CountDownTimer? = null
     private var imagePopupDialog: Dialog? = null
     private var lockDialog: Dialog? = null
+    private var progressDialog: Dialog? = null
+    private var progressLoadingDialog: Dialog? = null
     private var profilePopupDialog: Dialog? = null
     private var titleEditDialog: Dialog? = null
     var ho: i? = null
@@ -69,21 +68,7 @@ open class BaseActivity : AppCompatActivity() {
     // androidx.fragment.app.FragmentActivity, android.app.Activity
     override fun onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            val chatroomFragment =
-                getSupportFragmentManager().findFragmentByTag(ChatroomFragment.TAG) as ChatroomFragment?
-            val chatroomContainerFragment =
-                getSupportFragmentManager().findFragmentByTag(ChatroomContainerFragment.TAG) as ChatroomContainerFragment?
-            val customPicaAppContainerFragment =
-                getSupportFragmentManager().findFragmentByTag(CustomPicaAppContainerFragment.TAG) as CustomPicaAppContainerFragment?
-            if (chatroomFragment != null && chatroomFragment.isVisible()) {
-                this.ho!!.b(chatroomFragment.getView())
-            } else if (chatroomContainerFragment != null && chatroomContainerFragment.isVisible()) {
-                this.ho!!.b(chatroomContainerFragment.getView())
-            } else if (customPicaAppContainerFragment != null && customPicaAppContainerFragment.isVisible()) {
-                this.ho!!.b(customPicaAppContainerFragment.getView())
-            } else {
-                super.onBackPressed()
-            }
+            super.onBackPressed()
         } else if (this is MainActivity) {
             AlertDialogCenter.leavePica(this, object : View.OnClickListener {
                 // from class: com.picacomic.fregata.activities.BaseActivity.1
@@ -105,40 +90,65 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     fun bA() {
-        if ((getSupportFragmentManager().findFragmentByTag(ProgressLoadingFragment.TAG) as ProgressLoadingFragment?) == null) {
-            getSupportFragmentManager().beginTransaction()
-                .add(ProgressLoadingFragment(), ProgressLoadingFragment.TAG)
-                .commitAllowingStateLoss()
+        if (progressLoadingDialog?.isShowing == true) {
+            return
+        }
+        try {
+            val dialog = createProgressDialog(cancelable = true, canceledOnTouchOutside = true)
+            progressLoadingDialog = dialog
+            dialog.setContentView(
+                ComposeView(this).apply {
+                    setContent {
+                        ProgressLoadingContent()
+                    }
+                }
+            )
+            dialog.setOnShowListener {
+                dialog.window?.setGravity(android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL)
+            }
+            dialog.setOnDismissListener {
+                progressLoadingDialog = null
+                System.gc()
+            }
+            dialog.show()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     fun bB() {
-        if ((getSupportFragmentManager().findFragmentByTag(ProgressDialogFragment.TAG) as ProgressDialogFragment?) == null) {
-            getSupportFragmentManager().beginTransaction()
-                .add(ProgressDialogFragment.dH(), ProgressDialogFragment.TAG)
-                .commitAllowingStateLoss()
-        }
+        showProgressDialog(message = "")
     }
 
     fun C(str: String?) {
-        if ((getSupportFragmentManager().findFragmentByTag(ProgressDialogFragment.TAG) as ProgressDialogFragment?) != null || getSupportFragmentManager() == null) {
+        showProgressDialog(message = str.orEmpty())
+    }
+
+    private fun showProgressDialog(message: String) {
+        if (progressDialog?.isShowing == true) {
             return
         }
         try {
-            getSupportFragmentManager().beginTransaction()
-                .add(ProgressDialogFragment.ai(str), ProgressDialogFragment.TAG)
-                .commitAllowingStateLoss()
+            val dialog = createProgressDialog(cancelable = false, canceledOnTouchOutside = true)
+            progressDialog = dialog
+            dialog.setContentView(
+                ComposeView(this).apply {
+                    setContent {
+                        ProgressDialogContent(message = message)
+                    }
+                }
+            )
+            dialog.setOnDismissListener {
+                progressDialog = null
+                System.gc()
+            }
+            dialog.show()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun bC() {
-        val supportFragmentManager = getSupportFragmentManager()
-        if (supportFragmentManager == null) {
-            f.aA("dismiss null manager")
-            return
-        }
         if (abs(this.hm - System.currentTimeMillis()) < 50) {
             this.hm = System.currentTimeMillis()
             f.D(TAG, "call delay - last = " + this.hm + " current = " + System.currentTimeMillis())
@@ -148,23 +158,13 @@ open class BaseActivity : AppCompatActivity() {
         this.hm = System.currentTimeMillis()
         f.D(TAG, "No delay -   last = " + this.hm + " current = " + System.currentTimeMillis())
         try {
-            val progressDialogFragment =
-                supportFragmentManager.findFragmentByTag(ProgressDialogFragment.TAG) as ProgressDialogFragment?
-            if (progressDialogFragment != null) {
+            if (progressDialog?.isShowing == true) {
                 f.aA("dismiss progress dialog")
-                if (getSupportFragmentManager() != null) {
-                    getSupportFragmentManager().beginTransaction().remove(progressDialogFragment)
-                        .commit()
-                }
+                progressDialog?.dismiss()
             }
-            val progressLoadingFragment =
-                supportFragmentManager.findFragmentByTag(ProgressLoadingFragment.TAG) as ProgressLoadingFragment?
-            if (progressLoadingFragment != null) {
+            if (progressLoadingDialog?.isShowing == true) {
                 f.aA("dismiss progress loading")
-                if (getSupportFragmentManager() != null) {
-                    getSupportFragmentManager().beginTransaction().remove(progressLoadingFragment)
-                        .commit()
-                }
+                progressLoadingDialog?.dismiss()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -290,6 +290,21 @@ open class BaseActivity : AppCompatActivity() {
             window?.setBackgroundDrawable(ColorDrawable(0))
             setCancelable(true)
             setCanceledOnTouchOutside(true)
+            setOnKeyListener { _, keyCode, _ ->
+                keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_SEARCH
+            }
+        }
+    }
+
+    private fun createProgressDialog(
+        cancelable: Boolean,
+        canceledOnTouchOutside: Boolean,
+    ): Dialog {
+        return Dialog(this).apply {
+            window?.requestFeature(1)
+            window?.setBackgroundDrawable(ColorDrawable(0))
+            setCancelable(cancelable)
+            setCanceledOnTouchOutside(canceledOnTouchOutside)
             setOnKeyListener { _, keyCode, _ ->
                 keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_SEARCH
             }

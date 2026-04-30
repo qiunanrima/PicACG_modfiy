@@ -1121,6 +1121,30 @@ rg -n "@color/(colorPrimary|colorPrimaryDark|colorPrimaryDark2|colorPrimaryLight
 - 最新验证：
   - `./gradlew.bat :app:compileDebugKotlin` 通过。
 
+### 7.35 ProgressDialogFragment / ProgressLoadingFragment 迁移
+- 新增 `ProgressDialogContent` / `ProgressLoadingContent`
+  - 纯 Compose / MD3 承载，不再 inflate：
+    - `fragment_progress_dialog.xml`
+    - `fragment_progress_loading.xml`
+  - 不再使用 Picasso 加载 `TestingLink` placeholder 动画。
+  - 保留旧 `e.x(context)` 分支：
+    - `true`：使用系统进度指示器；
+    - `false`：使用旧 `loading_animation_big` / `loading_animation` drawable，并在 `AndroidView` 中启动 / 停止 `AnimationDrawable`。
+- `BaseActivity`
+  - `bA()`：不再 add `ProgressLoadingFragment`，改为显示顶部 Compose loading dialog。
+  - `bB()`：不再 add `ProgressDialogFragment.dH()`，改为显示无文字 Compose progress dialog。
+  - `C(message)`：不再 add `ProgressDialogFragment.ai(message)`，改为显示带文字 Compose progress dialog。
+  - `bC()`：不再查找 / remove progress Fragment，改为统一 dismiss Compose dialog。
+  - 保留旧关闭节流逻辑：
+    - 两次关闭间隔小于 50ms 时延迟 500ms 再关。
+  - 保留旧交互语义：
+    - 大 progress dialog `setCancelable(false)`；
+    - 大 progress dialog 允许 outside touch；
+    - back / search key 继续被消费；
+    - dismiss 后触发一次 `System.gc()`。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
 ### 7.19 Profile 请求修复与全局顶栏颜色统一
 - `ProfileViewModel`
   - Profile 进入页先回填本地缓存，再请求 `users/profile`。
