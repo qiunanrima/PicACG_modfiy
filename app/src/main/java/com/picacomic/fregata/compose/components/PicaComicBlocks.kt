@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Home
@@ -267,45 +266,54 @@ fun PicaEpisodeGridItem(
     state: PicaEpisodeGridItemState = PicaEpisodeGridItemState.Default,
     enabled: Boolean = true,
 ) {
+    val shape = MaterialTheme.shapes.medium
     val containerColor = when (state) {
-        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.surface
-        PicaEpisodeGridItemState.Downloading -> MaterialTheme.colorScheme.primary
+        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)
+        PicaEpisodeGridItemState.Downloading -> MaterialTheme.colorScheme.primaryContainer
         PicaEpisodeGridItemState.Downloaded -> MaterialTheme.colorScheme.primaryContainer
-        PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.secondary
+        PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.secondaryContainer
     }
     val contentColor = when (state) {
         PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.onSurface
-        PicaEpisodeGridItemState.Downloading -> MaterialTheme.colorScheme.onPrimary
+        PicaEpisodeGridItemState.Downloading -> MaterialTheme.colorScheme.onPrimaryContainer
         PicaEpisodeGridItemState.Downloaded -> MaterialTheme.colorScheme.onPrimaryContainer
-        PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.onSecondary
+        PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.onSecondaryContainer
     }
     val borderColor = when (state) {
-        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-        else -> containerColor
+        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+        PicaEpisodeGridItemState.Downloading -> MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
+        PicaEpisodeGridItemState.Downloaded -> MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
+        PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.42f)
     }
 
     Surface(
         color = containerColor,
         contentColor = contentColor,
-        shape = RoundedCornerShape(2.dp),
+        shape = shape,
+        tonalElevation = if (state == PicaEpisodeGridItemState.Default) 0.dp else 2.dp,
         border = BorderStroke(1.dp, borderColor),
         modifier = modifier
-            .clip(RoundedCornerShape(2.dp))
+            .height(46.dp)
+            .clip(shape)
             .clickable(enabled = enabled, onClick = onClick),
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .fillMaxSize()
+                .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Normal,
+                fontWeight = if (state == PicaEpisodeGridItemState.Default) {
+                    FontWeight.Medium
+                } else {
+                    FontWeight.SemiBold
+                },
                 textAlign = TextAlign.Center,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             if (!subtitle.isNullOrBlank()) {

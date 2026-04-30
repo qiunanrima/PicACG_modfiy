@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -376,20 +377,41 @@ private fun ComicListControlPanel(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                Text(
+                    text = stringResource(R.string.comment_jump_page_title),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
                 OutlinedTextField(
                     value = pageText,
                     onValueChange = { onPageTextChange(it.filter(Char::isDigit).take(5)) },
-                    label = { Text("${stringResource(R.string.comment_jump_page_title)} / $totalPage") },
+                    placeholder = { Text("1") },
+                    suffix = {
+                        Text(
+                            text = "/ $totalPage",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
                     keyboardActions = KeyboardActions(onGo = { onJump() }),
                     shape = MaterialTheme.shapes.large,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.48f),
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedSuffixColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unfocusedSuffixColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
                     modifier = Modifier
-                        .weight(1f)
+                        .width(132.dp)
                         .heightIn(min = 52.dp),
                 )
                 Button(

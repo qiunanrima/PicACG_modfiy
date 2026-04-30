@@ -508,12 +508,15 @@ private fun ProfileHeader(
                     )
                 }
             }
-            Text(
-                text = profile?.title.orEmpty().ifBlank { profile?.role.orEmpty() },
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.82f),
-                textAlign = TextAlign.Center,
-            )
+            val title = profile?.title.orEmpty().trim()
+            if (title.isNotEmpty()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.82f),
+                    textAlign = TextAlign.Center,
+                )
+            }
             PicaMetricRow(
                 metrics = listOf(
                     "Level" to (profile?.level ?: 0).toString(),
@@ -704,7 +707,10 @@ private fun ProfileCommentCard(
 private fun displayName(profile: UserProfileObject?): String {
     val raw = profile?.name.orEmpty().trim()
     if (raw.contains("SocketAddress", ignoreCase = true)) {
-        return profile?.title.orEmpty().ifBlank { "Profile" }
+        return profile?.email.orEmpty()
+            .substringBefore("@")
+            .takeIf { it.isNotBlank() }
+            ?: "Profile"
     }
     return raw.ifBlank { "Profile" }
 }

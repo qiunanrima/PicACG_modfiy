@@ -6,12 +6,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.picacomic.fregata.b.d
-import com.picacomic.fregata.objects.AnnouncementObject
 import com.picacomic.fregata.objects.CollectionObject
-import com.picacomic.fregata.objects.responses.DataClass.AnnouncementsResponse.AnnouncementsResponse
 import com.picacomic.fregata.objects.responses.DataClass.CollectionsResponse
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.utils.e
@@ -20,7 +16,6 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
-    var announcements by mutableStateOf<List<AnnouncementObject>>(emptyList())
     var collections by mutableStateOf<List<CollectionObject>>(emptyList())
     var hasNotification by mutableStateOf(false)
     var isLoading by mutableStateOf(false)
@@ -34,72 +29,23 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     var errorBody by mutableStateOf<String?>(null)
         private set
 
-    private var announcementsCall: Call<GeneralResponse<AnnouncementsResponse>>? = null
     private var collectionsCall: Call<GeneralResponse<CollectionsResponse>>? = null
     private var pendingCount = 0
 
     init {
-        loadCachedAnnouncements()
         hasNotification = e.ak(application)
         loadData()
     }
 
     fun loadData() {
-        announcementsCall?.cancel()
         collectionsCall?.cancel()
         isLoading = true
         pendingCount = 0
-        fetchAnnouncements()
         fetchCollections()
     }
 
     fun refreshNotificationState() {
         hasNotification = e.ak(getApplication())
-    }
-
-    fun saveAnnouncements() {
-        val context = getApplication<Application>()
-        if (announcements.isNotEmpty()) {
-            e.l(context, Gson().toJson(announcements))
-        }
-    }
-
-    private fun loadCachedAnnouncements() {
-        val context = getApplication<Application>()
-        val cached = e.E(context)
-        if (cached.isNullOrBlank()) return
-        try {
-            val type = object : TypeToken<List<AnnouncementObject>>() {}.type
-            announcements = Gson().fromJson(cached, type) ?: emptyList()
-        } catch (_: Exception) {
-        }
-    }
-
-    private fun fetchAnnouncements() {
-        val context = getApplication<Application>()
-        pendingCount += 1
-        announcementsCall = d(context).dO().f(e.z(context), 1)
-        announcementsCall?.enqueue(object : Callback<GeneralResponse<AnnouncementsResponse>> {
-            override fun onResponse(
-                call: Call<GeneralResponse<AnnouncementsResponse>>,
-                response: Response<GeneralResponse<AnnouncementsResponse>>
-            ) {
-                if (call.isCanceled) return
-                if (response.code() == 200) {
-                    announcements = response.body()?.data?.announcements?.docs ?: emptyList()
-                    saveAnnouncements()
-                } else {
-                    emitHttpError(response.code(), safeErrorBody(response))
-                }
-                checkLoadingFinished()
-            }
-
-            override fun onFailure(call: Call<GeneralResponse<AnnouncementsResponse>>, t: Throwable) {
-                if (call.isCanceled) return
-                emitNetworkError()
-                checkLoadingFinished()
-            }
-        })
     }
 
     private fun fetchCollections() {
@@ -154,7 +100,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     override fun onCleared() {
-        announcementsCall?.cancel()
         collectionsCall?.cancel()
         super.onCleared()
     }

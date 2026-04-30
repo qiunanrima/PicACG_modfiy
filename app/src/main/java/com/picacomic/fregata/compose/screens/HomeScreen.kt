@@ -45,14 +45,11 @@ import com.picacomic.fregata.compose.components.PicaComicListCard
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaSectionHeader
-import com.picacomic.fregata.compose.components.PicaTwoLineCard
 import com.picacomic.fregata.compose.viewmodels.HomeViewModel
 import com.picacomic.fregata.compose.viewmodels.ProfileViewModel
-import com.picacomic.fregata.objects.AnnouncementObject
 import com.picacomic.fregata.objects.CollectionObject
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.ThumbnailObject
-import com.picacomic.fregata.utils.g
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +69,7 @@ fun HomeScreen(
 
     LaunchedEffect(refreshEvent) {
         val vm = screenViewModel
-        if (!inPreview && vm != null && (refreshEvent > 0 || (vm.announcements.isEmpty() && vm.collections.isEmpty()))) {
+        if (!inPreview && vm != null && (refreshEvent > 0 || vm.collections.isEmpty())) {
             vm.loadData()
         }
         if (!inPreview) {
@@ -85,7 +82,6 @@ fun HomeScreen(
             if (inPreview) return@LifecycleEventObserver
             when (event) {
                 Lifecycle.Event.ON_RESUME -> screenViewModel?.refreshNotificationState()
-                Lifecycle.Event.ON_PAUSE -> screenViewModel?.saveAnnouncements()
                 else -> Unit
             }
         }
@@ -156,7 +152,6 @@ fun HomeScreen(
             },
             containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
-            val announcements = if (inPreview) previewState?.announcements.orEmpty() else screenViewModel?.announcements.orEmpty()
             val collections = if (inPreview) previewState?.collections.orEmpty() else screenViewModel?.collections.orEmpty()
             Box(
                 modifier = Modifier
@@ -168,7 +163,7 @@ fun HomeScreen(
                         PicaLoadingIndicator()
                     }
 
-                    collections.isEmpty() && announcements.isEmpty() -> {
+                    collections.isEmpty() -> {
                         PicaEmptyState(message = "No content")
                     }
 
@@ -178,26 +173,6 @@ fun HomeScreen(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(18.dp),
                         ) {
-                            if (announcements.isNotEmpty()) {
-                                item(key = "announcements") {
-                                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                                        PicaSectionHeader(
-                                            title = stringResource(R.string.title_notification),
-                                            actionLabel = stringResource(R.string.more),
-                                            onActionClick = onNotification,
-                                        )
-                                        announcements.forEach { announcement ->
-                                            PicaTwoLineCard(
-                                                title = announcement.title.orEmpty(),
-                                                body = announcement.content.orEmpty(),
-                                                supporting = g.B(context, announcement.createdAt),
-                                                onClick = onNotification,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
                             items(
                                 items = collections,
                                 key = { it.title.orEmpty() },
@@ -255,7 +230,6 @@ private fun HomeCollectionRow(
 }
 
 private data class HomePreviewState(
-    val announcements: List<AnnouncementObject>,
     val collections: List<CollectionObject>,
 )
 
@@ -267,10 +241,6 @@ private fun homePreviewState(): HomePreviewState {
         ComicListObject("comic-3", "Pica selected", "Team", 680, 20, 1, true, arrayListOf("Pick"), cover),
     )
     return HomePreviewState(
-        announcements = listOf(
-            AnnouncementObject("ann-1", "Maintenance", "Short maintenance tonight.", "2026-04-24T10:00:00.000Z", cover),
-            AnnouncementObject("ann-2", "Update", "Compose screens refreshed.", "2026-04-23T08:00:00.000Z", cover),
-        ),
         collections = listOf(
             CollectionObject("Latest", ArrayList(comics)),
             CollectionObject("Popular", ArrayList(comics.reversed())),

@@ -351,8 +351,6 @@ private fun displayName(userProfile: UserProfileObject): String {
     val raw = userProfile.name.orEmpty().trim()
     if (raw.isEmpty()) return ""
     if (raw.contains("SocketAddress", ignoreCase = true)) {
-        val title = userProfile.title.orEmpty().trim()
-        if (title.isNotEmpty()) return title
         val email = userProfile.email.orEmpty().trim()
         if (email.contains("@")) return email.substringBefore("@")
         return ""
