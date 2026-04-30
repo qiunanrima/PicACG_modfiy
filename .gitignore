@@ -93,8 +93,7 @@ compile.log
 app-debug.apk
 app-debug.apk_
 
-# 迁移文档（临时）
-migration_summary.md
+
 
 # 其他临时文件
 node_modules/

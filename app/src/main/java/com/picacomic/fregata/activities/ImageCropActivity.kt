@@ -3,10 +3,11 @@ package com.picacomic.fregata.activities
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.compose.setContent
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.picacomic.fregata.R
 import com.picacomic.fregata.b.d
-import com.picacomic.fregata.fragments.CropImageFragment
+import com.picacomic.fregata.compose.screens.ImageCropScreen
 import com.picacomic.fregata.objects.requests.AvatarBody
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.objects.responses.PutAvatarResponse
@@ -26,16 +27,21 @@ class ImageCropActivity : BaseActivity(), com.picacomic.fregata.a_pkg.f {
     // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     override fun onCreate(bundle: Bundle?) {
         super.onCreate(bundle)
-        setContentView(R.layout.activity_image_crop)
         val intent = getIntent()
         if (intent != null) {
             this.`is` = intent.getStringExtra("KEY_IMAGE_URI_STRING")
             this.type = intent.getIntExtra("KEY_ACTION_TYPE", 2)
-            getSupportFragmentManager().beginTransaction().add(
-                R.id.container,
-                CropImageFragment.a(this.`is`, this.type),
-                CropImageFragment.TAG
-            ).commit()
+            setContent {
+                ImageCropScreen(
+                    imageUriString = this.`is`,
+                    cropType = this.type,
+                    onCropped = { uri -> b(uri) },
+                    onError = {
+                        setResult(0)
+                        finish()
+                    },
+                )
+            }
         } else {
             setResult(0)
             finish()
