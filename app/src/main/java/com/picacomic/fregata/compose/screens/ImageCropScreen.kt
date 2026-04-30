@@ -119,7 +119,6 @@ private fun CropFab(
 
 class PicaCropImageView(context: Context) : View(context) {
     private val imageMatrix = Matrix()
-    private val inverseMatrix = Matrix()
     private val cropRect = RectF()
     private val bitmapRect = RectF()
     private val mappedBitmapRect = RectF()
@@ -173,15 +172,14 @@ class PicaCropImageView(context: Context) : View(context) {
 
     fun cropToCache(): Uri? {
         val source = bitmap ?: return null
-        if (!imageMatrix.invert(inverseMatrix)) return null
-
-        val cropInBitmap = RectF(cropRect)
-        inverseMatrix.mapRect(cropInBitmap)
-        val left = cropInBitmap.left.toInt().coerceIn(0, source.width - 1)
-        val top = cropInBitmap.top.toInt().coerceIn(0, source.height - 1)
-        val right = cropInBitmap.right.toInt().coerceIn(left + 1, source.width)
-        val bottom = cropInBitmap.bottom.toInt().coerceIn(top + 1, source.height)
-        val cropped = Bitmap.createBitmap(source, left, top, right - left, bottom - top)
+        val cropWidth = cropRect.width().toInt().coerceAtLeast(1)
+        val cropHeight = cropRect.height().toInt().coerceAtLeast(1)
+        val cropped = Bitmap.createBitmap(cropWidth, cropHeight, Bitmap.Config.ARGB_8888)
+        Canvas(cropped).apply {
+            drawColor(Color.BLACK)
+            translate(-cropRect.left, -cropRect.top)
+            drawBitmap(source, imageMatrix, null)
+        }
         val output = resizeForOutput(cropped)
         if (output !== cropped) cropped.recycle()
 
@@ -191,7 +189,7 @@ class PicaCropImageView(context: Context) : View(context) {
                 output.compress(Bitmap.CompressFormat.JPEG, 95, stream)
             }
             output.recycle()
-            f.D(TAG, "Crop size = w:${right - left} h:${bottom - top}")
+            f.D(TAG, "Crop size = w:$cropWidth h:$cropHeight")
             Uri.fromFile(file)
         } catch (throwable: Throwable) {
             throwable.printStackTrace()
@@ -243,11 +241,9 @@ class PicaCropImageView(context: Context) : View(context) {
     }
 
     private fun rotate(degrees: Float) {
-        val source = bitmap ?: return
-        val matrix = Matrix().apply { postRotate(degrees) }
-        bitmap = Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
-        source.recycle()
-        resetFrameAndImage()
+        if (bitmap == null) return
+        imageMatrix.postRotate(degrees, cropRect.centerX(), cropRect.centerY())
+        constrainImage()
         invalidate()
     }
 

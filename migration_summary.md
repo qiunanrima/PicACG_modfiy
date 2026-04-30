@@ -1717,3 +1717,43 @@ rg -n "@color/(colorPrimary|colorPrimaryDark|colorPrimaryDark2|colorPrimaryLight
     - EXP 调整继续调用 `MainActivity.i(...)`。
 - 最新验证：
   - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
+### 7.39 迁移后行为对齐修复
+- `ComicDetailScreen` / `ComicDetailViewModel`
+  - 从旧 `ComicDetailFragment.syncEpisodes()` 补回章节本地状态同步：
+    - 读取 `DownloadComicEpisodeObject`；
+    - 下载 DB 状态 `1 / 2 / 3` 映射为下载中；
+    - 下载 DB 状态 `4` 映射为已下载；
+    - 其他状态映射为默认。
+  - 从 `DbComicViewRecordObject` 读取当前漫画最近阅读记录，并将对应 episode 标记为 `selected`。
+  - `ComicDetailScreen` 在 `ON_RESUME` 时刷新本地章节状态，用户从阅读器返回后能立即显示最近阅读状态。
+  - UI 状态映射从 `status > 0` 统一显示已下载，修正为：
+    - `isSelected` -> 当前选中 / 最近阅读；
+    - `status == 1` -> 下载中；
+    - `status == 2` -> 已下载；
+    - 其他 -> 默认。
+- `MainActivity`
+  - 在 Activity 层统一拦截 Compose 主界面的实体键：
+    - `KEYCODE_SEARCH` 直接消费，对齐旧 Fragment 弹窗不穿透搜索键的行为；
+    - `KEYCODE_BACK` 先尝试 `NavController.popBackStack()`；
+    - 只有 Compose 导航栈没有上一级时，才回落到旧 `BaseActivity.onBackPressed()` 退出确认。
+  - 修复 Compose 子页面按返回键直接进入退出应用确认的问题，现在会优先返回上一级页面。
+- `ComicViewerActivity`
+  - 修复 Compose 阅读器在分页边界（例如第 40 页）下滑无法继续加载下一批页面的问题。
+  - 新增 Compose 阅读器页尾判断：
+    - Compose host 使用真实页尾 `pageList.size - 1`；
+    - 旧 RecyclerView / Fragment 阅读器继续使用含广告位的 `g.ad(size)` 虚拟页尾。
+  - 触底加载、自动翻页和控制条最大值统一走同一套页尾判断，避免滑动与控制条行为不一致。
+- 低优先级行为差异收敛
+  - `ChangePasswordScreen` 顶栏标题改回旧 Fragment 使用的 `title_setting`。
+  - `ApkVersionListScreen` 顶栏标题改回旧 Fragment 使用的 `title_home`。
+  - `CommentScreen` 接入 `CommentViewModel.jumpToPage()`，补回评论页跳页入口。
+  - `ProfilePopupDialogContent` 的封锁 / 删除评论确认弹窗移除额外取消按钮，对齐旧确认弹窗。
+  - `ImageCropScreen` 旋转时改为通过矩阵旋转显示与裁剪输出，避免旋转时立即创建整张新 bitmap。
+  - `GameDetailScreen` 补回部分旧详情页体验：
+    - 推荐标记；
+    - Android / iOS 游戏大小；
+    - 游戏介绍与版本更新折叠 / 展开；
+    - 点赞选中态与轻量缩放反馈。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。

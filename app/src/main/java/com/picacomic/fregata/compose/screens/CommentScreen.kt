@@ -77,6 +77,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +97,7 @@ fun CommentScreen(
     val listState = rememberLazyListState()
     var inputText by rememberSaveable(comicId, gameId, commentId) { mutableStateOf("") }
     var pendingAction by remember { mutableStateOf<CommentAction?>(null) }
+    var showJumpPageDialog by rememberSaveable(comicId, gameId, commentId) { mutableStateOf(false) }
     val previewState = if (inPreview) commentPreviewState(gameId != null) else null
 
     LaunchedEffect(comicId, gameId, commentId) {
@@ -167,6 +169,17 @@ fun CommentScreen(
                 }
             )
         }
+        if (!inPreview && showJumpPageDialog) {
+            CommentJumpPageDialog(
+                currentPage = screenViewModel?.currentPage ?: 1,
+                totalPages = screenViewModel?.totalPages ?: 1,
+                onDismiss = { showJumpPageDialog = false },
+                onJump = { page ->
+                    screenViewModel?.jumpToPage(page)
+                    showJumpPageDialog = false
+                },
+            )
+        }
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -185,6 +198,13 @@ fun CommentScreen(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.back)
                             )
+                        }
+                    },
+                    actions = {
+                        if (!inPreview) {
+                            TextButton(onClick = { showJumpPageDialog = true }) {
+                                Text(stringResource(R.string.action_comment_page))
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -306,6 +326,60 @@ fun CommentScreen(
             }
         }
     }
+}
+
+@Composable
+private fun CommentJumpPageDialog(
+    currentPage: Int,
+    totalPages: Int,
+    onDismiss: () -> Unit,
+    onJump: (Int) -> Unit,
+) {
+    var pageText by rememberSaveable(currentPage, totalPages) { mutableStateOf(currentPage.toString()) }
+    val parsedPage = pageText.toIntOrNull()
+    val targetPage = parsedPage?.coerceIn(1, totalPages.coerceAtLeast(1))
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.action_comment_page)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = pageText,
+                    onValueChange = { pageText = it.filter(Char::isDigit).take(5) },
+                    label = { Text(stringResource(R.string.comment_jump_page_title)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done,
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            targetPage?.let(onJump)
+                        },
+                    ),
+                )
+                Text(
+                    text = "$currentPage / ${totalPages.coerceAtLeast(1)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { targetPage?.let(onJump) },
+                enabled = targetPage != null,
+            ) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
 }
 
 @Composable

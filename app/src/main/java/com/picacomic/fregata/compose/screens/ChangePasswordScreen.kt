@@ -62,7 +62,7 @@ fun ChangePasswordScreen(
 
     PicaComposeTheme {
         PicaSecondaryScreen(
-            title = stringResource(R.string.setting_password_title),
+            title = stringResource(R.string.title_setting),
             onBack = onBack
         ) {
             Column(

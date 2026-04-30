@@ -76,7 +76,7 @@ fun ApkVersionListScreen(
 
     PicaComposeTheme {
         PicaSecondaryScreen(
-            title = stringResource(R.string.title_apk_version),
+            title = stringResource(R.string.title_home),
             onBack = onBack
         ) {
             Box(modifier = Modifier.weight(1f)) {

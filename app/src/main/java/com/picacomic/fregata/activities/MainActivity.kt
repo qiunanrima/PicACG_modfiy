@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -128,6 +129,32 @@ class MainActivity : BaseActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         consumePopupOpenExtras(intent)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_SEARCH -> return true
+                KeyEvent.KEYCODE_BACK -> {
+                    onBackPressed()
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onBackPressed() {
+        if (popComposeBackStack()) {
+            bC()
+            return
+        }
+        super.onBackPressed()
+    }
+
+    private fun popComposeBackStack(): Boolean {
+        val navController = navControllerRef ?: return false
+        return navController.previousBackStackEntry != null && navController.popBackStack()
     }
 
     @Preview

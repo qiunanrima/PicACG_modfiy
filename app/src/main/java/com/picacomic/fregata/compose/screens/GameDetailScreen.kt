@@ -4,6 +4,7 @@ import android.net.Uri
 import android.widget.MediaController
 import android.widget.Toast
 import android.widget.VideoView
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,9 +43,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
@@ -178,6 +184,13 @@ private fun GameDetailContent(
     onVideo: () -> Unit,
     onScreenshotClick: (Int) -> Unit,
 ) {
+    var descriptionExpanded by rememberSaveable(detail.gameId, "description") { mutableStateOf(false) }
+    var updateExpanded by rememberSaveable(detail.gameId, "update") { mutableStateOf(false) }
+    val likeScale by animateFloatAsState(
+        targetValue = if (detail.isLiked) 1.18f else 1f,
+        label = "game_detail_like_scale",
+    )
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
@@ -212,6 +225,9 @@ private fun GameDetailContent(
                                 .clip(MaterialTheme.shapes.medium),
                         )
                         Column(modifier = Modifier.weight(1f)) {
+                            if (detail.isSuggest) {
+                                PicaInfoChip("推荐")
+                            }
                             Text(
                                 text = detail.title.orEmpty(),
                                 style = MaterialTheme.typography.headlineSmall,
@@ -252,7 +268,15 @@ private fun GameDetailContent(
                             Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringResource(R.string.title_comment))
                         }
                         IconButton(onClick = onLike) {
-                            Icon(Icons.Filled.Favorite, contentDescription = "Like")
+                            Icon(
+                                Icons.Filled.Favorite,
+                                contentDescription = "Like",
+                                tint = if (detail.isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.graphicsLayer {
+                                    scaleX = likeScale
+                                    scaleY = likeScale
+                                },
+                            )
                         }
                         if (!detail.videoLink.isNullOrBlank()) {
                             IconButton(onClick = onVideo) {
@@ -273,10 +297,28 @@ private fun GameDetailContent(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    PicaSectionHeader(title = "Description")
-                    Text(text = detail.description.orEmpty(), style = MaterialTheme.typography.bodyMedium)
-                    PicaSectionHeader(title = "Update")
-                    Text(text = detail.updateContent.orEmpty(), style = MaterialTheme.typography.bodyMedium)
+                    PicaSectionHeader(title = stringResource(R.string.game_detail_description_title))
+                    GameDetailExpandableText(
+                        text = detail.description.orEmpty(),
+                        expanded = descriptionExpanded,
+                        onToggle = { descriptionExpanded = !descriptionExpanded },
+                    )
+                    PicaSectionHeader(
+                        title = stringResource(R.string.game_detail_latest_version_title) + detail.version.orEmpty(),
+                    )
+                    GameDetailExpandableText(
+                        text = detail.updateContent.orEmpty(),
+                        expanded = updateExpanded,
+                        onToggle = { updateExpanded = !updateExpanded },
+                    )
+                    val sizeText = gameSizeText(detail)
+                    if (sizeText.isNotBlank()) {
+                        Text(
+                            text = sizeText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
         }
@@ -304,6 +346,42 @@ private fun GameDetailContent(
             }
         }
     }
+}
+
+@Composable
+private fun GameDetailExpandableText(
+    text: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = if (expanded) Int.MAX_VALUE else 4,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (text.length > 120 || text.count { it == '\n' } >= 4) {
+            TextButton(onClick = onToggle) {
+                Text(if (expanded) "收起" else "展开")
+            }
+        }
+    }
+}
+
+private fun gameSizeText(detail: GameDetailObject): String {
+    val parts = mutableListOf<String>()
+    if (detail.isAndroid && detail.androidSize > 0f) {
+        parts.add("Android ${formatGameSize(detail.androidSize)} MB")
+    }
+    if (detail.isIos && detail.iosSize > 0f) {
+        parts.add("iOS ${formatGameSize(detail.iosSize)} MB")
+    }
+    return parts.joinToString(" / ")
+}
+
+private fun formatGameSize(size: Float): String {
+    return if (size % 1f == 0f) size.toInt().toString() else "%.1f".format(size)
 }
 
 @Composable

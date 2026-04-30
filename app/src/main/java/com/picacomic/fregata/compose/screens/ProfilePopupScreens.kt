@@ -367,11 +367,6 @@ private fun ConfirmAdminDialog(
                 Text(stringResource(R.string.ok))
             }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        },
     )
 }
 

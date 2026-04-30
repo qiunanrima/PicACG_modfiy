@@ -1455,7 +1455,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     private fun advanceAutoPagingPage(): Boolean {
-        if (this.pageList == null || this.currentPage >= g.ad(this.pageList!!.size)) {
+        if (this.pageList == null || this.currentPage >= bV()) {
             return false
         }
         this.currentPage++
@@ -1569,7 +1569,11 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         }
 
     fun o(i: Int) {
-        val iAd = g.ad(i)
+        val iAd = if (this.comicViewerHostView != null) {
+            (i - 1).coerceAtLeast(0)
+        } else {
+            g.ad(i)
+        }
         this.seekBar_verticalPaging!!.setMax(iAd)
         this.seekBar_horizontalPaging!!.setMax(iAd)
         this.comicViewerControlsOverlayView?.setPage(
@@ -1625,14 +1629,14 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.comicViewerControlsOverlayView?.setPage(
                 label = "",
                 progress = i,
-                max = g.ad(this.pageList!!.size)
+                max = bV()
             )
             n(i)
             this.currentPage = i
             if (!this.hasMovedPastFirstLoadedPage && i != 0) {
                 this.hasMovedPastFirstLoadedPage = true
             }
-            if (this.currentPage == g.ad(this.pageList!!.size)) {
+            if (this.currentPage >= bV()) {
                 bL()
                 q(View.GONE)
                 if (this.currentPagingPage == this.totalPagingPages) {
@@ -1657,7 +1661,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     fun bR() {
-        if (this.currentPage < g.ad(this.pageList!!.size)) {
+        if (this.currentPage < bV()) {
             this.currentPage++
             this.comicStatusChangeListener!!.b(this.currentPage, false)
             r(this.currentPage)
@@ -1678,6 +1682,18 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
     fun bU(): Int {
         return (this.loadedPageOffset / hq) * hq
+    }
+
+    private fun bV(): Int {
+        val size = this.pageList?.size ?: 0
+        if (size <= 0) {
+            return 0
+        }
+        return if (this.comicViewerHostView != null) {
+            size - 1
+        } else {
+            g.ad(size)
+        }
     }
 
     companion object {
