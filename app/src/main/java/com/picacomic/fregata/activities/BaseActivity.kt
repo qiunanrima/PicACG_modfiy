@@ -2,29 +2,35 @@ package com.picacomic.fregata.activities
 
 import android.Manifest
 import android.annotation.TargetApi
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Settings
+import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.PointerIconCompat
+import androidx.lifecycle.ViewModelProvider
 import com.picacomic.fregata.a_pkg.i
 import com.picacomic.fregata.fragments.ChatroomContainerFragment
 import com.picacomic.fregata.fragments.ChatroomFragment
 import com.picacomic.fregata.fragments.CustomPicaAppContainerFragment
-import com.picacomic.fregata.fragments.ImagePopupFragment
-import com.picacomic.fregata.fragments.LockDialogFragment
-import com.picacomic.fregata.fragments.ProfilePopupFragment
 import com.picacomic.fregata.fragments.ProgressDialogFragment
 import com.picacomic.fregata.fragments.ProgressLoadingFragment
-import com.picacomic.fregata.fragments.TitleEditPopupFragment
+import com.picacomic.fregata.compose.screens.ImagePopupDialogContent
+import com.picacomic.fregata.compose.screens.LockDialogContent
+import com.picacomic.fregata.compose.screens.ProfilePopupDialogContent
+import com.picacomic.fregata.compose.screens.TitleEditDialogContent
+import com.picacomic.fregata.compose.viewmodels.ProfilePopupViewModel
 import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.utils.f
@@ -36,6 +42,10 @@ import kotlin.math.abs
 open class BaseActivity : AppCompatActivity() {
     private var hm: Long = 0
     private var hn: CountDownTimer? = null
+    private var imagePopupDialog: Dialog? = null
+    private var lockDialog: Dialog? = null
+    private var profilePopupDialog: Dialog? = null
+    private var titleEditDialog: Dialog? = null
     var ho: i? = null
 
     // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
@@ -177,60 +187,147 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     fun D(str: String?) {
-        if ((getSupportFragmentManager().findFragmentByTag(ImagePopupFragment.TAG) as ImagePopupFragment?) != null || getSupportFragmentManager() == null) {
+        if (imagePopupDialog?.isShowing == true) {
             return
         }
         try {
-            getSupportFragmentManager().beginTransaction()
-                .add(ImagePopupFragment.ae(str), ImagePopupFragment.TAG).commit()
+            val dialog = createComposePopupDialog()
+            imagePopupDialog = dialog
+            dialog.setContentView(
+                ComposeView(this).apply {
+                    setContent {
+                        ImagePopupDialogContent(
+                            imageUrl = str,
+                            onDismiss = { dialog.dismiss() },
+                        )
+                    }
+                }
+            )
+            dialog.setOnShowListener {
+                dialog.window?.setLayout(
+                    android.view.WindowManager.LayoutParams.MATCH_PARENT,
+                    android.view.WindowManager.LayoutParams.MATCH_PARENT,
+                )
+            }
+            dialog.setOnDismissListener {
+                imagePopupDialog = null
+                System.gc()
+            }
+            dialog.show()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun E(str: String?) {
-        if ((getSupportFragmentManager().findFragmentByTag(ProfilePopupFragment.TAG) as ProfilePopupFragment?) != null || getSupportFragmentManager() == null) {
-            return
-        }
-        try {
-            getSupportFragmentManager().beginTransaction()
-                .add(ProfilePopupFragment.ah(str), ProfilePopupFragment.TAG).commit()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        showProfilePopup(userId = str, userProfileObject = null)
     }
 
     fun a(userProfileObject: UserProfileObject?) {
-        if ((getSupportFragmentManager().findFragmentByTag(ProfilePopupFragment.TAG) as ProfilePopupFragment?) != null || getSupportFragmentManager() == null) {
+        showProfilePopup(userId = null, userProfileObject = userProfileObject)
+    }
+
+    fun h(str: String?, str2: String?) {
+        if (titleEditDialog?.isShowing == true) {
             return
         }
         try {
-            getSupportFragmentManager().beginTransaction()
-                .add(ProfilePopupFragment.c(userProfileObject), ProfilePopupFragment.TAG).commit()
+            val viewModel = ViewModelProvider(this)[ProfilePopupViewModel::class.java]
+            viewModel.initializeTitle(str, str2)
+            val dialog = createComposePopupDialog()
+            titleEditDialog = dialog
+            dialog.setContentView(
+                ComposeView(this).apply {
+                    setContent {
+                        TitleEditDialogContent(
+                            viewModel = viewModel,
+                            onDismiss = { dialog.dismiss() },
+                        )
+                    }
+                }
+            )
+            dialog.setOnDismissListener { titleEditDialog = null }
+            dialog.show()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    fun h(str: String?, str2: String?) {
-        if ((getSupportFragmentManager().findFragmentByTag(TitleEditPopupFragment.TAG) as TitleEditPopupFragment?) != null || getSupportFragmentManager() == null) {
+    private fun showProfilePopup(userId: String?, userProfileObject: UserProfileObject?) {
+        if (profilePopupDialog?.isShowing == true) {
             return
         }
         try {
-            getSupportFragmentManager().beginTransaction()
-                .add(TitleEditPopupFragment.o(str, str2), TitleEditPopupFragment.TAG).commit()
+            val viewModel = ViewModelProvider(this)[ProfilePopupViewModel::class.java]
+            viewModel.initializeProfile(userId, userProfileObject)
+            val dialog = createComposePopupDialog()
+            profilePopupDialog = dialog
+            dialog.setContentView(
+                ComposeView(this).apply {
+                    setContent {
+                        ProfilePopupDialogContent(
+                            viewModel = viewModel,
+                            onDismiss = { dialog.dismiss() },
+                            onShowImage = { imageUrl -> D(imageUrl) },
+                            onEditTitle = { targetUserId, title -> h(targetUserId, title) },
+                            onAdjustExp = { name, targetUserId ->
+                                (this@BaseActivity as? MainActivity)?.i(name, targetUserId)
+                            },
+                        )
+                    }
+                }
+            )
+            dialog.setOnDismissListener { profilePopupDialog = null }
+            dialog.show()
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun createComposePopupDialog(): Dialog {
+        return Dialog(this).apply {
+            window?.requestFeature(1)
+            window?.setBackgroundDrawable(ColorDrawable(0))
+            setCancelable(true)
+            setCanceledOnTouchOutside(true)
+            setOnKeyListener { _, keyCode, _ ->
+                keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_SEARCH
+            }
         }
     }
 
     fun bD() {
-        if ((getSupportFragmentManager().findFragmentByTag(LockDialogFragment.TAG) as LockDialogFragment?) != null || getSupportFragmentManager() == null) {
+        if (lockDialog?.isShowing == true) {
+            return
+        }
+        val pin = e.y(this)
+        if (pin.isNullOrBlank()) {
             return
         }
         try {
-            getSupportFragmentManager().beginTransaction()
-                .add(LockDialogFragment(), LockDialogFragment.TAG).commit()
+            val dialog = createComposePopupDialog()
+            lockDialog = dialog
+            dialog.setCancelable(false)
+            dialog.setCanceledOnTouchOutside(false)
+            dialog.setContentView(
+                ComposeView(this).apply {
+                    setContent {
+                        LockDialogContent(
+                            pin = pin,
+                            onUnlock = { dialog.dismiss() },
+                        )
+                    }
+                }
+            )
+            dialog.setOnDismissListener {
+                lockDialog = null
+                System.gc()
+            }
+            dialog.show()
+            dialog.window?.setLayout(
+                android.view.WindowManager.LayoutParams.MATCH_PARENT,
+                android.view.WindowManager.LayoutParams.MATCH_PARENT,
+            )
         } catch (e: Exception) {
             e.printStackTrace()
         }

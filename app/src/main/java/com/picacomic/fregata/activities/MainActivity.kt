@@ -117,6 +117,8 @@ class MainActivity : BaseActivity() {
     private var popupVisible by mutableStateOf(false)
     private var expButtonsVisible by mutableStateOf(false)
     private var forceOneTimeUpdate by mutableStateOf(false)
+    private var pendingExternalComicId by mutableStateOf<String?>(null)
+    private var pendingExternalGameId by mutableStateOf<String?>(null)
     private var navControllerRef: NavHostController? = null
 
     // Legacy controls overlay
@@ -134,6 +136,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(bundle: Bundle?) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         super.onCreate(bundle)
+        consumePopupOpenExtras(intent)
 
         setContent {
             MainScreen()
@@ -143,6 +146,12 @@ class MainActivity : BaseActivity() {
         e.j(this, null as String?)
         e.l(this, null as String?)
 
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        consumePopupOpenExtras(intent)
     }
 
     @Preview
@@ -168,6 +177,26 @@ class MainActivity : BaseActivity() {
                 navController.navigate(Screen.OneTimeUpdateQA.route) {
                     popUpTo(Screen.Home.route)
                     launchSingleTop = true
+                }
+            }
+        }
+
+        LaunchedEffect(pendingExternalComicId, pendingExternalGameId) {
+            val comicId = pendingExternalComicId
+            val gameId = pendingExternalGameId
+            when {
+                !comicId.isNullOrBlank() -> {
+                    pendingExternalComicId = null
+                    navController.navigate(Screen.createComicDetailRoute(comicId)) {
+                        launchSingleTop = true
+                    }
+                }
+
+                !gameId.isNullOrBlank() -> {
+                    pendingExternalGameId = null
+                    navController.navigate(Screen.createGameDetailRoute(gameId)) {
+                        launchSingleTop = true
+                    }
                 }
             }
         }
@@ -887,6 +916,17 @@ class MainActivity : BaseActivity() {
                 creatorName = creatorName
             )
         )
+    }
+
+    private fun consumePopupOpenExtras(intent: Intent?) {
+        pendingExternalComicId = intent
+            ?.getStringExtra(PopupActivity.EXTRA_OPEN_COMIC_ID)
+            ?.takeIf { it.isNotBlank() }
+        pendingExternalGameId = intent
+            ?.getStringExtra(PopupActivity.EXTRA_OPEN_GAME_ID)
+            ?.takeIf { it.isNotBlank() }
+        intent?.removeExtra(PopupActivity.EXTRA_OPEN_COMIC_ID)
+        intent?.removeExtra(PopupActivity.EXTRA_OPEN_GAME_ID)
     }
 
     // -------------------------------------------------------------
