@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.picacomic.fregata.b.d
 import com.picacomic.fregata.objects.AnnouncementObject
 import com.picacomic.fregata.objects.CollectionObject
@@ -37,6 +39,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private var pendingCount = 0
 
     init {
+        loadCachedAnnouncements()
         hasNotification = e.ak(application)
         loadData()
     }
@@ -48,6 +51,28 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         pendingCount = 0
         fetchAnnouncements()
         fetchCollections()
+    }
+
+    fun refreshNotificationState() {
+        hasNotification = e.ak(getApplication())
+    }
+
+    fun saveAnnouncements() {
+        val context = getApplication<Application>()
+        if (announcements.isNotEmpty()) {
+            e.l(context, Gson().toJson(announcements))
+        }
+    }
+
+    private fun loadCachedAnnouncements() {
+        val context = getApplication<Application>()
+        val cached = e.E(context)
+        if (cached.isNullOrBlank()) return
+        try {
+            val type = object : TypeToken<List<AnnouncementObject>>() {}.type
+            announcements = Gson().fromJson(cached, type) ?: emptyList()
+        } catch (_: Exception) {
+        }
     }
 
     private fun fetchAnnouncements() {
@@ -62,6 +87,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 if (call.isCanceled) return
                 if (response.code() == 200) {
                     announcements = response.body()?.data?.announcements?.docs ?: emptyList()
+                    saveAnnouncements()
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
                 }

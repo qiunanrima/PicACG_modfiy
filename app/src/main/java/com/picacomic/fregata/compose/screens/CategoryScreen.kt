@@ -67,11 +67,14 @@ import com.picacomic.fregata.compose.components.PicaRemoteImage
 import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
 import com.picacomic.fregata.objects.CategoryObject
 import com.picacomic.fregata.objects.ThumbnailObject
+import com.picacomic.fregata.utils.e
+import com.picacomic.fregata.utils.views.AlertDialogCenter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CategoryScreen(
     viewModel: CategoryViewModel? = null,
+    refreshEvent: Int = 0,
     onSearch: (String) -> Unit,
     onCategoryClick: (String) -> Unit,
     onWebCategoryClick: (title: String, link: String) -> Unit = { _, _ -> },
@@ -88,6 +91,20 @@ fun CategoryScreen(
     val screenViewModel = previewAwareViewModel(viewModel)
     val previewState = if (inPreview) categoryPreviewState() else null
     val gridState = rememberLazyGridState()
+
+    LaunchedEffect(refreshEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (!inPreview && refreshEvent > 0) {
+            vm.loadData()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!inPreview && e.ai(context)) {
+            AlertDialogCenter.showFaqAlertDialog(context, "https://www.picacomic.com/faq", null)
+            e.n(context, false)
+        }
+    }
 
     LaunchedEffect(screenViewModel?.errorEvent) {
         val vm = screenViewModel ?: return@LaunchedEffect

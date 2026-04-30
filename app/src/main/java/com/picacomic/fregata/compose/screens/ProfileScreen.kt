@@ -6,9 +6,12 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.CountDownTimer
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,16 +48,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -83,6 +92,7 @@ import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.FileProviderHelper
 import com.picacomic.fregata.utils.views.AlertDialogCenter
+import com.picacomic.fregata.utils.views.ExpCircleView
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +102,7 @@ fun ProfileScreen(
     onComicClick: (String) -> Unit = {},
     onGameClick: (String) -> Unit = {},
     onComicListClick: (String) -> Unit = {},
+    refreshEvent: Int = 0,
     viewModel: ProfileViewModel? = null,
 ) {
     val context = LocalContext.current
@@ -189,10 +200,10 @@ fun ProfileScreen(
             .show()
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshEvent) {
         if (!inPreview) {
-            screenViewModel?.loadProfile()
-            profileComicViewModel?.load()
+            screenViewModel?.loadProfile(force = refreshEvent > 0)
+            profileComicViewModel?.load(force = refreshEvent > 0)
         }
     }
 
@@ -414,17 +425,60 @@ private fun ProfileHeader(
         shape = MaterialTheme.shapes.large,
         tonalElevation = 1.dp,
     ) {
-        Column(
-            modifier = Modifier.padding(18.dp),
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            PicaRemoteImage(
+                thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
+                contentDescription = null,
+                modifier = Modifier
+                    .matchParentSize()
+                    .blur(18.dp),
+            )
+            if (!avatarPreviewUri.isNullOrBlank()) {
+                PicaImageUrl(
+                    imageUrl = avatarPreviewUri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .blur(18.dp),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.Black.copy(alpha = 0.46f)),
+            )
+            Column(
+                modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(
                 modifier = Modifier
-                    .size(112.dp)
-                    .clip(MaterialTheme.shapes.extraLarge)
+                    .size(150.dp)
                     .clickable(onClick = onAvatarClick),
+                contentAlignment = Alignment.Center,
             ) {
+                if (!profile?.character.isNullOrBlank()) {
+                    PicaImageUrl(
+                        imageUrl = profile?.character,
+                        contentDescription = profile?.role,
+                        modifier = Modifier
+                            .size(146.dp)
+                            .align(Alignment.Center),
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+                AnimatedExpCircle(
+                    angle = expAngle(profile),
+                    modifier = Modifier.size(132.dp),
+                )
+                Box(
+                    modifier = Modifier
+                        .size(112.dp)
+                        .clip(CircleShape),
+                ) {
                 PicaRemoteImage(
                     thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
                     contentDescription = profile?.name,
@@ -438,16 +492,30 @@ private fun ProfileHeader(
                     )
                 }
             }
-            Text(
-                text = displayName(profile),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-            )
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = displayName(profile),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+                if (profile?.isVerified == true) {
+                    Image(
+                        painter = painterResource(R.drawable.verified_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+            }
             Text(
                 text = profile?.title.orEmpty().ifBlank { profile?.role.orEmpty() },
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = Color.White.copy(alpha = 0.82f),
                 textAlign = TextAlign.Center,
             )
             PicaMetricRow(
@@ -467,6 +535,49 @@ private fun ProfileHeader(
             }
         }
     }
+}
+}
+
+@Composable
+private fun AnimatedExpCircle(
+    angle: Float,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    var currentView by androidx.compose.runtime.remember { mutableStateOf<ExpCircleView?>(null) }
+    AndroidView(
+        modifier = modifier,
+        factory = {
+            ExpCircleView(context).apply {
+                setGridSize(20)
+                setAngle(0f)
+                currentView = this
+            }
+        },
+        update = { view ->
+            view.setGridSize(20)
+            currentView = view
+        },
+    )
+    DisposableEffect(currentView, angle) {
+        val view = currentView
+        val timer = object : CountDownTimer(1000L, 10L) {
+            override fun onTick(millisUntilFinished: Long) {
+                view?.setAngle(((1000L - millisUntilFinished) * angle) / 1000f)
+            }
+
+            override fun onFinish() {
+                view?.setAngle(angle)
+            }
+        }
+        timer.start()
+        onDispose { timer.cancel() }
+    }
+}
+
+private fun expAngle(profile: UserProfileObject?): Float {
+    val next = expForLevel((profile?.level ?: 0) + 1).coerceAtLeast(1)
+    return ((profile?.exp ?: 0) * 360f) / next
 }
 
 @Composable
@@ -502,7 +613,7 @@ private fun ProfileComicSection(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        comics.take(8).forEach { comic ->
+                        comics.forEach { comic ->
                             PicaComicListCard(
                                 title = comic.title.orEmpty(),
                                 subtitle = comic.author.orEmpty(),

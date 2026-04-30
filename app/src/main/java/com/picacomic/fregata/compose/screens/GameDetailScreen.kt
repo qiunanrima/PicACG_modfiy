@@ -1,6 +1,11 @@
 package com.picacomic.fregata.compose.screens
 
+import android.net.Uri
+import android.widget.MediaController
 import android.widget.Toast
+import android.widget.VideoView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -37,14 +42,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
@@ -91,6 +100,8 @@ fun GameDetailScreen(
     }
 
     PicaComposeTheme {
+        val detail = if (inPreview) previewState?.detail else screenViewModel?.gameDetail
+        val screenshots = if (inPreview) previewState?.screenshots.orEmpty() else screenViewModel?.screenshots.orEmpty()
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -118,8 +129,6 @@ fun GameDetailScreen(
             },
             containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
-            val detail = if (inPreview) previewState?.detail else screenViewModel?.gameDetail
-            val screenshots = if (inPreview) previewState?.screenshots.orEmpty() else screenViewModel?.screenshots.orEmpty()
             when {
                 !inPreview && screenViewModel?.isLoading == true && detail == null -> PicaLoadingIndicator()
                 detail == null -> PicaEmptyState(message = "No game detail")
@@ -136,13 +145,21 @@ fun GameDetailScreen(
                         },
                         onComment = { onCommentClick(gameId) },
                         onLike = { screenViewModel?.toggleLike() },
-                        onVideo = {
-                            val link = detail.videoLink
-                            if (!link.isNullOrBlank()) g.A(context, link)
-                        },
+                        onGift = { AlertDialogCenter.giftNotReady(context) },
+                        onVideo = { screenViewModel?.openVideoPopup() },
+                        onScreenshotClick = { index -> screenViewModel?.openScreenshot(index) },
                     )
                 }
             }
+        }
+        if (!inPreview && screenViewModel?.popupVisible == true && detail != null) {
+            GameDetailPopup(
+                detail = detail,
+                screenshots = screenshots,
+                selectedIndex = screenViewModel.selectedScreenshotIndex,
+                showVideo = screenViewModel.showVideoInPopup,
+                onClose = screenViewModel::closePopup,
+            )
         }
     }
 }
@@ -155,7 +172,9 @@ private fun GameDetailContent(
     onDownload: () -> Unit,
     onComment: () -> Unit,
     onLike: () -> Unit,
+    onGift: () -> Unit,
     onVideo: () -> Unit,
+    onScreenshotClick: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -220,6 +239,13 @@ private fun GameDetailContent(
                             Icon(Icons.Filled.Download, contentDescription = null)
                             Text("Download")
                         }
+                        IconButton(onClick = onGift) {
+                            Image(
+                                painter = painterResource(R.drawable.icon_gift_off),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
                         IconButton(onClick = onComment) {
                             Icon(Icons.Filled.Comment, contentDescription = stringResource(R.string.title_comment))
                         }
@@ -260,7 +286,7 @@ private fun GameDetailContent(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        screenshots.forEach { shot ->
+                        screenshots.forEachIndexed { index, shot ->
                             PicaRemoteImage(
                                 thumbnail = shot,
                                 contentDescription = detail.title,
@@ -268,12 +294,70 @@ private fun GameDetailContent(
                                     .width(220.dp)
                                     .aspectRatio(16f / 9f)
                                     .clip(MaterialTheme.shapes.medium)
-                                    .clickable {},
+                                    .clickable { onScreenshotClick(index) },
                             )
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun GameDetailPopup(
+    detail: GameDetailObject,
+    screenshots: List<ThumbnailObject>,
+    selectedIndex: Int,
+    showVideo: Boolean,
+    onClose: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.88f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (showVideo && !detail.videoLink.isNullOrBlank()) {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = { context ->
+                    VideoView(context).apply {
+                        val controller = MediaController(context)
+                        controller.setAnchorView(this)
+                        setMediaController(controller)
+                    }
+                },
+                update = { videoView ->
+                    val url = detail.videoLink.orEmpty()
+                    if (videoView.getTag(R.id.videoView_game_detail) != url) {
+                        videoView.setTag(R.id.videoView_game_detail, url)
+                        videoView.setVideoURI(Uri.parse(url))
+                        videoView.start()
+                    }
+                },
+            )
+        } else {
+            PicaRemoteImage(
+                thumbnail = screenshots.getOrNull(selectedIndex),
+                contentDescription = detail.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .aspectRatio(16f / 9f),
+            )
+        }
+        IconButton(
+            onClick = onClose,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.icon_cross),
+                contentDescription = null,
+                modifier = Modifier.size(28.dp),
+            )
         }
     }
 }

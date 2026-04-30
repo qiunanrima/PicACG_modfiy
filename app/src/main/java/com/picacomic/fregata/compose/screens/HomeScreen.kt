@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -34,6 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaComicListCard
@@ -53,24 +57,39 @@ import com.picacomic.fregata.utils.g
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel? = null,
+    refreshEvent: Int = 0,
     onNotification: () -> Unit,
     onComicClick: (String) -> Unit,
     onMoreClick: (String) -> Unit,
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val inPreview = LocalInspectionMode.current
     val screenViewModel = previewAwareViewModel(viewModel)
     val punchInViewModel: ProfileViewModel? = if (inPreview) null else viewModel(key = "home_auto_punch_in")
     val previewState = if (inPreview) homePreviewState() else null
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshEvent) {
         val vm = screenViewModel
-        if (!inPreview && vm != null && vm.announcements.isEmpty() && vm.collections.isEmpty()) {
+        if (!inPreview && vm != null && (refreshEvent > 0 || (vm.announcements.isEmpty() && vm.collections.isEmpty()))) {
             vm.loadData()
         }
         if (!inPreview) {
             punchInViewModel?.punchInIfNeeded()
         }
+    }
+
+    DisposableEffect(lifecycleOwner, screenViewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (inPreview) return@LifecycleEventObserver
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> screenViewModel?.refreshNotificationState()
+                Lifecycle.Event.ON_PAUSE -> screenViewModel?.saveAnnouncements()
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(screenViewModel?.errorEvent) {
@@ -166,7 +185,7 @@ fun HomeScreen(
                                             actionLabel = stringResource(R.string.more),
                                             onActionClick = onNotification,
                                         )
-                                        announcements.take(3).forEach { announcement ->
+                                        announcements.forEach { announcement ->
                                             PicaTwoLineCard(
                                                 title = announcement.title.orEmpty(),
                                                 body = announcement.content.orEmpty(),
@@ -213,7 +232,7 @@ private fun HomeCollectionRow(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            comics.take(8).forEach { comic ->
+            comics.forEach { comic ->
                 PicaComicListCard(
                     title = comic.title.orEmpty(),
                     subtitle = comic.author.orEmpty(),

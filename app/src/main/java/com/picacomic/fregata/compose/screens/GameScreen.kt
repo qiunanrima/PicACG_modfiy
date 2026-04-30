@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun GameScreen(
     viewModel: GameViewModel? = null,
+    refreshEvent: Int = 0,
     onGameClick: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -49,9 +50,13 @@ fun GameScreen(
     val screenViewModel = previewAwareViewModel(viewModel)
     val previewGames = if (inPreview) gamePreviewList() else emptyList()
 
-    LaunchedEffect(Unit) {
-        if (!inPreview && screenViewModel?.games?.isEmpty() == true) {
-            screenViewModel?.loadData()
+    LaunchedEffect(refreshEvent) {
+        if (!inPreview) {
+            if (refreshEvent > 0) {
+                screenViewModel?.refresh()
+            } else if (screenViewModel?.games?.isEmpty() == true) {
+                screenViewModel.loadData()
+            }
         }
     }
 

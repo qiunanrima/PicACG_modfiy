@@ -19,11 +19,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
+import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaPrimaryButton
 import com.picacomic.fregata.compose.components.PicaSecondaryScreen
 import com.picacomic.fregata.compose.components.PicaTextField
 import com.picacomic.fregata.compose.viewmodels.ChangePinViewModel
+import com.picacomic.fregata.utils.e
 
 @Composable
 fun ChangePinScreen(
@@ -35,6 +37,12 @@ fun ChangePinScreen(
     val screenViewModel = previewAwareViewModel(viewModel)
     val pinErrorRes = screenViewModel?.pinErrorRes()
     val pinConfirmErrorRes = screenViewModel?.pinConfirmErrorRes()
+
+    LaunchedEffect(Unit) {
+        if (!inPreview && e.y(context).orEmpty().isNotEmpty()) {
+            (context as? BaseActivity)?.bD()
+        }
+    }
 
     LaunchedEffect(screenViewModel?.clearSuccessEvent) {
         val vm = screenViewModel ?: return@LaunchedEffect

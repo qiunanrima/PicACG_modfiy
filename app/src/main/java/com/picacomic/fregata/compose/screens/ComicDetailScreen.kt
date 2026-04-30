@@ -257,7 +257,7 @@ private fun ComicDetailContent(
             PicaCardSection {
                 PicaSectionHeader(
                     title = "漫画信息",
-                    supportingText = if (detail == null && isLoading) "加载中" else "README info response + ComicDetailViewModel state",
+                    supportingText = if (detail == null && isLoading) "加载中" else "",
                 )
 
                 if (detail == null) {

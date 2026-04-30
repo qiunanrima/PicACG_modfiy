@@ -113,6 +113,7 @@ class MainActivity : BaseActivity() {
 
     // Compose State
     private var selectedTabIndex by mutableIntStateOf(0)
+    private var tabRefreshEvent by mutableIntStateOf(0)
     private var bannerVisible by mutableStateOf(false)
     private var popupVisible by mutableStateOf(false)
     private var expButtonsVisible by mutableStateOf(false)
@@ -174,6 +175,7 @@ class MainActivity : BaseActivity() {
                                 NavigationBarItem(
                                     selected = currentRoute == screen.route,
                                     onClick = {
+                                        tabRefreshEvent++
                                         if (currentRoute != screen.route) {
                                             navController.navigate(screen.route) {
                                                 popUpTo(navController.graph.startDestinationId) {
@@ -218,6 +220,7 @@ class MainActivity : BaseActivity() {
                     ) {
                         composable(Screen.Home.route) {
                             HomeScreen(
+                                refreshEvent = tabRefreshEvent,
                                 onNotification = { navController.navigate(Screen.Notification.route) },
                                 onComicClick = { id ->
                                     navController.navigate(
@@ -237,6 +240,7 @@ class MainActivity : BaseActivity() {
                         }
                         composable(Screen.Category.route) {
                             CategoryScreen(
+                                refreshEvent = tabRefreshEvent,
                                 onSearch = { query ->
                                     val value = query.trim()
                                     val route = when {
@@ -315,12 +319,13 @@ class MainActivity : BaseActivity() {
                             )
                         }
                         composable(Screen.Game.route) {
-                            GameScreen(onGameClick = { id ->
+                            GameScreen(refreshEvent = tabRefreshEvent, onGameClick = { id ->
                                 navController.navigate(Screen.createGameDetailRoute(id))
                             })
                         }
                         composable(Screen.Profile.route) {
                             ProfileScreen(
+                                refreshEvent = tabRefreshEvent,
                                 onEdit = { navController.navigate(Screen.ProfileEdit.route) },
                                 onComicClick = { id ->
                                     navController.navigate(Screen.createComicDetailRoute(id))
@@ -336,13 +341,8 @@ class MainActivity : BaseActivity() {
                         composable(Screen.Settings.route) {
                             val settingsViewModel: com.picacomic.fregata.compose.viewmodels.SettingsViewModel =
                                 viewModel()
-                            LaunchedEffect(Unit) {
+                            LaunchedEffect(tabRefreshEvent) {
                                 settingsViewModel.loadSettings()
-                            }
-                            LaunchedEffect(settingsViewModel.themeRecreateEvent) {
-                                if (settingsViewModel.themeRecreateEvent > 0) {
-                                    recreate()
-                                }
                             }
                             SettingsScreen(
                                 state = settingsViewModel.state,
@@ -385,7 +385,14 @@ class MainActivity : BaseActivity() {
                                 onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
                                 onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
                                 onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
-                                onThemeColorSelected = settingsViewModel::selectThemeColorIndex,
+                                onThemeColorSelected = { index ->
+                                    val previous = settingsViewModel.state.themeColorIndex
+                                    settingsViewModel.selectThemeColorIndex(index)
+                                    if (previous != index) {
+                                        startActivity(Intent(this@MainActivity, MainActivity::class.java))
+                                        finish()
+                                    }
+                                },
                                 onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
                                 onAutoPagingConfirmed = settingsViewModel::confirmAutoPagingInterval
                             )

@@ -3,7 +3,6 @@ package com.picacomic.fregata.compose.viewmodels
 import android.app.Application
 import android.content.Intent
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
@@ -18,9 +17,6 @@ import java.text.DecimalFormat
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     var state by mutableStateOf(SettingsState())
-        private set
-
-    var themeRecreateEvent by mutableIntStateOf(0)
         private set
 
     init {
@@ -118,14 +114,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun selectThemeColorIndex(index: Int) {
-        val changed = state.themeColorIndex != index
         state = state.copy(activeDialog = null)
         e.h(getApplication(), index)
         LauncherIconHelper.syncLauncherIcon(getApplication(), index)
         loadSettings()
-        if (changed) {
-            themeRecreateEvent++
-        }
     }
 
     fun updateAutoPagingDraftProgress(progress: Int) {
