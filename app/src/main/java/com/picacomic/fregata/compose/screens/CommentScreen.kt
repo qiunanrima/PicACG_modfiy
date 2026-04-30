@@ -331,6 +331,7 @@ private fun CommentCard(
     onReplyDirty: (Int) -> Unit,
 ) {
     val user = displayUser(item, profileUser, isProfileMode)
+    var profileExpanded by rememberSaveable(item.commentId, user.name) { mutableStateOf(false) }
     val targetTitle = item.comicId?.title?.takeIf { it.isNotBlank() }
         ?: item.gameId?.title?.takeIf { it.isNotBlank() }
     val profileNoReply = if (item.comicId != null) {
@@ -359,6 +360,7 @@ private fun CommentCard(
                     thumbnail = user.avatar,
                     name = user.name,
                     character = user.character,
+                    onClick = { profileExpanded = !profileExpanded },
                     modifier = Modifier.size(42.dp),
                 )
                 Column(modifier = Modifier.weight(1f)) {
@@ -372,7 +374,10 @@ private fun CommentCard(
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false),
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable { profileExpanded = !profileExpanded },
                         )
                         Text(
                             text = "#${floor.coerceAtLeast(0)}",
@@ -408,6 +413,9 @@ private fun CommentCard(
                         contentDescription = stringResource(R.string.comment_option_title),
                     )
                 }
+            }
+            if (profileExpanded) {
+                CommentProfilePanel(user = user)
             }
             if (item.isTop || index < 0) {
                 AssistChip(
@@ -510,6 +518,7 @@ private fun ReplyRow(
     onDirty: () -> Unit,
 ) {
     val user = displayUser(reply.user)
+    var profileExpanded by rememberSaveable(reply.commentId, user.name) { mutableStateOf(false) }
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
         shape = MaterialTheme.shapes.small,
@@ -526,6 +535,7 @@ private fun ReplyRow(
                     thumbnail = user.avatar,
                     name = user.name,
                     character = user.character,
+                    onClick = { profileExpanded = !profileExpanded },
                     modifier = Modifier.size(34.dp),
                 )
                 Column(modifier = Modifier.weight(1f)) {
@@ -538,7 +548,10 @@ private fun ReplyRow(
                             style = MaterialTheme.typography.labelLarge,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false),
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable { profileExpanded = !profileExpanded },
                         )
                         Text(
                             text = "#${floor.coerceAtLeast(0)}",
@@ -575,6 +588,9 @@ private fun ReplyRow(
                     )
                 }
             }
+            if (profileExpanded) {
+                CommentProfilePanel(user = user)
+            }
             Text(text = reply.content.orEmpty(), style = MaterialTheme.typography.bodySmall)
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -602,9 +618,15 @@ private fun CommentAvatar(
     thumbnail: ThumbnailObject?,
     name: String,
     character: String?,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+    Box(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.small)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        contentAlignment = Alignment.Center,
+    ) {
         PicaRemoteImage(
             thumbnail = thumbnail,
             contentDescription = name,
@@ -623,9 +645,62 @@ private fun CommentAvatar(
     }
 }
 
+@Composable
+private fun CommentProfilePanel(user: CommentDisplayUser) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)),
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = user.slogan.ifBlank { "暂无个人简介" },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "昵称 ${user.name.ifBlank { "Anonymous" }}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (user.title.isNotBlank()) {
+                    Text(
+                        text = "称号 ${user.title}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Text(
+                    text = "Lv.${user.level}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (user.activationDate.isNotBlank()) {
+                    Text(
+                        text = g.B(LocalContext.current, user.activationDate),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
 private data class CommentDisplayUser(
     val name: String,
     val title: String,
+    val slogan: String,
+    val role: String,
+    val activationDate: String,
     val level: Int,
     val avatar: ThumbnailObject?,
     val character: String?,
@@ -640,6 +715,9 @@ private fun displayUser(
         return CommentDisplayUser(
             name = profileUser.name.orEmpty(),
             title = "",
+            slogan = "",
+            role = "",
+            activationDate = "",
             level = profileUser.level,
             avatar = profileUser.avatar,
             character = profileUser.character,
@@ -652,6 +730,9 @@ private fun displayUser(user: UserProfileObject?): CommentDisplayUser {
     return CommentDisplayUser(
         name = user?.name.orEmpty(),
         title = user?.title.orEmpty(),
+        slogan = user?.slogan.orEmpty(),
+        role = user?.role.orEmpty(),
+        activationDate = user?.activationDate.orEmpty(),
         level = user?.level ?: 0,
         avatar = user?.avatar,
         character = user?.character,
