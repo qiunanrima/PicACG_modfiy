@@ -42,6 +42,7 @@ import androidx.core.content.ContextCompat
 import com.picacomic.fregata.R
 import com.picacomic.fregata.adapters.c
 import com.picacomic.fregata.compose.screens.ComicViewerComposeHostView
+import com.picacomic.fregata.compose.screens.ComicViewerControlsOverlayView
 import com.picacomic.fregata.databinding.ActivityComicViewerBinding
 import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicPageObject
@@ -71,6 +72,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
     var binding: ActivityComicViewerBinding? = null
     var comicViewerHostView: ComicViewerComposeHostView? = null
+    var comicViewerControlsOverlayView: ComicViewerControlsOverlayView? = null
     var button_autoPaging: Button? = null
     var button_comment: Button? = null
     var button_dialogAutoPagingStart: Button? = null
@@ -258,9 +260,18 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                     FrameLayout.LayoutParams.MATCH_PARENT
                 )
             )
+            this.comicViewerControlsOverlayView = ComicViewerControlsOverlayView(this)
+            this.binding!!.root.addView(
+                this.comicViewerControlsOverlayView,
+                RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+                )
+            )
             a(this.comicViewerHostView)
             init()
             bF()
+            setupComposeControlsOverlay()
             bL()
             bH()
             return
@@ -576,6 +587,9 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             // android.widget.SeekBar.OnSeekBarChangeListener
             override fun onProgressChanged(seekBar: SeekBar?, i: Int, z: Boolean) {
                 this@ComicViewerActivity.autoPagingInterval = (i * 100) + 1000
+                this@ComicViewerActivity.comicViewerControlsOverlayView?.setAutoPagingInterval(
+                    this@ComicViewerActivity.autoPagingInterval
+                )
                 e.b(
                     this@ComicViewerActivity as Context,
                     this@ComicViewerActivity.autoPagingInterval
@@ -651,6 +665,75 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 e.c(this@ComicViewerActivity as Context, false)
             }
         })
+    }
+
+    private fun setupComposeControlsOverlay() {
+        this.comicViewerControlsOverlayView?.apply {
+            setBrightnessValue(this@ComicViewerActivity.brightnessValue)
+            setAutoPagingInterval(this@ComicViewerActivity.autoPagingInterval)
+            setNightModeValue(this@ComicViewerActivity.isNightMode)
+            onHide = {
+                this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
+            }
+            onScreenOrientation = {
+                if (this@ComicViewerActivity.isLandscape) {
+                    this@ComicViewerActivity.isLandscape = false
+                    this@ComicViewerActivity.h(false)
+                } else {
+                    this@ComicViewerActivity.isLandscape = true
+                    this@ComicViewerActivity.h(true)
+                }
+                e.e(this@ComicViewerActivity, this@ComicViewerActivity.isLandscape)
+            }
+            onScrollOrientation = {
+                if (this@ComicViewerActivity.isVerticalScroll) {
+                    this@ComicViewerActivity.isVerticalScroll = false
+                    this@ComicViewerActivity.i(false)
+                } else {
+                    this@ComicViewerActivity.isVerticalScroll = true
+                    this@ComicViewerActivity.i(true)
+                }
+                e.f(this@ComicViewerActivity, this@ComicViewerActivity.isVerticalScroll)
+            }
+            onAutoPaging = {
+                this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
+                this@ComicViewerActivity.bO()
+            }
+            onSettings = {
+                val intent = Intent(this@ComicViewerActivity, PopupActivity::class.java as Class<*>)
+                intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_SETTING")
+                this@ComicViewerActivity.startActivity(intent)
+            }
+            onSelectEpisode = {
+                if (this@ComicViewerActivity.gridView_episodeDialog!!.getVisibility() == View.VISIBLE) {
+                    this@ComicViewerActivity.gridView_episodeDialog!!.setVisibility(View.GONE)
+                } else {
+                    this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.setVisibility(View.GONE)
+                    this@ComicViewerActivity.gridView_episodeDialog!!.setVisibility(View.VISIBLE)
+                    this@ComicViewerActivity.bN()
+                }
+            }
+            onNightMode = {
+                this@ComicViewerActivity.setNightModeEnabled(!this@ComicViewerActivity.isNightMode)
+            }
+            onComment = {
+                if (this@ComicViewerActivity.comicId != null) {
+                    val intent =
+                        Intent(this@ComicViewerActivity, PopupActivity::class.java as Class<*>)
+                    intent.putExtra("EXTRA_KEY_COMIC_ID", this@ComicViewerActivity.comicId)
+                    intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_COMMENT")
+                    this@ComicViewerActivity.startActivity(intent)
+                }
+            }
+            onPageChanged = { page ->
+                this@ComicViewerActivity.currentPage = page
+                this@ComicViewerActivity.comicStatusChangeListener?.b(page, false)
+                this@ComicViewerActivity.r(page)
+            }
+            onBrightnessChanged = { value ->
+                this@ComicViewerActivity.m(value)
+            }
+        }
     }
 
     fun bG() {
@@ -837,6 +920,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         a(null as com.picacomic.fregata.a_pkg.c?)
         this.comicViewerHostView?.release()
         this.comicViewerHostView = null
+        this.comicViewerControlsOverlayView = null
         super.onDestroy()
     }
 
@@ -1222,23 +1306,15 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
     fun setReaderControlsVisibility(visibility: Int) {
         ensurePanelAnimationsLoaded()
-        this.relativeLayout_leftPanel!!.setVisibility(visibility)
-        this.linearLayout_rightPanel!!.setVisibility(visibility)
+        this.relativeLayout_leftPanel!!.setVisibility(View.GONE)
+        this.linearLayout_rightPanel!!.setVisibility(View.GONE)
         this.relativeLayout_toolbar!!.setVisibility(View.GONE)
-        this.linearLayout_bottomPanel!!.setVisibility(visibility)
+        this.linearLayout_bottomPanel!!.setVisibility(View.GONE)
+        this.comicViewerControlsOverlayView?.updateControlsVisible(visibility == View.VISIBLE)
         if (visibility == View.VISIBLE) {
-            if (!e.x(this)) {
-                this.relativeLayout_leftPanel!!.startAnimation(this.leftPanelEnterAnimation)
-                this.linearLayout_rightPanel!!.startAnimation(this.rightPanelEnterAnimation)
-                this.linearLayout_bottomPanel!!.startAnimation(this.bottomPanelEnterAnimation)
-            }
+            this.comicViewerControlsOverlayView?.bringToFront()
             setGesturePanelState(GesturePanelState.HIDDEN)
             return
-        }
-        if (!e.x(this)) {
-            this.relativeLayout_leftPanel!!.startAnimation(this.leftPanelExitAnimation)
-            this.linearLayout_rightPanel!!.startAnimation(this.rightPanelExitAnimation)
-            this.linearLayout_bottomPanel!!.startAnimation(this.bottomPanelExitAnimation)
         }
         this.gridView_episodeDialog!!.setVisibility(View.GONE)
         this.linearLayout_dialogAutoPaging!!.setVisibility(View.GONE)
@@ -1323,6 +1399,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             e.printStackTrace()
         }
         this.brightnessValue = i
+        this.comicViewerControlsOverlayView?.setBrightnessValue(i)
     }
 
     fun setNightModeEnabled(enabled: Boolean) {
@@ -1350,6 +1427,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.button_nightMode!!.setTextColor(ContextCompat.getColor(this, R.color.white))
         }
         this.isNightMode = enabled
+        this.comicViewerControlsOverlayView?.setNightModeValue(enabled)
         e.d(this, this.isNightMode)
     }
 
@@ -1448,11 +1526,14 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 this.textView_horizontalPage!!.setText("完/" + i2)
                 this.textView_verticalPage!!.setText("完/" + i2)
                 this.textView_page!!.setText("完/" + i2 + " " + networkStatus + " 電量:" + this.batteryLevelText)
+                this.comicViewerControlsOverlayView?.setPage("完/$i2")
                 return
             }
-            this.textView_horizontalPage!!.setText((g.ac(i) + 1 + bU()).toString() + "/" + i2)
-            this.textView_verticalPage!!.setText((g.ac(i) + 1 + bU()).toString() + "/" + i2)
+            val pageText = (g.ac(i) + 1 + bU()).toString() + "/" + i2
+            this.textView_horizontalPage!!.setText(pageText)
+            this.textView_verticalPage!!.setText(pageText)
             this.textView_page!!.setText("P." + (g.ac(i) + 1 + bU()) + "/" + i2 + " " + networkStatus + " 電量:" + this.batteryLevelText)
+            this.comicViewerControlsOverlayView?.setPage(pageText)
         }
     }
 
@@ -1491,6 +1572,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         val iAd = g.ad(i)
         this.seekBar_verticalPaging!!.setMax(iAd)
         this.seekBar_horizontalPaging!!.setMax(iAd)
+        this.comicViewerControlsOverlayView?.setPage(
+            label = this.textView_page?.text?.toString()?.substringAfter("P.")?.substringBefore(" ") ?: "",
+            max = iAd
+        )
     }
 
     fun p(i: Int) {
@@ -1537,6 +1622,11 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             } else {
                 this.seekBar_horizontalPaging!!.setProgress(i)
             }
+            this.comicViewerControlsOverlayView?.setPage(
+                label = "",
+                progress = i,
+                max = g.ad(this.pageList!!.size)
+            )
             n(i)
             this.currentPage = i
             if (!this.hasMovedPastFirstLoadedPage && i != 0) {

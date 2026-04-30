@@ -1208,6 +1208,35 @@ rg -n "@color/(colorPrimary|colorPrimaryDark|colorPrimaryDark2|colorPrimaryLight
 - 最新验证：
   - `./gradlew.bat :app:compileDebugKotlin` 通过。
 
+### 7.38 ComicViewer 控制层 Compose 化
+- 新增 `ComicViewerControlsOverlayView`
+  - 用 Compose overlay 替代阅读器可见控制层，不再显示旧 XML 的左侧亮度面板、右侧快捷面板和底部工具栏。
+  - 底部栏改为半透明圆角面板：
+    - 页码 + Slider 同行；
+    - 亮屏方向、翻页方向、自动翻页、设置、隐藏改为图标 + 短标签；
+    - 高度收敛，减少对漫画内容的遮挡。
+  - 右侧快捷操作改为窄浮动胶囊：
+    - 章节；
+    - 夜间模式；
+    - 评论。
+  - 左侧亮度改为窄浮动竖向控制条，Compose Slider 旋转为竖向交互。
+- `ComicViewerActivity`
+  - 新增 `comicViewerControlsOverlayView` 并挂到 Activity root。
+  - `setReaderControlsVisibility(View.VISIBLE)` 现在隐藏旧 XML 控制层，只显示 Compose overlay。
+  - Compose overlay 复用旧 Activity 逻辑：
+    - 屏幕方向 `h(...)`；
+    - 滚动方向 `i(...)`；
+    - 自动翻页 `bO()`；
+    - 设置弹窗 `PopupActivity TYPE_KEY_SETTING`；
+    - 章节 Grid 入口；
+    - 夜间模式 `setNightModeEnabled(...)`；
+    - 评论弹窗 `PopupActivity TYPE_KEY_COMMENT`；
+    - 分页跳转 `comicStatusChangeListener.b(...)` + `r(...)`；
+    - 亮度调整 `m(...)`。
+  - 页码、页数、亮度、夜间模式、自动翻页间隔同步到 Compose overlay。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
 ### 7.19 Profile 请求修复与全局顶栏颜色统一
 - `ProfileViewModel`
   - Profile 进入页先回填本地缓存，再请求 `users/profile`。

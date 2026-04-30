@@ -271,7 +271,7 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
                         episodes + docs
                     }
                     episodeTotal = paging?.total ?: merged.size
-                    episodes = merged
+                    episodes = syncEpisodeLocalState(comicId, merged)
                     nextEpisodePage = targetPage + 1
                     hasMoreEpisodes = merged.size < episodeTotal
                 } else {
@@ -287,6 +287,50 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
                 popLoading()
             }
         })
+    }
+
+    fun refreshEpisodeLocalState() {
+        val comicId = loadedComicId ?: return
+        if (episodes.isEmpty()) return
+        episodes = syncEpisodeLocalState(comicId, episodes)
+    }
+
+    private fun syncEpisodeLocalState(
+        comicId: String,
+        sourceEpisodes: List<ComicEpisodeObject>
+    ): List<ComicEpisodeObject> {
+        val viewRecord = try {
+            b.ax(comicId)
+        } catch (_: Exception) {
+            null
+        }
+        var markedLastView = false
+
+        sourceEpisodes.forEach { episode ->
+            val downloadEpisode = try {
+                b.ay(episode.episodeId)
+            } catch (_: Exception) {
+                null
+            }
+
+            episode.setStatus(
+                when (downloadEpisode?.status) {
+                    1, 2, 3 -> 1
+                    4 -> 2
+                    else -> 0
+                }
+            )
+
+            val isLastViewedEpisode = !markedLastView &&
+                viewRecord != null &&
+                viewRecord.episodeOrder == episode.order
+            episode.setSelected(isLastViewedEpisode)
+            if (isLastViewedEpisode) {
+                markedLastView = true
+            }
+        }
+
+        return sourceEpisodes.toList()
     }
 
     private fun fetchRecommendations(comicId: String) {
