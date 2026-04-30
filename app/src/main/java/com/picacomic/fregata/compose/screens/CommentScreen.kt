@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -340,9 +339,7 @@ private fun CommentCard(
         stringResource(R.string.comment_profile_no_reply_game)
     }
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (item.isTop) {
                 MaterialTheme.colorScheme.primaryContainer
@@ -352,10 +349,16 @@ private fun CommentCard(
         ),
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
                 CommentAvatar(
                     thumbnail = user.avatar,
                     name = user.name,
@@ -385,7 +388,10 @@ private fun CommentCard(
                             color = MaterialTheme.colorScheme.primary,
                         )
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         if (user.title.isNotBlank()) {
                             Text(
                                 text = user.title,
@@ -444,26 +450,41 @@ private fun CommentCard(
             Text(
                 text = item.content.orEmpty(),
                 style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.fillMaxWidth(),
             )
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                TextButton(onClick = onLike) {
-                    Text(if (item.isLiked) "已赞 ${item.likesCount}" else "赞好 ${item.likesCount}")
-                }
-                TextButton(onClick = onClick) {
-                    Text("${stringResource(R.string.comment_reply)} ${item.childsCount}")
-                }
-                if (!isProfileMode && (item.comicId != null || item.gameId != null)) {
-                    TextButton(onClick = onOpenTarget) {
-                        Text(stringResource(R.string.more))
-                    }
-                }
-                TextButton(onClick = onReport) {
-                    Text(stringResource(R.string.comment_option_title))
-                }
-                if (adminMode) {
+                CommentActionButton(
+                    text = if (item.isLiked) "已赞 ${item.likesCount}" else "赞好 ${item.likesCount}",
+                    onClick = onLike,
+                    modifier = Modifier.weight(1f),
+                )
+                CommentActionButton(
+                    text = "${stringResource(R.string.comment_reply)} ${item.childsCount}",
+                    onClick = onClick,
+                    modifier = Modifier.weight(1f),
+                )
+                CommentActionButton(
+                    text = stringResource(R.string.more),
+                    onClick = onOpenTarget,
+                    enabled = !isProfileMode && (item.comicId != null || item.gameId != null),
+                    modifier = Modifier.weight(1f),
+                )
+                CommentActionButton(
+                    text = stringResource(R.string.comment_option_title),
+                    onClick = onReport,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (adminMode) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     TextButton(onClick = onDirty) { Text(stringResource(R.string.comment_tool_dirty)) }
                     TextButton(onClick = onTop) { Text(stringResource(R.string.comment_tool_top)) }
                     if (!item.isHide) {
@@ -486,12 +507,18 @@ private fun CommentCard(
                     )
                 }
                 if (item.currentPage < item.totalPage) {
-                    TextButton(onClick = onLoadMoreReplies) {
+                    TextButton(
+                        onClick = onLoadMoreReplies,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
                         Text(stringResource(R.string.comment_view_more_reply))
                     }
                 }
             } else if (expanded && item.childsCount > 0) {
-                TextButton(onClick = onLoadMoreReplies) {
+                TextButton(
+                    onClick = onLoadMoreReplies,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
                     Text(stringResource(R.string.comment_view_more_reply))
                 }
             } else if (expanded && item.childsCount == 0) {
@@ -520,14 +547,18 @@ private fun ReplyRow(
     val user = displayUser(reply.user)
     var profileExpanded by rememberSaveable(reply.commentId, user.name) { mutableStateOf(false) }
     Surface(
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
         shape = MaterialTheme.shapes.small,
     ) {
         Column(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -559,7 +590,10 @@ private fun ReplyRow(
                             color = MaterialTheme.colorScheme.primary,
                         )
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         if (user.title.isNotBlank()) {
                             Text(
                                 text = user.title,
@@ -591,18 +625,33 @@ private fun ReplyRow(
             if (profileExpanded) {
                 CommentProfilePanel(user = user)
             }
-            Text(text = reply.content.orEmpty(), style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = reply.content.orEmpty(),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth(),
+            )
             Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                TextButton(onClick = onLike) {
-                    Text(if (reply.isLiked) "已赞 ${reply.likesCount}" else "赞好 ${reply.likesCount}")
-                }
-                TextButton(onClick = onReport) {
-                    Text(stringResource(R.string.comment_option_title))
-                }
-                if (adminMode) {
+                CommentActionButton(
+                    text = if (reply.isLiked) "已赞 ${reply.likesCount}" else "赞好 ${reply.likesCount}",
+                    onClick = onLike,
+                    modifier = Modifier.weight(1f),
+                )
+                CommentActionButton(
+                    text = stringResource(R.string.comment_option_title),
+                    onClick = onReport,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (adminMode) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     TextButton(onClick = onDirty) { Text(stringResource(R.string.comment_tool_dirty)) }
                     if (!reply.isHide) {
                         TextButton(onClick = onHide) { Text(stringResource(R.string.comment_tool_hide)) }
@@ -610,6 +659,27 @@ private fun ReplyRow(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CommentActionButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -648,17 +718,18 @@ private fun CommentAvatar(
 @Composable
 private fun CommentProfilePanel(user: CommentDisplayUser) {
     Surface(
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
         shape = MaterialTheme.shapes.medium,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = user.slogan.ifBlank { "暂无个人简介" },
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Row(
@@ -668,25 +739,25 @@ private fun CommentProfilePanel(user: CommentDisplayUser) {
             ) {
                 Text(
                     text = "昵称 ${user.name.ifBlank { "Anonymous" }}",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (user.title.isNotBlank()) {
                     Text(
                         text = "称号 ${user.title}",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Text(
                     text = "Lv.${user.level}",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (user.activationDate.isNotBlank()) {
                     Text(
                         text = g.B(LocalContext.current, user.activationDate),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -872,13 +943,15 @@ private fun CommentInputBar(
                     }
                 )
             )
-            Spacer(modifier = Modifier.width(4.dp))
             Button(
                 onClick = {
                     onSubmit()
                     focusManager.clearFocus()
                 },
-                enabled = !isPosting
+                enabled = !isPosting,
+                modifier = Modifier
+                    .width(88.dp)
+                    .heightIn(min = 56.dp),
             ) {
                 Text(text = submitText)
             }

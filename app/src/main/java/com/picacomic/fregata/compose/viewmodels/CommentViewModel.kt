@@ -369,7 +369,10 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
 
     fun N(index: Int) {
         val item = commentItems.getOrNull(index) ?: return
-        if (item.currentPage < item.totalPage) {
+        if (item.childsCount <= 0) return
+        if (item.arrayList.isNullOrEmpty() || item.currentPage <= 0) {
+            a(item.commentId.orEmpty(), index, true)
+        } else if (item.currentPage < item.totalPage) {
             a(item.commentId.orEmpty(), index, false)
         }
     }

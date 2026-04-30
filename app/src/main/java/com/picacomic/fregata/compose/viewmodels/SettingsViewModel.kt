@@ -16,6 +16,11 @@ import java.io.File
 import java.text.DecimalFormat
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    companion object {
+        private const val PREFS_NAME = "PICACOMIC_FREGATA"
+        private const val KEY_LAUNCHER_ICON = "KEY_LAUNCHER_ICON"
+    }
+
     var state by mutableStateOf(SettingsState())
         private set
 
@@ -29,11 +34,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val directions = app.resources.getStringArray(R.array.setting_options_scroll_directions)
         val qualities = app.resources.getStringArray(R.array.setting_options_image_qualities)
         val colors = app.resources.getStringArray(R.array.setting_theme_colors)
+        val launcherIcons = listOf("默认图标", "Miracle Neon")
 
         val rx = if (e.M(app)) 0 else 1
         val rz = if (e.N(app)) 0 else 1
         val rB = e.R(app)
         val rD = e.al(app)
+        val launcherIconIndex = app.getSharedPreferences(PREFS_NAME, 0)
+            .getInt(KEY_LAUNCHER_ICON, if (rD == 2) 1 else 0)
+            .coerceIn(0, launcherIcons.lastIndex)
         val hM = e.O(app)
         val pin = e.y(app)
         val cacheSize = formatSize(sizeOf(app.cacheDir) + sizeOf(app.externalCacheDir))
@@ -48,6 +57,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             imageQualityIndex = rB,
             themeColorValue = colors.getOrElse(rD) { "" },
             themeColorIndex = rD,
+            launcherIconValue = launcherIcons.getOrElse(launcherIconIndex) { "" },
+            launcherIconIndex = launcherIconIndex,
             autoPagingValue = String.format("%.1f", hM / 1000.0f) + " " + app.getString(R.string.second),
             autoPagingDraftIntervalMs = if (state.activeDialog == SettingsDialog.AutoPaging) {
                 state.autoPagingDraftIntervalMs
@@ -88,6 +99,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         state = state.copy(activeDialog = SettingsDialog.ThemeColor)
     }
 
+    fun openLauncherIconDialog() {
+        state = state.copy(activeDialog = SettingsDialog.LauncherIcon)
+    }
+
     fun dismissDialog() {
         state = state.copy(
             activeDialog = null,
@@ -116,7 +131,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun selectThemeColorIndex(index: Int) {
         state = state.copy(activeDialog = null)
         e.h(getApplication(), index)
-        LauncherIconHelper.syncLauncherIcon(getApplication(), index)
+        loadSettings()
+    }
+
+    fun selectLauncherIconIndex(index: Int) {
+        val safeIndex = index.coerceIn(0, 1)
+        val app = getApplication<Application>()
+        state = state.copy(activeDialog = null)
+        app.getSharedPreferences(PREFS_NAME, 0)
+            .edit()
+            .putInt(KEY_LAUNCHER_ICON, safeIndex)
+            .apply()
+        LauncherIconHelper.syncLauncherIcon(app, if (safeIndex == 1) 2 else 0)
         loadSettings()
     }
 

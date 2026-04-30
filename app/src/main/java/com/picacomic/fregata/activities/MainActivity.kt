@@ -351,6 +351,7 @@ class MainActivity : BaseActivity() {
                                 onAutoPaging = settingsViewModel::openAutoPagingDialog,
                                 onImageQuality = settingsViewModel::openImageQualityDialog,
                                 onThemeColor = settingsViewModel::openThemeColorDialog,
+                                onLauncherIcon = settingsViewModel::openLauncherIconDialog,
                                 onContinueDownload = {
                                     g.av(this@MainActivity)
                                 },
@@ -393,6 +394,7 @@ class MainActivity : BaseActivity() {
                                         finish()
                                     }
                                 },
+                                onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
                                 onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
                                 onAutoPagingConfirmed = settingsViewModel::confirmAutoPagingInterval
                             )

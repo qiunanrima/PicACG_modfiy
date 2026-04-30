@@ -45,6 +45,7 @@ enum class SettingsDialog {
     AutoPaging,
     ImageQuality,
     ThemeColor,
+    LauncherIcon,
     ThemeColorUnsupported,
 }
 
@@ -61,6 +62,8 @@ data class SettingsState(
     val imageQualityValue: String = "",
     val themeColorIndex: Int = 0,
     val themeColorValue: String = "",
+    val launcherIconIndex: Int = 0,
+    val launcherIconValue: String = "",
     val cacheTitleValue: String = "",
     val pinTitleValue: String = "",
     val pinValue: String = "",
@@ -80,6 +83,7 @@ fun SettingsScreen(
     onAutoPaging: () -> Unit,
     onImageQuality: () -> Unit,
     onThemeColor: () -> Unit,
+    onLauncherIcon: () -> Unit,
     onContinueDownload: () -> Unit,
     onApkVersion: () -> Unit,
     onCache: () -> Unit,
@@ -96,6 +100,7 @@ fun SettingsScreen(
     onScrollDirectionSelected: (Int) -> Unit,
     onImageQualitySelected: (Int) -> Unit,
     onThemeColorSelected: (Int) -> Unit,
+    onLauncherIconSelected: (Int) -> Unit,
     onAutoPagingDraftChanged: (Int) -> Unit,
     onAutoPagingConfirmed: () -> Unit,
 ) {
@@ -103,6 +108,7 @@ fun SettingsScreen(
     val scrollDirectionOptions = stringArrayResource(R.array.setting_options_scroll_directions)
     val imageQualityOptions = stringArrayResource(R.array.setting_options_image_qualities)
     val themeColorOptions = stringArrayResource(R.array.setting_theme_colors)
+    val launcherIconOptions = listOf("默认图标", "Miracle Neon")
 
     PicaComposeTheme {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -190,6 +196,11 @@ fun SettingsScreen(
                         onClick = onThemeColor
                     )
                     PicaValueListItem(
+                        label = "应用图标",
+                        value = state.launcherIconValue,
+                        onClick = onLauncherIcon
+                    )
+                    PicaValueListItem(
                         label = stringResource(R.string.alert_continue_download_comic_title),
                         value = stringResource(R.string.setting_chatroom_open),
                         onClick = onContinueDownload
@@ -263,6 +274,14 @@ fun SettingsScreen(
                 options = themeColorOptions.toList(),
                 selectedIndex = state.themeColorIndex,
                 onSelect = onThemeColorSelected,
+                onDismiss = onDialogDismiss,
+            )
+
+            SettingsDialog.LauncherIcon -> PicaSingleChoiceDialog(
+                title = "应用图标",
+                options = launcherIconOptions,
+                selectedIndex = state.launcherIconIndex,
+                onSelect = onLauncherIconSelected,
                 onDismiss = onDialogDismiss,
             )
 
@@ -357,6 +376,7 @@ private fun SettingsScreenPreview(
         onAutoPaging = {},
         onImageQuality = {},
         onThemeColor = {},
+        onLauncherIcon = {},
         onContinueDownload = {},
         onApkVersion = {},
         onCache = {},
@@ -373,6 +393,7 @@ private fun SettingsScreenPreview(
         onScrollDirectionSelected = {},
         onImageQualitySelected = {},
         onThemeColorSelected = {},
+        onLauncherIconSelected = {},
         onAutoPagingDraftChanged = {},
         onAutoPagingConfirmed = {},
     )
