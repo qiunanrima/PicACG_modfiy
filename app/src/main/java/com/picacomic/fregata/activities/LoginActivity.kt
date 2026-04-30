@@ -1,6 +1,7 @@
 package com.picacomic.fregata.activities
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -16,19 +17,25 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.picacomic.fregata.R
+import com.picacomic.fregata.a_pkg.g
 import com.picacomic.fregata.b.c
 import com.picacomic.fregata.compose.screens.LoginScreen
+import com.picacomic.fregata.compose.screens.RegisterScreen
 import com.picacomic.fregata.compose.viewmodels.LoginViewModel
+import com.picacomic.fregata.compose.viewmodels.RegisterValidationError
+import com.picacomic.fregata.compose.viewmodels.RegisterViewModel
+import com.picacomic.fregata.objects.NetworkErrorObject
 import com.picacomic.fregata.utils.views.AlertDialogCenter
 
 class LoginActivity : BaseActivity() {
     private val viewModel: LoginViewModel by viewModels()
+    private val registerViewModel: RegisterViewModel by viewModels()
 
     override fun onCreate(bundle: Bundle?) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -37,7 +44,43 @@ class LoginActivity : BaseActivity() {
         viewModel.initialize()
 
         setContent {
-            Box(modifier = Modifier.fillMaxSize()) {
+            var showingRegister by rememberSaveable { mutableStateOf(false) }
+
+            if (showingRegister) {
+                RegisterScreen(
+                    username = registerViewModel.username,
+                    email = registerViewModel.email,
+                    password = registerViewModel.password,
+                    passwordConfirm = registerViewModel.passwordConfirm,
+                    question1 = registerViewModel.question1,
+                    answer1 = registerViewModel.answer1,
+                    question2 = registerViewModel.question2,
+                    answer2 = registerViewModel.answer2,
+                    question3 = registerViewModel.question3,
+                    answer3 = registerViewModel.answer3,
+                    birthdayText = registerViewModel.birthdayDisplay(
+                        prefix = getString(R.string.register_date_of_birth_prefix),
+                        suffix = getString(R.string.register_age),
+                    ),
+                    selectedGenderIndex = registerViewModel.selectedGenderIndex,
+                    isLoading = registerViewModel.isLoading,
+                    loadingText = getString(registerViewModel.loadingTextRes),
+                    onUsernameChange = registerViewModel::updateUsername,
+                    onEmailChange = registerViewModel::updateEmail,
+                    onPasswordChange = registerViewModel::updatePassword,
+                    onPasswordConfirmChange = registerViewModel::updatePasswordConfirm,
+                    onQuestion1Change = registerViewModel::updateQuestion1,
+                    onAnswer1Change = registerViewModel::updateAnswer1,
+                    onQuestion2Change = registerViewModel::updateQuestion2,
+                    onAnswer2Change = registerViewModel::updateAnswer2,
+                    onQuestion3Change = registerViewModel::updateQuestion3,
+                    onAnswer3Change = registerViewModel::updateAnswer3,
+                    onGenderChange = registerViewModel::aa,
+                    onBirthdayClick = ::showBirthdayPicker,
+                    onSubmit = registerViewModel::dI,
+                    onBack = { showingRegister = false },
+                )
+            } else {
                 LoginScreen(
                     email = viewModel.email,
                     password = viewModel.password,
@@ -52,18 +95,9 @@ class LoginActivity : BaseActivity() {
                             viewModel.submitLogin()
                         }
                     },
-                    onRegister = ::showRegisterScreen,
+                    onRegister = { showingRegister = true },
                     onForgotPassword = ::showForgotPasswordDialog,
                     onResendActivation = ::showResendActivationDialog,
-                )
-
-                AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { context ->
-                        androidx.fragment.app.FragmentContainerView(context).apply {
-                            id = R.id.container
-                        }
-                    },
                 )
             }
 
@@ -106,6 +140,78 @@ class LoginActivity : BaseActivity() {
                     c(this@LoginActivity).dN()
                 }
             }
+
+            LaunchedEffect(registerViewModel.validationErrorEvent) {
+                if (registerViewModel.validationErrorEvent <= 0) return@LaunchedEffect
+                when (registerViewModel.validationError) {
+                    RegisterValidationError.UsernameLength -> AlertDialogCenter.usernameLength(this@LoginActivity)
+                    RegisterValidationError.CannotStartWithPica -> AlertDialogCenter.cannotStartWithPica(this@LoginActivity)
+                    RegisterValidationError.PasswordLength -> AlertDialogCenter.passwordLength(this@LoginActivity)
+                    RegisterValidationError.PasswordNotMatch -> AlertDialogCenter.passwordNotMatch(this@LoginActivity)
+                    RegisterValidationError.Birthday -> AlertDialogCenter.birthday(this@LoginActivity)
+                    RegisterValidationError.AgeNotEnough -> AlertDialogCenter.ageNotEnough(this@LoginActivity)
+                    null -> Unit
+                }
+            }
+
+            LaunchedEffect(registerViewModel.registerSuccessEvent) {
+                if (registerViewModel.registerSuccessEvent <= 0) return@LaunchedEffect
+                AlertDialogCenter.showCustomAlertDialog(
+                    this@LoginActivity,
+                    R.drawable.icon_success,
+                    R.string.alert_register_success_title,
+                    R.string.alert_register_success,
+                    { registerViewModel.dr() },
+                    null,
+                )
+            }
+
+            LaunchedEffect(registerViewModel.navigateToMainEvent) {
+                if (registerViewModel.navigateToMainEvent > 0) {
+                    goToMain()
+                }
+            }
+
+            LaunchedEffect(registerViewModel.errorEvent) {
+                if (registerViewModel.errorEvent <= 0) return@LaunchedEffect
+                val closeRegister = registerViewModel.signInErrorShouldCloseRegister
+                if (closeRegister) {
+                    showingRegister = false
+                }
+                val code = registerViewModel.errorCode
+                if (code != null) {
+                    try {
+                        if (closeRegister) {
+                            c(
+                                this@LoginActivity,
+                                code,
+                                registerViewModel.errorBody.orEmpty(),
+                                object : g {
+                                    override fun a(i: Int, networkErrorObject: NetworkErrorObject?) {
+                                        if (networkErrorObject == null) {
+                                            AlertDialogCenter.generalError(this@LoginActivity)
+                                            return
+                                        }
+                                        AlertDialog.Builder(this@LoginActivity)
+                                            .setTitle(networkErrorObject.error)
+                                            .setMessage(
+                                                networkErrorObject.message + "\n" + networkErrorObject.detail,
+                                            )
+                                            .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
+                                            .show()
+                                    }
+                                },
+                            ).dN()
+                        } else {
+                            c(this@LoginActivity, code, registerViewModel.errorBody.orEmpty()).dN()
+                        }
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
+                } else {
+                    c(this@LoginActivity).dN()
+                }
+            }
         }
     }
 
@@ -114,23 +220,16 @@ class LoginActivity : BaseActivity() {
         finish()
     }
 
-    private fun showRegisterScreen() {
-        if (findViewById<android.view.View>(R.id.container) == null) return
-
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(
-                android.R.anim.fade_in,
-                android.R.anim.fade_out,
-                android.R.anim.fade_in,
-                android.R.anim.fade_out,
-            )
-            .add(
-                R.id.container,
-                com.picacomic.fregata.fragments.RegisterFragment(),
-                com.picacomic.fregata.fragments.RegisterFragment.TAG,
-            )
-            .addToBackStack(com.picacomic.fregata.fragments.RegisterFragment.TAG)
-            .commit()
+    private fun showBirthdayPicker() {
+        DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                registerViewModel.setBirthday(year, month, dayOfMonth)
+            },
+            registerViewModel.selectedYear,
+            registerViewModel.selectedMonth,
+            registerViewModel.selectedDay,
+        ).show()
     }
 
     private fun showForgotPasswordDialog() {

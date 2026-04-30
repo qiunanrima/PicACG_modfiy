@@ -44,6 +44,26 @@ fun PicaAppListScreen(
     onPicaAppClick: (title: String, link: String) -> Unit,
     viewModel: PicaAppListViewModel? = null
 ) {
+    PicaComposeTheme {
+        PicaSecondaryScreen(
+            title = stringResource(R.string.title_pica_app),
+            onBack = onBack
+        ) {
+            PicaAppListContent(
+                onPicaAppClick = onPicaAppClick,
+                viewModel = viewModel,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+fun PicaAppListContent(
+    onPicaAppClick: (title: String, link: String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: PicaAppListViewModel? = null,
+) {
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
     val screenViewModel = previewAwareViewModel(viewModel)
@@ -66,58 +86,51 @@ fun PicaAppListScreen(
         }
     }
 
-    PicaComposeTheme {
-        PicaSecondaryScreen(
-            title = stringResource(R.string.title_pica_app),
-            onBack = onBack
-        ) {
-            Box(modifier = Modifier.weight(1f)) {
-                if (inPreview) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
+    Box(modifier = modifier.fillMaxSize()) {
+        if (inPreview) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                PreviewListPanel(
+                    title = stringResource(R.string.title_pica_app),
+                    items = previewApps.map { "${it.title} · ${it.description}" }
+                )
+            }
+        } else {
+            val vm = screenViewModel
+            when {
+                vm == null || (vm.apps.isEmpty() && vm.isLoading) -> {
+                    PicaLoadingIndicator()
+                }
+
+                vm.apps.isEmpty() -> {
+                    PicaEmptyState(message = "暂无内容")
+                }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
-                        PreviewListPanel(
-                            title = stringResource(R.string.title_pica_app),
-                            items = previewApps.map { "${it.title} · ${it.description}" }
-                        )
-                    }
-                } else {
-                    val vm = screenViewModel
-                    when {
-                        vm == null || (vm.apps.isEmpty() && vm.isLoading) -> {
-                            PicaLoadingIndicator()
-                        }
-
-                        vm.apps.isEmpty() -> {
-                            PicaEmptyState(message = "暂无内容")
-                        }
-
-                        else -> {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(vertical = 8.dp)
-                            ) {
-                                itemsIndexed(
-                                    items = vm.apps,
-                                    key = { index, item ->
-                                        item.title ?: "pica_app_$index"
-                                    }
-                                ) { _, item ->
-                                    PicaAppListItem(item = item) {
-                                        val title = item.title.orEmpty()
-                                        val link = item.url ?: if (
-                                            title.equals("嗶咔萌約", ignoreCase = true)
-                                        ) {
-                                            a.dT()
-                                        } else {
-                                            ""
-                                        }
-                                        if (title.isNotBlank() && link.isNotBlank()) {
-                                            onPicaAppClick(title, link)
-                                        }
-                                    }
+                        itemsIndexed(
+                            items = vm.apps,
+                            key = { index, item ->
+                                item.title ?: "pica_app_$index"
+                            }
+                        ) { _, item ->
+                            PicaAppListItem(item = item) {
+                                val title = item.title.orEmpty()
+                                val link = item.url ?: if (
+                                    title.equals("嗶咔萌約", ignoreCase = true)
+                                ) {
+                                    a.dT()
+                                } else {
+                                    ""
+                                }
+                                if (title.isNotBlank() && link.isNotBlank()) {
+                                    onPicaAppClick(title, link)
                                 }
                             }
                         }

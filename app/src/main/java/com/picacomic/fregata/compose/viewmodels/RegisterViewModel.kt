@@ -94,43 +94,43 @@ class RegisterViewModel(application: Application) : AndroidViewModel(application
     private var registerCall: Call<RegisterResponse>? = null
     private var signInCall: Call<GeneralResponse<SignInResponse>>? = null
 
-    fun setUsername(value: String) {
+    fun updateUsername(value: String) {
         username = value
     }
 
-    fun setEmail(value: String) {
+    fun updateEmail(value: String) {
         email = value
     }
 
-    fun setPassword(value: String) {
+    fun updatePassword(value: String) {
         password = value
     }
 
-    fun setPasswordConfirm(value: String) {
+    fun updatePasswordConfirm(value: String) {
         passwordConfirm = value
     }
 
-    fun setQuestion1(value: String) {
+    fun updateQuestion1(value: String) {
         question1 = value
     }
 
-    fun setAnswer1(value: String) {
+    fun updateAnswer1(value: String) {
         answer1 = value
     }
 
-    fun setQuestion2(value: String) {
+    fun updateQuestion2(value: String) {
         question2 = value
     }
 
-    fun setAnswer2(value: String) {
+    fun updateAnswer2(value: String) {
         answer2 = value
     }
 
-    fun setQuestion3(value: String) {
+    fun updateQuestion3(value: String) {
         question3 = value
     }
 
-    fun setAnswer3(value: String) {
+    fun updateAnswer3(value: String) {
         answer3 = value
     }
 
