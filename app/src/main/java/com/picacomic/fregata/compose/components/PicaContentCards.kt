@@ -181,33 +181,39 @@ fun PicaComicListCard(
     pages: Int? = null,
     episodes: Int? = null,
     categories: List<String> = emptyList(),
-    coverWidth: Dp = 84.dp,
+    coverWidth: Dp = 76.dp,
 ) {
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
+            .height(174.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         ),
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top,
         ) {
             PicaRemoteImage(
                 thumbnail = thumbnail,
                 contentDescription = title,
                 modifier = Modifier
                     .width(coverWidth)
-                    .aspectRatio(0.72f)
+                    .height(130.dp)
                     .clip(MaterialTheme.shapes.small),
                 fallbackIcon = Icons.Filled.Category,
             )
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 Text(
                     text = title,
@@ -225,33 +231,25 @@ fun PicaComicListCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
                     likes?.let {
-                        Text(
-                            text = "$it likes",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
+                        PicaComicMetaText(text = "$it likes", primary = true)
                     }
                     pages?.let {
-                        Text(
-                            text = "$it pages",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        PicaComicMetaText(text = "$it pages")
                     }
                     episodes?.let {
-                        Text(
-                            text = "$it eps",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        PicaComicMetaText(text = "$it eps")
                     }
                 }
+                Spacer(modifier = Modifier.weight(1f))
                 if (categories.isNotEmpty()) {
                     Text(
                         text = categories.take(3).joinToString(" / "),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -260,6 +258,22 @@ fun PicaComicListCard(
             }
         }
     }
+}
+
+@Composable
+private fun PicaComicMetaText(
+    text: String,
+    primary: Boolean = false,
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        fontWeight = FontWeight.Medium,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -281,7 +295,7 @@ fun PicaGameCard(
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -376,7 +390,7 @@ fun PicaTwoLineCard(
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),

@@ -58,6 +58,9 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     var isLoading by mutableStateOf(false)
         private set
 
+    var loadingReplyIndex by mutableIntStateOf(-1)
+        private set
+
     var isPosting by mutableStateOf(false)
         private set
 
@@ -256,14 +259,14 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     fun loadReplies(index: Int, reset: Boolean = false) {
         val item = commentItems.getOrNull(index) ?: return
         val commentId = item.commentId ?: return
-        if (isLoading) return
+        if (loadingReplyIndex == index) return
 
         val targetPage = if (reset) 1 else (item.currentPage + 1).coerceAtLeast(1)
         val context = getApplication<Application>()
         val api = d(context).dO()
         val auth = e.z(context)
 
-        isLoading = true
+        loadingReplyIndex = index
         childCommentsCall?.cancel()
         childCommentsCall = api.d(auth, commentId, targetPage)
         childCommentsCall?.enqueue(object : Callback<GeneralResponse<CommentsResponse>> {
@@ -290,19 +293,26 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
                 }
-                isLoading = false
+                loadingReplyIndex = -1
             }
 
             override fun onFailure(call: Call<GeneralResponse<CommentsResponse>>, t: Throwable) {
                 if (call.isCanceled) return
                 emitNetworkError()
-                isLoading = false
+                loadingReplyIndex = -1
             }
         })
     }
 
     fun beginReply(index: Int) {
-        selectComment(index)
+        val item = commentItems.getOrNull(index) ?: return
+        if (replyingToCommentId.equals(item.commentId, ignoreCase = true) && replyMode) {
+            cancelReplyMode()
+            return
+        }
+        D(true)
+        replyingToCommentId = item.commentId
+        replyingToIndex = index
     }
 
     fun toggleCommentLike(index: Int) {
@@ -356,7 +366,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun C(index: Int) {
-        selectComment(index)
+        toggleReplies(index)
     }
 
     fun D(enabled: Boolean) {
@@ -369,6 +379,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
 
     fun N(index: Int) {
         val item = commentItems.getOrNull(index) ?: return
+        expandedCommentIndex = index
         if (item.childsCount <= 0) return
         if (item.arrayList.isNullOrEmpty() || item.currentPage <= 0) {
             a(item.commentId.orEmpty(), index, true)
@@ -966,6 +977,7 @@ class CommentViewModel(application: Application) : AndroidViewModel(application)
         totalPages = 1
         hasMore = true
         isLoading = false
+        loadingReplyIndex = -1
         isPosting = false
         expandedCommentIndex = -1
         adminToolsIndex = -1

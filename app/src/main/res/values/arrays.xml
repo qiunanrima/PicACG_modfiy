@@ -99,6 +99,12 @@
         <item>@string/theme_color_white</item>
         <item>@string/theme_color_dark</item>
         <item>@string/theme_color_neon</item>
+        <item>@string/theme_color_blue</item>
+        <item>@string/theme_color_green</item>
+        <item>@string/theme_color_teal</item>
+        <item>@string/theme_color_purple</item>
+        <item>@string/theme_color_orange</item>
+        <item>@string/theme_color_red</item>
     </string-array>
     <string-array name="sorting_advanced">
         <item>@string/sorting_dd</item>

@@ -6,7 +6,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.CountDownTimer
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,7 +61,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -93,7 +90,6 @@ import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.FileProviderHelper
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-import com.picacomic.fregata.utils.views.ExpCircleView
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -452,7 +448,7 @@ private fun ProfileHeader(
         ) {
             Box(
                 modifier = Modifier
-                    .size(150.dp)
+                    .size(128.dp)
                     .clickable(onClick = onAvatarClick),
                 contentAlignment = Alignment.Center,
             ) {
@@ -461,19 +457,15 @@ private fun ProfileHeader(
                         imageUrl = profile?.character,
                         contentDescription = profile?.role,
                         modifier = Modifier
-                            .size(146.dp)
+                            .size(128.dp)
                             .align(Alignment.Center),
                         contentScale = ContentScale.Fit,
                     )
                 }
-                AnimatedExpCircle(
-                    angle = expAngle(profile),
-                    modifier = Modifier.size(132.dp),
-                )
                 Box(
                     modifier = Modifier
-                        .size(112.dp)
-                        .clip(CircleShape),
+                        .size(104.dp)
+                        .clip(MaterialTheme.shapes.medium),
                 ) {
                 PicaRemoteImage(
                     thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
@@ -535,48 +527,6 @@ private fun ProfileHeader(
         }
     }
 }
-}
-
-@Composable
-private fun AnimatedExpCircle(
-    angle: Float,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-    var currentView by androidx.compose.runtime.remember { mutableStateOf<ExpCircleView?>(null) }
-    AndroidView(
-        modifier = modifier,
-        factory = {
-            ExpCircleView(context).apply {
-                setGridSize(20)
-                setAngle(0f)
-                currentView = this
-            }
-        },
-        update = { view ->
-            view.setGridSize(20)
-            currentView = view
-        },
-    )
-    DisposableEffect(currentView, angle) {
-        val view = currentView
-        val timer = object : CountDownTimer(1000L, 10L) {
-            override fun onTick(millisUntilFinished: Long) {
-                view?.setAngle(((1000L - millisUntilFinished) * angle) / 1000f)
-            }
-
-            override fun onFinish() {
-                view?.setAngle(angle)
-            }
-        }
-        timer.start()
-        onDispose { timer.cancel() }
-    }
-}
-
-private fun expAngle(profile: UserProfileObject?): Float {
-    val next = expForLevel((profile?.level ?: 0) + 1).coerceAtLeast(1)
-    return ((profile?.exp ?: 0) * 360f) / next
 }
 
 @Composable

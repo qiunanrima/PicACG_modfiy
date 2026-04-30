@@ -265,10 +265,12 @@ fun CommentScreen(
                                         index = index,
                                         floor = vm.displayFloorCount - index,
                                         expanded = vm.expandedCommentIndex == index,
+                                        repliesLoading = vm.loadingReplyIndex == index,
                                         adminMode = vm.adminMode,
                                         profileUser = vm.profileUser,
                                         isProfileMode = vm.isProfileMode,
-                                        onClick = { vm.C(index) },
+                                        onReply = { vm.beginReply(index) },
+                                        onToggleReplies = { vm.C(index) },
                                         onOpenTarget = {
                                             when (val target = vm.O(index)) {
                                                 is CommentViewModel.CommentTarget.Comic -> onComicClick(target.comicId)
@@ -313,10 +315,12 @@ private fun CommentCard(
     index: Int,
     floor: Int,
     expanded: Boolean,
+    repliesLoading: Boolean,
     adminMode: Boolean,
     profileUser: UserBasicObject?,
     isProfileMode: Boolean,
-    onClick: () -> Unit,
+    onReply: () -> Unit,
+    onToggleReplies: () -> Unit,
     onOpenTarget: () -> Unit,
     onLike: () -> Unit,
     onHide: () -> Unit,
@@ -344,7 +348,7 @@ private fun CommentCard(
             containerColor = if (item.isTop) {
                 MaterialTheme.colorScheme.primaryContainer
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.surfaceContainerHighest
             },
         ),
     ) {
@@ -462,14 +466,17 @@ private fun CommentCard(
                     modifier = Modifier.weight(1f),
                 )
                 CommentActionButton(
-                    text = "${stringResource(R.string.comment_reply)} ${item.childsCount}",
-                    onClick = onClick,
+                    text = stringResource(R.string.comment_reply),
+                    onClick = onReply,
                     modifier = Modifier.weight(1f),
                 )
                 CommentActionButton(
-                    text = stringResource(R.string.more),
-                    onClick = onOpenTarget,
-                    enabled = !isProfileMode && (item.comicId != null || item.gameId != null),
+                    text = if (expanded) {
+                        "收起 ${item.childsCount}"
+                    } else {
+                        "展开 ${item.childsCount}"
+                    },
+                    onClick = onToggleReplies,
                     modifier = Modifier.weight(1f),
                 )
                 CommentActionButton(
@@ -509,17 +516,31 @@ private fun CommentCard(
                 if (item.currentPage < item.totalPage) {
                     TextButton(
                         onClick = onLoadMoreReplies,
+                        enabled = !repliesLoading,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(stringResource(R.string.comment_view_more_reply))
+                        Text(
+                            if (repliesLoading) {
+                                stringResource(R.string.loading_general)
+                            } else {
+                                stringResource(R.string.comment_view_more_reply)
+                            }
+                        )
                     }
                 }
             } else if (expanded && item.childsCount > 0) {
                 TextButton(
                     onClick = onLoadMoreReplies,
+                    enabled = !repliesLoading,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(stringResource(R.string.comment_view_more_reply))
+                    Text(
+                        if (repliesLoading) {
+                            stringResource(R.string.loading_general)
+                        } else {
+                            stringResource(R.string.comment_view_more_reply)
+                        }
+                    )
                 }
             } else if (expanded && item.childsCount == 0) {
                 Text(

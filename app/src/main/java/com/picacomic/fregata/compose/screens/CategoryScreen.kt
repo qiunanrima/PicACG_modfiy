@@ -302,7 +302,7 @@ private fun CategoryActionCard(
             .width(112.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = item.onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
         Box(
             modifier = Modifier
@@ -342,7 +342,7 @@ private fun RemoteCategoryCard(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
         Column(
             modifier = Modifier.padding(10.dp),

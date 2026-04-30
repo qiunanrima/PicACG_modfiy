@@ -357,7 +357,7 @@ fun PicaRecommendationCard(
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
