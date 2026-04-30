@@ -171,7 +171,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (this@ComicViewerActivity != null) {
-                    Toast.makeText(this@ComicViewerActivity, "cannot parse battery level.", 0)
+                    Toast.makeText(this@ComicViewerActivity, "cannot parse battery level.", Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -378,14 +378,14 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             // from class: com.picacomic.fregata.activities.ComicViewerActivity.28
             // android.view.View.OnClickListener
             override fun onClick(view: View?) {
-                Toast.makeText(this@ComicViewerActivity, "Download and Share Image", 0).show()
+                Toast.makeText(this@ComicViewerActivity, "Download and Share Image", Toast.LENGTH_SHORT).show()
             }
         })
         this.button_download!!.setOnClickListener(object : View.OnClickListener {
             // from class: com.picacomic.fregata.activities.ComicViewerActivity.29
             // android.view.View.OnClickListener
             override fun onClick(view: View?) {
-                Toast.makeText(this@ComicViewerActivity, "Download Current Image", 0).show()
+                Toast.makeText(this@ComicViewerActivity, "Download Current Image", android.widget.Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -503,7 +503,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             CompoundButton.OnCheckedChangeListener {
             // from class: com.picacomic.fregata.activities.ComicViewerActivity.9
             // android.widget.CompoundButton.OnCheckedChangeListener
-            override fun onCheckedChanged(compoundButton: CompoundButton?, z: Boolean) {
+            override fun onCheckedChanged(compoundButton: CompoundButton, z: Boolean) {
                 this@ComicViewerActivity.j(z)
             }
         })
@@ -1416,7 +1416,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
-    public override fun onRequestPermissionsResult(i: Int, strArr: Array<String?>, iArr: IntArray) {
+    public override fun onRequestPermissionsResult(i: Int, strArr: Array<out String>, iArr: IntArray) {
         super.onRequestPermissionsResult(i, strArr, iArr)
         if (i == REQUEST_WRITE_SETTINGS && iArr.size > 0) {
             if (iArr[0] == PackageManager.PERMISSION_GRANTED) {
@@ -1584,6 +1584,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     companion object {
         const val TAG: String = "ComicViewerActivity"
         private const val REQUEST_WRITE_SETTINGS = 2001
+        @JvmField
         var hq: Int = 40
     }
 }

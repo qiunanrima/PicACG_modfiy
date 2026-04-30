@@ -59,7 +59,6 @@ import com.picacomic.fregata.databinding.ActivityMainBinding
 import com.picacomic.fregata.fragments.CategoryFragment
 import com.picacomic.fregata.fragments.GameFragment
 import com.picacomic.fregata.fragments.HomeFragment
-import com.picacomic.fregata.fragments.OneTimeUpdateQAFragment
 import com.picacomic.fregata.fragments.ProfileFragment
 import com.picacomic.fregata.fragments.SettingFragment
 import com.picacomic.fregata.objects.requests.AdjustExpBody
@@ -117,6 +116,7 @@ class MainActivity : BaseActivity() {
     private var bannerVisible by mutableStateOf(false)
     private var popupVisible by mutableStateOf(false)
     private var expButtonsVisible by mutableStateOf(false)
+    private var forceOneTimeUpdate by mutableStateOf(false)
     private var navControllerRef: NavHostController? = null
 
     // Legacy controls overlay
@@ -138,6 +138,7 @@ class MainActivity : BaseActivity() {
         setContent {
             MainScreen()
         }
+        bH()
 
         e.j(this, null as String?)
         e.l(this, null as String?)
@@ -161,6 +162,15 @@ class MainActivity : BaseActivity() {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
         val showBottomBar = navItems.any { it.route == currentRoute }
+
+        LaunchedEffect(forceOneTimeUpdate) {
+            if (forceOneTimeUpdate) {
+                navController.navigate(Screen.OneTimeUpdateQA.route) {
+                    popUpTo(Screen.Home.route)
+                    launchSingleTop = true
+                }
+            }
+        }
 
         PicaComposeTheme {
             Scaffold(
@@ -368,11 +378,7 @@ class MainActivity : BaseActivity() {
                                     startActivity(intent)
                                 },
                                 onFaq = {
-                                    AlertDialogCenter.showFaqAlertDialog(
-                                        this@MainActivity,
-                                        "https://www.picacomic.com/faq",
-                                        null
-                                    )
+                                    navController.navigate(Screen.Question.route)
                                 },
                                 onPin = {
                                     navController.navigate(Screen.ChangePin.route)
@@ -527,6 +533,31 @@ class MainActivity : BaseActivity() {
 
                         composable(Screen.ChangePassword.route) {
                             ChangePasswordScreen(
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(Screen.OneTimeUpdateQA.route) {
+                            OneTimeUpdateQAScreen(
+                                onBack = { navController.popBackStack() },
+                                onSuccess = {
+                                    navController.navigate(Screen.OneTimeIdUpdate.route) {
+                                        popUpTo(Screen.OneTimeUpdateQA.route) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            )
+                        }
+
+                        composable(Screen.OneTimeIdUpdate.route) {
+                            OneTimeIdUpdateScreen(
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(Screen.Question.route) {
+                            QuestionScreen(
                                 onBack = { navController.popBackStack() }
                             )
                         }
@@ -775,6 +806,9 @@ class MainActivity : BaseActivity() {
         }
 
         e.k(this, Gson().toJson(iH?.categories))
+        if (iH?.isIdUpdated == false) {
+            forceOneTimeUpdate = true
+        }
         val version = appState.version
         if (version != null && g.C(this, version)) {
             AlertDialogCenter.showUpdateApkAlertDialog(

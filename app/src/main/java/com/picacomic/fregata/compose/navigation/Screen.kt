@@ -45,6 +45,9 @@ sealed class Screen(
     object Leaderboard : Screen("leaderboard", R.string.category_title_leaderboard)
     object ChangePin : Screen("change_pin", R.string.setting_pin_title)
     object ChangePassword : Screen("change_password", R.string.setting_password_title)
+    object OneTimeUpdateQA : Screen("one_time_update_qa", R.string.title_one_time_update)
+    object OneTimeIdUpdate : Screen("one_time_id_update", R.string.title_one_time_update)
+    object Question : Screen("question", R.string.forgot_password_q_and_a_title)
 
     companion object {
         private fun enc(value: String): String = Uri.encode(value)

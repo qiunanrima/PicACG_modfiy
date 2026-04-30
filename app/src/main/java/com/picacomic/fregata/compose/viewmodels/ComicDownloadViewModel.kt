@@ -13,10 +13,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.picacomic.fregata.b.d
 import com.picacomic.fregata.objects.ComicEpisodeObject
+import com.picacomic.fregata.objects.ComicPageObject
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject
 import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
 import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject
 import com.picacomic.fregata.objects.responses.DataClass.ComicEpisodeResponse.ComicEpisodeResponse
+import com.picacomic.fregata.objects.responses.DataClass.ComicPageResponse.ComicPagesResponse
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.services.DownloadService
 import com.picacomic.fregata.utils.b
@@ -40,6 +42,9 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         private set
 
     var episodes by mutableStateOf<List<ComicEpisodeObject>>(emptyList())
+        private set
+
+    var f2if by mutableStateOf<List<ComicPageObject>>(emptyList())
         private set
 
     var nm by mutableIntStateOf(1)
@@ -70,6 +75,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         private set
 
     private var nb: Call<GeneralResponse<ComicEpisodeResponse>>? = null
+    private var hZ: Call<GeneralResponse<ComicPagesResponse>>? = null
     private var nt = false
 
     private val nv = object : BroadcastReceiver() {
@@ -93,6 +99,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         this.comicTitle = title
         episodeTotal = 0
         episodes = emptyList()
+        f2if = emptyList()
         nm = 1
         nk = true
         nu = false
@@ -207,6 +214,36 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         getApplication<Application>().startService(intent)
     }
 
+    fun loadEpisodePages(index: Int, page: Int = 1, reset: Boolean = true) {
+        val episodeId = episodes.getOrNull(index)?.episodeId ?: return
+        loadEpisodePages(episodeId, page, reset)
+    }
+
+    fun loadEpisodePages(episodeId: String, page: Int = 1, reset: Boolean = true) {
+        if (episodeId.isBlank()) return
+        hZ?.cancel()
+        hZ = d(getApplication<Application>()).dO().e(e.z(getApplication<Application>()), episodeId, page)
+        hZ?.enqueue(object : Callback<GeneralResponse<ComicPagesResponse>> {
+            override fun onResponse(
+                call: Call<GeneralResponse<ComicPagesResponse>>,
+                response: Response<GeneralResponse<ComicPagesResponse>>
+            ) {
+                if (response.code() == 200) {
+                    val docs = response.body()?.data?.pages?.docs.orEmpty()
+                    f2if = if (reset) docs else f2if + docs
+                } else {
+                    emitHttpError(response.code(), safeErrorBody(response))
+                }
+            }
+
+            override fun onFailure(call: Call<GeneralResponse<ComicPagesResponse>>, t: Throwable) {
+                if (!call.isCanceled) {
+                    emitNetworkError()
+                }
+            }
+        })
+    }
+
     fun cO() {
         val targetComicId = comicId ?: return
         val dbComicDetailObjectAw = b.aw(targetComicId) ?: return
@@ -297,6 +334,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
 
     override fun onCleared() {
         nb?.cancel()
+        hZ?.cancel()
         cQ()
         super.onCleared()
     }

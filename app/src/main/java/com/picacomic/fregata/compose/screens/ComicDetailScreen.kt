@@ -131,6 +131,7 @@ fun ComicDetailScreen(
     PicaComposeTheme {
         // MD3: 使用 pinnedScrollBehavior 让 TopAppBar 在滚动时保持固定
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+        val topBarDetail = if (inPreview) previewDetail else screenViewModel?.comicDetail
 
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -156,12 +157,28 @@ fun ComicDetailScreen(
                             )
                         }
                     },
+                    actions = {
+                        IconButton(
+                            enabled = topBarDetail != null,
+                            onClick = {
+                                val currentDetail = topBarDetail ?: return@IconButton
+                                if (inPreview) return@IconButton
+                                onDownloadClick(comicId, currentDetail.title)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Download,
+                                contentDescription = stringResource(R.string.download),
+                            )
+                        }
+                    },
                     // MD3: TopAppBar 颜色跟随 colorScheme，滚动后自动显示 surfaceContainer 背景
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
                         scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
                         titleContentColor = MaterialTheme.colorScheme.onSurface,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                        actionIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
                     scrollBehavior = scrollBehavior
                 )
@@ -435,16 +452,7 @@ private fun ComicDetailContent(
                         enabled = detail != null,
                         onClick = {
                             val currentDetail = detail ?: return@PicaActionItem
-                            if (currentDetail.isAllowDownload) {
-                                onDownloadClick(comicId, currentDetail.title)
-                            } else {
-                                com.picacomic.fregata.utils.views.AlertDialogCenter.showCustomAlertDialog(
-                                    context,
-                                    R.drawable.icon_exclamation_error,
-                                    R.string.alert_download_not_allow_title,
-                                    R.string.alert_download_not_allow,
-                                )
-                            }
+                            onDownloadClick(comicId, currentDetail.title)
                         },
                     ),
                 ),
