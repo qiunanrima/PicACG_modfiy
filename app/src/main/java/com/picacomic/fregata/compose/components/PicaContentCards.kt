@@ -186,7 +186,7 @@ fun PicaComicListCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .height(174.dp)
+            .height(154.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
         colors = CardDefaults.elevatedCardColors(
@@ -219,7 +219,7 @@ fun PicaComicListCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (subtitle.isNotBlank()) {
@@ -245,7 +245,6 @@ fun PicaComicListCard(
                         PicaComicMetaText(text = "$it eps")
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
                 if (categories.isNotEmpty()) {
                     Text(
                         text = categories.take(3).joinToString(" / "),
