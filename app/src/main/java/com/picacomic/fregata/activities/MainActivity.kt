@@ -493,7 +493,23 @@ class MainActivity : BaseActivity() {
                                 },
                                 onShowImage = { imageUrl ->
                                     D(imageUrl)
+                                },
+                                onDownloadClick = { id, title ->
+                                    navController.navigate(Screen.createComicDownloadRoute(id, title))
                                 }
+                            )
+                        }
+
+                        composable(Screen.ComicDownload.route) { backStackEntry ->
+                            val comicId = backStackEntry.arguments?.getString("comicId")
+                                ?.let { Uri.decode(it) }
+                                ?: ""
+                            val title = backStackEntry.arguments?.getString("title")
+                                ?.let { Uri.decode(it) }
+                            ComicDownloadScreen(
+                                comicId = comicId,
+                                title = title,
+                                onBack = { navController.popBackStack() }
                             )
                         }
 

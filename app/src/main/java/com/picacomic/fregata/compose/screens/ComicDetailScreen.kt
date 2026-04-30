@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -94,6 +95,7 @@ fun ComicDetailScreen(
     ) -> Unit,
     onCreatorProfileClick: (String) -> Unit = {},
     onShowImage: (String) -> Unit = {},
+    onDownloadClick: (String, String?) -> Unit = { _, _ -> },
     viewModel: ComicDetailViewModel? = null
 ) {
     val inPreview = LocalInspectionMode.current
@@ -208,6 +210,7 @@ fun ComicDetailScreen(
                     onLoadMoreEpisodes = { screenViewModel?.loadMoreEpisodes() },
                     onToggleFavourite = { screenViewModel?.toggleFavourite() },
                     onToggleLike = { screenViewModel?.toggleLike() },
+                    onDownloadClick = onDownloadClick,
                 )
 
             }
@@ -241,6 +244,7 @@ private fun ComicDetailContent(
     onLoadMoreEpisodes: () -> Unit,
     onToggleFavourite: () -> Unit,
     onToggleLike: () -> Unit,
+    onDownloadClick: (String, String?) -> Unit,
 ) {
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
@@ -424,6 +428,24 @@ private fun ComicDetailContent(
                         selected = detail?.isFavourite == true,
                         enabled = detail != null && !isActionLoading,
                         onClick = onToggleFavourite,
+                    ),
+                    PicaActionItem(
+                        icon = Icons.Filled.Download,
+                        contentDescription = "download",
+                        enabled = detail != null,
+                        onClick = {
+                            val currentDetail = detail ?: return@PicaActionItem
+                            if (currentDetail.isAllowDownload) {
+                                onDownloadClick(comicId, currentDetail.title)
+                            } else {
+                                com.picacomic.fregata.utils.views.AlertDialogCenter.showCustomAlertDialog(
+                                    context,
+                                    R.drawable.icon_exclamation_error,
+                                    R.string.alert_download_not_allow_title,
+                                    R.string.alert_download_not_allow,
+                                )
+                            }
+                        },
                     ),
                 ),
             )

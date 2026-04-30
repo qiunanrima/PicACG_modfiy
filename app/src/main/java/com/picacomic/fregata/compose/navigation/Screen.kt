@@ -31,6 +31,7 @@ sealed class Screen(
     object Notification : Screen("notification", R.string.title_notification)
     object ComicList : Screen("comic_list?category={category}&keywords={keywords}&tags={tags}&author={author}&finished={finished}&sorting={sorting}&translate={translate}&creatorId={creatorId}&creatorName={creatorName}", R.string.title_search)
     object ComicDetail : Screen("comic_detail/{comicId}", R.string.title_comic_detail_default)
+    object ComicDownload : Screen("comic_download/{comicId}?title={title}", R.string.download)
     object GameDetail : Screen("game_detail/{gameId}", R.string.title_game_detail)
     object Comment : Screen("comment?comicId={comicId}&gameId={gameId}&commentId={commentId}", R.string.title_comment)
     object PicaApp : Screen("pica_app?title={title}&link={link}", R.string.app_name)
@@ -74,6 +75,8 @@ sealed class Screen(
         }
 
         fun createComicDetailRoute(comicId: String) = "comic_detail/$comicId"
+        fun createComicDownloadRoute(comicId: String, title: String?) =
+            "comic_download/${enc(comicId)}?title=${enc(title.orEmpty())}"
         fun createGameDetailRoute(gameId: String) = "game_detail/$gameId"
         fun createCommentRoute(comicId: String? = null, gameId: String? = null, commentId: String? = null) = 
             "comment?" + listOfNotNull(
