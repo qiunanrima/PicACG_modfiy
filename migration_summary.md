@@ -1145,6 +1145,69 @@ rg -n "@color/(colorPrimary|colorPrimaryDark|colorPrimaryDark2|colorPrimaryLight
 - 最新验证：
   - `./gradlew.bat :app:compileDebugKotlin` 通过。
 
+### 7.36 ComicViewFragment / ComicViewerListFragment 迁移
+- `ComicViewerActivity.kt`
+  - 不再通过 `FragmentTransaction` 添加 `ComicViewFragment` / `ComicViewerListFragment`。
+  - 改为直接创建 `ComicViewerComposeHostView` 并加入 `R.id.container`。
+  - 保留旧 `a_pkg.c` 监听注册链路：
+    - Activity 仍通过 `a(comicViewerHostView)` 注册阅读器；
+    - 销毁时清空 listener 并释放 Compose host。
+  - 旧 Fragment `bH()` 里触发的 `bL()` / `bH()` 行为已迁到 Activity 初始化流程，进入阅读器后仍会加载当前章节页与章节列表。
+- `ComicViewerComposeHostView`
+  - 纯 Compose reader host，替代横向 `ComicViewFragment` 与纵向 `ComicViewerListFragment`。
+  - 保留旧接口方法与语义：
+    - `a(arrayList, i, z, z2)`：重置、追加、前插、恢复记录位置；
+    - `b(i, z)`：跳转到指定虚拟页位；
+    - `M(i)`：保留屏幕方向信号入口；
+    - `B(z)`：切换纵向 / 横向滚动方向。
+  - 保留旧分页与广告位索引逻辑：
+    - item 总数仍为 `pages.size + pages.size / 20 + 1`；
+    - 广告位仍按旧 adapter 规则占虚拟位置；
+    - 对 Activity 回调仍传虚拟 index，继续兼容 `g.ac()` / `g.ad()` 的页码计算。
+  - 保留旧阅读数据行为：
+    - reset 清空并滚到 0；
+    - 前插上一页数据后滚到 `ComicViewerActivity.hq`；
+    - 恢复记录时滚到 `i - basePageOffset`；
+    - 下载文件优先读取 `DownloadComicPageObject` 本地路径；
+    - 网络图仍使用旧 `g.b(media)` 组装 URL。
+  - Picasso 已替换为 Coil：
+    - 页面显示使用 `AsyncImage`；
+    - 预取使用 `context.imageLoader.enqueue(ImageRequest...)`；
+    - 保持 `allowHardware(false)` 以兼容旧 Android 与阅读器图片场景。
+  - 保留旧性能 / 测试列表模式差异：
+    - `e.w(context)` 强制纵向列表模式；
+    - `e.x(context)` 使用低成本透明占位图；
+    - 空 media 页面仍显示旧 page id 文本。
+  - 补入 Compose 缩放层：
+    - 支持 1x-3x 双指缩放；
+    - 纵向内容横向拖动，横向内容纵向拖动；
+    - 切换滚动方向时重置缩放与偏移。
+- 残留旧文件状态
+  - `ComicViewFragment.java` / `ComicViewerListFragment.java` 仍作为源逻辑参考保留在旧 fragments 目录，但 Activity 不再托管它们。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
+### 7.37 迁移后 Compose Dialog ViewTreeOwner 修复
+- `BaseActivity`
+  - 新增统一 `createDialogComposeView(...)`，所有迁移后的 `Dialog + ComposeView` 弹窗入口都改为走该 helper。
+  - 为 Dialog 内的 ComposeView 显式绑定：
+    - `ViewTreeLifecycleOwner`
+    - `ViewTreeViewModelStoreOwner`
+    - `ViewTreeSavedStateRegistryOwner`
+  - 设置 `ViewCompositionStrategy.DisposeOnDetachedFromWindow`，Dialog dismiss 后及时释放 composition。
+  - 覆盖并清理以下迁移弹窗的 `ViewTreeLifecycleOwner not found` 风险：
+    - `LockDialogContent`
+    - `ProgressLoadingContent`
+    - `ProgressDialogContent`
+    - `ImagePopupDialogContent`
+    - `ProfilePopupDialogContent`
+    - `TitleEditDialogContent`
+- 扫描结果
+  - `BaseActivity` 不再散落手写 `ComposeView(this).apply { setContent { ... } }`。
+  - 剩余 `ComicViewerComposeHostView` 挂在 Activity 正常内容 ViewTree 下；旧 Fragment 内的 `AbstractComposeView` 仍由 Fragment/Activity ViewTree 提供 owner。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
 ### 7.19 Profile 请求修复与全局顶栏颜色统一
 - `ProfileViewModel`
   - Profile 进入页先回填本地缓存，再请求 `users/profile`。

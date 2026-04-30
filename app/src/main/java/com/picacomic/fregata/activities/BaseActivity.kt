@@ -15,11 +15,16 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.PointerIconCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.picacomic.fregata.a_pkg.i
 import com.picacomic.fregata.compose.screens.ImagePopupDialogContent
 import com.picacomic.fregata.compose.screens.LockDialogContent
@@ -97,10 +102,8 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createProgressDialog(cancelable = true, canceledOnTouchOutside = true)
             progressLoadingDialog = dialog
             dialog.setContentView(
-                ComposeView(this).apply {
-                    setContent {
-                        ProgressLoadingContent()
-                    }
+                createDialogComposeView {
+                    ProgressLoadingContent()
                 }
             )
             dialog.setOnShowListener {
@@ -132,10 +135,8 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createProgressDialog(cancelable = false, canceledOnTouchOutside = true)
             progressDialog = dialog
             dialog.setContentView(
-                ComposeView(this).apply {
-                    setContent {
-                        ProgressDialogContent(message = message)
-                    }
+                createDialogComposeView {
+                    ProgressDialogContent(message = message)
                 }
             )
             dialog.setOnDismissListener {
@@ -194,13 +195,11 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createComposePopupDialog()
             imagePopupDialog = dialog
             dialog.setContentView(
-                ComposeView(this).apply {
-                    setContent {
-                        ImagePopupDialogContent(
-                            imageUrl = str,
-                            onDismiss = { dialog.dismiss() },
-                        )
-                    }
+                createDialogComposeView {
+                    ImagePopupDialogContent(
+                        imageUrl = str,
+                        onDismiss = { dialog.dismiss() },
+                    )
                 }
             )
             dialog.setOnShowListener {
@@ -237,13 +236,11 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createComposePopupDialog()
             titleEditDialog = dialog
             dialog.setContentView(
-                ComposeView(this).apply {
-                    setContent {
-                        TitleEditDialogContent(
-                            viewModel = viewModel,
-                            onDismiss = { dialog.dismiss() },
-                        )
-                    }
+                createDialogComposeView {
+                    TitleEditDialogContent(
+                        viewModel = viewModel,
+                        onDismiss = { dialog.dismiss() },
+                    )
                 }
             )
             dialog.setOnDismissListener { titleEditDialog = null }
@@ -263,18 +260,16 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createComposePopupDialog()
             profilePopupDialog = dialog
             dialog.setContentView(
-                ComposeView(this).apply {
-                    setContent {
-                        ProfilePopupDialogContent(
-                            viewModel = viewModel,
-                            onDismiss = { dialog.dismiss() },
-                            onShowImage = { imageUrl -> D(imageUrl) },
-                            onEditTitle = { targetUserId, title -> h(targetUserId, title) },
-                            onAdjustExp = { name, targetUserId ->
-                                (this@BaseActivity as? MainActivity)?.i(name, targetUserId)
-                            },
-                        )
-                    }
+                createDialogComposeView {
+                    ProfilePopupDialogContent(
+                        viewModel = viewModel,
+                        onDismiss = { dialog.dismiss() },
+                        onShowImage = { imageUrl -> D(imageUrl) },
+                        onEditTitle = { targetUserId, title -> h(targetUserId, title) },
+                        onAdjustExp = { name, targetUserId ->
+                            (this@BaseActivity as? MainActivity)?.i(name, targetUserId)
+                        },
+                    )
                 }
             )
             dialog.setOnDismissListener { profilePopupDialog = null }
@@ -325,13 +320,11 @@ open class BaseActivity : AppCompatActivity() {
             dialog.setCancelable(false)
             dialog.setCanceledOnTouchOutside(false)
             dialog.setContentView(
-                ComposeView(this).apply {
-                    setContent {
-                        LockDialogContent(
-                            pin = pin,
-                            onUnlock = { dialog.dismiss() },
-                        )
-                    }
+                createDialogComposeView {
+                    LockDialogContent(
+                        pin = pin,
+                        onUnlock = { dialog.dismiss() },
+                    )
                 }
             )
             dialog.setOnDismissListener {
@@ -345,6 +338,16 @@ open class BaseActivity : AppCompatActivity() {
             )
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun createDialogComposeView(content: @Composable () -> Unit): ComposeView {
+        return ComposeView(this).apply {
+            setViewTreeLifecycleOwner(this@BaseActivity)
+            setViewTreeViewModelStoreOwner(this@BaseActivity)
+            setViewTreeSavedStateRegistryOwner(this@BaseActivity)
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            setContent(content)
         }
     }
 

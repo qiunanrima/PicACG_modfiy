@@ -41,9 +41,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.picacomic.fregata.R
 import com.picacomic.fregata.adapters.c
+import com.picacomic.fregata.compose.screens.ComicViewerComposeHostView
 import com.picacomic.fregata.databinding.ActivityComicViewerBinding
-import com.picacomic.fregata.fragments.ComicViewFragment
-import com.picacomic.fregata.fragments.ComicViewerListFragment
 import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicPageObject
 import com.picacomic.fregata.objects.databaseTable.DbComicViewRecordObject
@@ -71,6 +70,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     var binding: ActivityComicViewerBinding? = null
+    var comicViewerHostView: ComicViewerComposeHostView? = null
     var button_autoPaging: Button? = null
     var button_comment: Button? = null
     var button_dialogAutoPagingStart: Button? = null
@@ -250,16 +250,18 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         this.binding!!.layoutToolbar.toolbar.setVisibility(View.GONE)
         this.relativeLayout_toolbar!!.setVisibility(View.GONE)
         if (bundle == null) {
-            if (e.w(this)) {
-                getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, ComicViewerListFragment(), ComicViewerListFragment.TAG)
-                    .commit()
-            } else {
-                getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, ComicViewFragment(), ComicViewFragment.TAG).commit()
-            }
+            this.comicViewerHostView = ComicViewerComposeHostView(this)
+            findViewById<FrameLayout>(R.id.container).addView(
+                this.comicViewerHostView,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+            )
+            a(this.comicViewerHostView)
             init()
             bF()
+            bL()
             bH()
             return
         }
@@ -829,6 +831,13 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.episodeButtonFadeTimer!!.cancel()
         }
         super.onStop()
+    }
+
+    override fun onDestroy() {
+        a(null as com.picacomic.fregata.a_pkg.c?)
+        this.comicViewerHostView?.release()
+        this.comicViewerHostView = null
+        super.onDestroy()
     }
 
     fun j(i: Int): Boolean {
