@@ -2,6 +2,7 @@ package com.picacomic.fregata.compose.screens
 
 import android.content.DialogInterface
 import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -10,26 +11,36 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -39,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -57,8 +69,6 @@ import com.picacomic.fregata.compose.viewmodels.ComicListViewModel
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-
-private val filterLabels = listOf("Forbidden", "JP", "BL", "Heavy", "Pure", "Trap", "Futari", "Webtoon")
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -182,21 +192,21 @@ fun ComicListScreen(
                                     }
                                 },
                             ) {
-                                Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.sorting_title))
+                                Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.sorting_title))
                             }
                         }
                         if (isAdvancedSearch && screenViewModel?.advancedCategoryTitles?.isNotEmpty() == true) {
                             IconButton(
                                 onClick = {
-                                    val vm = screenViewModel ?: return@IconButton
+                                    val vm = screenViewModel
                                     AlertDialogCenter.sortingAdvancedCategoriesOptions(
                                         context,
                                         vm.advancedCategoryTitles.toTypedArray(),
                                         vm.advancedCategorySelections.toBooleanArray(),
-                                        DialogInterface.OnMultiChoiceClickListener { _, which, isChecked ->
+                                        { _, which, isChecked ->
                                             vm.setAdvancedCategorySelected(which, isChecked)
                                         },
-                                        DialogInterface.OnClickListener { dialog, _ ->
+                                        { dialog, _ ->
                                             vm.applyAdvancedCategorySelection()
                                             dialog.dismiss()
                                         },
@@ -213,8 +223,8 @@ fun ComicListScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
                     ),
                     scrollBehavior = scrollBehavior,
                 )
@@ -231,51 +241,22 @@ fun ComicListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(key = "filters") {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ComicListControlPanel(
+                        filterStates = screenViewModel?.filterStates.orEmpty(),
+                        totalPage = screenViewModel?.totalPage ?: previewState?.totalPage ?: 1,
+                        pageText = pageText,
+                        onPageTextChange = { pageText = it },
+                        onToggleFilter = { screenViewModel?.toggleFilter(it) },
+                        onJump = { screenViewModel?.jumpToPage(pageText.toIntOrNull() ?: 1) },
+                    )
+                    if (screenViewModel?.selectedAdvancedCategories?.isNotEmpty() == true) {
                         FlowRow(
+                            modifier = Modifier.padding(top = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            filterLabels.forEachIndexed { index, label ->
-                                val selected = screenViewModel?.filterStates?.getOrNull(index) == true
-                                FilterChip(
-                                    selected = selected,
-                                    onClick = { screenViewModel?.toggleFilter(index) },
-                                    label = { Text(label) },
-                                )
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            OutlinedTextField(
-                                value = pageText,
-                                onValueChange = { pageText = it.filter(Char::isDigit).take(5) },
-                                label = { Text("Page / ${screenViewModel?.totalPage ?: previewState?.totalPage ?: 1}") },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                                keyboardActions = KeyboardActions(
-                                    onGo = {
-                                        screenViewModel?.jumpToPage(pageText.toIntOrNull() ?: 1)
-                                    },
-                                ),
-                                modifier = Modifier.weight(1f),
-                            )
-                            Button(
-                                onClick = {
-                                    screenViewModel?.jumpToPage(pageText.toIntOrNull() ?: 1)
-                                },
-                                modifier = Modifier.padding(top = 8.dp),
-                            ) {
-                                Text("Go")
-                            }
-                        }
-                        if (screenViewModel?.selectedAdvancedCategories?.isNotEmpty() == true) {
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                screenViewModel.selectedAdvancedCategories.forEach { category ->
-                                    AssistChip(onClick = {}, label = { Text(category) })
-                                }
+                            screenViewModel.selectedAdvancedCategories.forEach { category ->
+                                AssistChip(onClick = {}, label = { Text(category) })
                             }
                         }
                     }
@@ -314,6 +295,122 @@ fun ComicListScreen(
 
                 if (!inPreview && screenViewModel?.isLoading == true && comics.isNotEmpty()) {
                     item(key = "footer") { ListLoadingFooter() }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@Composable
+private fun ComicListControlPanel(
+    filterStates: List<Boolean>,
+    totalPage: Int,
+    pageText: String,
+    onPageTextChange: (String) -> Unit,
+    onToggleFilter: (Int) -> Unit,
+    onJump: () -> Unit,
+) {
+    val filterLabels = listOf(
+        stringResource(R.string.comic_list_filter_button_forbidden),
+        stringResource(R.string.comic_list_filter_button_non_chinese),
+        stringResource(R.string.comic_list_filter_button_bl),
+        stringResource(R.string.comic_list_filter_button_heavy),
+        stringResource(R.string.comic_list_filter_button_pure_love),
+        stringResource(R.string.comic_list_filter_button_fake_girl),
+        stringResource(R.string.comic_list_filter_button_futari),
+        stringResource(R.string.comic_list_filter_button_webtoon),
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                filterLabels.forEachIndexed { index, label ->
+                    val selected = filterStates.getOrNull(index) == true
+                    FilterChip(
+                        selected = selected,
+                        onClick = { onToggleFilter(index) },
+                        label = {
+                            Text(
+                                text = label,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                        leadingIcon = if (selected) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        ),
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedTextField(
+                    value = pageText,
+                    onValueChange = { onPageTextChange(it.filter(Char::isDigit).take(5)) },
+                    label = { Text("${stringResource(R.string.comment_jump_page_title)} / $totalPage") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                    keyboardActions = KeyboardActions(onGo = { onJump() }),
+                    shape = MaterialTheme.shapes.large,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 52.dp),
+                )
+                Button(
+                    onClick = onJump,
+                    shape = MaterialTheme.shapes.large,
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                    modifier = Modifier.heightIn(min = 52.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.KeyboardDoubleArrowRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.ok),
+                        modifier = Modifier.padding(start = 6.dp),
+                    )
                 }
             }
         }

@@ -50,15 +50,17 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val api = d(context).dO()
     private var profileCall: Call<GeneralResponse<UserProfileResponse>>? = null
     private var punchInCall: Call<GeneralResponse<PunchInResponse>>? = null
+    private var hasRequestedProfile = false
 
     fun loadProfile(force: Boolean = false) {
-        if (isLoading) return
-        if (!force && userProfile != null) return
         if (userProfile == null) {
             loadCachedProfile()
         }
+        if (!force && hasRequestedProfile) return
+        if (isLoading && !force) return
 
         profileCall?.cancel()
+        hasRequestedProfile = true
         isLoading = true
         profileCall = api.am(e.z(context))
         profileCall?.enqueue(object : Callback<GeneralResponse<UserProfileResponse>> {
@@ -71,13 +73,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 if (response.code() == 200) {
                     val fetchedProfile = response.body()?.data?.user
                     if (fetchedProfile != null) {
-                        val previousLevel = e.A(context)
-                        userProfile = fetchedProfile
-                        e.i(context, Gson().toJson(fetchedProfile))
-                        if (previousLevel != -1 && previousLevel != fetchedProfile.level) {
-                            levelUpEvent++
-                        }
-                        e.a(context, fetchedProfile.level)
+                        applyProfile(fetchedProfile)
                         avatarPreviewUri = null
                     } else if (userProfile == null) {
                         loadCachedProfile()
@@ -153,8 +149,17 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         val current = userProfile ?: return
         val updated = Gson().fromJson(Gson().toJson(current), UserProfileObject::class.java)
         updated.setPunched(true)
-        userProfile = updated
-        e.i(context, Gson().toJson(updated))
+        applyProfile(updated, checkLevel = false)
+    }
+
+    private fun applyProfile(profile: UserProfileObject, checkLevel: Boolean = true) {
+        val previousLevel = e.A(context)
+        userProfile = profile
+        e.i(context, Gson().toJson(profile))
+        if (checkLevel && previousLevel != -1 && previousLevel != profile.level) {
+            levelUpEvent++
+        }
+        e.a(context, profile.level)
     }
 
     private fun safeErrorBody(response: Response<*>): String? {

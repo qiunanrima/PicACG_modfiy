@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -30,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,12 +49,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.ComicViewerActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
@@ -61,6 +61,7 @@ import com.picacomic.fregata.compose.components.PicaActionRow
 import com.picacomic.fregata.compose.components.PicaCardSection
 import com.picacomic.fregata.compose.components.PicaEpisodeGridItem
 import com.picacomic.fregata.compose.components.PicaEpisodeGridItemState
+import com.picacomic.fregata.compose.components.PicaImageUrl
 import com.picacomic.fregata.compose.components.PicaRecommendationCard
 import com.picacomic.fregata.compose.components.PicaSectionHeader
 import com.picacomic.fregata.compose.components.PicaStatRow
@@ -155,8 +156,8 @@ fun ComicDetailScreen(
                     },
                     // MD3: TopAppBar 颜色跟随 colorScheme，滚动后自动显示 surfaceContainer 背景
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
                         titleContentColor = MaterialTheme.colorScheme.onSurface,
                         navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
@@ -205,6 +206,7 @@ fun ComicDetailScreen(
                     onComicListClick = onComicListClick,
                     onShowImage = onShowImage,
                     onLoadMoreEpisodes = { screenViewModel?.loadMoreEpisodes() },
+                    onToggleFavourite = { screenViewModel?.toggleFavourite() },
                     onToggleLike = { screenViewModel?.toggleLike() },
                 )
 
@@ -237,6 +239,7 @@ private fun ComicDetailContent(
     ) -> Unit,
     onShowImage: (String) -> Unit,
     onLoadMoreEpisodes: () -> Unit,
+    onToggleFavourite: () -> Unit,
     onToggleLike: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -246,6 +249,7 @@ private fun ComicDetailContent(
     val categories = detail?.categories.orEmpty()
     val tags = detail?.tags.orEmpty()
     var tagsExpanded by remember(tags) { mutableStateOf(false) }
+    var descriptionExpanded by remember(detail?.comicId) { mutableStateOf(false) }
     val shownTags = if (tagsExpanded || tags.size <= 4) tags else tags.take(4)
 
     LazyColumn(
@@ -322,9 +326,10 @@ private fun ComicDetailContent(
                             }
                         },
                     )
-                    PicaStatRow(
-                        label = "简介",
-                        value = detail.description.orEmpty(),
+                    CollapsibleDescriptionRow(
+                        description = detail.description.orEmpty(),
+                        expanded = descriptionExpanded,
+                        onToggle = { descriptionExpanded = !descriptionExpanded },
                         supportingText = "点赞 ${detail.likesCount} / 评论 ${if (canComment) detail.commentsCount else "禁"}",
                     )
                 }
@@ -409,8 +414,16 @@ private fun ComicDetailContent(
                         icon = Icons.Filled.Favorite,
                         contentDescription = "likes",
                         count = (detail?.likesCount ?: 0).toString(),
+                        selected = detail?.isLiked == true,
                         enabled = detail != null && !isActionLoading,
                         onClick = onToggleLike,
+                    ),
+                    PicaActionItem(
+                        icon = Icons.Filled.Bookmark,
+                        contentDescription = "favourite",
+                        selected = detail?.isFavourite == true,
+                        enabled = detail != null && !isActionLoading,
+                        onClick = onToggleFavourite,
                     ),
                 ),
             )
@@ -495,6 +508,55 @@ private fun ComicDetailContent(
 }
 
 @Composable
+private fun CollapsibleDescriptionRow(
+    description: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    supportingText: String,
+) {
+    val shouldCollapse = description.length > 90 || description.count { it == '\n' } > 2
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(enabled = shouldCollapse, onClick = onToggle)
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(
+            text = "简介",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(0.8f),
+        )
+        Column(
+            modifier = Modifier.weight(1.2f),
+            horizontalAlignment = Alignment.End,
+        ) {
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                maxLines = if (shouldCollapse && !expanded) 5 else Int.MAX_VALUE,
+                overflow = if (shouldCollapse && !expanded) TextOverflow.Ellipsis else TextOverflow.Clip,
+            )
+            Text(
+                text = if (shouldCollapse) {
+                    if (expanded) "收起 · $supportingText" else "展开 · $supportingText"
+                } else {
+                    supportingText
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = if (shouldCollapse) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.End,
+            )
+        }
+    }
+}
+
+@Composable
 private fun ComicCoverPreview(
     thumbnail: ThumbnailObject?,
     title: String?,
@@ -516,11 +578,9 @@ private fun ComicCoverPreview(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            AsyncImage(
-                model = imageUrl,
+            PicaImageUrl(
+                imageUrl = imageUrl,
                 contentDescription = title,
-                placeholder = painterResource(R.drawable.placeholder_avatar_2),
-                error = painterResource(R.drawable.placeholder_avatar_2),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
@@ -544,11 +604,9 @@ private fun ComicRecommendationPreview(thumbnail: ThumbnailObject?) {
             )
         }
     } else {
-        AsyncImage(
-            model = imageUrl,
+        PicaImageUrl(
+            imageUrl = imageUrl,
             contentDescription = null,
-            placeholder = painterResource(R.drawable.placeholder_avatar_2),
-            error = painterResource(R.drawable.placeholder_avatar_2),
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
         )

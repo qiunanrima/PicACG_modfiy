@@ -8,14 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
@@ -46,6 +43,7 @@ data class PicaActionItem(
     val icon: ImageVector,
     val contentDescription: String?,
     val count: String? = null,
+    val selected: Boolean = false,
     val enabled: Boolean = true,
     val onClick: () -> Unit,
 )
@@ -226,7 +224,7 @@ fun PicaActionRow(
             enabled = primaryEnabled,
             modifier = Modifier
                 .weight(1.6f)
-                .defaultMinSize(minHeight = 64.dp),
+                .height(72.dp),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -347,7 +345,7 @@ fun PicaRecommendationCard(
 ) {
     Card(
         modifier = modifier
-            .width(80.dp)
+            .height(214.dp)
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
@@ -356,13 +354,15 @@ fun PicaRecommendationCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(
                 modifier = Modifier
-                    .width(80.dp)
-                    .height(120.dp)
+                    .fillMaxWidth()
+                    .height(128.dp)
                     .clip(MaterialTheme.shapes.extraSmall),
             ) {
                 thumbnail()
@@ -373,15 +373,13 @@ fun PicaRecommendationCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (!supportingText.isNullOrBlank()) {
-                Text(
-                    text = supportingText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            Text(
+                text = supportingText.orEmpty(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
@@ -391,23 +389,37 @@ private fun PicaActionStatButton(
     item: PicaActionItem,
     modifier: Modifier = Modifier,
 ) {
+    val containerColor = if (item.selected) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    val contentColor = if (item.selected) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
     Surface(
-        color = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        color = containerColor,
+        contentColor = contentColor,
         shape = MaterialTheme.shapes.medium,
-        tonalElevation = 1.dp,
+        tonalElevation = if (item.selected) 3.dp else 1.dp,
         border = BorderStroke(
             width = 1.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+            color = if (item.selected) {
+                MaterialTheme.colorScheme.secondary.copy(alpha = 0.38f)
+            } else {
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+            },
         ),
         modifier = modifier
+            .height(72.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(enabled = item.enabled, onClick = item.onClick),
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 64.dp)
+                .fillMaxSize()
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
             Icon(

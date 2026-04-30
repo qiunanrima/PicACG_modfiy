@@ -4,6 +4,10 @@
     platformBuildVersionName="2.2.1.3.3.4">
 
     <!-- 网络 -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 

@@ -23,12 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
@@ -141,6 +141,7 @@ private fun PicaAppListItem(
     item: PicaAppObject,
     onClick: () -> Unit,
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -157,12 +158,16 @@ private fun PicaAppListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = item.icon,
+                model = ImageRequest.Builder(context)
+                    .data(item.icon)
+                    .placeholder(R.drawable.placeholder_avatar_2)
+                    .error(R.drawable.placeholder_avatar_2)
+                    .fallback(R.drawable.placeholder_avatar_2)
+                    .allowHardware(false)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = null,
                 modifier = Modifier.size(80.dp),
-                placeholder = painterResource(R.drawable.placeholder_avatar_2),
-                error = painterResource(R.drawable.placeholder_avatar_2),
-                fallback = painterResource(R.drawable.placeholder_avatar_2),
                 contentScale = ContentScale.Crop
             )
             Column(

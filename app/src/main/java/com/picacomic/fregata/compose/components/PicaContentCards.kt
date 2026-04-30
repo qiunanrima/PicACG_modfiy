@@ -1,6 +1,5 @@
 package com.picacomic.fregata.compose.components
 
-import android.widget.ImageView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,11 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
-import com.squareup.picasso.Picasso
 
 @Composable
 fun PicaRemoteImage(
@@ -91,35 +90,19 @@ fun PicaImageUrl(
                 }
             }
         } else {
-            AndroidView(
+            val context = androidx.compose.ui.platform.LocalContext.current
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(safeUrl)
+                    .placeholder(R.drawable.placeholder_avatar_2)
+                    .error(R.drawable.placeholder_avatar_2)
+                    .fallback(R.drawable.placeholder_avatar_2)
+                    .allowHardware(false)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = contentDescription,
+                contentScale = contentScale,
                 modifier = Modifier.fillMaxSize(),
-                factory = { context ->
-                    ImageView(context).apply {
-                        scaleType = when (contentScale) {
-                            ContentScale.Fit -> ImageView.ScaleType.FIT_CENTER
-                            ContentScale.Inside -> ImageView.ScaleType.CENTER_INSIDE
-                            else -> ImageView.ScaleType.CENTER_CROP
-                        }
-                        setImageResource(R.drawable.placeholder_avatar_2)
-                    }
-                },
-                update = { imageView ->
-                    imageView.contentDescription = contentDescription
-                    imageView.scaleType = when (contentScale) {
-                        ContentScale.Fit -> ImageView.ScaleType.FIT_CENTER
-                        ContentScale.Inside -> ImageView.ScaleType.CENTER_INSIDE
-                        else -> ImageView.ScaleType.CENTER_CROP
-                    }
-                    val oldUrl = imageView.getTag(R.id.imageView_profile_avatar) as? String
-                    if (oldUrl != safeUrl) {
-                        imageView.setTag(R.id.imageView_profile_avatar, safeUrl)
-                        Picasso.with(imageView.context)
-                            .load(safeUrl)
-                            .placeholder(R.drawable.placeholder_avatar_2)
-                            .error(R.drawable.placeholder_avatar_2)
-                            .into(imageView)
-                    }
-                },
             )
         }
     }

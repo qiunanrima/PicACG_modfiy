@@ -2,6 +2,7 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -124,7 +126,7 @@ fun CategoryScreen(
             topBar = {
                 Surface(
                     tonalElevation = 2.dp,
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
                 ) {
                     Column(
                         modifier = Modifier
@@ -313,10 +315,9 @@ private fun CategoryActionCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Icon(
+                Image(
                     painter = painterResource(item.iconRes),
                     contentDescription = item.title,
-                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(42.dp),
                 )
                 Text(
