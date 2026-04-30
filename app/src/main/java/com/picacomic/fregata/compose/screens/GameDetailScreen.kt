@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
@@ -248,7 +249,7 @@ private fun GameDetailContent(
                             )
                         }
                         IconButton(onClick = onComment) {
-                            Icon(Icons.Filled.Comment, contentDescription = stringResource(R.string.title_comment))
+                            Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringResource(R.string.title_comment))
                         }
                         IconButton(onClick = onLike) {
                             Icon(Icons.Filled.Favorite, contentDescription = "Like")

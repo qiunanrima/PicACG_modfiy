@@ -294,6 +294,9 @@ class MainActivity : BaseActivity() {
                                         )
                                     )
                                 },
+                                onSupportClick = {
+                                    navController.navigate(Screen.SupportUs.route)
+                                },
                                 onLeaderboardClick = {
                                     navController.navigate(Screen.Leaderboard.route)
                                 },
@@ -561,6 +564,15 @@ class MainActivity : BaseActivity() {
                         composable(Screen.LovePicaContainer.route) {
                             LovePicaContainerScreen(
                                 onBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        composable(Screen.SupportUs.route) {
+                            SupportUsScreen(
+                                onBack = { navController.popBackStack() },
+                                onGameClick = {
+                                    navController.navigate(Screen.Game.route)
+                                }
                             )
                         }
 

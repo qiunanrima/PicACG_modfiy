@@ -80,6 +80,7 @@ fun CategoryScreen(
     onSearch: (String) -> Unit,
     onCategoryClick: (String) -> Unit,
     onWebCategoryClick: (title: String, link: String) -> Unit = { _, _ -> },
+    onSupportClick: () -> Unit = {},
     onLeaderboardClick: () -> Unit = {},
     onGameClick: () -> Unit = {},
     onLovePicaClick: () -> Unit = {},
@@ -187,9 +188,10 @@ fun CategoryScreen(
             val categories = if (inPreview) previewState.orEmpty() else screenViewModel?.categories.orEmpty()
             val keywords = if (inPreview) categoryKeywordPreviewItems() else screenViewModel?.keywords.orEmpty()
             val defaultActions = listOf(
-                CategoryAction(stringResource(R.string.category_title_support), R.drawable.cat_support, onLovePicaClick),
+                CategoryAction(stringResource(R.string.category_title_support), R.drawable.cat_support, onSupportClick),
                 CategoryAction(stringResource(R.string.category_title_leaderboard), R.drawable.cat_leaderboard, onLeaderboardClick),
                 CategoryAction(stringResource(R.string.category_title_game), R.drawable.cat_game, onGameClick),
+                CategoryAction(stringResource(R.string.category_title_ads), R.drawable.cat_love_pica, onSupportClick),
                 CategoryAction(stringResource(R.string.category_title_love_pica), R.drawable.cat_love_pica, onLovePicaClick),
                 CategoryAction(stringResource(R.string.category_title_pica_forum), R.drawable.cat_forum, onForumClick),
                 CategoryAction(stringResource(R.string.category_title_latest), R.drawable.cat_latest, onLatestClick),
@@ -397,5 +399,6 @@ private fun CategoryScreenPreview() {
         onSearch = {},
         onCategoryClick = {},
         onWebCategoryClick = { _, _ -> },
+        onSupportClick = {},
     )
 }
