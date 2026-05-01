@@ -1,9 +1,19 @@
 package com.picacomic.fregata.compose.screens
 
+import android.Manifest
+import android.content.Context
+import android.media.MediaPlayer
+import android.media.MediaRecorder
+import android.net.Uri
+import android.os.Build
+import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +21,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.Icons
@@ -26,11 +40,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +55,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -48,6 +65,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -78,7 +97,12 @@ import com.picacomic.fregata.compose.viewmodels.ChatroomListViewModel
 import com.picacomic.fregata.compose.viewmodels.ChatroomViewModel
 import com.picacomic.fregata.objects.ChatMessageObject
 import com.picacomic.fregata.objects.ChatroomListObject
+import com.picacomic.fregata.objects.responses.ChatroomBlacklistObject
+import com.picacomic.fregata.utils.FileProviderHelper
+import com.picacomic.fregata.utils.e
+import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
+import java.io.IOException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -328,12 +352,45 @@ private fun ChatroomContent(
     val inPreview = LocalInspectionMode.current
     val messages = if (inPreview) rememberChatroomPreviewMessages() else viewModel.messages
     var showAdminPanel by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var previewImage by remember { mutableStateOf<String?>(null) }
+    val audioController = remember(context, inPreview) {
+        ChatroomAudioController(
+            context = context,
+            onRecorded = { base64 -> if (!inPreview) viewModel.sendAudio(base64) },
+            onToast = { text -> Toast.makeText(context, text, Toast.LENGTH_SHORT).show() },
+        )
+    }
+    val imagePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null || inPreview) return@rememberLauncherForActivityResult
+        val encoded = g.f(g.b(context, uri))
+        if (encoded.isNotBlank()) {
+            viewModel.sendImage(encoded)
+        } else {
+            Toast.makeText(context, R.string.chatroom_send_image, Toast.LENGTH_SHORT).show()
+        }
+    }
+    val recordPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) audioController.startRecording() else Toast.makeText(context, "No Permission", Toast.LENGTH_SHORT).show()
+    }
 
     LaunchedEffect(roomUrl) {
         if (!inPreview) {
             viewModel.start(roomUrl)
         }
     }
+
+    DisposableEffect(Unit) {
+        onDispose { audioController.release() }
+    }
+
+    ChatroomSpeechEffect(
+        latestMessage = messages.firstOrNull(),
+        enabled = !inPreview && viewModel.speechEnabled,
+        withName = viewModel.speechWithName,
+        language = viewModel.speechLanguage,
+        myUserId = viewModel.userProfile?.userId,
+    )
 
     LaunchedEffect(viewModel.errorEvent) {
         if (inPreview || viewModel.errorEvent <= 0) return@LaunchedEffect
@@ -408,6 +465,14 @@ private fun ChatroomContent(
                     showTimestamp = viewModel.showTimestamp,
                     onReply = { viewModel.setReplyTarget(item) },
                     onPrivate = { viewModel.setPrivateTarget(item) },
+                    onImageClick = {
+                        if (item.type == 11 && !item.at.isNullOrBlank()) {
+                            g.A(context, item.at)
+                        } else {
+                            previewImage = item.image
+                        }
+                    },
+                    onAudioClick = { audioController.playBase64(item.audio.orEmpty()) },
                 )
             }
         }
@@ -424,22 +489,55 @@ private fun ChatroomContent(
                 viewModel.cr()
             },
             onImageClick = {
-                Toast.makeText(context, R.string.chatroom_send_image, Toast.LENGTH_SHORT).show()
+                imagePickerLauncher.launch("image/*")
             },
             onAudioClick = {
-                Toast.makeText(context, R.string.chatroom_send_audio, Toast.LENGTH_SHORT).show()
+                if (audioController.isRecording) {
+                    audioController.stopRecording()
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                ) {
+                    recordPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                } else {
+                    audioController.startRecording()
+                }
             },
-            onSettingsClick = {
-                AlertDialogCenter.showChatroomSettingDialog(
-                    context,
-                    viewModel.userProfile,
-                    { viewModel.cd() },
-                    { viewModel.refreshSettings() },
-                )
-            },
+            isRecording = audioController.isRecording,
+            onSettingsClick = { showSettingsDialog = true },
             adminMode = viewModel.adminMode,
             showAdminPanel = showAdminPanel,
             onAdminToggle = { showAdminPanel = !showAdminPanel },
+        )
+    }
+
+    if (showSettingsDialog) {
+        ChatroomSettingsDialog(
+            viewModel = viewModel,
+            onDismiss = { showSettingsDialog = false },
+            onRefreshProfile = { viewModel.cd() },
+        )
+    }
+
+    previewImage?.let { image ->
+        AlertDialog(
+            onDismissRequest = { previewImage = null },
+            confirmButton = {
+                TextButton(onClick = { previewImage = null }) { Text(stringResource(R.string.ok)) }
+            },
+            text = {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(image)
+                        .allowHardware(false)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 220.dp, max = 520.dp),
+                )
+            },
         )
     }
 }
@@ -488,6 +586,8 @@ private fun ChatroomMessageBubble(
     showTimestamp: Boolean,
     onReply: () -> Unit,
     onPrivate: () -> Unit,
+    onImageClick: () -> Unit,
+    onAudioClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -557,11 +657,21 @@ private fun ChatroomMessageBubble(
                             .build(),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 120.dp, max = 260.dp)
+                            .clickable(onClick = onImageClick),
                     )
-                    !item.audio.isNullOrBlank() -> Text(
-                        text = stringResource(R.string.chatroom_send_audio),
-                        style = MaterialTheme.typography.bodyMedium,
+                    !item.audio.isNullOrBlank() -> AssistChip(
+                        onClick = onAudioClick,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
+                        label = { Text(stringResource(R.string.chatroom_send_audio)) },
                     )
                     else -> Text(
                         text = stringResource(R.string.chatroom_send_ads),
@@ -593,6 +703,7 @@ private fun ChatroomInputBar(
     onCommandClick: () -> Unit,
     onImageClick: () -> Unit,
     onAudioClick: () -> Unit,
+    isRecording: Boolean,
     onSettingsClick: () -> Unit,
     adminMode: Boolean,
     showAdminPanel: Boolean,
@@ -604,7 +715,10 @@ private fun ChatroomInputBar(
         tonalElevation = 2.dp,
     ) {
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 FilterChip(
                     selected = isPublicChannel,
                     onClick = { onChannelChange(true) },
@@ -622,7 +736,11 @@ private fun ChatroomInputBar(
                     Icon(Icons.Filled.Image, contentDescription = null)
                 }
                 IconButton(onClick = onAudioClick) {
-                    Icon(Icons.Filled.Mic, contentDescription = null)
+                    Icon(
+                        Icons.Filled.Mic,
+                        contentDescription = null,
+                        tint = if (isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 IconButton(onClick = onSettingsClick) {
                     Icon(Icons.Filled.Settings, contentDescription = null)
@@ -637,7 +755,9 @@ private fun ChatroomInputBar(
             }
             if (showEmoji) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     chatroomEmojiCodes.take(12).forEach { code ->
@@ -748,12 +868,18 @@ private fun ChatroomAdminPanel(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 blockLabels.take(blockMinutes.size).forEachIndexed { index, label ->
                     AssistChip(onClick = { onMute(blockMinutes[index]) }, label = { Text(label) })
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 avatarLabels.forEachIndexed { index, label ->
                     AssistChip(
                         onClick = {
@@ -763,7 +889,10 @@ private fun ChatroomAdminPanel(
                     )
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Button(onClick = { titleDialog = true }) { Text(stringResource(R.string.alert_action_change_title)) }
                 Button(onClick = { onToggleTime(true) }) { Text("Time ON") }
                 Button(onClick = { onToggleTime(false) }) { Text("Time OFF") }
@@ -856,6 +985,375 @@ private fun ChatroomAdminPanel(
                 TextButton(onClick = { aiDialog = false }) { Text(stringResource(R.string.cancel)) }
             },
         )
+    }
+}
+
+@Composable
+private fun ChatroomSettingsDialog(
+    viewModel: ChatroomViewModel,
+    onDismiss: () -> Unit,
+    onRefreshProfile: () -> Unit,
+) {
+    val context = LocalContext.current
+    var nightMode by rememberSaveable { mutableStateOf(viewModel.nightMode) }
+    var showTimestamp by rememberSaveable { mutableStateOf(viewModel.showTimestamp) }
+    var fixImageSize by rememberSaveable { mutableStateOf(viewModel.fixImageSize) }
+    var hideAvatar by rememberSaveable { mutableStateOf(viewModel.hideAvatar) }
+    var speechEnabled by rememberSaveable { mutableStateOf(viewModel.speechEnabled) }
+    var speechWithName by rememberSaveable { mutableStateOf(viewModel.speechWithName) }
+    var speechLanguage by rememberSaveable { mutableStateOf(viewModel.speechLanguage) }
+    var maxMessages by rememberSaveable { mutableStateOf(e.W(context).toString()) }
+    var adsInterval by rememberSaveable { mutableStateOf(viewModel.adsIntervalSeconds.toString()) }
+    var messageColorReverse by rememberSaveable { mutableStateOf(viewModel.messageColorReverse.toString()) }
+    var customProfile by rememberSaveable { mutableStateOf("") }
+    var showBlacklist by remember { mutableStateOf(false) }
+    val languages = listOf(
+        "chinese" to stringResource(R.string.chatroom_setting_speech_language_chinese),
+        "cantonese" to stringResource(R.string.chatroom_setting_speech_language_cantonese),
+        "japanese" to stringResource(R.string.chatroom_setting_speech_language_japanese),
+        "english" to stringResource(R.string.chatroom_setting_speech_language_english),
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.chatroom_setting_title)) },
+        text = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.heightIn(max = 560.dp),
+            ) {
+                item {
+                    Text(
+                        text = viewModel.userProfile?.let {
+                            "${it.name.orEmpty()}\n${stringResource(R.string.level)}${it.level} (${it.exp}/${g.Z(it.level + 1)})"
+                        }.orEmpty(),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                item {
+                    TextButton(onClick = onRefreshProfile) {
+                        Text(stringResource(R.string.profile_edit_update))
+                    }
+                }
+                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_night_mode), nightMode) { nightMode = it } }
+                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_timestamp), showTimestamp) { showTimestamp = it } }
+                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_fix_image_size), fixImageSize) { fixImageSize = it } }
+                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_hide_all_avatar), hideAvatar) { hideAvatar = it } }
+                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_speech), speechEnabled) { speechEnabled = it } }
+                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_speech_with_name), speechWithName) { speechWithName = it } }
+                item {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        itemsIndexed(languages) { _, item ->
+                            FilterChip(
+                                selected = speechLanguage == item.first,
+                                onClick = { speechLanguage = item.first },
+                                label = { Text(item.second) },
+                            )
+                        }
+                    }
+                }
+                item {
+                    OutlinedTextField(
+                        value = maxMessages,
+                        onValueChange = { maxMessages = it.filter(Char::isDigit) },
+                        label = { Text(stringResource(R.string.chatroom_setting_max_message_size)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                    )
+                }
+                item {
+                    OutlinedTextField(
+                        value = messageColorReverse,
+                        onValueChange = { messageColorReverse = it.filter(Char::isDigit) },
+                        label = { Text(stringResource(R.string.chatroom_setting_message_color_reverse)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                    )
+                }
+                if (viewModel.adminMode) {
+                    item {
+                        OutlinedTextField(
+                            value = adsInterval,
+                            onValueChange = { adsInterval = it.filter(Char::isDigit) },
+                            label = { Text(stringResource(R.string.chatroom_setting_ads_interval)) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                        )
+                    }
+                    item {
+                        OutlinedTextField(
+                            value = customProfile,
+                            onValueChange = { customProfile = it },
+                            label = { Text(stringResource(R.string.chatroom_setting_control_panel)) },
+                            singleLine = true,
+                        )
+                    }
+                }
+                item {
+                    TextButton(onClick = { showBlacklist = true }) {
+                        Text("${stringResource(R.string.chatroom_setting_blacklist)} (${viewModel.blacklist.size})")
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    viewModel.updateChatroomSettings(
+                        nightMode = nightMode,
+                        showTimestamp = showTimestamp,
+                        fixImageSize = fixImageSize,
+                        hideAvatar = hideAvatar,
+                        maxMessages = maxMessages.toIntOrNull() ?: 100,
+                        speechEnabled = speechEnabled,
+                        speechWithName = speechWithName,
+                        speechLanguage = speechLanguage,
+                        messageColorReverse = messageColorReverse.toIntOrNull() ?: 70,
+                        adsIntervalSeconds = adsInterval.toIntOrNull() ?: 30,
+                        customProfileText = customProfile,
+                    )
+                    onDismiss()
+                },
+            ) { Text(stringResource(R.string.ok)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+    )
+
+    if (showBlacklist) {
+        ChatroomBlacklistDialog(
+            blacklist = viewModel.blacklist,
+            onRemove = viewModel::removeBlacklistAt,
+            onClear = viewModel::clearBlacklist,
+            onDismiss = { showBlacklist = false },
+        )
+    }
+}
+
+@Composable
+private fun ChatroomSettingSwitch(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+private fun ChatroomBlacklistDialog(
+    blacklist: List<ChatroomBlacklistObject>,
+    onRemove: (Int) -> Unit,
+    onClear: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val selected = remember(blacklist.size) { mutableStateListOf<Int>() }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.chatroom_setting_blacklist_clear)) },
+        text = {
+            if (blacklist.isEmpty()) {
+                Text(stringResource(R.string.chatroom_setting_blacklist_empty))
+            } else {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 360.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    itemsIndexed(blacklist) { index, item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    if (selected.contains(index)) selected.remove(index) else selected.add(index)
+                                }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Checkbox(
+                                checked = selected.contains(index),
+                                onCheckedChange = {
+                                    if (it) selected.add(index) else selected.remove(index)
+                                },
+                            )
+                            Text(
+                                text = item.username.orEmpty(),
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    selected.sortedDescending().forEach(onRemove)
+                    onDismiss()
+                },
+            ) { Text(stringResource(R.string.ok)) }
+        },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextButton(
+                    onClick = {
+                        onClear()
+                        onDismiss()
+                    },
+                ) { Text(stringResource(R.string.chatroom_setting_blacklist_clear_all)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+            }
+        },
+    )
+}
+
+@Composable
+private fun ChatroomSpeechEffect(
+    latestMessage: ChatMessageObject?,
+    enabled: Boolean,
+    withName: Boolean,
+    language: String,
+    myUserId: String?,
+) {
+    val context = LocalContext.current
+    val tts = remember { TextToSpeech(context) {} }
+    DisposableEffect(tts) {
+        onDispose {
+            tts.stop()
+            tts.shutdown()
+        }
+    }
+    LaunchedEffect(language) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                tts.language = com.picacomic.fregata.c.b.aD(language)
+            } catch (_: Exception) {
+            }
+        }
+    }
+    LaunchedEffect(latestMessage, enabled, withName, myUserId) {
+        val message = latestMessage ?: return@LaunchedEffect
+        if (!enabled || message.userId == myUserId || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return@LaunchedEffect
+        val content = when {
+            !message.message.isNullOrBlank() -> message.message.orEmpty()
+            !message.image.isNullOrBlank() -> "發了一張圖片"
+            !message.audio.isNullOrBlank() -> "發了一段語音"
+            else -> return@LaunchedEffect
+        }
+        val speech = if (withName) "：${message.name.orEmpty()}$content" else content
+        try {
+            tts.speak(speech, TextToSpeech.QUEUE_FLUSH, null, "chatroom_${message.uniqueId}_${message.message}")
+        } catch (_: Exception) {
+        }
+    }
+}
+
+private class ChatroomAudioController(
+    private val context: Context,
+    private val onRecorded: (String) -> Unit,
+    private val onToast: (String) -> Unit,
+) {
+    private var recorder: MediaRecorder? = null
+    private var player: MediaPlayer? = null
+    private var startedAt = 0L
+    var isRecording by mutableStateOf(false)
+        private set
+
+    fun startRecording() {
+        if (isRecording) return
+        releasePlayer()
+        val output = FileProviderHelper.getAudioRecordFile(context).absolutePath
+        recorder = MediaRecorder().apply {
+            setAudioSource(MediaRecorder.AudioSource.MIC)
+            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            setOutputFile(output)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            try {
+                prepare()
+                start()
+                startedAt = System.currentTimeMillis()
+                isRecording = true
+                onToast(context.getString(R.string.chatroom_recording))
+            } catch (error: IOException) {
+                error.printStackTrace()
+                releaseRecorder()
+            } catch (error: RuntimeException) {
+                error.printStackTrace()
+                releaseRecorder()
+            }
+        }
+    }
+
+    fun stopRecording() {
+        if (!isRecording) return
+        val elapsed = System.currentTimeMillis() - startedAt
+        val output = FileProviderHelper.getAudioRecordFile(context).absolutePath
+        try {
+            recorder?.stop()
+        } catch (error: RuntimeException) {
+            error.printStackTrace()
+        } finally {
+            releaseRecorder()
+        }
+        if (elapsed >= 1000L) {
+            g.aB(output)?.takeIf { it.isNotBlank() }?.let(onRecorded)
+        }
+    }
+
+    fun playBase64(audio: String) {
+        if (audio.isBlank()) return
+        releasePlayer()
+        val output = FileProviderHelper.getAudioRecordFile(context).absolutePath
+        g.G(audio, output)
+        player = MediaPlayer().apply {
+            try {
+                setDataSource(output)
+                prepare()
+                setOnCompletionListener { releasePlayer() }
+                start()
+            } catch (error: IOException) {
+                error.printStackTrace()
+                releasePlayer()
+            } catch (error: RuntimeException) {
+                error.printStackTrace()
+                releasePlayer()
+            }
+        }
+    }
+
+    fun release() {
+        releaseRecorder()
+        releasePlayer()
+    }
+
+    private fun releaseRecorder() {
+        try {
+            recorder?.release()
+        } catch (_: Exception) {
+        }
+        recorder = null
+        isRecording = false
+    }
+
+    private fun releasePlayer() {
+        try {
+            player?.release()
+        } catch (_: Exception) {
+        }
+        player = null
     }
 }
 

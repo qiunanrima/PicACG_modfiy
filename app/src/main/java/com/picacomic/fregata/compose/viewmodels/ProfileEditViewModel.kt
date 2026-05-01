@@ -1,6 +1,7 @@
 package com.picacomic.fregata.compose.viewmodels
 
 import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -8,11 +9,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.picacomic.fregata.b.d
 import com.picacomic.fregata.objects.UserProfileObject
+import com.picacomic.fregata.objects.requests.AvatarBody
 import com.picacomic.fregata.objects.requests.UpdateProfileBody
 import com.picacomic.fregata.objects.responses.GeneralResponse
+import com.picacomic.fregata.objects.responses.PutAvatarResponse
 import com.picacomic.fregata.objects.responses.RegisterResponse
 import com.picacomic.fregata.objects.responses.UserProfileResponse
 import com.picacomic.fregata.utils.e
+import com.picacomic.fregata.utils.g
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -21,7 +25,12 @@ class ProfileEditViewModel(application: Application) : AndroidViewModel(applicat
     var userProfile by mutableStateOf<UserProfileObject?>(null)
     var isLoading by mutableStateOf(false)
     var isSubmitting by mutableStateOf(false)
+    var isUploadingAvatar by mutableStateOf(false)
+        private set
     var avatarPreviewUri by mutableStateOf<String?>(null)
+        private set
+
+    var avatarUploadSuccessEvent by mutableIntStateOf(0)
         private set
 
     var updateSuccessEvent by mutableIntStateOf(0)
@@ -41,6 +50,7 @@ class ProfileEditViewModel(application: Application) : AndroidViewModel(applicat
     
     private var profileCall: Call<GeneralResponse<UserProfileResponse>>? = null
     private var updateCall: Call<RegisterResponse>? = null
+    private var avatarCall: Call<GeneralResponse<PutAvatarResponse>>? = null
 
     fun loadSelfProfile(force: Boolean = false) {
         loadProfile("__self__", force) {
@@ -89,6 +99,55 @@ class ProfileEditViewModel(application: Application) : AndroidViewModel(applicat
 
     fun onAvatarCropped(localUri: String) {
         avatarPreviewUri = localUri
+        uploadAvatar(localUri)
+    }
+
+    private fun uploadAvatar(localUri: String) {
+        if (isUploadingAvatar) return
+        isUploadingAvatar = true
+        avatarCall?.cancel()
+
+        val avatarBody = try {
+            AvatarBody(
+                g.f(
+                    g.c(
+                        appContext,
+                        Uri.parse(localUri),
+                        200
+                    )
+                )
+            )
+        } catch (_: Exception) {
+            isUploadingAvatar = false
+            emitNetworkError()
+            return
+        }
+
+        avatarCall = d(appContext).dO().a(e.z(appContext), avatarBody)
+        avatarCall?.enqueue(object : Callback<GeneralResponse<PutAvatarResponse>> {
+            override fun onResponse(
+                call: Call<GeneralResponse<PutAvatarResponse>>,
+                response: Response<GeneralResponse<PutAvatarResponse>>
+            ) {
+                if (call.isCanceled) return
+                if (response.code() == 200) {
+                    val avatar = response.body()?.data?.avatar
+                    if (avatar != null) {
+                        userProfile?.setAvatar(avatar)
+                    }
+                    avatarUploadSuccessEvent++
+                } else {
+                    emitHttpError(response.code(), safeErrorBody(response))
+                }
+                isUploadingAvatar = false
+            }
+
+            override fun onFailure(call: Call<GeneralResponse<PutAvatarResponse>>, t: Throwable) {
+                if (call.isCanceled) return
+                emitNetworkError()
+                isUploadingAvatar = false
+            }
+        })
     }
 
     fun updateSlogan(slogan: String) {
@@ -139,6 +198,7 @@ class ProfileEditViewModel(application: Application) : AndroidViewModel(applicat
     override fun onCleared() {
         profileCall?.cancel()
         updateCall?.cancel()
+        avatarCall?.cancel()
         super.onCleared()
     }
 }

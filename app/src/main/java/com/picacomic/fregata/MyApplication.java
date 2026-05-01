@@ -2,6 +2,10 @@ package com.picacomic.fregata;
 
 import android.content.Context;
 
+import coil.Coil;
+import coil.ImageLoader;
+import coil.ImageLoaderFactory;
+
 import com.orm.SugarApp;
 import com.picacomic.fregata.b.b;
 import com.picacomic.fregata.utils.NetworkSecurityHelper;
@@ -14,7 +18,7 @@ import com.squareup.picasso.Picasso;
 import okhttp3.OkHttpClient;
 
 /* JADX INFO: loaded from: classes.dex */
-public class MyApplication extends SugarApp {
+public class MyApplication extends SugarApp implements ImageLoaderFactory {
     public static final String TAG = "MyApplication";
     private static MyApplication hk;
     private static Context mAppContext;
@@ -56,14 +60,37 @@ public class MyApplication extends SugarApp {
             return;
         }
         f.D(TAG, "SET PICASSO INSTANCE");
-        OkHttpClient.Builder builder = new OkHttpClient().newBuilder().dns(new b());
-        NetworkSecurityHelper.applySslPolicy(builder, mAppContext);
+        OkHttpClient.Builder builder = createImageOkHttpClientBuilder(mAppContext);
         try {
             Picasso.setSingletonInstance(new Picasso.Builder(mAppContext).downloader(new com.a.a.a(builder.build())).build());
         } catch (IllegalStateException ex) {
             f.D(TAG, "PICASSO INSTANCE ALREADY INITIALIZED");
         }
         picassoConfigured = true;
+    }
+
+    public static synchronized void refreshCoilImageLoader() {
+        if (mAppContext == null) {
+            return;
+        }
+        Coil.setImageLoader((ImageLoaderFactory) () -> createCoilImageLoader(mAppContext));
+    }
+
+    @Override
+    public ImageLoader newImageLoader() {
+        return createCoilImageLoader(mAppContext != null ? mAppContext : this);
+    }
+
+    private static ImageLoader createCoilImageLoader(Context context) {
+        return new ImageLoader.Builder(context)
+                .okHttpClient(createImageOkHttpClientBuilder(context).build())
+                .build();
+    }
+
+    private static OkHttpClient.Builder createImageOkHttpClientBuilder(Context context) {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder().dns(new b());
+        NetworkSecurityHelper.applySslPolicy(builder, context);
+        return builder;
     }
 
     public static MyApplication bx() {

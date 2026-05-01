@@ -1012,6 +1012,129 @@ rg -n "@color/(colorPrimary|colorPrimaryDark|colorPrimaryDark2|colorPrimaryLight
 - 最新验证：
   - `./gradlew.bat :app:compileDebugKotlin` 通过。
 
+### 7.41 Login / ImageCrop 旧逻辑补齐
+- `LoginViewModel`
+  - `submitLogin()` 内部补回密码长度兜底校验。
+  - 新增 `passwordLengthErrorEvent`，即使未来绕过 `LoginActivity` 直接调用 ViewModel，也不会在密码不足 8 位时发起登录 API。
+- `LoginActivity`
+  - 继续保留 Compose 登录页到旧逻辑的连接：
+    - 登录前密码不足时弹出 `AlertDialogCenter.passwordLength()`；
+    - 忘记密码入口调用 `requestForgotPassword()`；
+    - 密保问题弹窗调用 `submitSecurityAnswer()`；
+    - 重置密码成功后复制新密码到剪贴板，并提示“新密碼已複製”和“登入後請到「設定」修改密碼”。
+  - 监听 `passwordLengthErrorEvent`，对齐 Fragment 的密码长度提示行为。
+- `ImageCropScreen`
+  - `cropType = 1` 继续保持头像方形裁剪，并输出 `400x400`。
+  - `cropType = 2` 改回自由裁剪语义：
+    - 初始裁剪框不再按原图宽高比锁定；
+    - 支持拖动边 / 角自由调整裁剪框宽高比；
+    - 非边缘区域仍可拖动图片，双指缩放继续保留；
+    - 输出保持旧 Fragment 逻辑，长边最大 `800`。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
+### 7.42 Chatroom 剩余逻辑补齐
+- `ChatroomScreen` / `ChatroomContent`
+  - 图片发送不再是 Toast 占位：
+    - 接入 Compose `ActivityResultContracts.GetContent()` 图片选择器；
+    - 选择后使用旧工具链 `g.b(context, uri)` 读取 bitmap；
+    - 使用 `g.f(bitmap)` 转为 `data:image/jpeg;base64,...`；
+    - 调用 `ChatroomViewModel.sendImage()` 走旧 `send_image` socket 事件。
+  - 语音发送 / 播放不再是 Toast 占位：
+    - 接入 `RECORD_AUDIO` 权限请求；
+    - 使用 `MediaRecorder` 录制到 `FileProviderHelper.getAudioRecordFile()`；
+    - 使用旧 `g.aB(filePath)` 转 base64；
+    - 调用 `ChatroomViewModel.sendAudio()` 走旧 `send_audio` socket 事件；
+    - 语音消息点击后使用旧 `g.G(base64, filePath)` 写回文件并用 `MediaPlayer` 播放。
+  - 图片消息点击补回预览：
+    - 普通图片用 Compose Dialog + Coil 预览；
+    - 广告图 `type = 11` 继续按旧逻辑打开 `at` 链接。
+  - 补回 TTS 朗读：
+    - 按聊天室设置读取 `speech / speechWithName / speechLanguage`；
+    - 支持中文、广东话、日语、英语语言切换；
+    - 收到文字 / 图片 / 语音消息时按旧提示语朗读。
+- `ChatroomViewModel`
+  - 补回黑名单状态：
+    - 启动时读取 `e.ae(context)`；
+    - 收到消息时按 `userId` 过滤黑名单用户；
+    - `@BLACKLIST` 命令会把当前选中目标写入本地黑名单；
+    - 提供删除单项、清空全部、持久化到 `e.u(context, json)`。
+  - 聊天室命令补齐持久化：
+    - `NIGHT ON/OFF`；
+    - `TIME ON/OFF`；
+    - `FIX IMAGE SIZE ON/OFF`；
+    - `MAXIMUM MESSAGE SIZE n`；
+    - 管理员 `SET ADS INTERVAL n`。
+  - 设置项新增 Compose 可观察状态：
+    - TTS 开关；
+    - TTS 是否带名字；
+    - TTS 语言；
+    - 文字颜色修正；
+    - 广告间隔。
+- 新增 Compose 聊天室设置弹窗
+  - 不再依赖旧 XML `dialog_chatroom_setting` 才能完成黑名单管理。
+  - 支持：
+    - 夜间模式；
+    - 显示时间；
+    - 固定图片大小；
+    - 隐藏头像；
+    - TTS 与 TTS 带名字；
+    - TTS 语言选择；
+    - 最大讯息数；
+    - 文字颜色修正；
+    - 管理员广告间隔 / 自定义头像或改名入口；
+    - 黑名单单项删除与清空全部。
+- 控制面板视觉优化
+  - 输入栏工具、emoji、管理员封锁时间、头像选择、管理员操作按钮改成横向单行滑动。
+  - 录音中 Mic 图标使用错误色提示当前状态。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
+### 7.43 AlertDialogCenter Compose / MD3 弹窗迁移
+- 新增 `ComposeAlertDialogCenter`
+  - 作为旧 `AlertDialogCenter` 的 Compose / MD3 渲染层。
+  - 使用 `Dialog + ComposeView` 托管 Compose 内容，并设置 `ViewTreeLifecycleOwner / ViewTreeViewModelStoreOwner / ViewTreeSavedStateRegistryOwner`，避免迁移后 Dialog 中 ComposeView 缺 owner 的崩溃。
+  - 统一使用 `PicaComposeTheme`、MD3 `Card / Button / TextButton / OutlinedButton`。
+- `AlertDialogCenter`
+  - `showCustomAlertDialog(...)` 全部重定向到 Compose 实现：
+    - 普通错误 / 成功 / 提示弹窗；
+    - 确认 / 取消弹窗；
+    - 资源 id 与字符串入参版本都继续保留原静态方法签名。
+  - `showUpdateApkAlertDialog(...)` 重定向到 Compose 实现：
+    - 保留 APK 下载；
+    - 保留浏览器下载；
+    - 保留强制更新时不可关闭，只 toast 提示。
+  - `showAnnouncementAlertDialog(...)` 重定向到 Compose 实现：
+    - 使用 Coil/Compose 显示公告图；
+    - 保留标题、内容、时间与可选确认回调。
+  - `showFaqAlertDialog(...)` 重定向到 Compose 实现：
+    - 使用 Compose `AndroidView(WebView)` 承载 FAQ；
+    - 保留可选确认回调。
+- 兼容策略
+  - 旧 Java 方法签名不变，旧 Fragment / Activity 和新 Compose screen 均无需改调用代码。
+  - 旧 XML 分支暂保留为文件内兜底代码，但实际入口已经走 Compose 渲染层。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+  - `./gradlew.bat :app:compileDebugJavaWithJavac` 通过。
+
+### 7.40 ProfileEditScreen 头像上传补全
+- `ProfileEditViewModel`
+  - `onAvatarCropped(localUri)` 不再只写入 `avatarPreviewUri`。
+  - 裁剪结果会按旧 `ImageCropActivity.c(uri)` 上传链路处理：
+    - `g.c(context, uri, 200)` 读取 / 压缩头像；
+    - `g.f(...)` 转为 `data:image/jpeg;base64,...`；
+    - `AvatarBody(...)` 调用 `PUT users/avatar`。
+  - 新增 `avatarCall`、`isUploadingAvatar`、`avatarUploadSuccessEvent`。
+  - 上传成功后用接口返回的 `PutAvatarResponse.avatar` 更新当前 `userProfile.avatar`。
+  - 上传失败继续走现有 `errorEvent / errorCode / errorBody` 错误弹窗链路。
+  - `onCleared()` 取消头像上传请求。
+- `ProfileEditScreen`
+  - 头像裁剪入口改为 `KEY_ACTION_TYPE = 2`，只让 `ImageCropActivity` 返回裁剪 URI，避免 CropActivity 与 ViewModel 双重上传。
+  - 裁剪后立即显示 `avatarPreviewUri` 本地预览。
+  - 头像上传成功后 toast `profile_edit_update_success`。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
 ### 7.31 PopupActivity CommentFragment / SettingFragment 迁移
 - `PopupActivity`
   - 改为 Compose host，不再 inflate `activity_comment.xml`。
@@ -1234,6 +1357,22 @@ rg -n "@color/(colorPrimary|colorPrimaryDark|colorPrimaryDark2|colorPrimaryLight
     - 分页跳转 `comicStatusChangeListener.b(...)` + `r(...)`；
     - 亮度调整 `m(...)`。
   - 页码、页数、亮度、夜间模式、自动翻页间隔同步到 Compose overlay。
+- 最新验证：
+  - `./gradlew.bat :app:compileDebugKotlin` 通过。
+
+### 7.39 ComicDetail 剧集本地状态补全
+- `ComicDetailViewModel`
+  - 修复 `fetchEpisodes()` 合并后剧集状态丢失的问题。
+  - `syncEpisodeLocalState(comicId, episodes)` 现在会先按 `comic_id` 扫描 `DownloadComicEpisodeObject`，对齐旧 `ComicDetailFragment.Y(comicId)` 的本地下载索引逻辑。
+  - 单集仍 fallback 到旧 `b.ay(episodeId)`，对齐旧 `syncEpisodes()` / `A()` 中逐集查询逻辑。
+  - 下载状态映射输出为 Compose UI 使用的状态：
+    - `1 / 3` -> `ComicEpisodeObject.status = 1`，显示下载中；
+    - `2 / 4` -> `ComicEpisodeObject.status = 2`，显示已下载；
+    - 其他 -> `0`，默认状态。
+  - 继续读取 `DbComicViewRecordObject`：
+    - 首个 `episode.order == viewRecord.episodeOrder` 的剧集设置 `isSelected = true`；
+    - `PicaEpisodeGridItem` 因此显示已观看 / 当前阅读剧集选中态。
+  - 本地状态合并时改为复制 `ComicEpisodeObject` 后返回新列表，避免直接 mutate API 原对象导致 Compose 刷新不稳定。
 - 最新验证：
   - `./gradlew.bat :app:compileDebugKotlin` 通过。
 

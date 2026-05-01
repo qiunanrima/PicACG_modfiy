@@ -244,89 +244,7 @@ public class AlertDialogCenter {
     }
 
     public static void showCustomAlertDialog(Context context, int i, String str, String str2, final View.OnClickListener onClickListener, View.OnClickListener onClickListener2) {
-        if (context == null) {
-            return;
-        }
-        final Dialog dialog = new Dialog(context, R.style.CustomDialog);
-        dialog.setContentView(R.layout.dialog_custom_alert);
-        WindowManager.LayoutParams attributes = dialog.getWindow().getAttributes();
-        attributes.gravity = 48;
-        attributes.width = g.as(context) - 50;
-        final ImageView imageView = (ImageView) dialog.findViewById(R.id.imageView_dialog_custom_icon_large);
-        TextView textView = (TextView) dialog.findViewById(R.id.textView_dialog_custom_title);
-        TextView textView2 = (TextView) dialog.findViewById(R.id.textView_dialog_custom_message);
-        FrameLayout frameLayout = (FrameLayout) dialog.findViewById(R.id.frameLayout_dialog_custom_top_bg);
-        FrameLayout frameLayout2 = (FrameLayout) dialog.findViewById(R.id.frameLayout_dialog_custom_buttons_center_line);
-        Button button = (Button) dialog.findViewById(R.id.button_dialog_custom_positive);
-        Button button2 = (Button) dialog.findViewById(R.id.button_dialog_custom_negative);
-        imageView.getLayoutParams().width = (g.as(context) * 3) / 5;
-        frameLayout.getLayoutParams().height = g.as(context) / 3;
-        if (str == null) {
-            textView.setVisibility(8);
-        } else {
-            textView.setText(str + "");
-        }
-        if (str2 == null) {
-            textView2.setVisibility(8);
-        } else {
-            textView2.setText(str2 + "");
-            textView2.append("\n");
-        }
-        Callback callback = new Callback() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.7
-            @Override // com.squareup.picasso.Callback
-            public void onError() {
-            }
-
-            @Override // com.squareup.picasso.Callback
-            public void onSuccess() {
-                ScaleAnimation scaleAnimation = new ScaleAnimation(1.0f, 1.0f, 0.0f, 1.0f, 1, 0.0f, 1, 1.0f);
-                scaleAnimation.setInterpolator(new AccelerateInterpolator());
-                scaleAnimation.setDuration(300L);
-                imageView.startAnimation(scaleAnimation);
-            }
-        };
-        if (i == -1) {
-            if (e.x(context)) {
-                Picasso.with(context).load(R.drawable.icon_unknown_error).into(imageView);
-            } else {
-                Picasso.with(context).load(R.drawable.icon_unknown_error).into(imageView, callback);
-            }
-        } else if (e.x(context)) {
-            Picasso.with(context).load(i).into(imageView);
-        } else {
-            Picasso.with(context).load(i).into(imageView, callback);
-        }
-        Log.e(TAG, "Width = " + attributes.width + " Height = " + attributes.height);
-        if (onClickListener == null && onClickListener2 == null) {
-            frameLayout2.setVisibility(8);
-            button2.setVisibility(8);
-            button.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.8
-                @Override // android.view.View.OnClickListener
-                public void onClick(View view) {
-                    dialog.dismiss();
-                }
-            });
-        } else if (onClickListener != null && onClickListener2 == null) {
-            button.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.9
-                @Override // android.view.View.OnClickListener
-                public void onClick(View view) {
-                    onClickListener.onClick(view);
-                    dialog.dismiss();
-                }
-            });
-            button2.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.10
-                @Override // android.view.View.OnClickListener
-                public void onClick(View view) {
-                    dialog.dismiss();
-                }
-            });
-        } else {
-            button.setOnClickListener(onClickListener);
-            button2.setOnClickListener(onClickListener2);
-        }
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.show();
+        ComposeAlertDialogCenter.showCustomAlertDialog(context, i, str, str2, onClickListener, onClickListener2);
     }
 
     public static void showCustomAlertDialog(Context context, int i, String str, String str2) {
@@ -334,89 +252,9 @@ public class AlertDialogCenter {
     }
 
     public static void showCustomAlertDialog(Context context, int i, int i2, int i3, final View.OnClickListener onClickListener, View.OnClickListener onClickListener2) {
-        if (context == null) {
-            return;
-        }
-        final Dialog dialog = new Dialog(context, R.style.CustomDialog);
-        dialog.setContentView(R.layout.dialog_custom_alert);
-        WindowManager.LayoutParams attributes = dialog.getWindow().getAttributes();
-        attributes.gravity = 48;
-        attributes.width = g.as(context) - 50;
-        final ImageView imageView = (ImageView) dialog.findViewById(R.id.imageView_dialog_custom_icon_large);
-        TextView textView = (TextView) dialog.findViewById(R.id.textView_dialog_custom_title);
-        TextView textView2 = (TextView) dialog.findViewById(R.id.textView_dialog_custom_message);
-        FrameLayout frameLayout = (FrameLayout) dialog.findViewById(R.id.frameLayout_dialog_custom_top_bg);
-        FrameLayout frameLayout2 = (FrameLayout) dialog.findViewById(R.id.frameLayout_dialog_custom_buttons_center_line);
-        Button button = (Button) dialog.findViewById(R.id.button_dialog_custom_positive);
-        Button button2 = (Button) dialog.findViewById(R.id.button_dialog_custom_negative);
-        imageView.getLayoutParams().width = (g.as(context) * 3) / 5;
-        frameLayout.getLayoutParams().height = g.as(context) / 3;
-        if (i2 == -1) {
-            textView.setVisibility(8);
-        } else {
-            textView.setText(i2);
-        }
-        if (i3 == -1) {
-            textView2.setVisibility(8);
-        } else {
-            textView2.setText(i3);
-            textView2.append("\n");
-        }
-        Callback callback = new Callback() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.11
-            @Override // com.squareup.picasso.Callback
-            public void onError() {
-            }
-
-            @Override // com.squareup.picasso.Callback
-            public void onSuccess() {
-                ScaleAnimation scaleAnimation = new ScaleAnimation(1.0f, 1.0f, 0.0f, 1.0f, 1, 0.0f, 1, 1.0f);
-                scaleAnimation.setInterpolator(new AccelerateInterpolator());
-                scaleAnimation.setDuration(300L);
-                imageView.startAnimation(scaleAnimation);
-            }
-        };
-        if (i == -1) {
-            if (e.x(context)) {
-                Picasso.with(context).load(R.drawable.icon_unknown_error).into(imageView);
-            } else {
-                Picasso.with(context).load(R.drawable.icon_unknown_error).into(imageView, callback);
-            }
-        } else if (e.x(context)) {
-            Picasso.with(context).load(i).into(imageView);
-        } else {
-            Picasso.with(context).load(i).into(imageView, callback);
-        }
-        Log.e(TAG, "Width = " + attributes.width + " Height = " + attributes.height);
-        if (onClickListener == null && onClickListener2 == null) {
-            frameLayout2.setVisibility(8);
-            button2.setVisibility(8);
-            button.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.12
-                @Override // android.view.View.OnClickListener
-                public void onClick(View view) {
-                    dialog.dismiss();
-                }
-            });
-        } else if (onClickListener != null && onClickListener2 == null) {
-            button.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.13
-                @Override // android.view.View.OnClickListener
-                public void onClick(View view) {
-                    onClickListener.onClick(view);
-                    dialog.dismiss();
-                }
-            });
-            button2.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.14
-                @Override // android.view.View.OnClickListener
-                public void onClick(View view) {
-                    dialog.dismiss();
-                }
-            });
-        } else {
-            button.setOnClickListener(onClickListener);
-            button2.setOnClickListener(onClickListener2);
-        }
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.show();
+        String title = i2 == -1 || context == null ? null : context.getString(i2);
+        String message = i3 == -1 || context == null ? null : context.getString(i3);
+        ComposeAlertDialogCenter.showCustomAlertDialog(context, i, title, message, onClickListener, onClickListener2);
     }
 
     public static void showCustomAlertDialog(Context context, int i, int i2, int i3) {
@@ -432,7 +270,8 @@ public class AlertDialogCenter {
     }
 
     public static void showUpdateApkAlertDialog(final Context context, final LatestApplicationObject latestApplicationObject, final boolean z) {
-        if (context == null) {
+        ComposeAlertDialogCenter.showUpdateApkAlertDialog(context, latestApplicationObject, z);
+        if (context == null || context != null) {
             return;
         }
         final Dialog dialog = new Dialog(context, R.style.CustomDialog);
@@ -514,7 +353,8 @@ public class AlertDialogCenter {
     }
 
     public static void showAnnouncementAlertDialog(Context context, String str, String str2, String str3, String str4, final View.OnClickListener onClickListener) {
-        if (context == null) {
+        ComposeAlertDialogCenter.showAnnouncementAlertDialog(context, str, str2, str3, str4, onClickListener);
+        if (context == null || context != null) {
             return;
         }
         final Dialog dialog = new Dialog(context, R.style.CustomDialog);
@@ -586,7 +426,8 @@ public class AlertDialogCenter {
     }
 
     public static void showFaqAlertDialog(Context context, String str, final View.OnClickListener onClickListener) {
-        if (context == null) {
+        ComposeAlertDialogCenter.showFaqAlertDialog(context, str, onClickListener);
+        if (context == null || context != null) {
             return;
         }
         final Dialog dialog = new Dialog(context, R.style.CustomDialog);

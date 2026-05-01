@@ -107,6 +107,12 @@ class LoginActivity : BaseActivity() {
                 }
             }
 
+            LaunchedEffect(viewModel.passwordLengthErrorEvent) {
+                if (viewModel.passwordLengthErrorEvent > 0) {
+                    AlertDialogCenter.passwordLength(this@LoginActivity)
+                }
+            }
+
             LaunchedEffect(viewModel.securityQuestionEvent) {
                 if (viewModel.securityQuestionEvent > 0) {
                     showAnswerDialog()

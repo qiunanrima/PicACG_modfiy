@@ -61,6 +61,7 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
     fun updateSslVerificationDisabled(enabled: Boolean) {
         com.picacomic.fregata.utils.e.setSslVerificationDisabled(appContext, enabled)
         sslVerificationDisabled = enabled
+        MyApplication.refreshCoilImageLoader()
     }
 
     fun selectServer(server: Int) {

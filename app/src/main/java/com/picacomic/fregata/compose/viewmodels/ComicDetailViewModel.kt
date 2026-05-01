@@ -12,6 +12,7 @@ import com.picacomic.fregata.objects.ComicDetailObject
 import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject
+import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
 import com.picacomic.fregata.objects.responses.ActionResponse
 import com.picacomic.fregata.objects.responses.ComicDetailResponse
 import com.picacomic.fregata.objects.responses.ComicRandomListResponse
@@ -304,33 +305,68 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
         } catch (_: Exception) {
             null
         }
+        val downloadedEpisodesById = loadDownloadedEpisodes(comicId)
         var markedLastView = false
 
-        sourceEpisodes.forEach { episode ->
+        return sourceEpisodes.map { episode ->
             val downloadEpisode = try {
-                b.ay(episode.episodeId)
+                downloadedEpisodesById[episode.episodeId] ?: b.ay(episode.episodeId)
             } catch (_: Exception) {
                 null
             }
+            val localEpisode = copyEpisode(episode)
 
-            episode.setStatus(
-                when (downloadEpisode?.status) {
-                    1, 2, 3 -> 1
-                    4 -> 2
-                    else -> 0
-                }
-            )
+            localEpisode.setStatus(mapDownloadStatus(downloadEpisode?.status))
 
             val isLastViewedEpisode = !markedLastView &&
                 viewRecord != null &&
-                viewRecord.episodeOrder == episode.order
-            episode.setSelected(isLastViewedEpisode)
+                viewRecord.episodeOrder == localEpisode.order
+            localEpisode.setSelected(isLastViewedEpisode)
             if (isLastViewedEpisode) {
                 markedLastView = true
             }
-        }
 
-        return sourceEpisodes.toList()
+            localEpisode
+        }
+    }
+
+    private fun loadDownloadedEpisodes(comicId: String): Map<String, DownloadComicEpisodeObject> {
+        return try {
+            DownloadComicEpisodeObject.find(
+                DownloadComicEpisodeObject::class.java,
+                "comic_id = ?",
+                comicId
+            )
+                ?.filterIsInstance<DownloadComicEpisodeObject>()
+                ?.mapNotNull { episode ->
+                    val episodeId = episode.episodeId ?: return@mapNotNull null
+                    episodeId to episode
+                }
+                ?.toMap()
+                .orEmpty()
+        } catch (_: Exception) {
+            emptyMap()
+        }
+    }
+
+    private fun mapDownloadStatus(status: Int?): Int {
+        return when (status) {
+            1, 3 -> 1
+            2, 4 -> 2
+            else -> 0
+        }
+    }
+
+    private fun copyEpisode(source: ComicEpisodeObject): ComicEpisodeObject {
+        return ComicEpisodeObject(
+            source.episodeId,
+            source.title,
+            source.order,
+            source.updatedAt
+        ).apply {
+            setStatus(source.status)
+            setSelected(source.isSelected)
+        }
     }
 
     private fun fetchRecommendations(comicId: String) {

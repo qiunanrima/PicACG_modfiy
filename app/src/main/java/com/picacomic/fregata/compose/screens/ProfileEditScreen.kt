@@ -47,6 +47,7 @@ import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.activities.ImageCropActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaImageUrl
 import com.picacomic.fregata.compose.components.PicaRemoteImage
 import com.picacomic.fregata.compose.components.PicaSectionHeader
 import com.picacomic.fregata.compose.viewmodels.ProfileEditViewModel
@@ -103,7 +104,7 @@ fun ProfileEditScreen(
             if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
             val selectedUri = result.data?.data ?: return@rememberLauncherForActivityResult
             val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-                putExtra("KEY_ACTION_TYPE", 1)
+                putExtra("KEY_ACTION_TYPE", 2)
                 putExtra("KEY_IMAGE_URI_STRING", selectedUri.toString())
             }
             cropLauncher?.launch(cropIntent)
@@ -119,7 +120,7 @@ fun ProfileEditScreen(
             if (result.resultCode != Activity.RESULT_OK) return@rememberLauncherForActivityResult
             val cameraUri = pendingCameraUri ?: return@rememberLauncherForActivityResult
             val cropIntent = Intent(context, ImageCropActivity::class.java).apply {
-                putExtra("KEY_ACTION_TYPE", 1)
+                putExtra("KEY_ACTION_TYPE", 2)
                 putExtra("KEY_IMAGE_URI_STRING", cameraUri)
             }
             cropLauncher?.launch(cropIntent)
@@ -196,6 +197,12 @@ fun ProfileEditScreen(
         onBack()
     }
 
+    LaunchedEffect(screenViewModel?.avatarUploadSuccessEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (inPreview || vm.avatarUploadSuccessEvent <= 0) return@LaunchedEffect
+        Toast.makeText(context, R.string.profile_edit_update_success, Toast.LENGTH_SHORT).show()
+    }
+
     LaunchedEffect(screenViewModel?.errorEvent) {
         val vm = screenViewModel ?: return@LaunchedEffect
         if (inPreview || vm.errorEvent <= 0) return@LaunchedEffect
@@ -252,6 +259,7 @@ fun ProfileEditScreen(
                     .padding(innerPadding)
             ) {
                 val userProfile = if (inPreview) previewProfile else screenViewModel?.userProfile
+                val avatarPreviewUri = if (inPreview) null else screenViewModel?.avatarPreviewUri
                 val displaySlogan = if (inPreview) userProfile?.slogan.orEmpty() else sloganText
                 if (inPreview || userProfile != null) {
                     LazyColumn(
@@ -279,11 +287,19 @@ fun ProfileEditScreen(
                                             .clip(MaterialTheme.shapes.extraLarge)
                                             .clickable(onClick = onAvatarClick),
                                     ) {
-                                        PicaRemoteImage(
-                                            thumbnail = userProfile?.avatar,
-                                            contentDescription = userProfile?.name,
-                                            modifier = Modifier.fillMaxSize(),
-                                        )
+                                        if (!avatarPreviewUri.isNullOrBlank()) {
+                                            PicaImageUrl(
+                                                imageUrl = avatarPreviewUri,
+                                                contentDescription = userProfile?.name,
+                                                modifier = Modifier.fillMaxSize(),
+                                            )
+                                        } else {
+                                            PicaRemoteImage(
+                                                thumbnail = userProfile?.avatar,
+                                                contentDescription = userProfile?.name,
+                                                modifier = Modifier.fillMaxSize(),
+                                            )
+                                        }
                                     }
                                     ProfileEditInfoRow("Name", userProfile?.let(::displayName).orEmpty())
                                     ProfileEditInfoRow("Birthday", userProfile?.birthday?.substringBefore("T").orEmpty())

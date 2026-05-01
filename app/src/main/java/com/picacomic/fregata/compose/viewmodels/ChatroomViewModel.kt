@@ -24,6 +24,7 @@ import com.picacomic.fregata.objects.chatroomObjects.SetAvatarAction
 import com.picacomic.fregata.objects.chatroomObjects.SetAvatarExtraAction
 import com.picacomic.fregata.objects.chatroomObjects.TimeAction
 import com.picacomic.fregata.objects.requests.UpdateUserTitleBody
+import com.picacomic.fregata.objects.responses.ChatroomBlacklistObject
 import com.picacomic.fregata.objects.responses.ChatroomListResponse
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.objects.responses.RegisterResponse
@@ -145,8 +146,10 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
     private var socket: Socket? = null
     private var initializedUrl: String? = null
     private var aiRunnable: Runnable? = null
+    private var maxMessageSize = e.W(app).coerceAtLeast(1)
 
     val messages = mutableStateListOf<ChatMessageObject>()
+    val blacklist = mutableStateListOf<ChatroomBlacklistObject>()
     var input by mutableStateOf("")
         private set
     var userProfile by mutableStateOf<UserProfileObject?>(null)
@@ -177,6 +180,16 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
         private set
     var hideAvatar by mutableStateOf(e.ad(app))
         private set
+    var speechEnabled by mutableStateOf(e.Y(app))
+        private set
+    var speechWithName by mutableStateOf(e.Z(app))
+        private set
+    var speechLanguage by mutableStateOf(e.aa(app).orEmpty().ifBlank { "chinese" })
+        private set
+    var messageColorReverse by mutableIntStateOf(e.af(app))
+        private set
+    var adsIntervalSeconds by mutableIntStateOf(e.X(app).coerceAtLeast(0))
+        private set
 
     val adminMode: Boolean
         get() = userProfile?.email?.endsWith("@picacomic.com") == true
@@ -200,6 +213,7 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
         if (initializedUrl == safeUrl) return
         initializedUrl = safeUrl
         loadCachedProfile()
+        loadBlacklist()
         cd {
             connect(safeUrl)
         }
@@ -471,34 +485,48 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
         fixImageSize = e.V(app)
         nightMode = e.T(app)
         hideAvatar = e.ad(app)
+        speechEnabled = e.Y(app)
+        speechWithName = e.Z(app)
+        speechLanguage = e.aa(app).orEmpty().ifBlank { "chinese" }
+        messageColorReverse = e.af(app)
+        adsIntervalSeconds = e.X(app).coerceAtLeast(0)
+        maxMessageSize = e.W(app).coerceAtLeast(1)
+        loadBlacklist()
+        trimMessages()
     }
 
     fun V(command: String): Boolean {
         when {
             command.equals("NIGHT ON", ignoreCase = true) -> {
                 nightMode = true
+                e.h(app, true)
                 return true
             }
             command.equals("NIGHT OFF", ignoreCase = true) -> {
                 nightMode = false
+                e.h(app, false)
                 return true
             }
             command.equals("TIME ON", ignoreCase = true) -> {
                 showTimestamp = true
+                e.i(app, true)
                 emitToast("SHOW TIMESTAMP ON")
                 return true
             }
             command.equals("TIME OFF", ignoreCase = true) -> {
                 showTimestamp = false
+                e.i(app, false)
                 return true
             }
             command.equals("FIX IMAGE SIZE ON", ignoreCase = true) -> {
                 fixImageSize = true
+                e.j(app, true)
                 emitToast("FIX IMAGE SIZE ON")
                 return true
             }
             command.equals("FIX IMAGE SIZE OFF", ignoreCase = true) -> {
                 fixImageSize = false
+                e.j(app, false)
                 emitToast("FIX IMAGE SIZE OFF")
                 return true
             }
@@ -507,13 +535,38 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
                 return false
             }
             command.startsWith("@BLACKLIST", ignoreCase = true) -> {
-                emitToast("Blacklist command received")
+                addSelectedToBlacklist()
                 return true
             }
             command.startsWith("AUTO EARN PICA", ignoreCase = true) -> return true
             command.startsWith("MAXIMUM MESSAGE SIZE ", ignoreCase = true) -> {
-                emitToast("SET MAX MESSAGE SIZE")
+                maxMessageSize = command.substringAfter("MAXIMUM MESSAGE SIZE ", "").trim().toIntOrNull()
+                    ?.coerceAtLeast(1)
+                    ?: maxMessageSize
+                e.e(app, maxMessageSize)
+                trimMessages()
+                emitToast("SET MAX MESSAGE SIZE = $maxMessageSize")
                 return true
+            }
+        }
+        if (adminMode) {
+            when {
+                command.startsWith("SET ADS INTERVAL ", ignoreCase = true) -> {
+                    adsIntervalSeconds = command.substringAfter("SET ADS INTERVAL ", "").trim().toIntOrNull()
+                        ?.coerceAtLeast(0)
+                        ?: adsIntervalSeconds
+                    e.f(app, adsIntervalSeconds)
+                    emitToast("SET ADS INTERVAL = $adsIntervalSeconds")
+                    return true
+                }
+                command.equals("CLEAR TEXT ON", ignoreCase = true) -> {
+                    emitToast("CLEAR TEXT ON")
+                    return true
+                }
+                command.equals("CLEAR TEXT OFF", ignoreCase = true) -> {
+                    emitToast("CLEAR TEXT OFF")
+                    return true
+                }
             }
         }
         return false
@@ -550,6 +603,104 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
                 isLoading = false
             }
         })
+    }
+
+    fun updateChatroomSettings(
+        nightMode: Boolean,
+        showTimestamp: Boolean,
+        fixImageSize: Boolean,
+        hideAvatar: Boolean,
+        maxMessages: Int,
+        speechEnabled: Boolean,
+        speechWithName: Boolean,
+        speechLanguage: String,
+        messageColorReverse: Int,
+        adsIntervalSeconds: Int,
+        customProfileText: String,
+    ) {
+        this.nightMode = nightMode
+        this.showTimestamp = showTimestamp
+        this.fixImageSize = fixImageSize
+        this.hideAvatar = hideAvatar
+        this.maxMessageSize = maxMessages.coerceAtLeast(1)
+        this.speechEnabled = speechEnabled
+        this.speechWithName = speechWithName
+        this.speechLanguage = speechLanguage.ifBlank { "chinese" }
+        this.messageColorReverse = messageColorReverse.coerceIn(0, 100)
+        this.adsIntervalSeconds = adsIntervalSeconds.coerceAtLeast(0)
+        e.h(app, nightMode)
+        e.i(app, showTimestamp)
+        e.j(app, fixImageSize)
+        e.m(app, hideAvatar)
+        e.e(app, this.maxMessageSize)
+        e.k(app, speechEnabled)
+        e.l(app, speechWithName)
+        e.r(app, this.speechLanguage)
+        e.g(app, this.messageColorReverse)
+        e.f(app, this.adsIntervalSeconds)
+        applyCustomProfileText(customProfileText)
+        trimMessages()
+    }
+
+    private fun applyCustomProfileText(text: String) {
+        val profile = userProfile ?: return
+        if (!adminMode) return
+        when {
+            text.startsWith("http://") || text.startsWith("https://") -> {
+                if (profile.email.orEmpty().startsWithAnyPrivilegedPrefix()) {
+                    e.s(app, text)
+                }
+            }
+            text.startsWith("改名") -> {
+                if (profile.email.orEmpty().startsWithAnyNamePrefix()) {
+                    val name = text.removePrefix("改名")
+                    e.t(app, name)
+                    profile.name = name
+                }
+            }
+            text.isBlank() -> e.s(app, "")
+        }
+    }
+
+    fun loadBlacklist() {
+        blacklist.clear()
+        val json = e.ae(app) ?: return
+        try {
+            val type = object : TypeToken<List<ChatroomBlacklistObject>>() {}.type
+            val parsed: List<ChatroomBlacklistObject>? = gson.fromJson(json, type)
+            if (!parsed.isNullOrEmpty()) blacklist.addAll(parsed)
+        } catch (_: Exception) {
+        }
+    }
+
+    fun addSelectedToBlacklist() {
+        val target = selectedTarget
+        if (target?.userId.isNullOrBlank() || target?.name.isNullOrBlank()) {
+            emitToast("Blacklist User Failed")
+            return
+        }
+        val name = target.name.orEmpty()
+        val userId = target.userId.orEmpty()
+        if (name.startsWith("嗶咔") || name.equals("ruff", ignoreCase = true)) {
+            emitToast("Blacklist User Failed")
+            return
+        }
+        if (blacklist.none { it.userId == userId }) {
+            blacklist.add(ChatroomBlacklistObject(name, userId))
+            persistBlacklist()
+        }
+        emitToast("Blacklist User: $name Success")
+    }
+
+    fun removeBlacklistAt(index: Int) {
+        if (index !in blacklist.indices) return
+        blacklist.removeAt(index)
+        persistBlacklist()
+    }
+
+    fun clearBlacklist() {
+        blacklist.clear()
+        e.u(app, null)
     }
 
     private fun connect(roomUrl: String) {
@@ -688,10 +839,23 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun addMessage(message: ChatMessageObject) {
+        if (isBlacklisted(message.userId)) return
         messages.add(0, message)
-        while (messages.size > MAX_MESSAGES) {
-            messages.removeAt(messages.lastIndex)
-        }
+        trimMessages()
+    }
+
+    private fun trimMessages() {
+        val limit = minOf(maxMessageSize, MAX_MESSAGES).coerceAtLeast(1)
+        while (messages.size > limit) messages.removeAt(messages.lastIndex)
+    }
+
+    private fun isBlacklisted(userId: String?): Boolean {
+        if (userId.isNullOrBlank()) return false
+        return blacklist.any { it.userId == userId }
+    }
+
+    private fun persistBlacklist() {
+        e.u(app, if (blacklist.isEmpty()) null else gson.toJson(blacklist.toList()))
     }
 
     private fun loadCachedProfile() {
@@ -747,5 +911,14 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
         stopAiTalk()
         disconnect()
         super.onCleared()
+    }
+
+    private fun String.startsWithAnyPrivilegedPrefix(): Boolean {
+        return startsWith("ruff") || startsWith("knight-ace") || startsWith("leader") ||
+            startsWith("server") || startsWith("kagu")
+    }
+
+    private fun String.startsWithAnyNamePrefix(): Boolean {
+        return startsWith("ruff") || startsWith("leader") || startsWith("server") || startsWith("kagu")
     }
 }

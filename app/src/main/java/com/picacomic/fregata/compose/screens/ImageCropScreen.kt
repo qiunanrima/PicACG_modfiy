@@ -142,6 +142,8 @@ class PicaCropImageView(context: Context) : View(context) {
     private var lastX = 0f
     private var lastY = 0f
     private var dragging = false
+    private var touchMode = TouchMode.None
+    private var resizeEdges = EDGE_NONE
 
     fun load(uri: Uri, cropType: Int): Boolean {
         release()
@@ -217,6 +219,8 @@ class PicaCropImageView(context: Context) : View(context) {
         scaleDetector.onTouchEvent(event)
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                resizeEdges = if (cropType == 1) EDGE_NONE else detectResizeEdges(event.x, event.y)
+                touchMode = if (resizeEdges == EDGE_NONE) TouchMode.MoveImage else TouchMode.ResizeCrop
                 dragging = true
                 lastX = event.x
                 lastY = event.y
@@ -226,8 +230,12 @@ class PicaCropImageView(context: Context) : View(context) {
                 if (dragging && !scaleDetector.isInProgress && event.pointerCount == 1) {
                     val dx = event.x - lastX
                     val dy = event.y - lastY
-                    imageMatrix.postTranslate(dx, dy)
-                    constrainImage()
+                    if (touchMode == TouchMode.ResizeCrop) {
+                        resizeCrop(dx, dy)
+                    } else {
+                        imageMatrix.postTranslate(dx, dy)
+                        constrainImage()
+                    }
                     invalidate()
                     lastX = event.x
                     lastY = event.y
@@ -235,7 +243,11 @@ class PicaCropImageView(context: Context) : View(context) {
             }
 
             MotionEvent.ACTION_UP,
-            MotionEvent.ACTION_CANCEL -> dragging = false
+            MotionEvent.ACTION_CANCEL -> {
+                dragging = false
+                touchMode = TouchMode.None
+                resizeEdges = EDGE_NONE
+            }
         }
         return true
     }
@@ -262,12 +274,13 @@ class PicaCropImageView(context: Context) : View(context) {
                 (height + side) / 2f,
             )
         } else {
-            val sourceAspect = source.width.toFloat() / source.height.toFloat()
             var cropWidth = availableWidth
-            var cropHeight = cropWidth / sourceAspect
+            var cropHeight = availableHeight
+            val minimumSide = min(width, height) * 0.36f
+            if (cropWidth < minimumSide) cropWidth = minimumSide
+            if (cropHeight < minimumSide) cropHeight = minimumSide
             if (cropHeight > availableHeight) {
                 cropHeight = availableHeight
-                cropWidth = cropHeight * sourceAspect
             }
             cropRect.set(
                 (width - cropWidth) / 2f,
@@ -283,6 +296,44 @@ class PicaCropImageView(context: Context) : View(context) {
         val dx = cropRect.centerX() - source.width * scale / 2f
         val dy = cropRect.centerY() - source.height * scale / 2f
         imageMatrix.postTranslate(dx, dy)
+        constrainImage()
+    }
+
+    private fun detectResizeEdges(x: Float, y: Float): Int {
+        val slop = 28f * resources.displayMetrics.density
+        val expanded = RectF(cropRect).apply { inset(-slop, -slop) }
+        if (!expanded.contains(x, y)) return EDGE_NONE
+
+        var edges = EDGE_NONE
+        if (kotlin.math.abs(x - cropRect.left) <= slop) edges = edges or EDGE_LEFT
+        if (kotlin.math.abs(x - cropRect.right) <= slop) edges = edges or EDGE_RIGHT
+        if (kotlin.math.abs(y - cropRect.top) <= slop) edges = edges or EDGE_TOP
+        if (kotlin.math.abs(y - cropRect.bottom) <= slop) edges = edges or EDGE_BOTTOM
+        return edges
+    }
+
+    private fun resizeCrop(dx: Float, dy: Float) {
+        if (resizeEdges == EDGE_NONE || width <= 0 || height <= 0) return
+
+        val minSide = max(96f * resources.displayMetrics.density, min(width, height) * 0.18f)
+        val inset = 16f * resources.displayMetrics.density
+        val bounds = RectF(inset, inset, width - inset, height - inset)
+        val next = RectF(cropRect)
+
+        if (resizeEdges and EDGE_LEFT != 0) {
+            next.left = (next.left + dx).coerceIn(bounds.left, next.right - minSide)
+        }
+        if (resizeEdges and EDGE_RIGHT != 0) {
+            next.right = (next.right + dx).coerceIn(next.left + minSide, bounds.right)
+        }
+        if (resizeEdges and EDGE_TOP != 0) {
+            next.top = (next.top + dy).coerceIn(bounds.top, next.bottom - minSide)
+        }
+        if (resizeEdges and EDGE_BOTTOM != 0) {
+            next.bottom = (next.bottom + dy).coerceIn(next.top + minSide, bounds.bottom)
+        }
+
+        cropRect.set(next)
         constrainImage()
     }
 
@@ -359,8 +410,19 @@ class PicaCropImageView(context: Context) : View(context) {
         }
     }
 
+    private enum class TouchMode {
+        None,
+        MoveImage,
+        ResizeCrop,
+    }
+
     companion object {
         private const val TAG = "PicaCropImageView"
+        private const val EDGE_NONE = 0
+        private const val EDGE_LEFT = 1
+        private const val EDGE_TOP = 1 shl 1
+        private const val EDGE_RIGHT = 1 shl 2
+        private const val EDGE_BOTTOM = 1 shl 3
 
         private fun decodeSampledBitmap(context: Context, uri: Uri): Bitmap? {
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }

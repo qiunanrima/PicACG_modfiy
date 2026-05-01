@@ -44,6 +44,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var navigateToMainEvent by mutableIntStateOf(0)
         private set
 
+    var passwordLengthErrorEvent by mutableIntStateOf(0)
+        private set
+
     var securityQuestionPrompt by mutableStateOf<SecurityQuestionPrompt?>(null)
         private set
 
@@ -112,6 +115,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun submitLogin() {
+        if (!canSubmitLogin()) {
+            passwordLengthErrorEvent++
+            return
+        }
         if (isLoading) return
         isLoading = true
         signInCall?.cancel()
