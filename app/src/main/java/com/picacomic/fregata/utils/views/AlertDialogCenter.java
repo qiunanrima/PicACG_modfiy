@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.c.b;
+import com.picacomic.fregata.objects.LatestApplicationObject;
 import com.picacomic.fregata.objects.UserProfileObject;
 import com.picacomic.fregata.objects.responses.ChatroomBlacklistObject;
 import com.picacomic.fregata.utils.e;
