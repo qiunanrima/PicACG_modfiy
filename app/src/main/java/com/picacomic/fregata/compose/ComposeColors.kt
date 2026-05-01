@@ -70,20 +70,25 @@ val md_theme_dark_inversePrimary = Color(0xFFC43D74)
 
 // ===== Miracle Neon Theme =====
 
-val md_theme_neon_light_primary = Color(0xFF6B3FBF)
+// ── Light ──────────────────────────────────────────────
+
+// Primary: Arcane Purple
+val md_theme_neon_light_primary = Color(0xFF7B5EA7)
 val md_theme_neon_light_onPrimary = Color(0xFFFFFFFF)
-val md_theme_neon_light_primaryContainer = Color(0xFFEADDFF)
-val md_theme_neon_light_onPrimaryContainer = Color(0xFF21005D)
+val md_theme_neon_light_primaryContainer = Color(0xFFEAD9FF)
+val md_theme_neon_light_onPrimaryContainer = Color(0xFF3B1A72)
 
-val md_theme_neon_light_secondary = Color(0xFF6C6400)
+// Secondary: Star Gold
+val md_theme_neon_light_secondary = Color(0xFF7A6200)
 val md_theme_neon_light_onSecondary = Color(0xFFFFFFFF)
-val md_theme_neon_light_secondaryContainer = Color(0xFFFFF15A)
-val md_theme_neon_light_onSecondaryContainer = Color(0xFF211C00)
+val md_theme_neon_light_secondaryContainer = Color(0xFFFFF3B0)
+val md_theme_neon_light_onSecondaryContainer = Color(0xFF3A2E00)
 
-val md_theme_neon_light_tertiary = Color(0xFFC6007E)
+// Tertiary: Crimson Rose（撞色核心）
+val md_theme_neon_light_tertiary = Color(0xFFD4215C)
 val md_theme_neon_light_onTertiary = Color(0xFFFFFFFF)
-val md_theme_neon_light_tertiaryContainer = Color(0xFFFFD7ED)
-val md_theme_neon_light_onTertiaryContainer = Color(0xFF430025)
+val md_theme_neon_light_tertiaryContainer = Color(0xFFFFD6DC)
+val md_theme_neon_light_onTertiaryContainer = Color(0xFF6B0020)
 
 val md_theme_neon_light_error = Color(0xFFBA1A1A)
 val md_theme_neon_light_onError = Color(0xFFFFFFFF)
@@ -101,16 +106,21 @@ val md_theme_neon_light_inverseSurface = Color(0xFF312C40)
 val md_theme_neon_light_inverseOnSurface = Color(0xFFF3EEFF)
 val md_theme_neon_light_inversePrimary = Color(0xFFD0BCFF)
 
+// ── Dark ───────────────────────────────────────────────
+
+// Primary
 val md_theme_neon_dark_primary = Color(0xFFD0BCFF)
 val md_theme_neon_dark_onPrimary = Color(0xFF381E72)
 val md_theme_neon_dark_primaryContainer = Color(0xFF4F378B)
-val md_theme_neon_dark_onPrimaryContainer = Color(0xFFEADDFF)
+val md_theme_neon_dark_onPrimaryContainer = Color(0xFFEAD9FF)
 
+// Secondary: Neon Gold
 val md_theme_neon_dark_secondary = Color(0xFFE8D900)
 val md_theme_neon_dark_onSecondary = Color(0xFF383100)
 val md_theme_neon_dark_secondaryContainer = Color(0xFF514900)
 val md_theme_neon_dark_onSecondaryContainer = Color(0xFFFFF15A)
 
+// Tertiary: Rose Pink（暗色下的撞色核心）
 val md_theme_neon_dark_tertiary = Color(0xFFFF80C4)
 val md_theme_neon_dark_onTertiary = Color(0xFF68003F)
 val md_theme_neon_dark_tertiaryContainer = Color(0xFF94005D)
@@ -130,4 +140,4 @@ val md_theme_neon_dark_onSurfaceVariant = Color(0xFFCBC4D8)
 val md_theme_neon_dark_outline = Color(0xFF948FA2)
 val md_theme_neon_dark_inverseSurface = Color(0xFFE8E0F5)
 val md_theme_neon_dark_inverseOnSurface = Color(0xFF312C40)
-val md_theme_neon_dark_inversePrimary = Color(0xFF6B3FBF)
+val md_theme_neon_dark_inversePrimary = Color(0xFF7B5EA7)
