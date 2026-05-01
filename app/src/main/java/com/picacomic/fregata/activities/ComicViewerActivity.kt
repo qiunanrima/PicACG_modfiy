@@ -40,7 +40,6 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.picacomic.fregata.R
-import com.picacomic.fregata.adapters.c
 import com.picacomic.fregata.compose.screens.ComicViewerComposeHostView
 import com.picacomic.fregata.compose.screens.ComicViewerControlsOverlayView
 import com.picacomic.fregata.databinding.ActivityComicViewerBinding
@@ -102,7 +101,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     var frameLayout_gestureArea: FrameLayout? = null
     var frameLayout_nightModeMask: FrameLayout? = null
     var gridView_episodeDialog: GridView? = null
-    var episodeAdapter: c? = null
     var isLandscape: Boolean = false
     var isVerticalScroll: Boolean = false
     var isSystemBrightness: Boolean = false
@@ -327,8 +325,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         if (this.episodeList == null) {
             this.episodeList = ArrayList<ComicEpisodeObject?>()
         }
-        this.episodeAdapter = com.picacomic.fregata.adapters.c(this, this.episodeList)
-        this.gridView_episodeDialog!!.setAdapter(this.episodeAdapter as ListAdapter)
         this.gridView_episodeDialog!!.setOnItemClickListener(object : OnItemClickListener {
             // from class: com.picacomic.fregata.activities.ComicViewerActivity.12
             // android.widget.AdapterView.OnItemClickListener
@@ -1229,7 +1225,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                                     response.body()!!.data!!.getEps().getDocs().get(i)
                                 )
                             }
-                            this@ComicViewerActivity.episodeAdapter!!.notifyDataSetChanged()
                             f.D(TAG, this@ComicViewerActivity.episodeList!!.size.toString() + "")
                         }
                     } else {
