@@ -13,7 +13,6 @@ import com.picacomic.fregata.utils.d;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.LauncherIconHelper;
-import com.squareup.picasso.Picasso;
 
 import okhttp3.OkHttpClient;
 
@@ -22,7 +21,6 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
     public static final String TAG = "MyApplication";
     private static MyApplication hk;
     private static Context mAppContext;
-    private static boolean picassoConfigured;
     private d hl;
 
     public native String getStringSigFromNative();
@@ -53,20 +51,6 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
             return nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES ? R.style.AppThemeNeonDark : R.style.AppThemeNeon;
         }
         return themeIndex == 0 ? R.style.AppTheme : R.style.AppThemeBlack;
-    }
-
-    public static synchronized void bw() {
-        if (picassoConfigured || mAppContext == null) {
-            return;
-        }
-        f.D(TAG, "SET PICASSO INSTANCE");
-        OkHttpClient.Builder builder = createImageOkHttpClientBuilder(mAppContext);
-        try {
-            Picasso.setSingletonInstance(new Picasso.Builder(mAppContext).downloader(new com.a.a.a(builder.build())).build());
-        } catch (IllegalStateException ex) {
-            f.D(TAG, "PICASSO INSTANCE ALREADY INITIALIZED");
-        }
-        picassoConfigured = true;
     }
 
     public static synchronized void refreshCoilImageLoader() {

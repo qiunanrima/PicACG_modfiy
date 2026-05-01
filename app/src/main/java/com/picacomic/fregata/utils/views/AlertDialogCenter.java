@@ -6,17 +6,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.ScaleAnimation;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -24,13 +19,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.picacomic.fregata.R;
 import com.picacomic.fregata.c.b;
-import com.picacomic.fregata.objects.LatestApplicationObject;
 import com.picacomic.fregata.objects.UserProfileObject;
 import com.picacomic.fregata.objects.responses.ChatroomBlacklistObject;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.g;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -271,158 +263,10 @@ public class AlertDialogCenter {
 
     public static void showUpdateApkAlertDialog(final Context context, final LatestApplicationObject latestApplicationObject, final boolean z) {
         ComposeAlertDialogCenter.showUpdateApkAlertDialog(context, latestApplicationObject, z);
-        if (context == null || context != null) {
-            return;
-        }
-        final Dialog dialog = new Dialog(context, R.style.CustomDialog);
-        dialog.setContentView(R.layout.dialog_update_apk_alert);
-        WindowManager.LayoutParams attributes = dialog.getWindow().getAttributes();
-        attributes.gravity = 48;
-        attributes.width = g.as(context) - 50;
-        final ImageView imageView = (ImageView) dialog.findViewById(R.id.imageView_dialog_update_apk_icon_large);
-        TextView textView = (TextView) dialog.findViewById(R.id.textView_dialog_update_apk_title);
-        TextView textView2 = (TextView) dialog.findViewById(R.id.textView_dialog_update_apk_message);
-        FrameLayout frameLayout = (FrameLayout) dialog.findViewById(R.id.frameLayout_dialog_update_apk_top_bg);
-        Button button = (Button) dialog.findViewById(R.id.button_dialog_update_apk_positive);
-        Button button2 = (Button) dialog.findViewById(R.id.button_dialog_update_apk_neutral);
-        Button button3 = (Button) dialog.findViewById(R.id.button_dialog_update_apk_negative);
-        imageView.getLayoutParams().width = (g.as(context) * 3) / 5;
-        frameLayout.getLayoutParams().height = g.as(context) / 3;
-        if (latestApplicationObject.getVersion() == null) {
-            textView.setVisibility(8);
-        } else {
-            textView.setText(context.getResources().getString(R.string.alert_apk_version_prefix) + latestApplicationObject.getVersion());
-        }
-        if (latestApplicationObject.getUpdateContent() == null) {
-            textView2.setVisibility(8);
-        } else {
-            textView2.setText(g.B(context, latestApplicationObject.getCreatedAt()) + "\n\n" + latestApplicationObject.getUpdateContent());
-            textView2.append("\n");
-        }
-        Callback callback = new Callback() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.15
-            @Override // com.squareup.picasso.Callback
-            public void onError() {
-            }
-
-            @Override // com.squareup.picasso.Callback
-            public void onSuccess() {
-                ScaleAnimation scaleAnimation = new ScaleAnimation(1.0f, 1.0f, 0.0f, 1.0f, 1, 0.0f, 1, 1.0f);
-                scaleAnimation.setInterpolator(new AccelerateInterpolator());
-                scaleAnimation.setDuration(300L);
-                imageView.startAnimation(scaleAnimation);
-            }
-        };
-        if (e.x(context)) {
-            Picasso.with(context).load(R.drawable.icon_exclamation_error).into(imageView);
-        } else {
-            Picasso.with(context).load(R.drawable.icon_exclamation_error).into(imageView, callback);
-        }
-        button.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.16
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-                if (latestApplicationObject.getApk() != null) {
-                    g.A(context, g.aC(latestApplicationObject.getApk().getFileServer()) + latestApplicationObject.getApk().getPath());
-                    return;
-                }
-                g.A(context, "https://picacomic.com");
-            }
-        });
-        button2.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.17
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-                if (latestApplicationObject.getDownloadUrl() != null) {
-                    g.A(context, latestApplicationObject.getDownloadUrl());
-                } else {
-                    g.A(context, "https://picacomic.com");
-                }
-            }
-        });
-        button3.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.18
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-                if (z) {
-                    Toast.makeText(context, R.string.alert_apk_verison_must_update, 0).show();
-                } else {
-                    dialog.dismiss();
-                }
-            }
-        });
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.show();
     }
 
     public static void showAnnouncementAlertDialog(Context context, String str, String str2, String str3, String str4, final View.OnClickListener onClickListener) {
         ComposeAlertDialogCenter.showAnnouncementAlertDialog(context, str, str2, str3, str4, onClickListener);
-        if (context == null || context != null) {
-            return;
-        }
-        final Dialog dialog = new Dialog(context, R.style.CustomDialog);
-        dialog.setContentView(R.layout.dialog_announcement_alert);
-        WindowManager.LayoutParams attributes = dialog.getWindow().getAttributes();
-        attributes.gravity = 17;
-        attributes.width = g.as(context);
-        final ScrollView scrollView = (ScrollView) dialog.findViewById(R.id.scrollView_dialog_announcement);
-        ImageView imageView = (ImageView) dialog.findViewById(R.id.imageView_dialog_announcement_image);
-        final ImageView imageView2 = (ImageView) dialog.findViewById(R.id.imageView_dialog_announcement_icon_large);
-        TextView textView = (TextView) dialog.findViewById(R.id.textView_dialog_announcement_title);
-        TextView textView2 = (TextView) dialog.findViewById(R.id.textView_dialog_announcement_message);
-        TextView textView3 = (TextView) dialog.findViewById(R.id.textView_dialog_announcement_timestamp);
-        FrameLayout frameLayout = (FrameLayout) dialog.findViewById(R.id.frameLayout_dialog_announcement_buttons_center_line);
-        Button button = (Button) dialog.findViewById(R.id.button_dialog_announcement_positive);
-        Button button2 = (Button) dialog.findViewById(R.id.button_dialog_announcement_negative);
-        Log.e(TAG, "Width = " + attributes.width + " Height = " + attributes.height);
-        scrollView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.19
-            @Override // android.view.ViewTreeObserver.OnScrollChangedListener
-            public void onScrollChanged() {
-                if (scrollView.getScrollY() <= 200) {
-                    imageView2.setAlpha(scrollView.getScrollY() / 200.0f);
-                } else {
-                    imageView2.setAlpha(1.0f);
-                }
-            }
-        });
-        imageView2.setAlpha(0.0f);
-        button2.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.20
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-                dialog.dismiss();
-            }
-        });
-        button.setOnClickListener(new View.OnClickListener() { // from class: com.picacomic.fregata.utils.views.AlertDialogCenter.21
-            @Override // android.view.View.OnClickListener
-            public void onClick(View view) {
-                onClickListener.onClick(view);
-                dialog.dismiss();
-            }
-        });
-        if (onClickListener == null) {
-            button.setVisibility(8);
-            frameLayout.setVisibility(8);
-        }
-        if (str2 != null) {
-            textView.setText(str2 + "");
-        } else {
-            textView.setVisibility(8);
-        }
-        if (str3 != null) {
-            textView2.setText(str3 + "");
-        } else {
-            textView2.setVisibility(8);
-        }
-        if (str4 != null) {
-            textView3.setText(g.B(context, str4));
-        } else {
-            textView3.setVisibility(8);
-        }
-        if (str != null && !str.equalsIgnoreCase("")) {
-            Picasso.with(context).load(str).placeholder(R.drawable.placeholder_avatar_2).into(imageView);
-        } else {
-            imageView.setVisibility(8);
-        }
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.show();
     }
 
     public static void showFaqAlertDialog(Context context, String str, final View.OnClickListener onClickListener) {

@@ -65,7 +65,6 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun selectServer(server: Int) {
-        MyApplication.bw()
         when (server) {
             1 -> {
                 com.picacomic.fregata.utils.e.p(appContext, false)
