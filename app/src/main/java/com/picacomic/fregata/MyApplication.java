@@ -23,10 +23,22 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
     private static Context mAppContext;
     private d hl;
 
+    // Key2 from picacomic_downloader (d.py)
+    private static final String HMAC_KEY = "~d}$Q7$eIni=V)9\\RK/P.RM4;9[7|@/CA}b~OW!3?EV`:<>M7pddUBL5n|0/*Cn";
+
+    /**
+     * 对应 native getStringSigFromNative()
+     * 返回 HMAC 密钥 Key2
+     */
     public String getStringSigFromNative() {
-        return "~d}$Q7$eIni=V)9\\RK/P.RM4;9[7|@   CA}b~OW!3?EV`:<>M7pddUBL5n|0/*Cn";
+        return HMAC_KEY;
     }
 
+    /**
+     * 对应 native getStringConFromNative(String[])
+     * 签名 raw 串: url + time + nonce + method + apiKey
+     * strArr = [baseUrl, strippedUrl, time, nonce, method, apiKey, version, buildVersion]
+     */
     public String getStringConFromNative(String[] strArr) {
         if (strArr == null || strArr.length < 6) {
             return "";
@@ -34,6 +46,9 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
         return strArr[1] + strArr[2] + strArr[3] + strArr[4] + strArr[5];
     }
 
+    /**
+     * 对应 native getStringComFromNative()
+     */
     public String getStringComFromNative() {
         return "1";
     }
