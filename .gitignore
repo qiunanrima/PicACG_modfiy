@@ -81,7 +81,6 @@ captures/
 
 # 临时脚本文件
 fix_*.py
-jni_kt.kt
 
 # 日志文件
 *.log

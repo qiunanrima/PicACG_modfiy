@@ -23,14 +23,22 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
     private static Context mAppContext;
     private d hl;
 
-    public native String getStringSigFromNative();
+    public String getStringSigFromNative() {
+        return "~d}$Q7$eIni=V)9\\RK/P.RM4;9[7|@   CA}b~OW!3?EV`:<>M7pddUBL5n|0/*Cn";
+    }
 
-    public native String getStringConFromNative(String[] strArr);
+    public String getStringConFromNative(String[] strArr) {
+        if (strArr == null || strArr.length < 6) {
+            return "";
+        }
+        return strArr[1] + strArr[2] + strArr[3] + strArr[4] + strArr[5];
+    }
 
-    public native String getStringComFromNative();
+    public String getStringComFromNative() {
+        return "1";
+    }
 
     static {
-        System.loadLibrary("JniTest");
         androidx.appcompat.app.AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 

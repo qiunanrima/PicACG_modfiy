@@ -11,18 +11,12 @@
 -keepattributes InnerClasses
 -keepattributes Exceptions
 
-# ===== App 启动 / JNI =====
-# MyApplication 中的 native 方法由 libJniTest.so 按 Java 原始类名和方法名解析。
-# 如果 R8 改名，release 包会在启动或签名调用时 UnsatisfiedLinkError 闪退。
+# ===== App 启动 =====
 -keep class com.picacomic.fregata.MyApplication {
-    public native <methods>;
     public static *** bx(...);
     public static *** by(...);
     public *** bz(...);
     public *** c(...);
-}
--keepclasseswithmembernames class * {
-    native <methods>;
 }
 
 # Manifest 组件和 launcher alias 目标必须保持稳定，避免系统按旧类名启动失败。
