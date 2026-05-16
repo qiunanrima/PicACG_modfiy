@@ -73,7 +73,7 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
     private var likeCall: Call<GeneralResponse<ActionResponse>>? = null
     private var favouriteCall: Call<GeneralResponse<ActionResponse>>? = null
 
-    fun loadComic(comicId: String, force: Boolean = false) {
+    fun loadComic(comicId: String, force: Boolean = false, offlineMode: Boolean = false) {
         if (!force && loadedComicId == comicId && comicDetail != null) {
             return
         }
@@ -81,6 +81,12 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
         loadedComicId = comicId
         cancelAll()
         resetState()
+        loadCachedComicDetail(comicId)
+
+        if (offlineMode) {
+            loadDownloadedEpisodesOnly(comicId)
+            return
+        }
 
         fetchDetail(comicId)
         fetchEpisodes(comicId, reset = true)
@@ -413,6 +419,39 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
         isLoading = false
         isActionLoading = false
         pendingRequestCount = 0
+    }
+
+    private fun loadCachedComicDetail(comicId: String) {
+        comicDetail = try {
+            b.aw(comicId)?.comicDetailObject
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun loadDownloadedEpisodesOnly(comicId: String) {
+        val downloadedEpisodes = try {
+            DownloadComicEpisodeObject.find(
+                DownloadComicEpisodeObject::class.java,
+                "comic_id = ? and status != ?",
+                comicId,
+                "0"
+            )
+                ?.filterIsInstance<DownloadComicEpisodeObject>()
+                ?.sortedBy { it.episodeOrder }
+                ?.map { episode ->
+                    episode.comicEpisodeObject.apply {
+                        setStatus(mapDownloadStatus(episode.status))
+                    }
+                }
+                .orEmpty()
+        } catch (_: Exception) {
+            emptyList()
+        }
+        episodes = syncEpisodeLocalState(comicId, downloadedEpisodes)
+        episodeTotal = downloadedEpisodes.size
+        hasMoreEpisodes = false
+        nextEpisodePage = 1
     }
 
     private fun persistComicDetail(detail: ComicDetailObject) {

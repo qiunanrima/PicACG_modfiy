@@ -88,6 +88,7 @@ import com.picacomic.fregata.utils.g
 @Composable
 fun ComicDetailScreen(
     comicId: String,
+    offlineMode: Boolean = false,
     onBack: () -> Unit,
     onComicClick: (String) -> Unit,
     onCommentClick: (String) -> Unit,
@@ -113,7 +114,7 @@ fun ComicDetailScreen(
 
     LaunchedEffect(comicId, inPreview) {
         if (!inPreview) {
-            screenViewModel?.loadComic(comicId)
+            screenViewModel?.loadComic(comicId, offlineMode = offlineMode)
         }
     }
 
@@ -239,6 +240,7 @@ fun ComicDetailScreen(
                     previewState = previewState,
                     isLoading = screenViewModel?.isLoading == true,
                     isActionLoading = screenViewModel?.isActionLoading == true,
+                    offlineMode = offlineMode,
                     onComicClick = onComicClick,
                     onCommentClick = onCommentClick,
                     onComicListClick = onComicListClick,
@@ -266,6 +268,7 @@ private fun ComicDetailContent(
     previewState: ComicDetailPreviewState?,
     isLoading: Boolean,
     isActionLoading: Boolean,
+    offlineMode: Boolean,
     onComicClick: (String) -> Unit,
     onCommentClick: (String) -> Unit,
     onComicListClick: (
@@ -436,6 +439,7 @@ private fun ComicDetailContent(
                             page = record.page,
                             episodeTotal = if (record.episodeTotal > 0) record.episodeTotal else episodeTotal,
                             fromRecord = true,
+                            offlineMode = offlineMode,
                         )
                     } else {
                         openComicViewer(
@@ -446,6 +450,7 @@ private fun ComicDetailContent(
                             page = 1,
                             episodeTotal = episodeTotal,
                             fromRecord = false,
+                            offlineMode = offlineMode,
                         )
                     }
                 },
@@ -455,27 +460,27 @@ private fun ComicDetailContent(
                         contentDescription = "comments",
                         count = if (canComment) (detail?.commentsCount ?: 0).toString() else "禁",
                         enabled = canComment,
-                        onClick = { if (canComment) onCommentClick(comicId) },
+                        onClick = { if (canComment && !offlineMode) onCommentClick(comicId) },
                     ),
                     PicaActionItem(
                         icon = Icons.Filled.Favorite,
                         contentDescription = "likes",
                         count = (detail?.likesCount ?: 0).toString(),
                         selected = detail?.isLiked == true,
-                        enabled = detail != null && !isActionLoading,
+                        enabled = detail != null && !isActionLoading && !offlineMode,
                         onClick = onToggleLike,
                     ),
                     PicaActionItem(
                         icon = Icons.Filled.Bookmark,
                         contentDescription = "favourite",
                         selected = detail?.isFavourite == true,
-                        enabled = detail != null && !isActionLoading,
+                        enabled = detail != null && !isActionLoading && !offlineMode,
                         onClick = onToggleFavourite,
                     ),
                     PicaActionItem(
                         icon = Icons.Filled.Download,
                         contentDescription = "download",
-                        enabled = detail != null,
+                        enabled = detail != null && !offlineMode,
                         onClick = {
                             val currentDetail = detail ?: return@PicaActionItem
                             onDownloadClick(comicId, currentDetail.title)
@@ -517,6 +522,7 @@ private fun ComicDetailContent(
                                             page = 1,
                                             episodeTotal = if (totalEpisodes > 0) totalEpisodes else currentDetail.episodeCount,
                                             fromRecord = false,
+                                            offlineMode = offlineMode,
                                         )
                                     },
                                     modifier = Modifier.weight(1f),
@@ -684,7 +690,8 @@ private fun openComicViewer(
     episodeOrder: Int,
     page: Int,
     episodeTotal: Int,
-    fromRecord: Boolean
+    fromRecord: Boolean,
+    offlineMode: Boolean,
 ) {
     val intent = Intent(context, ComicViewerActivity::class.java).apply {
         putExtra("EXTRA_KEY_COMIC_ID", comicId)
@@ -693,6 +700,7 @@ private fun openComicViewer(
         putExtra("EXTRA_KEY_EPISODE_TOTAL", episodeTotal)
         putExtra("EXTRA_KEY_COMIC_TITLE", title ?: "")
         putExtra("EXTRA_KEY_VIEW_FROM_RECORD", fromRecord)
+        putExtra("EXTRA_KEY_OFFLINE_MODE", offlineMode)
     }
     context.startActivity(intent)
 }

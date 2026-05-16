@@ -13,6 +13,7 @@ import com.picacomic.fregata.objects.responses.ComicDetailResponse
 import com.picacomic.fregata.objects.responses.ComicRandomListResponse
 import com.picacomic.fregata.objects.responses.DataClass.ComicEpisodeResponse.ComicEpisodeResponse
 import com.picacomic.fregata.objects.responses.GeneralResponse
+import com.picacomic.fregata.utils.b
 import com.picacomic.fregata.utils.e
 import retrofit2.Call
 import retrofit2.Callback
@@ -72,7 +73,7 @@ class ComicDetailFragmentViewModel(application: Application) : AndroidViewModel(
         likeCall?.cancel()
         favouriteCall?.cancel()
 
-        _state.value = ComicDetailFragmentState()
+        _state.value = ComicDetailFragmentState(comicDetail = loadCachedComicDetail(targetComicId))
 
         fetchDetail(targetComicId)
         fetchEpisodes(targetComicId, reset = true)
@@ -329,6 +330,14 @@ class ComicDetailFragmentViewModel(application: Application) : AndroidViewModel(
             code = code,
             body = body
         )
+    }
+
+    private fun loadCachedComicDetail(targetComicId: String): ComicDetailObject? {
+        return try {
+            b.aw(targetComicId)?.comicDetailObject
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private fun <T> readErrorBody(response: Response<T>): String? {

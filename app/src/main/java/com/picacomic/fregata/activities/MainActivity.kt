@@ -393,9 +393,7 @@ class MainActivity : BaseActivity() {
                                     }
                                 },
                                 onComicClick = { id ->
-                                    if (!offlineMode) {
-                                        navController.navigate(Screen.createComicDetailRoute(id))
-                                    }
+                                    navController.navigate(Screen.createComicDetailRoute(id))
                                 },
                                 onGameClick = { id ->
                                     if (!offlineMode) {
@@ -547,6 +545,7 @@ class MainActivity : BaseActivity() {
                             val comicId = backStackEntry.arguments?.getString("comicId") ?: ""
                             ComicDetailScreen(
                                 comicId = comicId,
+                                offlineMode = offlineMode,
                                 onBack = { navController.popBackStack() },
                                 onComicClick = { id ->
                                     navController.navigate(Screen.createComicDetailRoute(id))

@@ -354,8 +354,16 @@ fun ProfileScreen(
                             total = profileComicViewModel?.bookmarkedTotal?.toLong() ?: 0L,
                             comics = profileComicViewModel?.bookmarkedComics.orEmpty(),
                             loading = profileComicViewModel?.isLoading == true,
-                            onMore = { onComicListClick("CATEGORY_USER_FAVOURITE") },
-                            onComicClick = onComicClick,
+                            onMore = {
+                                if (!offlineMode) {
+                                    onComicListClick("CATEGORY_USER_FAVOURITE")
+                                }
+                            },
+                            onComicClick = {
+                                if (!offlineMode) {
+                                    onComicClick(it)
+                                }
+                            },
                         )
                     }
                     item {
@@ -364,8 +372,16 @@ fun ProfileScreen(
                             total = profileComicViewModel?.recentTotal ?: 0L,
                             comics = profileComicViewModel?.recentComics.orEmpty(),
                             loading = false,
-                            onMore = { onComicListClick("CATEGORY_RECENT_VIEW") },
-                            onComicClick = onComicClick,
+                            onMore = {
+                                if (!offlineMode) {
+                                    onComicListClick("CATEGORY_RECENT_VIEW")
+                                }
+                            },
+                            onComicClick = {
+                                if (!offlineMode) {
+                                    onComicClick(it)
+                                }
+                            },
                         )
                     }
                     item {
@@ -374,7 +390,11 @@ fun ProfileScreen(
                             total = profileComicViewModel?.downloadedTotal ?: 0L,
                             comics = profileComicViewModel?.downloadedComics.orEmpty(),
                             loading = false,
-                            onMore = { onComicListClick("CATEGORY_DOWNLOADED") },
+                            onMore = {
+                                if (!offlineMode) {
+                                    onComicListClick("CATEGORY_DOWNLOADED")
+                                }
+                            },
                             onComicClick = onComicClick,
                         )
                     }

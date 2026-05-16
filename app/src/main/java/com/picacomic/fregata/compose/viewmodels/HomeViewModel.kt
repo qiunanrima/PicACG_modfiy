@@ -34,7 +34,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         hasNotification = e.ak(application)
-        loadData()
     }
 
     fun loadData() {
