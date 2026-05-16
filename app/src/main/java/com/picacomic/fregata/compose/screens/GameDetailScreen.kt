@@ -448,21 +448,27 @@ private data class GameDetailPreviewState(
 )
 
 private fun gameDetailPreviewState(): GameDetailPreviewState {
-    val icon = ThumbnailObject("https://storage1.picacomic.com", "icon.jpg", "icon.jpg")
+    val icon = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "5d8d36d0-f0f7-4935-a9d7-1f9a0dd26fb7.jpg",
+        "0a7c125f-4f8e-4922-b9ab-275bc9e94e52.jpg"
+    )
     val screenshots = listOf(
-        ThumbnailObject("https://storage1.picacomic.com", "shot1.jpg", "shot1.jpg"),
-        ThumbnailObject("https://storage1.picacomic.com", "shot2.jpg", "shot2.jpg"),
+        ThumbnailObject("https://storage1.picacomic.com", "ec29f500-ddad-4dbd-99b8-fc39d0cc2f23.jpg", "0d20c59f-0b4e-4578-b1ff-d84106db4d1d.jpg"),
+        ThumbnailObject("https://storage1.picacomic.com", "6557ade1-74b7-4089-82b8-d2e86d0304d1.jpg", "17f35358-ed6e-488c-a7a6-d51b5fe8c840.jpg"),
+        ThumbnailObject("https://storage1.picacomic.com", "93292827-0ab3-4814-a195-eb8290a605ec.jpg", "3851ba34-d63a-42ac-a670-b8db61c32bfb.jpg"),
+        ThumbnailObject("https://storage1.picacomic.com", "7567ed74-f2e6-4c96-bf87-257061ab857a.jpg", "f5be85e6-8af4-4420-8dda-3d1c023332d6.jpg"),
     )
     val detail = GameDetailObject(
-        "game-1",
+        "5d354f5b30dda25b3b542dbb",
         "CLANNAD",
         "1.0.0",
         "Key",
         icon,
-        "Fixes and resource update.",
-        "A visual novel classic.",
-        "https://example.com/video.mp4",
-        2205,
+        "在本游戲即將上傳的前夕，2019 年 7 月 18 日上午，京都動畫第一工作室遭到汽油縱火殺人襲擊…",
+        "在某個小鎮，岡崎朋也因為家庭的因素而喪失了生活在這個地方的希望；與春原陽平為朋友，在光阪高等學校過著潦倒的生活…",
+        "https://game.eroge.xyz/cl.mp4",
+        0,
         258,
         2205,
         false,
@@ -472,8 +478,8 @@ private fun gameDetailPreviewState(): GameDetailPreviewState {
         true,
         763f,
         763f,
-        arrayListOf("https://example.com/ios"),
-        arrayListOf("https://example.com/android"),
+        arrayListOf("https://game.eroge.xyz/hhh.php?id=95"),
+        arrayListOf("https://game.eroge.xyz/hhh.php?id=95"),
         ArrayList(screenshots),
     )
     return GameDetailPreviewState(detail, screenshots)

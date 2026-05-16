@@ -700,23 +700,28 @@ private fun expForLevel(level: Int): Int {
 }
 
 private fun profileScreenPreviewUser(): UserProfileObject {
+    val avatar = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "bf30b2bc-5127-4144-86f0-b496b102c6d3.jpg",
+        "avatar.jpg"
+    )
     return UserProfileObject(
-        "user-1",
-        "knight@example.com",
-        "Miracle Knight",
-        "Knight",
-        "2000-01-01",
-        "bot",
-        "Compose profile preview",
-        "member",
-        null,
-        arrayListOf(),
-        "2026-04-25",
-        1280,
-        12,
+        "593019d53f532059f297efa7",
+        "knight@picacomic.com",
+        "黎欧",
+        "萌新",
+        "1999-06-15",
+        "m",
+        "emmm。。。二八七六八七八三九二",
+        "knight",
+        "https://www.picacomic.com/characters/frame_knight_1000.png?r=3",
+        arrayListOf("knight"),
+        "2016-01-01",
+        465280,
+        68,
         false,
-        true,
-        ThumbnailObject("https://storage1.picacomic.com", "avatar.jpg", "avatar.jpg"),
+        false,
+        avatar
     )
 }
 

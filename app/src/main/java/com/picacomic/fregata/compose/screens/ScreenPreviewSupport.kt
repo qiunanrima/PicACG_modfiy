@@ -278,22 +278,25 @@ internal fun PreviewChatPanel(
 internal fun profilePreviewUser(): UserProfileObject {
     val avatar = ThumbnailObject(
         "https://storage1.picacomic.com",
-        "profile-avatar.jpg",
-        "profile-avatar.jpg"
+        "bf30b2bc-5127-4144-86f0-b496b102c6d3.jpg",
+        "avatar.jpg"
     )
-    return UserProfileObject().apply {
-        setUserId("user-preview")
-        setEmail("knight@picacomic.com")
-        setName("Knight")
-        setTitle("哔咔骑士")
-        setBirthday("2000-01-01")
-        setGender("bot")
-        setSlogan("今天也在补 Compose 迁移。")
-        setRole("knight")
-        setLevel(8)
-        setExp(1280)
-        setPunched(false)
-        setVerified(true)
-        setAvatar(avatar)
-    }
+    return UserProfileObject(
+        "593019d53f532059f297efa7",
+        "knight@picacomic.com",
+        "黎欧",
+        "萌新",
+        "1999-06-15",
+        "m",
+        "emmm。。。二八七六八七八三九二",
+        "knight",
+        "https://www.picacomic.com/characters/frame_knight_1000.png?r=3",
+        arrayListOf("knight"),
+        "2016-01-01",
+        465280,
+        68,
+        false,
+        false,
+        avatar
+    )
 }

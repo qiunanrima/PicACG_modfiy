@@ -178,16 +178,15 @@ fun GameScreen(
 }
 
 private fun gamePreviewList(): List<GameListObject> {
-    val icon = ThumbnailObject(
-        "https://storage1.picacomic.com",
-        "a7fe934b-a0c3-466e-8d38-4345c1ecf559.jpg",
-        "0608_1.jpg"
-    )
     return listOf(
-        GameListObject("58296dee1cc00b5d50b1b5fe", "機動戰隊", "2.1", "即时弹道运算引擎打造热血像素机甲格斗手游", 16036, true, false, false, true, icon),
-        GameListObject("5d511f6779f8d4028e63c0a7", "戀花綻放櫻飛時", "1.0.0", "ぱれっと", 858, false, true, true, true, icon),
-        GameListObject("game-3", "CLANNAD", "1.0.0", "Key", 2205, false, false, true, true, icon),
-        GameListObject("game-4", "像素地牢", "0.9.8", "独立开发", 320, false, false, false, true, icon)
+        GameListObject("58296dee1cc00b5d50b1b5fe", "機動戰隊", "2.1", "即时弹道运算引擎打造热血像素机甲格斗手游", 16036, true, false, false, true,
+            ThumbnailObject("https://storage1.picacomic.com", "a7fe934b-a0c3-466e-8d38-4345c1ecf559.jpg", "0608_1.jpg")),
+        GameListObject("5d511f6779f8d4028e63c0a7", "戀花綻放櫻飛時", "1.0.0", "ぱれっと", 858, false, true, true, true,
+            ThumbnailObject("https://storage1.picacomic.com", "ef6137dc-fabd-4085-9743-a1763a284aac.jpg", "snap001.jpg")),
+        GameListObject("5d354f5b30dda25b3b542dbb", "CLANNAD", "1.0.0", "Key", 2205, false, false, true, true,
+            ThumbnailObject("https://storage1.picacomic.com", "5d8d36d0-f0f7-4935-a9d7-1f9a0dd26fb7.jpg", "0a7c125f-4f8e-4922-b9ab-275bc9e94e52.jpg")),
+        GameListObject("game-4", "像素地牢", "0.9.8", "独立开发", 320, false, false, false, true,
+            ThumbnailObject("https://storage1.picacomic.com", "pixel-dungeon-icon.jpg", "pixel-dungeon.jpg"))
     )
 }
 

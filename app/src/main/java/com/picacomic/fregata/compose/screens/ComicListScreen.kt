@@ -452,11 +452,15 @@ private fun comicListPreviewState(
     translate: String?,
     creatorName: String?,
 ): ComicListPreviewState {
-    val cover = ThumbnailObject("https://storage1.picacomic.com", "cover.jpg", "cover.jpg")
+    val cover = ThumbnailObject(
+        "https://storage1.picacomic.com",
+        "tobeimg/IrEYXQ_4J8Iq7JRpV9kMOYEqfhk15lxR7i9LmEbeU6U/fill/300/400/sm/0/aHR0cHM6Ly9zdG9yYWdlMS5waWNhY29taWMuY29tL3N0YXRpYy8xZDFkYjBhMC04NzY0LTQ5ZWEtYmUwYS0zMTRiZWUyYzQ1ZDcuanBn.jpg",
+        "01.jpg"
+    )
     val comics = listOf(
-        ComicListObject("comic-1", "Hot spring story", "Akatama", 316, 26, 1, true, arrayListOf("Short"), cover),
-        ComicListObject("comic-2", "Arknights winter", "Arcana XIV", 4779, 18, 1, false, arrayListOf("Short"), cover),
-        ComicListObject("comic-3", "Pica selected", "Team", 680, 20, 1, true, arrayListOf("Pick"), cover),
+        ComicListObject("5d56e4370bcf57397e60576b", "(C94) ホカホカJS温泉 [中国翻訳]", "アカタマ (桜吹雪ねる)", 316, 26, 1, true, arrayListOf("短篇", "妹妹系"), cover),
+        ComicListObject("5d09f7701edbf52f24b2819d", "【明日方舟】凛冬の拘束调教（上篇）", "大阿卡纳XIV", 4779, 18, 1, false, arrayListOf("短篇"), cover),
+        ComicListObject("comic-3", "C96 偶像大师 同人本", "C.R's NEST", 1204, 36, 3, false, arrayListOf("長篇", "偶像"), cover),
     )
     val title = when {
         !keywords.isNullOrBlank() -> "Search $keywords"

@@ -352,8 +352,8 @@ fun PicaRecommendationCard(
         }
     },
 ) {
-    val recommendationContainer = Color(0xFFFFE3EC)
-    val recommendationBorder = Color(0xFFD98EA8)
+    val recommendationContainer = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+    val recommendationBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)
 
     Card(
         modifier = modifier

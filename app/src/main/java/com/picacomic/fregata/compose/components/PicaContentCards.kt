@@ -186,7 +186,7 @@ fun PicaComicListCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .height(128.dp)
+            .height(148.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
         colors = CardDefaults.elevatedCardColors(
@@ -205,7 +205,7 @@ fun PicaComicListCard(
                 contentDescription = title,
                 modifier = Modifier
                     .width(coverWidth)
-                    .aspectRatio(3f / 4.5f)
+                    .aspectRatio(3f / 4.8f)
                     .clip(MaterialTheme.shapes.small),
                 fallbackIcon = Icons.Filled.Category,
             )

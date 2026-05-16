@@ -379,17 +379,41 @@ private fun RemoteCategoryCard(
 
 private fun categoryPreviewState(): List<CategoryObject> {
     return listOf(
-        CategoryObject("1", "PicACG", "Translated picks", ThumbnailObject("https://storage1.picacomic.com", "translate.png", "translate.png"), false, null),
-        CategoryObject("2", "Short", "Fast reads", ThumbnailObject("https://storage1.picacomic.com", "short.png", "short.png"), false, null),
-        CategoryObject("3", "Long", "Serial works", ThumbnailObject("https://storage1.picacomic.com", "long.png", "long.png"), false, null),
-        CategoryObject("4", "Web", "Partner link", ThumbnailObject("https://storage1.picacomic.com", "web.png", "web.png"), true, "https://www.picacomic.com"),
-        CategoryObject("5", "Small monster", "No cropped cards", ThumbnailObject("https://storage1.picacomic.com", "monster.png", "monster.png"), false, null),
-        CategoryObject("6", "Store", "Responsive row", ThumbnailObject("https://storage1.picacomic.com", "store.png", "store.png"), false, null),
+        CategoryObject(
+            "5821859b5f6b9a4f93dbf6e9", "嗶咔漢化", "未知",
+            ThumbnailObject("https://storage1.picacomic.com", "f541d9aa-e4fd-411d-9e76-c912ffc514d1.png", "translate.png"),
+            false, null
+        ),
+        CategoryObject(
+            null, "大家都在看", null,
+            ThumbnailObject("https://oc.woyeahgo.cf/static/", "every-see.jpg", "every-see.jpg"),
+            false, null
+        ),
+        CategoryObject(
+            null, "援助嗶咔", null,
+            ThumbnailObject("https://oc.woyeahgo.cf/static/", "help.jpg", "help.jpg"),
+            true, "https://donate.woyeahgo.cf"
+        ),
+        CategoryObject(
+            null, "嗶咔女皇總選", null,
+            ThumbnailObject("https://oc.woyeahgo.cf/static/", "final-vote.jpeg", "final-vote.jpeg"),
+            true, "https://final-vote.woyeahgo.cf"
+        ),
+        CategoryObject(
+            "5821859b5f6b9a4f93dbf6e8", "短篇", "短篇漫画合集",
+            ThumbnailObject("https://storage1.picacomic.com", "short-story.png", "short-story.png"),
+            false, null
+        ),
+        CategoryObject(
+            "5821859b5f6b9a4f93dbf6e7", "長篇", "長篇连载作品",
+            ThumbnailObject("https://storage1.picacomic.com", "long-story.png", "long-story.png"),
+            false, null
+        ),
     )
 }
 
 private fun categoryKeywordPreviewItems(): List<String> {
-    return listOf("C96", "Pica pick", "School", "Uniform", "Ice", "Daily")
+    return listOf("C96", "嗶咔團長推薦", "肥宅", "老師", "校園", "校服", "水平線", "冰菓", "一拳超人", "遊戲王", "小梅けいと", "40010", "ホムンクルス")
 }
 
 @Preview(showBackground = true)
