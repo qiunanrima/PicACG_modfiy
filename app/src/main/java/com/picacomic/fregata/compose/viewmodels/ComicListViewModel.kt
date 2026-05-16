@@ -14,6 +14,8 @@ import com.picacomic.fregata.objects.CategoryObject
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject
 import com.picacomic.fregata.objects.databaseTable.DbComicViewRecordObject
+import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
+import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject
 import com.picacomic.fregata.objects.requests.SortingBody
 import com.picacomic.fregata.objects.responses.ComicRandomListResponse
 import com.picacomic.fregata.objects.responses.DataClass.ComicListResponse.ComicListResponse
@@ -112,11 +114,15 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
     var messageRes by mutableStateOf<Int?>(null)
         private set
 
+    var downloadingProgressText by mutableStateOf<Map<String, String>>(emptyMap())
+        private set
+
     private var currentCall: Call<*>? = null
     private var requestKey: String? = null
     private var currentRequest: ComicListRequest? = null
     private var recentOffset = 0
     private var downloadedOffset = 0
+    private var downloadingOffset = 0
     private var shouldResetOnNextLoad = false
 
     fun init(
@@ -201,6 +207,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         when (request.category) {
             "CATEGORY_RANDOM" -> fetchRandom()
             "CATEGORY_RECENT_VIEW" -> loadRecentView()
+            "CATEGORY_DOWNLOADING" -> loadDownloading()
             "CATEGORY_DOWNLOADED" -> loadDownloaded()
             "CATEGORY_USER_FAVOURITE" -> fetchRemote(request, favourite = true)
             else -> fetchRemote(request, favourite = false)
@@ -219,6 +226,8 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         shouldResetOnNextLoad = true
         if (currentRequest?.category == "CATEGORY_RECENT_VIEW") {
             recentOffset = (safePage - 1) * pageLimit
+        } else if (currentRequest?.category == "CATEGORY_DOWNLOADING") {
+            downloadingOffset = (safePage - 1) * pageLimit
         } else if (currentRequest?.category == "CATEGORY_DOWNLOADED") {
             downloadedOffset = (safePage - 1) * pageLimit
         }
@@ -426,7 +435,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         try {
             val records = DbComicDetailObject.findWithQuery(
                 DbComicDetailObject::class.java,
-                "SELECT * FROM db_comic_detail_object WHERE download_status > 0 ORDER BY downloaded_at DESC LIMIT ? OFFSET ?",
+                "SELECT * FROM db_comic_detail_object WHERE download_status = 4 ORDER BY downloaded_at DESC LIMIT ? OFFSET ?",
                 pageLimit.toString(),
                 downloadedOffset.toString()
             ) ?: emptyList<Any>()
@@ -435,7 +444,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             }
             val totalCount = DbComicDetailObject.count<DbComicDetailObject>(
                 DbComicDetailObject::class.java,
-                "download_status > 0",
+                "download_status = 4",
                 null
             )
             totalPage = totalPagesFromCount(totalCount)
@@ -454,9 +463,52 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         isLoading = false
     }
 
+    private fun loadDownloading() {
+        isLoading = true
+        try {
+            val records = DbComicDetailObject.findWithQuery(
+                DbComicDetailObject::class.java,
+                "SELECT * FROM db_comic_detail_object WHERE download_status > 0 AND download_status < 4 ORDER BY downloaded_at DESC LIMIT ? OFFSET ?",
+                pageLimit.toString(),
+                downloadingOffset.toString()
+            ) ?: emptyList<Any>()
+            val loaded = records.mapNotNull { raw ->
+                (raw as? DbComicDetailObject)?.let { ComicListObject(it) }
+            }
+            val loadedProgress = loaded.mapNotNull { comic ->
+                val comicId = comic.comicId ?: return@mapNotNull null
+                comicId to buildDownloadingProgressText(comicId)
+            }.toMap()
+            val totalCount = DbComicDetailObject.count<DbComicDetailObject>(
+                DbComicDetailObject::class.java,
+                "download_status > 0 AND download_status < 4",
+                null
+            )
+            totalPage = totalPagesFromCount(totalCount)
+            comics = if (shouldResetOnNextLoad) loaded else comics + loaded
+            downloadingProgressText = if (shouldResetOnNextLoad) {
+                loadedProgress
+            } else {
+                downloadingProgressText + loadedProgress
+            }
+            downloadingOffset = comics.size
+            hasMore = downloadingOffset < totalCount
+            if (loaded.isNotEmpty()) {
+                page += 1
+            } else if (comics.isEmpty()) {
+                hasMore = false
+            }
+            shouldResetOnNextLoad = false
+        } catch (_: Exception) {
+            emitNetworkError()
+        }
+        isLoading = false
+    }
+
     private fun resetState() {
         currentCall?.cancel()
         comics = emptyList()
+        downloadingProgressText = emptyMap()
         page = 1
         totalPage = 1
         pageLimit = DEFAULT_PAGE_LIMIT
@@ -465,6 +517,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         isLoading = false
         recentOffset = 0
         downloadedOffset = 0
+        downloadingOffset = 0
         shouldResetOnNextLoad = false
     }
 
@@ -504,6 +557,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             !request.creatorName.isNullOrBlank() -> appContext.getString(com.picacomic.fregata.R.string.title_search) + request.creatorName
             request.category == "CATEGORY_USER_FAVOURITE" -> appContext.getString(com.picacomic.fregata.R.string.bookmarked)
             request.category == "CATEGORY_RECENT_VIEW" -> appContext.getString(com.picacomic.fregata.R.string.recent_view)
+            request.category == "CATEGORY_DOWNLOADING" -> "正在下载"
             request.category == "CATEGORY_DOWNLOADED" -> appContext.getString(com.picacomic.fregata.R.string.downloaded)
             request.category == "CATEGORY_RANDOM" -> appContext.getString(com.picacomic.fregata.R.string.category_title_random)
             !request.category.isNullOrBlank() -> request.category
@@ -516,6 +570,35 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         if (totalCount <= 0L) return 1
         val pageCount = totalCount / pageLimit + if (totalCount % pageLimit == 0L) 0 else 1
         return pageCount.toInt().coerceAtLeast(1)
+    }
+
+    private fun buildDownloadingProgressText(comicId: String): String {
+        val episodes = try {
+            DownloadComicEpisodeObject.find(
+                DownloadComicEpisodeObject::class.java,
+                "comic_id = ?",
+                comicId,
+            ) ?: emptyList<Any>()
+        } catch (_: Exception) {
+            emptyList<Any>()
+        }
+        val episodeObjects = episodes.mapNotNull { it as? DownloadComicEpisodeObject }
+        val downloadedPages = try {
+            DownloadComicPageObject.count<DownloadComicPageObject>(
+                DownloadComicPageObject::class.java,
+                "comic_id = ?",
+                arrayOf(comicId),
+            )
+        } catch (_: Exception) {
+            0L
+        }
+        val totalPages = episodeObjects.sumOf { it.total.coerceAtLeast(0) }
+        val downloadedEpisodes = episodeObjects.count { it.status == 4 }
+        return if (totalPages > 0) {
+            "正在下载 $downloadedPages/$totalPages 页 · $downloadedEpisodes/${episodeObjects.size} 话"
+        } else {
+            "正在下载 $downloadedPages 页 · $downloadedEpisodes/${episodeObjects.size} 话"
+        }
     }
 
     private fun emitMessage(message: Int) {

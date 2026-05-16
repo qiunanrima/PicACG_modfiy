@@ -6,6 +6,7 @@ import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -215,7 +216,7 @@ private fun ReaderBrightnessPanel(
                 tint = Color.White,
                 modifier = Modifier.size(22.dp),
             )
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
@@ -226,7 +227,7 @@ private fun ReaderBrightnessPanel(
                     onValueChange = { onBrightnessChanged(it.toInt()) },
                     valueRange = 0f..255f,
                     modifier = Modifier
-                        .width(150.dp)
+                        .width(maxHeight)
                         .rotate(-90f),
                 )
             }

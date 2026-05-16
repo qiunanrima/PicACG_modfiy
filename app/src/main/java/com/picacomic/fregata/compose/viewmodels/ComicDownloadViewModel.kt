@@ -60,6 +60,9 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
     var progressText by mutableStateOf("")
         private set
 
+    var episodeProgress by mutableStateOf<Map<String, String>>(emptyMap())
+        private set
+
     var errorEvent by mutableIntStateOf(0)
         private set
 
@@ -105,6 +108,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         nk = true
         nu = false
         progressText = ""
+        episodeProgress = emptyMap()
         cP()
         bH()
     }
@@ -171,25 +175,44 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
 
     fun C(index: Int) {
         if (index !in episodes.indices) return
+        if (episodes[index].status == 1 || episodes[index].status == 2) {
+            return
+        }
         episodes[index].setSelected(!episodes[index].isSelected)
+        episodes = episodes.toList()
+    }
+
+    fun toggleSelectAll() {
+        val selectableEpisodes = episodes.filter { it.status != 1 && it.status != 2 }
+        if (selectableEpisodes.isEmpty()) return
+        val shouldSelectAll = selectableEpisodes.any { !it.isSelected }
+        episodes.forEach { episode ->
+            if (episode.status != 1 && episode.status != 2) {
+                episode.setSelected(shouldSelectAll)
+            }
+        }
         episodes = episodes.toList()
     }
 
     fun downloadSelected() {
         var selectedCount = 0
+        var skippedCount = 0
         episodes.forEachIndexed { index, episode ->
             if (episode.isSelected) {
-                J(index)
-                episode.setStatus(1)
+                if (J(index)) {
+                    episode.setStatus(1)
+                    selectedCount += 1
+                } else {
+                    skippedCount += 1
+                }
                 episode.setSelected(false)
-                selectedCount += 1
             }
         }
         if (selectedCount > 0) {
             val targetComicId = comicId
             val dbComicDetailObjectAw: DbComicDetailObject? = targetComicId?.let { b.aw(it) }
             if (dbComicDetailObjectAw != null) {
-                dbComicDetailObjectAw.downloadStatus = 4
+                dbComicDetailObjectAw.downloadStatus = 1
                 dbComicDetailObjectAw.downloadedAt = System.currentTimeMillis()
                 dbComicDetailObjectAw.save()
             } else {
@@ -197,22 +220,28 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
             }
             episodes = episodes.toList()
             emitMessage("已加入下载队列")
+        } else if (skippedCount > 0) {
+            episodes = episodes.toList()
+            emitMessage("选中的章节已在下载列表中")
         }
     }
 
-    fun J(index: Int) {
-        val targetComicId = comicId ?: return
-        val episode = episodes.getOrNull(index) ?: return
-        val episodeId = episode.episodeId ?: return
-        if (b.ay(episodeId) == null) {
-            DownloadComicEpisodeObject(targetComicId, episode, 1).save()
+    fun J(index: Int): Boolean {
+        val targetComicId = comicId ?: return false
+        val episode = episodes.getOrNull(index) ?: return false
+        val episodeId = episode.episodeId ?: return false
+        val dbEpisode = b.ay(episodeId)
+        if (dbEpisode != null) {
+            return false
         }
+        DownloadComicEpisodeObject(targetComicId, episode, 1).save()
         f.E("ComicDownloadFragment", "Start Download Service")
         val intent = Intent(getApplication<Application>(), DownloadService::class.java).apply {
             putExtra("COMIC_ID", targetComicId)
             putExtra("EPISODE_ID", episodeId)
         }
         getApplication<Application>().startService(intent)
+        return true
     }
 
     fun loadEpisodePages(index: Int, page: Int = 1, reset: Boolean = true) {
@@ -268,6 +297,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         }
         episodes = episodes.toList()
         progressText = ""
+        episodeProgress = emptyMap()
         emitMessage("已删除下载")
     }
 
@@ -297,9 +327,13 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         if (index >= 0) {
             if (current == total) {
                 episodes[index].setStatus(2)
-                episodes[index].title = episodeTitle
+                episodeProgress = episodeProgress - episodeId
+                if (episodeTitle.isNotBlank()) {
+                    episodes[index].title = episodeTitle
+                }
             } else {
-                episodes[index].title = "$current/$total"
+                episodes[index].setStatus(1)
+                episodeProgress = episodeProgress + (episodeId to "$current/$total")
             }
             episodes = episodes.toList()
         }

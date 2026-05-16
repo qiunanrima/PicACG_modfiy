@@ -10,6 +10,8 @@ import com.picacomic.fregata.b.d
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject
 import com.picacomic.fregata.objects.databaseTable.DbComicViewRecordObject
+import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
+import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject
 import com.picacomic.fregata.objects.responses.DataClass.ComicListResponse.ComicListResponse
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.utils.e
@@ -32,6 +34,12 @@ class ProfileComicViewModel(application: Application) : AndroidViewModel(applica
         private set
     var qL by mutableStateOf(0L)
         private set
+    var qM by mutableStateOf<List<ComicListObject>?>(null)
+        private set
+    var qN by mutableStateOf(0L)
+        private set
+    var downloadingProgressText by mutableStateOf<Map<String, String>>(emptyMap())
+        private set
 
     val bookmarkedComics: List<ComicListObject>
         get() = qG.orEmpty()
@@ -45,6 +53,10 @@ class ProfileComicViewModel(application: Application) : AndroidViewModel(applica
         get() = qK.orEmpty()
     val downloadedTotal: Long
         get() = qL
+    val downloadingComics: List<ComicListObject>
+        get() = qM.orEmpty()
+    val downloadingTotal: Long
+        get() = qN
 
     var isLoading by mutableStateOf(false)
         private set
@@ -118,27 +130,76 @@ class ProfileComicViewModel(application: Application) : AndroidViewModel(applica
 
     fun dx() {
         try {
-            val records = DbComicDetailObject.findWithQuery(
+            val downloadingRecords = DbComicDetailObject.findWithQuery(
                 DbComicDetailObject::class.java,
-                "SELECT * FROM db_comic_detail_object WHERE download_status > 0 ORDER BY downloaded_at DESC LIMIT 4 ",
+                "SELECT * FROM db_comic_detail_object WHERE download_status > 0 AND download_status < 4 ORDER BY downloaded_at DESC LIMIT 4 ",
             ) ?: emptyList<Any>()
-            qK = records.mapNotNull { raw ->
+            qM = downloadingRecords.mapNotNull { raw ->
+                (raw as? DbComicDetailObject)?.let { ComicListObject(it) }
+            }
+            downloadingProgressText = qM.orEmpty().mapNotNull { comic ->
+                val comicId = comic.comicId ?: return@mapNotNull null
+                comicId to buildDownloadingProgressText(comicId)
+            }.toMap()
+            qN = DbComicDetailObject.count<DbComicDetailObject>(
+                DbComicDetailObject::class.java,
+                "download_status > 0 AND download_status < 4",
+                null,
+            )
+            val downloadedRecords = DbComicDetailObject.findWithQuery(
+                DbComicDetailObject::class.java,
+                "SELECT * FROM db_comic_detail_object WHERE download_status = 4 ORDER BY downloaded_at DESC LIMIT 4 ",
+            ) ?: emptyList<Any>()
+            qK = downloadedRecords.mapNotNull { raw ->
                 (raw as? DbComicDetailObject)?.let { ComicListObject(it) }
             }
             qL = DbComicDetailObject.count<DbComicDetailObject>(
                 DbComicDetailObject::class.java,
-                "download_status > 0",
+                "download_status = 4",
                 null,
             )
             dy()
         } catch (_: Exception) {
             qK = emptyList()
             qL = 0L
+            qM = emptyList()
+            qN = 0L
+            downloadingProgressText = emptyMap()
         }
     }
 
     fun dy() {
         qK = qK.orEmpty().toList()
+        qM = qM.orEmpty().toList()
+    }
+
+    private fun buildDownloadingProgressText(comicId: String): String {
+        val episodes = try {
+            DownloadComicEpisodeObject.find(
+                DownloadComicEpisodeObject::class.java,
+                "comic_id = ?",
+                comicId,
+            ) ?: emptyList<Any>()
+        } catch (_: Exception) {
+            emptyList<Any>()
+        }
+        val episodeObjects = episodes.mapNotNull { it as? DownloadComicEpisodeObject }
+        val downloadedPages = try {
+            DownloadComicPageObject.count<DownloadComicPageObject>(
+                DownloadComicPageObject::class.java,
+                "comic_id = ?",
+                arrayOf(comicId),
+            )
+        } catch (_: Exception) {
+            0L
+        }
+        val totalPages = episodeObjects.sumOf { it.total.coerceAtLeast(0) }
+        val downloadedEpisodes = episodeObjects.count { it.status == 4 }
+        return if (totalPages > 0) {
+            "正在下载 $downloadedPages/$totalPages 页 · $downloadedEpisodes/${episodeObjects.size} 话"
+        } else {
+            "正在下载 $downloadedPages 页 · $downloadedEpisodes/${episodeObjects.size} 话"
+        }
     }
 
     fun bI() {
@@ -180,6 +241,7 @@ class ProfileComicViewModel(application: Application) : AndroidViewModel(applica
 
     fun onClickTag(tag: Int): String? {
         return when {
+            tag / 400 == 1 -> qM.orEmpty().getOrNull(tag % 400)?.comicId
             tag / 300 == 1 -> qK.orEmpty().getOrNull(tag % 300)?.comicId
             tag / 200 == 1 -> qI.orEmpty().getOrNull(tag % 200)?.comicId
             tag / 100 == 1 -> qG.orEmpty().getOrNull(tag % 100)?.comicId

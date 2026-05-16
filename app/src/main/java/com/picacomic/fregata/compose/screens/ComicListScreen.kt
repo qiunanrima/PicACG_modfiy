@@ -93,6 +93,7 @@ fun ComicListScreen(
     val previewState = if (inPreview) comicListPreviewState(category, keywords, tags, author, translate, creatorName) else null
     val isFavourite = category == "CATEGORY_USER_FAVOURITE"
     val isRecent = category == "CATEGORY_RECENT_VIEW"
+    val isDownloading = category == "CATEGORY_DOWNLOADING"
     val isAdvancedSearch = !keywords.isNullOrBlank()
     val canSort = isFavourite || isAdvancedSearch
     var pageText by rememberSaveable(category, keywords, tags, author, translate, creatorId) {
@@ -278,7 +279,12 @@ fun ComicListScreen(
                         ) { _, item ->
                             PicaComicListCard(
                                 title = item.title.orEmpty(),
-                                subtitle = item.author.orEmpty(),
+                                subtitle = if (isDownloading) {
+                                    screenViewModel?.downloadingProgressText?.get(item.comicId.orEmpty()).orEmpty()
+                                        .ifBlank { item.author.orEmpty() }
+                                } else {
+                                    item.author.orEmpty()
+                                },
                                 thumbnail = item.thumb,
                                 likes = item.likesCount,
                                 pages = item.pagesCount,

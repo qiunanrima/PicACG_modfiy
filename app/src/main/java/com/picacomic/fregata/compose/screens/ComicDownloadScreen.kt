@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -114,6 +115,7 @@ fun ComicDownloadScreen(
         val isLoading = if (inPreview) false else screenViewModel?.nu == true
         val hasMore = if (inPreview) false else screenViewModel?.nk == true
         val progressText = if (inPreview) previewState?.progressText.orEmpty() else screenViewModel?.progressText.orEmpty()
+        val episodeProgress = if (inPreview) previewState?.episodeProgress.orEmpty() else screenViewModel?.episodeProgress.orEmpty()
         val selectedCount = episodes.count { it.isSelected }
 
         Scaffold(
@@ -164,7 +166,9 @@ fun ComicDownloadScreen(
                 isLoading = isLoading,
                 hasMore = hasMore,
                 progressText = progressText,
+                episodeProgress = episodeProgress,
                 onEpisodeClick = { index -> screenViewModel?.C(index) },
+                onSelectAllClick = { screenViewModel?.toggleSelectAll() },
                 onLoadMore = { screenViewModel?.bN() },
             )
         }
@@ -201,10 +205,15 @@ private fun ComicDownloadContent(
     isLoading: Boolean,
     hasMore: Boolean,
     progressText: String,
+    episodeProgress: Map<String, String>,
     onEpisodeClick: (Int) -> Unit,
+    onSelectAllClick: () -> Unit,
     onLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val selectableCount = episodes.count { it.status != 1 && it.status != 2 }
+    val selectedSelectableCount = episodes.count { it.status != 1 && it.status != 2 && it.isSelected }
+
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
@@ -237,10 +246,12 @@ private fun ComicDownloadContent(
 
         item {
             PicaCardSection {
-                PicaSectionHeader(
+                ComicDownloadSectionHeader(
                     title = "下载章节",
                     supportingText = if (total > 0) "已加载 ${episodes.size} / 共 $total 话" else "已加载 ${episodes.size} 话",
-                    actionLabel = if (hasMore && !isLoading) "更多" else null,
+                    selectAllLabel = if (selectableCount > 0 && selectedSelectableCount == selectableCount) "取消全选" else "全选",
+                    onSelectAllClick = if (selectableCount > 0) onSelectAllClick else null,
+                    moreLabel = if (hasMore && !isLoading) "更多" else null,
                     onActionClick = onLoadMore,
                 )
 
@@ -256,9 +267,10 @@ private fun ComicDownloadContent(
                                 val index = rowIndex * 4 + columnIndex
                                 PicaEpisodeGridItem(
                                     title = episode.title?.takeIf { it.isNotBlank() } ?: "第 ${episode.order} 话",
-                                    subtitle = downloadStateLabel(episode),
+                                    subtitle = downloadStateLabel(episode, episodeProgress[episode.episodeId.orEmpty()]),
                                     state = downloadState(episode),
                                     onClick = { onEpisodeClick(index) },
+                                    enabled = episode.status != 1 && episode.status != 2,
                                     modifier = Modifier.weight(1f),
                                 )
                             }
@@ -282,6 +294,65 @@ private fun ComicDownloadContent(
                 LaunchedEffect(episodes.size) {
                     onLoadMore()
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ComicDownloadSectionHeader(
+    title: String,
+    supportingText: String,
+    selectAllLabel: String,
+    onSelectAllClick: (() -> Unit)?,
+    moreLabel: String?,
+    onActionClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            )
+            Text(
+                text = supportingText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (onSelectAllClick != null) {
+                Text(
+                    text = selectAllLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(onClick = onSelectAllClick)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                )
+            }
+            if (!moreLabel.isNullOrBlank()) {
+                Text(
+                    text = moreLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(onClick = onActionClick)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                )
             }
         }
     }
@@ -334,10 +405,10 @@ private fun downloadState(episode: ComicEpisodeObject): PicaEpisodeGridItemState
 }
 
 @Composable
-private fun downloadStateLabel(episode: ComicEpisodeObject): String? {
+private fun downloadStateLabel(episode: ComicEpisodeObject, progress: String?): String? {
     return when {
         episode.isSelected -> "已选择"
-        episode.status == 1 -> "下载中"
+        episode.status == 1 -> progress ?: "下载中"
         episode.status == 2 -> stringResource(R.string.downloaded)
         else -> null
     }
@@ -347,19 +418,21 @@ private data class ComicDownloadPreviewState(
     val episodes: List<ComicEpisodeObject>,
     val total: Int,
     val progressText: String,
+    val episodeProgress: Map<String, String>,
 )
 
 private fun comicDownloadPreviewState(): ComicDownloadPreviewState {
     return ComicDownloadPreviewState(
         episodes = listOf(
             ComicEpisodeObject("ep-1", "第一话", 1, "").apply { setStatus(2) },
-            ComicEpisodeObject("ep-2", "2/18", 2, "").apply { setStatus(1) },
+            ComicEpisodeObject("ep-2", "第二话", 2, "").apply { setStatus(1) },
             ComicEpisodeObject("ep-3", "第三话", 3, "").apply { setSelected(true) },
             ComicEpisodeObject("ep-4", "第四话", 4, ""),
             ComicEpisodeObject("ep-5", "第五话", 5, ""),
         ),
         total = 24,
         progressText = "示例漫画\n第二话\n2 / 18",
+        episodeProgress = mapOf("ep-2" to "2/18"),
     )
 }
 

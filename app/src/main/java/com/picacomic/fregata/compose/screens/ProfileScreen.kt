@@ -386,6 +386,21 @@ fun ProfileScreen(
                     }
                     item {
                         ProfileComicSection(
+                            title = "正在下载",
+                            total = profileComicViewModel?.downloadingTotal ?: 0L,
+                            comics = profileComicViewModel?.downloadingComics.orEmpty(),
+                            loading = false,
+                            subtitleOverrides = profileComicViewModel?.downloadingProgressText.orEmpty(),
+                            onMore = {
+                                if (!offlineMode) {
+                                    onComicListClick("CATEGORY_DOWNLOADING")
+                                }
+                            },
+                            onComicClick = onComicClick,
+                        )
+                    }
+                    item {
+                        ProfileComicSection(
                             title = stringResource(R.string.downloaded),
                             total = profileComicViewModel?.downloadedTotal ?: 0L,
                             comics = profileComicViewModel?.downloadedComics.orEmpty(),
@@ -565,6 +580,7 @@ private fun ProfileComicSection(
     total: Long,
     comics: List<ComicListObject>,
     loading: Boolean,
+    subtitleOverrides: Map<String, String> = emptyMap(),
     onMore: () -> Unit,
     onComicClick: (String) -> Unit,
 ) {
@@ -595,7 +611,7 @@ private fun ProfileComicSection(
                         comics.forEach { comic ->
                             PicaComicListCard(
                                 title = comic.title.orEmpty(),
-                                subtitle = comic.author.orEmpty(),
+                                subtitle = subtitleOverrides[comic.comicId.orEmpty()] ?: comic.author.orEmpty(),
                                 thumbnail = comic.thumb,
                                 likes = comic.likesCount,
                                 pages = comic.pagesCount,

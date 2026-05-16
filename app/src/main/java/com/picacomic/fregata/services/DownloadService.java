@@ -17,8 +17,11 @@ import com.picacomic.fregata.utils.g;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +40,7 @@ public class DownloadService extends IntentService {
     private CompletionService<b> tP;
     private LocalBroadcastManager tQ;
     private List<a> tR;
+    private final Set<String> tV;
     boolean tS;
     int tT;
     long tU;
@@ -48,6 +52,7 @@ public class DownloadService extends IntentService {
         this.tO = Executors.newFixedThreadPool(1);
         this.tP = new ExecutorCompletionService(this.tO);
         this.tR = new ArrayList();
+        this.tV = Collections.synchronizedSet(new HashSet<String>());
     }
 
     public DownloadService(String str) {
@@ -57,6 +62,7 @@ public class DownloadService extends IntentService {
         this.tO = Executors.newFixedThreadPool(1);
         this.tP = new ExecutorCompletionService(this.tO);
         this.tR = new ArrayList();
+        this.tV = Collections.synchronizedSet(new HashSet<String>());
     }
 
     @Override // android.app.IntentService, android.app.Service
@@ -69,6 +75,18 @@ public class DownloadService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         String stringExtra = intent.getStringExtra("COMIC_ID");
         String stringExtra2 = intent.getStringExtra("EPISODE_ID");
+        if (stringExtra == null || stringExtra2 == null) {
+            return;
+        }
+        DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(stringExtra2);
+        if (downloadComicEpisodeObjectAy != null && downloadComicEpisodeObjectAy.getStatus() == 4) {
+            f.E(TAG, "Skip downloaded task " + stringExtra2);
+            return;
+        }
+        if (!this.tV.add(stringExtra2)) {
+            f.E(TAG, "Skip duplicate running task " + stringExtra2);
+            return;
+        }
         if (this.tS) {
             a aVar = new a(stringExtra, stringExtra2);
             this.tR.add(aVar);
@@ -158,6 +176,10 @@ public class DownloadService extends IntentService {
         DbComicDetailObject dbComicDetailObjectAw = com.picacomic.fregata.utils.b.aw(str);
         String title2 = dbComicDetailObjectAw != null ? dbComicDetailObjectAw.getTitle() : "";
         DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(str2);
+        if (downloadComicEpisodeObjectAy != null && downloadComicEpisodeObjectAy.getStatus() == 4) {
+            this.tV.remove(str2);
+            return;
+        }
         boolean z2 = false;
         int i2 = 1;
         boolean z3 = false;
@@ -277,6 +299,7 @@ public class DownloadService extends IntentService {
                         if (downloadComicEpisodeObjectAy != null) {
                             downloadComicEpisodeObjectAy.setStatus(4);
                             downloadComicEpisodeObjectAy.save();
+                            updateComicDownloadStatus(str);
                         } else {
                             f.D(TAG, "DB error, missing DownloadComicEpisodeObject, episodeId = " + str2);
                         }
@@ -295,6 +318,32 @@ public class DownloadService extends IntentService {
                 i3 = i;
                 z2 = false;
             }
+        }
+        this.tV.remove(str2);
+    }
+
+    private void updateComicDownloadStatus(String str) {
+        try {
+            DbComicDetailObject dbComicDetailObjectAw = com.picacomic.fregata.utils.b.aw(str);
+            if (dbComicDetailObjectAw == null) {
+                return;
+            }
+            List listFind = DownloadComicEpisodeObject.find(DownloadComicEpisodeObject.class, "comic_id = ?", str);
+            boolean z = false;
+            if (listFind != null) {
+                for (Object obj : listFind) {
+                    DownloadComicEpisodeObject downloadComicEpisodeObject = (DownloadComicEpisodeObject) obj;
+                    if (downloadComicEpisodeObject.getStatus() != 4) {
+                        z = true;
+                        break;
+                    }
+                }
+            }
+            dbComicDetailObjectAw.setDownloadStatus(z ? 1 : 4);
+            dbComicDetailObjectAw.setDownloadedAt(System.currentTimeMillis());
+            dbComicDetailObjectAw.save();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
