@@ -63,6 +63,12 @@ class ProfileComicViewModel(application: Application) : AndroidViewModel(applica
         bH(force)
     }
 
+    fun loadOffline() {
+        bI()
+        dv()
+        dx()
+    }
+
     fun bH(force: Boolean = false) {
         if (qG != null && !force) {
             bI()

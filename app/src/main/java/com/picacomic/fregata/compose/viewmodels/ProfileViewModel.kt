@@ -102,6 +102,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         })
     }
 
+    fun loadCachedProfileOnly() {
+        if (userProfile == null) {
+            loadCachedProfile()
+        }
+    }
+
     fun punchIn() {
         if (isPunchingIn) return
         if (userProfile?.isPunched == true) return

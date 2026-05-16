@@ -100,6 +100,7 @@ fun ProfileScreen(
     onGameClick: (String) -> Unit = {},
     onComicListClick: (String) -> Unit = {},
     refreshEvent: Int = 0,
+    offlineMode: Boolean = false,
     viewModel: ProfileViewModel? = null,
 ) {
     val context = LocalContext.current
@@ -156,7 +157,7 @@ fun ProfileScreen(
     }
 
     val onAvatarClick: () -> Unit = click@{
-        if (inPreview) return@click
+        if (inPreview || offlineMode) return@click
         val hasCameraPermission = ContextCompat.checkSelfPermission(
             context,
             Manifest.permission.CAMERA,
@@ -199,14 +200,19 @@ fun ProfileScreen(
 
     LaunchedEffect(refreshEvent) {
         if (!inPreview) {
-            screenViewModel?.loadProfile(force = refreshEvent > 0)
-            profileComicViewModel?.load(force = refreshEvent > 0)
+            if (offlineMode) {
+                screenViewModel?.loadCachedProfileOnly()
+                profileComicViewModel?.loadOffline()
+            } else {
+                screenViewModel?.loadProfile(force = refreshEvent > 0)
+                profileComicViewModel?.load(force = refreshEvent > 0)
+            }
         }
     }
 
     LaunchedEffect(screenViewModel?.userProfile?.userId) {
         val profile = screenViewModel?.userProfile ?: return@LaunchedEffect
-        if (!inPreview) {
+        if (!inPreview && !offlineMode) {
             profileCommentViewModel?.init(
                 userId = profile.userId,
                 userBasic = UserBasicObject(profile),
@@ -217,7 +223,7 @@ fun ProfileScreen(
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && !inPreview) {
+            if (event == Lifecycle.Event.ON_RESUME && !inPreview && !offlineMode) {
                 screenViewModel?.loadProfile(force = true)
             }
         }
@@ -300,7 +306,11 @@ fun ProfileScreen(
                         avatarPreviewUri = screenViewModel?.avatarPreviewUri,
                         isPunchingIn = screenViewModel?.isPunchingIn == true,
                         onAvatarClick = onAvatarClick,
-                        onPunchIn = { screenViewModel?.punchIn() },
+                        onPunchIn = {
+                            if (!offlineMode) {
+                                screenViewModel?.punchIn()
+                            }
+                        },
                     )
                 }
                 item {

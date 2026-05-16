@@ -40,6 +40,7 @@ fun SplashScreen(
     isLoading: Boolean,
     showError: Boolean,
     showOptions: Boolean,
+    isEnteringOfflineMode: Boolean,
     sslVerificationDisabled: Boolean,
     onRetry: () -> Unit,
     onSslVerificationDisabledChanged: (Boolean) -> Unit,
@@ -124,6 +125,15 @@ fun SplashScreen(
                         }
                     }
                 }
+                if (isEnteringOfflineMode) {
+                    SplashCard {
+                        Text(
+                            text = stringResource(id = R.string.splash_entering_offline_mode),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(24.dp))
                 SplashCard {
                     Row(
@@ -176,6 +186,7 @@ private fun SplashScreenPreview(
         isLoading = preview.isLoading,
         showError = preview.showError,
         showOptions = preview.showOptions,
+        isEnteringOfflineMode = false,
         sslVerificationDisabled = preview.sslVerificationDisabled,
         onRetry = {},
         onSslVerificationDisabledChanged = {},

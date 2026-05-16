@@ -27,12 +27,18 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
     var showOptions by mutableStateOf(false)
         private set
 
+    var isEnteringOfflineMode by mutableStateOf(false)
+        private set
+
     var sslVerificationDisabled by mutableStateOf(
         com.picacomic.fregata.utils.e.isSslVerificationDisabled(appContext)
     )
         private set
 
     var navigateToLoginEvent by mutableIntStateOf(0)
+        private set
+
+    var navigateToOfflineMainEvent by mutableIntStateOf(0)
         private set
 
     var restartRequiredEvent by mutableIntStateOf(0)
@@ -54,6 +60,7 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
     fun retry() {
         showError = false
         showOptions = false
+        isEnteringOfflineMode = false
         isLoading = true
         loadInit(retryCount = 3)
     }
@@ -112,6 +119,7 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
                     isLoading = false
                     showError = false
                     showOptions = true
+                    isEnteringOfflineMode = false
                     return
                 }
 
@@ -130,7 +138,9 @@ class SplashViewModel(application: Application) : AndroidViewModel(application) 
         if (remainingRetries < 0) {
             isLoading = false
             showOptions = false
-            showError = true
+            showError = false
+            isEnteringOfflineMode = true
+            navigateToOfflineMainEvent++
         } else {
             loadInit(remainingRetries)
         }

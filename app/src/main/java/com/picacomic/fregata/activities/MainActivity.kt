@@ -97,6 +97,7 @@ class MainActivity : BaseActivity() {
     private var pendingExternalComicId by mutableStateOf<String?>(null)
     private var pendingExternalGameId by mutableStateOf<String?>(null)
     private var navControllerRef: NavHostController? = null
+    private var offlineMode by mutableStateOf(false)
 
     // Legacy controls overlay
     private var buttonControlBlock: ImageButton? = null
@@ -113,12 +114,15 @@ class MainActivity : BaseActivity() {
     override fun onCreate(bundle: Bundle?) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         super.onCreate(bundle)
+        offlineMode = intent?.getBooleanExtra(EXTRA_OFFLINE_MODE, false) == true
         consumePopupOpenExtras(intent)
 
         setContent {
             MainScreen()
         }
-        bH()
+        if (!offlineMode) {
+            bH()
+        }
 
         e.j(this, null as String?)
         e.l(this, null as String?)
@@ -128,6 +132,7 @@ class MainActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        offlineMode = intent.getBooleanExtra(EXTRA_OFFLINE_MODE, offlineMode)
         consumePopupOpenExtras(intent)
     }
 
@@ -173,10 +178,15 @@ class MainActivity : BaseActivity() {
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
-        val showBottomBar = navItems.any { it.route == currentRoute }
+        val availableNavItems = if (offlineMode) {
+            listOf(Screen.Profile, Screen.Settings)
+        } else {
+            navItems
+        }
+        val showBottomBar = availableNavItems.any { it.route == currentRoute }
 
         LaunchedEffect(forceOneTimeUpdate) {
-            if (forceOneTimeUpdate) {
+            if (!offlineMode && forceOneTimeUpdate) {
                 navController.navigate(Screen.OneTimeUpdateQA.route) {
                     popUpTo(Screen.Home.route)
                     launchSingleTop = true
@@ -185,6 +195,11 @@ class MainActivity : BaseActivity() {
         }
 
         LaunchedEffect(pendingExternalComicId, pendingExternalGameId) {
+            if (offlineMode) {
+                pendingExternalComicId = null
+                pendingExternalGameId = null
+                return@LaunchedEffect
+            }
             val comicId = pendingExternalComicId
             val gameId = pendingExternalGameId
             when {
@@ -213,7 +228,7 @@ class MainActivity : BaseActivity() {
                             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
                             tonalElevation = 0.dp
                         ) {
-                            navItems.forEach { screen ->
+                            availableNavItems.forEach { screen ->
                                 NavigationBarItem(
                                     selected = currentRoute == screen.route,
                                     onClick = {
@@ -257,7 +272,7 @@ class MainActivity : BaseActivity() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.Home.route,
+                        startDestination = if (offlineMode) Screen.Profile.route else Screen.Home.route,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         composable(Screen.Home.route) {
@@ -371,15 +386,26 @@ class MainActivity : BaseActivity() {
                         composable(Screen.Profile.route) {
                             ProfileScreen(
                                 refreshEvent = tabRefreshEvent,
-                                onEdit = { navController.navigate(Screen.ProfileEdit.route) },
+                                offlineMode = offlineMode,
+                                onEdit = {
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.ProfileEdit.route)
+                                    }
+                                },
                                 onComicClick = { id ->
-                                    navController.navigate(Screen.createComicDetailRoute(id))
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.createComicDetailRoute(id))
+                                    }
                                 },
                                 onGameClick = { id ->
-                                    navController.navigate(Screen.createGameDetailRoute(id))
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.createGameDetailRoute(id))
+                                    }
                                 },
                                 onComicListClick = { category ->
-                                    navController.navigate(Screen.createComicListRoute(category = category))
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.createComicListRoute(category = category))
+                                    }
                                 }
                             )
                         }
@@ -398,10 +424,14 @@ class MainActivity : BaseActivity() {
                                 onThemeColor = settingsViewModel::openThemeColorDialog,
                                 onLauncherIcon = settingsViewModel::openLauncherIconDialog,
                                 onContinueDownload = {
-                                    g.av(this@MainActivity)
+                                    if (!offlineMode) {
+                                        g.av(this@MainActivity)
+                                    }
                                 },
                                 onApkVersion = {
-                                    navController.navigate(Screen.ApkVersionList.route)
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.ApkVersionList.route)
+                                    }
                                 },
                                 onCache = {
                                     val intent =
@@ -410,13 +440,19 @@ class MainActivity : BaseActivity() {
                                     startActivity(intent)
                                 },
                                 onFaq = {
-                                    navController.navigate(Screen.Question.route)
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.Question.route)
+                                    }
                                 },
                                 onPin = {
-                                    navController.navigate(Screen.ChangePin.route)
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.ChangePin.route)
+                                    }
                                 },
                                 onPassword = {
-                                    navController.navigate(Screen.ChangePassword.route)
+                                    if (!offlineMode) {
+                                        navController.navigate(Screen.ChangePassword.route)
+                                    }
                                 },
                                 onLogout = { settingsViewModel.logout() },
                                 onNightModeChanged = { settingsViewModel.toggleNightMode(it) },
@@ -431,7 +467,11 @@ class MainActivity : BaseActivity() {
                                     val previous = settingsViewModel.state.themeColorIndex
                                     settingsViewModel.selectThemeColorIndex(index)
                                     if (previous != index) {
-                                        startActivity(Intent(this@MainActivity, MainActivity::class.java))
+                                        startActivity(
+                                            Intent(this@MainActivity, MainActivity::class.java).apply {
+                                                putExtra(EXTRA_OFFLINE_MODE, offlineMode)
+                                            }
+                                        )
                                         finish()
                                     }
                                 },
@@ -904,6 +944,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun openComicDetailFromLegacy(comicId: String) {
+        if (offlineMode) return
         navControllerRef?.navigate(Screen.createComicDetailRoute(comicId))
     }
 
@@ -912,6 +953,7 @@ class MainActivity : BaseActivity() {
         creatorId: String? = null,
         creatorName: String? = null
     ) {
+        if (offlineMode) return
         navControllerRef?.navigate(
             Screen.createComicListRoute(
                 category = category,
@@ -922,6 +964,13 @@ class MainActivity : BaseActivity() {
     }
 
     private fun consumePopupOpenExtras(intent: Intent?) {
+        if (offlineMode) {
+            pendingExternalComicId = null
+            pendingExternalGameId = null
+            intent?.removeExtra(PopupActivity.EXTRA_OPEN_COMIC_ID)
+            intent?.removeExtra(PopupActivity.EXTRA_OPEN_GAME_ID)
+            return
+        }
         pendingExternalComicId = intent
             ?.getStringExtra(PopupActivity.EXTRA_OPEN_COMIC_ID)
             ?.takeIf { it.isNotBlank() }
@@ -964,5 +1013,9 @@ class MainActivity : BaseActivity() {
                 l(false)
                 dialogInterface.dismiss()
             }.show()
+    }
+
+    companion object {
+        const val EXTRA_OFFLINE_MODE = "com.picacomic.fregata.extra.OFFLINE_MODE"
     }
 }

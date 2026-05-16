@@ -603,6 +603,7 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="splash_server_3">分流【 3 】</string>
     <string name="splash_disable_ssl_verification">强行关闭 SSL 证书验证</string>
     <string name="splash_disable_ssl_verification_summary">勾选后，应用内网络请求将跳过证书校验与主机名校验，仅建议在证书异常时临时使用。</string>
+    <string name="splash_entering_offline_mode">离线模式进入</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="support_us_ads_title">▼ 拯救哔咔，请点广告 ▼</string>
     <string name="support_us_alipay_account">18659554802</string>

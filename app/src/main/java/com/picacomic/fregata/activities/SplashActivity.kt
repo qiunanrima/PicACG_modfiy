@@ -11,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.screens.SplashScreen
 import com.picacomic.fregata.compose.viewmodels.SplashViewModel
+import kotlinx.coroutines.delay
 
 class SplashActivity : BaseActivity() {
     private val viewModel: SplashViewModel by viewModels()
@@ -26,6 +27,7 @@ class SplashActivity : BaseActivity() {
                 isLoading = viewModel.isLoading,
                 showError = viewModel.showError,
                 showOptions = viewModel.showOptions,
+                isEnteringOfflineMode = viewModel.isEnteringOfflineMode,
                 sslVerificationDisabled = viewModel.sslVerificationDisabled,
                 onRetry = viewModel::retry,
                 onSslVerificationDisabledChanged = viewModel::updateSslVerificationDisabled,
@@ -37,6 +39,13 @@ class SplashActivity : BaseActivity() {
             LaunchedEffect(viewModel.navigateToLoginEvent) {
                 if (viewModel.navigateToLoginEvent > 0) {
                     navigateToLogin()
+                }
+            }
+
+            LaunchedEffect(viewModel.navigateToOfflineMainEvent) {
+                if (viewModel.navigateToOfflineMainEvent > 0) {
+                    delay(800)
+                    navigateToOfflineMain()
                 }
             }
 
@@ -53,6 +62,15 @@ class SplashActivity : BaseActivity() {
 
     private fun navigateToLogin() {
         startActivity(Intent(this, LoginActivity::class.java as Class<*>))
+        finish()
+    }
+
+    private fun navigateToOfflineMain() {
+        startActivity(
+            Intent(this, MainActivity::class.java as Class<*>).apply {
+                putExtra(MainActivity.EXTRA_OFFLINE_MODE, true)
+            }
+        )
         finish()
     }
 
