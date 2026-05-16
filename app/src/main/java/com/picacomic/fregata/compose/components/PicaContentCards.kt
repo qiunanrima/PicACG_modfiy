@@ -181,12 +181,12 @@ fun PicaComicListCard(
     pages: Int? = null,
     episodes: Int? = null,
     categories: List<String> = emptyList(),
-    coverWidth: Dp = 76.dp,
+    coverWidth: Dp = 84.dp,
 ) {
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .height(154.dp)
+            .height(128.dp)
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
         colors = CardDefaults.elevatedCardColors(
@@ -205,7 +205,7 @@ fun PicaComicListCard(
                 contentDescription = title,
                 modifier = Modifier
                     .width(coverWidth)
-                    .height(130.dp)
+                    .aspectRatio(3f / 4.5f)
                     .clip(MaterialTheme.shapes.small),
                 fallbackIcon = Icons.Filled.Category,
             )
@@ -235,7 +235,7 @@ fun PicaComicListCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    likes?.let {
+                    likes?.takeIf { it > 0 }?.let {
                         PicaComicMetaText(text = "$it likes", primary = true)
                     }
                     pages?.let {
@@ -284,11 +284,15 @@ fun PicaGameCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     likes: Int = 0,
-    android: Boolean = false,
-    ios: Boolean = false,
     adult: Boolean = false,
     suggested: Boolean = false,
 ) {
+    val badges = buildList {
+        if (likes > 0) add("$likes likes")
+        if (suggested) add("Pick")
+        if (adult) add("Adult")
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -323,29 +327,19 @@ fun PicaGameCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (android) PicaInfoChip(text = "Android")
-                if (ios) PicaInfoChip(text = "iOS")
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "$likes likes",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                if (suggested) {
-                    Text(
-                        text = "Pick",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.tertiary,
-                    )
-                }
-                if (adult) {
-                    Text(
-                        text = "Adult",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
+            if (badges.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    badges.forEach { badge ->
+                        Text(
+                            text = badge,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = when (badge) {
+                                "Pick" -> MaterialTheme.colorScheme.tertiary
+                                "Adult" -> MaterialTheme.colorScheme.error
+                                else -> MaterialTheme.colorScheme.primary
+                            },
+                        )
+                    }
                 }
             }
         }

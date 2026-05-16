@@ -1,5 +1,7 @@
 package com.picacomic.fregata.compose.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -322,6 +324,13 @@ private fun ComicDetailContent(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
+                            PicaStatRow(
+                                label = "名称",
+                                value = detail.title.orEmpty(),
+                                onClick = {
+                                    copyComicTitle(context, detail.title)
+                                },
+                            )
                             PicaStatRow(
                                 label = "作者",
                                 value = detail.author.orEmpty(),
@@ -659,6 +668,13 @@ private fun ComicRecommendationPreview(thumbnail: ThumbnailObject?) {
             modifier = Modifier.fillMaxSize(),
         )
     }
+}
+
+private fun copyComicTitle(context: Context, title: String?) {
+    val safeTitle = title?.takeIf { it.isNotBlank() } ?: return
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
+    clipboard.setPrimaryClip(ClipData.newPlainText("comic_title", safeTitle))
+    Toast.makeText(context, "已复制漫画名称", Toast.LENGTH_SHORT).show()
 }
 
 private fun openComicViewer(

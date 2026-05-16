@@ -218,7 +218,6 @@ private fun HomeCollectionRow(
                     pages = comic.pagesCount,
                     episodes = comic.episodeCount,
                     categories = comic.categories.orEmpty(),
-                    coverWidth = 72.dp,
                     onClick = {
                         val comicId = comic.comicId
                         if (!comicId.isNullOrBlank()) onComicClick(comicId)

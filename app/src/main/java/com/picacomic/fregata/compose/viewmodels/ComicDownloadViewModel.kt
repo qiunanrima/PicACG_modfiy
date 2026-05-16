@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -41,7 +42,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
     var episodeTotal by mutableIntStateOf(0)
         private set
 
-    var episodes by mutableStateOf<List<ComicEpisodeObject>>(emptyList())
+    var episodes by mutableStateOf<List<ComicEpisodeObject>>(emptyList(), neverEqualPolicy())
         private set
 
     var f2if by mutableStateOf<List<ComicPageObject>>(emptyList())

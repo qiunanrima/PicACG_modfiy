@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -353,11 +354,11 @@ fun PicaRecommendationCard(
 ) {
     Card(
         modifier = modifier
-            .height(214.dp)
+            .height(256.dp)
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
@@ -370,7 +371,7 @@ fun PicaRecommendationCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(128.dp)
+                    .aspectRatio(3f / 4.5f)
                     .clip(MaterialTheme.shapes.extraSmall),
             ) {
                 thumbnail()

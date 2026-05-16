@@ -123,9 +123,9 @@ fun GameScreen(
                             columns = 2
                         )
                         PreviewListPanel(
-                            title = "平台 / 标签",
+                            title = "游戏标签",
                             items = previewGames.map {
-                                "${it.title} · ${if (it.isAndroid) "Android" else ""}${if (it.isIos) "/iOS" else ""} · ${if (it.isAdult) "成人" else "全年龄"}"
+                                "${it.title} · ${if (it.isAdult) "成人" else "全年龄"}"
                             }
                         )
                     }
@@ -202,8 +202,6 @@ private fun GameGridItem(
         version = item.version.orEmpty(),
         icon = item.icon,
         likes = item.likesCount,
-        android = item.isAndroid,
-        ios = item.isIos,
         adult = item.isAdult,
         suggested = item.isSuggest,
         onClick = onClick,

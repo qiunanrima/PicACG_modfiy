@@ -14,6 +14,9 @@ import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.objects.responses.PunchInResponse
 import com.picacomic.fregata.objects.responses.UserProfileResponse
 import com.picacomic.fregata.utils.e
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -115,7 +118,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
                 if (response.code() == 200 && response.body()?.data != null) {
                     setPunchedInLocally()
-                    punchInSuccessEvent++
+                    emitFirstPunchInSuccess()
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
                 }
@@ -182,6 +185,14 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         errorEvent++
     }
 
+    private fun emitFirstPunchInSuccess() {
+        val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        if (prefs.getString(KEY_PUNCH_IN_SUCCESS_SHOWN_DATE, "") == today) return
+        prefs.edit().putString(KEY_PUNCH_IN_SUCCESS_SHOWN_DATE, today).apply()
+        punchInSuccessEvent++
+    }
+
     private fun loadCachedProfile() {
         val cached = e.B(context)
         if (cached.isNullOrBlank()) return
@@ -199,5 +210,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         profileCall?.cancel()
         punchInCall?.cancel()
         super.onCleared()
+    }
+
+    private companion object {
+        const val PREFS_NAME = "PICACOMIC_FREGATA"
+        const val KEY_PUNCH_IN_SUCCESS_SHOWN_DATE = "KEY_PUNCH_IN_SUCCESS_SHOWN_DATE"
     }
 }

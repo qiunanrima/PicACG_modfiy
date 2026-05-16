@@ -238,10 +238,10 @@ private fun GameDetailContent(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                if (detail.isAndroid) PicaInfoChip("Android")
-                                if (detail.isIos) PicaInfoChip("iOS")
-                                if (detail.isAdult) PicaInfoChip("Adult")
+                            if (detail.isAdult) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    PicaInfoChip("Adult")
+                                }
                             }
                         }
                     }
@@ -250,7 +250,7 @@ private fun GameDetailContent(
                             "Likes" to detail.likesCount.toString(),
                             "Comments" to detail.commentsCount.toString(),
                             "Downloads" to detail.downloadsCount.toString(),
-                        ),
+                        ).filter { (_, value) -> value.toIntOrNull()?.let { it > 0 } == true },
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = onDownload, modifier = Modifier.weight(1f)) {
@@ -371,11 +371,11 @@ private fun GameDetailExpandableText(
 
 private fun gameSizeText(detail: GameDetailObject): String {
     val parts = mutableListOf<String>()
-    if (detail.isAndroid && detail.androidSize > 0f) {
-        parts.add("Android ${formatGameSize(detail.androidSize)} MB")
+    if (detail.androidSize > 0f) {
+        parts.add("${formatGameSize(detail.androidSize)} MB")
     }
-    if (detail.isIos && detail.iosSize > 0f) {
-        parts.add("iOS ${formatGameSize(detail.iosSize)} MB")
+    if (detail.iosSize > 0f && detail.iosSize != detail.androidSize) {
+        parts.add("${formatGameSize(detail.iosSize)} MB")
     }
     return parts.joinToString(" / ")
 }

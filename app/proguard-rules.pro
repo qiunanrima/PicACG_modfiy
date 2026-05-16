@@ -9,6 +9,26 @@
 -keepattributes *Annotation*
 -keepattributes EnclosingMethod
 -keepattributes InnerClasses
+-keepattributes Exceptions
+
+# ===== App 启动 / JNI =====
+# MyApplication 中的 native 方法由 libJniTest.so 按 Java 原始类名和方法名解析。
+# 如果 R8 改名，release 包会在启动或签名调用时 UnsatisfiedLinkError 闪退。
+-keep class com.picacomic.fregata.MyApplication {
+    public native <methods>;
+    public static *** bx(...);
+    public static *** by(...);
+    public *** bz(...);
+    public *** c(...);
+}
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# Manifest 组件和 launcher alias 目标必须保持稳定，避免系统按旧类名启动失败。
+-keep class com.picacomic.fregata.activities.** { *; }
+-keep class com.picacomic.fregata.services.** { *; }
+-keep class com.picacomic.fregata.DemoLoginActivity { *; }
 
 # ===== Gson =====
 -keepattributes SerializedName
@@ -16,6 +36,10 @@
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
+-keep class com.picacomic.fregata.objects.** { *; }
+-keep class com.picacomic.fregata.b.** { *; }
+-keep class com.picacomic.fregata.compose.viewmodels.** { *; }
+-keep class com.picacomic.fregata.viewmodels.** { *; }
 
 # ===== Retrofit =====
 -keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
@@ -44,6 +68,8 @@
     <fields>;
     <methods>;
 }
+-keep class com.picacomic.fregata.objects.databaseTable.** { *; }
+-keepnames class * extends com.orm.SugarRecord
 
 # ===== AgentWeb =====
 -keep class com.just.agentweb.** { *; }
@@ -51,3 +77,16 @@
 
 # ===== Compose =====
 -dontwarn androidx.compose.**
+
+# ===== Android Parcelable / Serializable =====
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator CREATOR;
+}
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
