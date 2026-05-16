@@ -16,6 +16,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Slider
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,7 +27,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardOptions
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaConfirmDialog
@@ -47,6 +50,7 @@ enum class SettingsDialog {
     ImageQuality,
     ThemeColor,
     LauncherIcon,
+    CoilCacheSize,
     ThemeColorUnsupported,
 }
 
@@ -65,6 +69,8 @@ data class SettingsState(
     val themeColorValue: String = "",
     val launcherIconIndex: Int = 0,
     val launcherIconValue: String = "",
+    val coilCacheSizeValue: String = "",
+    val coilCacheDraftValue: String = "",
     val cacheTitleValue: String = "",
     val pinTitleValue: String = "",
     val pinValue: String = "",
@@ -85,6 +91,7 @@ fun SettingsScreen(
     onImageQuality: () -> Unit,
     onThemeColor: () -> Unit,
     onLauncherIcon: () -> Unit,
+    onCoilCacheSize: () -> Unit,
     onContinueDownload: () -> Unit,
     onApkVersion: () -> Unit,
     onCache: () -> Unit,
@@ -102,6 +109,8 @@ fun SettingsScreen(
     onImageQualitySelected: (Int) -> Unit,
     onThemeColorSelected: (Int) -> Unit,
     onLauncherIconSelected: (Int) -> Unit,
+    onCoilCacheSizeDraftChanged: (String) -> Unit,
+    onCoilCacheSizeConfirmed: () -> Unit,
     onAutoPagingDraftChanged: (Int) -> Unit,
     onAutoPagingConfirmed: () -> Unit,
 ) {
@@ -202,6 +211,11 @@ fun SettingsScreen(
                         onClick = onLauncherIcon
                     )
                     PicaValueListItem(
+                        label = stringResource(R.string.setting_coil_cache_size),
+                        value = state.coilCacheSizeValue,
+                        onClick = onCoilCacheSize
+                    )
+                    PicaValueListItem(
                         label = stringResource(R.string.alert_continue_download_comic_title),
                         value = stringResource(R.string.setting_chatroom_open),
                         onClick = onContinueDownload
@@ -283,6 +297,15 @@ fun SettingsScreen(
                 options = launcherIconOptions,
                 selectedIndex = state.launcherIconIndex,
                 onSelect = onLauncherIconSelected,
+                onDismiss = onDialogDismiss,
+            )
+
+            SettingsDialog.CoilCacheSize -> CoilCacheSizeDialog(
+                title = stringResource(R.string.setting_coil_cache_size_dialog_title),
+                body = stringResource(R.string.setting_coil_cache_size_dialog_body),
+                value = state.coilCacheDraftValue,
+                onValueChanged = onCoilCacheSizeDraftChanged,
+                onConfirm = onCoilCacheSizeConfirmed,
                 onDismiss = onDialogDismiss,
             )
 
@@ -371,6 +394,46 @@ private fun SettingsSection(
     }
 }
 
+@Composable
+private fun CoilCacheSizeDialog(
+    title: String,
+    body: String,
+    value: String,
+    onValueChanged: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = title) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(text = body)
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { input ->
+                        onValueChanged(input.filter { it.isDigit() })
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text(text = stringResource(R.string.setting_coil_cache_size_dialog_hint)) }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(text = stringResource(R.string.ok))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun SettingsScreenPreview(
@@ -384,6 +447,7 @@ private fun SettingsScreenPreview(
         onImageQuality = {},
         onThemeColor = {},
         onLauncherIcon = {},
+        onCoilCacheSize = {},
         onContinueDownload = {},
         onApkVersion = {},
         onCache = {},
@@ -401,6 +465,8 @@ private fun SettingsScreenPreview(
         onImageQualitySelected = {},
         onThemeColorSelected = {},
         onLauncherIconSelected = {},
+        onCoilCacheSizeDraftChanged = {},
+        onCoilCacheSizeConfirmed = {},
         onAutoPagingDraftChanged = {},
         onAutoPagingConfirmed = {},
     )

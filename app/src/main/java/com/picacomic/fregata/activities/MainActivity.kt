@@ -423,6 +423,7 @@ class MainActivity : BaseActivity() {
                                 onImageQuality = settingsViewModel::openImageQualityDialog,
                                 onThemeColor = settingsViewModel::openThemeColorDialog,
                                 onLauncherIcon = settingsViewModel::openLauncherIconDialog,
+                                onCoilCacheSize = settingsViewModel::openCoilCacheSizeDialog,
                                 onContinueDownload = {
                                     if (!offlineMode) {
                                         g.av(this@MainActivity)
@@ -479,6 +480,8 @@ class MainActivity : BaseActivity() {
                                     }
                                 },
                                 onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
+                                onCoilCacheSizeDraftChanged = settingsViewModel::updateCoilCacheDraftValue,
+                                onCoilCacheSizeConfirmed = settingsViewModel::confirmCoilCacheSize,
                                 onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
                                 onAutoPagingConfirmed = settingsViewModel::confirmAutoPagingInterval
                             )

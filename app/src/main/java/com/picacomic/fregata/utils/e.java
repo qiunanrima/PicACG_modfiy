@@ -200,6 +200,14 @@ public class e {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putInt("KEY_COMIC_VIEWER_IMAGE_QUALITY", i).commit();
     }
 
+    public static int ar(Context context) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getInt("KEY_COIL_CACHE_SIZE_MB", 128);
+    }
+
+    public static boolean at(Context context, int i) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putInt("KEY_COIL_CACHE_SIZE_MB", i).commit();
+    }
+
     public static String S(Context context) {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getString("KEY_IMAGE_STORAGE", null);
     }

@@ -3,8 +3,10 @@ package com.picacomic.fregata;
 import android.content.Context;
 
 import coil.Coil;
+import coil.disk.DiskCache;
 import coil.ImageLoader;
 import coil.ImageLoaderFactory;
+import coil.request.CachePolicy;
 
 import com.orm.SugarApp;
 import com.picacomic.fregata.b.b;
@@ -13,6 +15,8 @@ import com.picacomic.fregata.utils.d;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
 import com.picacomic.fregata.utils.LauncherIconHelper;
+
+import java.io.File;
 
 import okhttp3.OkHttpClient;
 
@@ -91,7 +95,23 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
     private static ImageLoader createCoilImageLoader(Context context) {
         return new ImageLoader.Builder(context)
                 .okHttpClient(createImageOkHttpClientBuilder(context).build())
+                .diskCache(() -> new DiskCache.Builder()
+                        .directory(new File(context.getCacheDir(), "coil_cache"))
+                        .maxSizeBytes(resolveCoilCacheMaxSizeBytes(context))
+                        .build())
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .networkCachePolicy(CachePolicy.ENABLED)
+                .respectCacheHeaders(false)
                 .build();
+    }
+
+    private static long resolveCoilCacheMaxSizeBytes(Context context) {
+        int cacheSizeMb = e.ar(context);
+        if (cacheSizeMb <= 0) {
+            cacheSizeMb = 128;
+        }
+        return cacheSizeMb * 1024L * 1024L;
     }
 
     private static OkHttpClient.Builder createImageOkHttpClientBuilder(Context context) {

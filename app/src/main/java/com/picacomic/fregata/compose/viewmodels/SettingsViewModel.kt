@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.LoginActivity
+import com.picacomic.fregata.MyApplication
 import com.picacomic.fregata.compose.screens.SettingsDialog
 import com.picacomic.fregata.compose.screens.SettingsState
 import com.picacomic.fregata.utils.e
@@ -46,6 +47,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val hM = e.O(app)
         val pin = e.y(app)
         val cacheSize = formatSize(sizeOf(app.cacheDir) + sizeOf(app.externalCacheDir))
+        val coilCacheSizeMb = e.ar(app).takeIf { it > 0 } ?: 128
 
         state = state.copy(
             screenOrientationIndex = rx,
@@ -59,6 +61,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             themeColorIndex = rD,
             launcherIconValue = launcherIcons.getOrElse(launcherIconIndex) { "" },
             launcherIconIndex = launcherIconIndex,
+            coilCacheSizeValue = formatCacheSize(coilCacheSizeMb),
+            coilCacheDraftValue = if (state.activeDialog == SettingsDialog.CoilCacheSize) {
+                state.coilCacheDraftValue
+            } else {
+                coilCacheSizeMb.toString()
+            },
             autoPagingValue = String.format("%.1f", hM / 1000.0f) + " " + app.getString(R.string.second),
             autoPagingDraftIntervalMs = if (state.activeDialog == SettingsDialog.AutoPaging) {
                 state.autoPagingDraftIntervalMs
@@ -103,10 +111,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         state = state.copy(activeDialog = SettingsDialog.LauncherIcon)
     }
 
+    fun openCoilCacheSizeDialog() {
+        state = state.copy(
+            activeDialog = SettingsDialog.CoilCacheSize,
+            coilCacheDraftValue = e.ar(getApplication()).takeIf { it > 0 }?.toString() ?: "128",
+        )
+    }
+
     fun dismissDialog() {
         state = state.copy(
             activeDialog = null,
             autoPagingDraftIntervalMs = state.autoPagingIntervalMs,
+            coilCacheDraftValue = e.ar(getApplication()).takeIf { it > 0 }?.toString() ?: "128",
         )
     }
 
@@ -143,6 +159,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             .putInt(KEY_LAUNCHER_ICON, safeIndex)
             .apply()
         LauncherIconHelper.syncLauncherIcon(app, if (safeIndex == 1) 2 else 0)
+        loadSettings()
+    }
+
+    fun updateCoilCacheDraftValue(value: String) {
+        state = state.copy(coilCacheDraftValue = value.filter { it.isDigit() })
+    }
+
+    fun confirmCoilCacheSize() {
+        val app = getApplication<Application>()
+        val sizeMb = state.coilCacheDraftValue.toIntOrNull()?.takeIf { it > 0 } ?: 128
+        e.at(app, sizeMb)
+        state = state.copy(activeDialog = null)
+        MyApplication.refreshCoilImageLoader()
         loadSettings()
     }
 
@@ -187,6 +216,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         app.startActivity(intent)
+    }
+
+    private fun formatCacheSize(sizeMb: Int): String {
+        return "${DecimalFormat("#,##0").format(sizeMb)} MB"
     }
 
     private fun sizeOf(file: File?): Long {

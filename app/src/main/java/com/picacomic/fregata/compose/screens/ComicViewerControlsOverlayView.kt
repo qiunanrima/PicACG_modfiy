@@ -42,11 +42,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -200,11 +200,11 @@ private fun ReaderBrightnessPanel(
     Surface(
         modifier = modifier
             .width(52.dp)
-            .fillMaxHeight(0.42f),
+            .fillMaxHeight(0.5f),
         shape = RoundedCornerShape(26.dp),
         color = Color.Black.copy(alpha = 0.58f),
         tonalElevation = 6.dp,
-    ) {
+        ) {
         Column(
             modifier = Modifier.padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -216,22 +216,36 @@ private fun ReaderBrightnessPanel(
                 tint = Color.White,
                 modifier = Modifier.size(22.dp),
             )
-            BoxWithConstraints(
+            ReaderBrightnessSlider(
+                brightness = brightness,
+                onBrightnessChanged = onBrightnessChanged,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Slider(
-                    value = brightness,
-                    onValueChange = { onBrightnessChanged(it.toInt()) },
-                    valueRange = 0f..255f,
-                    modifier = Modifier
-                        .width(maxHeight)
-                        .rotate(-90f),
-                )
-            }
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+            )
         }
+    }
+}
+
+@Composable
+private fun ReaderBrightnessSlider(
+    brightness: Float,
+    onBrightnessChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BoxWithConstraints(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        Slider(
+            value = brightness,
+            onValueChange = { onBrightnessChanged(it.toInt()) },
+            valueRange = 0f..255f,
+            modifier = Modifier
+                .width(maxHeight)
+                .rotate(-90f),
+        )
     }
 }
 
@@ -318,6 +332,16 @@ private fun ReaderBottomBar(
             }
         }
     }
+}
+
+@Composable
+fun Slider(
+    value: Float,
+    onValueChange: () -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier
+) {
+    TODO("Not yet implemented")
 }
 
 @Composable

@@ -90,6 +90,7 @@ class PopupActivity : BaseActivity() {
                         onImageQuality = settingsViewModel::openImageQualityDialog,
                         onThemeColor = settingsViewModel::openThemeColorDialog,
                         onLauncherIcon = settingsViewModel::openLauncherIconDialog,
+                        onCoilCacheSize = settingsViewModel::openCoilCacheSizeDialog,
                         onContinueDownload = { g.av(this@PopupActivity) },
                         onApkVersion = { page = PopupSettingsPage.ApkVersion },
                         onCache = {
@@ -125,6 +126,8 @@ class PopupActivity : BaseActivity() {
                             }
                         },
                         onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
+                        onCoilCacheSizeDraftChanged = settingsViewModel::updateCoilCacheDraftValue,
+                        onCoilCacheSizeConfirmed = settingsViewModel::confirmCoilCacheSize,
                         onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
                         onAutoPagingConfirmed = settingsViewModel::confirmAutoPagingInterval,
                     )

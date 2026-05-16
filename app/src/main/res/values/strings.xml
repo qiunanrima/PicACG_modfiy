@@ -560,6 +560,10 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="search_menu_title">Search</string>
     <string name="second">秒</string>
     <string name="setting_cache">前往清除</string>
+    <string name="setting_coil_cache_size">Coil缓存大小</string>
+    <string name="setting_coil_cache_size_dialog_title">设置Coil缓存大小</string>
+    <string name="setting_coil_cache_size_dialog_hint">缓存大小（MB）</string>
+    <string name="setting_coil_cache_size_dialog_body">留空或无效时使用默认值 128 MB。</string>
     <string name="setting_cache_title">快取记忆</string>
     <string name="setting_chatroom_open">开启</string>
     <string name="setting_chatroom_title">聊天室后台测试版（文字版）</string>
