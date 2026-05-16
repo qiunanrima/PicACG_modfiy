@@ -96,6 +96,7 @@ class MainActivity : BaseActivity() {
     private var forceOneTimeUpdate by mutableStateOf(false)
     private var pendingExternalComicId by mutableStateOf<String?>(null)
     private var pendingExternalGameId by mutableStateOf<String?>(null)
+    private var nightModeEnabled by mutableStateOf(false)
     private var navControllerRef: NavHostController? = null
     private var offlineMode by mutableStateOf(false)
 
@@ -115,6 +116,7 @@ class MainActivity : BaseActivity() {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         super.onCreate(bundle)
         offlineMode = intent?.getBooleanExtra(EXTRA_OFFLINE_MODE, false) == true
+        nightModeEnabled = e.L(this)
         consumePopupOpenExtras(intent)
 
         setContent {
@@ -219,7 +221,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        PicaComposeTheme {
+        PicaComposeTheme(darkTheme = nightModeEnabled) {
             Scaffold(
                 contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                 bottomBar = {
@@ -453,7 +455,10 @@ class MainActivity : BaseActivity() {
                                     }
                                 },
                                 onLogout = { settingsViewModel.logout() },
-                                onNightModeChanged = { settingsViewModel.toggleNightMode(it) },
+                                onNightModeChanged = {
+                                    settingsViewModel.toggleNightMode(it)
+                                    nightModeEnabled = it
+                                },
                                 onVolumePagingChanged = { settingsViewModel.toggleVolumePaging(it) },
                                 onTestingChanged = { settingsViewModel.toggleTesting(it) },
                                 onPerformanceChanged = { settingsViewModel.togglePerformance(it) },

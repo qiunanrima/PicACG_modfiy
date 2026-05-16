@@ -412,7 +412,7 @@ private val RedDarkColors = md3DarkPalette(
 fun PicaComposeTheme(
     darkTheme: Boolean = run {
         val context = LocalContext.current
-        when (e.al(context)) {
+        e.L(context) || when (e.al(context)) {
             1 -> true
             2 -> isSystemInDarkTheme()
             0 -> false
@@ -431,7 +431,7 @@ fun PicaComposeTheme(
         7 -> if (darkTheme) OrangeDarkColors else OrangeLightColors
         8 -> if (darkTheme) RedDarkColors else RedLightColors
         1 -> DarkColors
-        0 -> LightColors
+        0 -> if (darkTheme) DarkColors else LightColors
         else -> if (darkTheme) DarkColors else LightColors
     }
 

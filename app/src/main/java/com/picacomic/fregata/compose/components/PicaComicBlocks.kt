@@ -352,15 +352,19 @@ fun PicaRecommendationCard(
         }
     },
 ) {
+    val recommendationContainer = Color(0xFFFFE3EC)
+    val recommendationBorder = Color(0xFFD98EA8)
+
     Card(
         modifier = modifier
             .height(256.dp)
             .clip(MaterialTheme.shapes.small)
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            containerColor = recommendationContainer,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(1.dp, recommendationBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
             modifier = Modifier

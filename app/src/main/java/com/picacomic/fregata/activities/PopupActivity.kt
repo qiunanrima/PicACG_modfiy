@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.compose.navigation.Screen
+import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.screens.ApkVersionListScreen
 import com.picacomic.fregata.compose.screens.ChangePasswordScreen
 import com.picacomic.fregata.compose.screens.ChangePinScreen
@@ -80,52 +81,54 @@ class PopupActivity : BaseActivity() {
 
         when (page) {
             PopupSettingsPage.Settings -> {
-                SettingsScreen(
-                    state = settingsViewModel.state,
-                    onScreenOrientation = settingsViewModel::openScreenOrientationDialog,
-                    onScrollDirection = settingsViewModel::openScrollDirectionDialog,
-                    onAutoPaging = settingsViewModel::openAutoPagingDialog,
-                    onImageQuality = settingsViewModel::openImageQualityDialog,
-                    onThemeColor = settingsViewModel::openThemeColorDialog,
-                    onLauncherIcon = settingsViewModel::openLauncherIconDialog,
-                    onContinueDownload = { g.av(this@PopupActivity) },
-                    onApkVersion = { page = PopupSettingsPage.ApkVersion },
-                    onCache = {
-                        startActivity(
-                            Intent("android.settings.APPLICATION_DETAILS_SETTINGS").apply {
-                                data = Uri.fromParts("package", packageName, null)
-                            }
-                        )
-                    },
-                    onFaq = { page = PopupSettingsPage.Question },
-                    onPin = { page = PopupSettingsPage.ChangePin },
-                    onPassword = { page = PopupSettingsPage.ChangePassword },
-                    onLogout = {
-                        settingsViewModel.logout()
-                        finish()
-                    },
-                    onNightModeChanged = settingsViewModel::toggleNightMode,
-                    onVolumePagingChanged = settingsViewModel::toggleVolumePaging,
-                    onTestingChanged = settingsViewModel::toggleTesting,
-                    onPerformanceChanged = settingsViewModel::togglePerformance,
-                    onDialogDismiss = settingsViewModel::dismissDialog,
-                    onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
-                    onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
-                    onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
-                    onThemeColorSelected = { index ->
-                        val previous = settingsViewModel.state.themeColorIndex
-                        settingsViewModel.selectThemeColorIndex(index)
-                        if (previous != index) {
-                            startActivity(Intent(this@PopupActivity, PopupActivity::class.java).apply {
-                                putExtra(EXTRA_KEY_TYPE, TYPE_KEY_SETTING)
-                            })
+                PicaComposeTheme(darkTheme = settingsViewModel.state.nightModeEnabled) {
+                    SettingsScreen(
+                        state = settingsViewModel.state,
+                        onScreenOrientation = settingsViewModel::openScreenOrientationDialog,
+                        onScrollDirection = settingsViewModel::openScrollDirectionDialog,
+                        onAutoPaging = settingsViewModel::openAutoPagingDialog,
+                        onImageQuality = settingsViewModel::openImageQualityDialog,
+                        onThemeColor = settingsViewModel::openThemeColorDialog,
+                        onLauncherIcon = settingsViewModel::openLauncherIconDialog,
+                        onContinueDownload = { g.av(this@PopupActivity) },
+                        onApkVersion = { page = PopupSettingsPage.ApkVersion },
+                        onCache = {
+                            startActivity(
+                                Intent("android.settings.APPLICATION_DETAILS_SETTINGS").apply {
+                                    data = Uri.fromParts("package", packageName, null)
+                                }
+                            )
+                        },
+                        onFaq = { page = PopupSettingsPage.Question },
+                        onPin = { page = PopupSettingsPage.ChangePin },
+                        onPassword = { page = PopupSettingsPage.ChangePassword },
+                        onLogout = {
+                            settingsViewModel.logout()
                             finish()
-                        }
-                    },
-                    onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
-                    onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
-                    onAutoPagingConfirmed = settingsViewModel::confirmAutoPagingInterval,
-                )
+                        },
+                        onNightModeChanged = settingsViewModel::toggleNightMode,
+                        onVolumePagingChanged = settingsViewModel::toggleVolumePaging,
+                        onTestingChanged = settingsViewModel::toggleTesting,
+                        onPerformanceChanged = settingsViewModel::togglePerformance,
+                        onDialogDismiss = settingsViewModel::dismissDialog,
+                        onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
+                        onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
+                        onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
+                        onThemeColorSelected = { index ->
+                            val previous = settingsViewModel.state.themeColorIndex
+                            settingsViewModel.selectThemeColorIndex(index)
+                            if (previous != index) {
+                                startActivity(Intent(this@PopupActivity, PopupActivity::class.java).apply {
+                                    putExtra(EXTRA_KEY_TYPE, TYPE_KEY_SETTING)
+                                })
+                                finish()
+                            }
+                        },
+                        onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
+                        onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
+                        onAutoPagingConfirmed = settingsViewModel::confirmAutoPagingInterval,
+                    )
+                }
             }
 
             PopupSettingsPage.ApkVersion -> ApkVersionListScreen(
