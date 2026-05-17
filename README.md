@@ -8,18 +8,24 @@ Picacg官方app修改版，基于官方app二次开发，支持漫画推荐、�
 
 ## � 迁移状态
 
-### 当前阶段：Screen 全部重写为 MD3 Compose
+### 当前阶段：Screen 全部重写为 MD3 Compose ✅
 - **主题基线**：已切到 `Miracle Neon` 主题，支持浅色/深色两套配色
 - **组件层**：已抽出一批 Compose 通用组件（TopBar、Button、TextField 等）
-- **已重写 Screen**：
-  - ✅ `LoginScreen` / `LoginViewModel`
-  - ✅ `SplashScreen` / `SplashViewModel`
-  - ✅ `PicaAppListScreen` / `PicaAppListViewModel`
-  - ✅ `AnnouncementListScreen` / `AnnouncementListViewModel`
-  - ✅ `ApkVersionListScreen` / `ApkVersionListViewModel`
-  - ✅ `ChangePinScreen` / `ChangePinViewModel`
-  - ✅ `ChangePasswordScreen` / `ChangePasswordViewModel`
-  - 🔄 `ComicDetailScreen` (Preview 分支进行中)
+- **已重写 Screen**（全部完成）：
+  - ✅ `LoginScreen` / `SplashScreen` / `RegisterScreen`
+  - ✅ `HomeScreen` / `CategoryScreen` / `ComicListScreen`
+  - ✅ `ComicDetailScreen` / `CommentScreen`
+  - ✅ `GameScreen` / `GameDetailScreen`
+  - ✅ `LeaderboardScreen` / `NotificationScreen`
+  - ✅ `ProfileScreen` / `ProfileEditScreen`
+  - ✅ `SettingsScreen` / `SupportUsScreen`
+  - ✅ `PicaAppScreen` / `PicaAppListScreen`
+  - ✅ `AnnouncementListScreen` / `ApkVersionListScreen`
+  - ✅ `ChangePinScreen` / `ChangePasswordScreen`
+  - ✅ `ChatroomScreens` / `AnonymousChatScreen`
+  - ✅ `ComicDownloadScreen` / `ComicViewerComposeHostView`
+  - ✅ `ImageCropScreen` / `ImagePopupScreen` / `LockDialogScreen`
+  - ✅ `OneTimeUpdateScreens` / `LovePicaContainerScreen`
 
 ### 迁移原则
 - 新 Screen 不再使用源 XML（不进行 `LayoutInflater.inflate()`）
@@ -27,14 +33,6 @@ Picacg官方app修改版，基于官方app二次开发，支持漫画推荐、�
 - Screen 只负责渲染状态和分发事件
 - ViewModel 保留源方法语义便于逐项对照
 - 已重写的 Screen 不再保留旧 XML fallback
-
-### 二级页面管理
-为避免交互逻辑只迁移一半，以下二级页暂时采用 **Fragment 托管**：
-- `Notification` / `ComicList` / `ComicDetail` / `ProfileEdit`
-- `ChangePin` / `ChangePassword` / `GameDetail` / `Comment`
-- `PicaApp` / `PicaAppList` / `ApkVersionList` / `AnnouncementList` / `Leaderboard`
-
-**后续目标**：在确保交互完整的前提下，逐页把 Fragment 内逻辑拆出 ViewModel，再迁移到纯 Compose
 
 ## �📱 功能特性
 
@@ -56,7 +54,7 @@ Picacg官方app修改版，基于官方app二次开发，支持漫画推荐、�
 | **网络请求** | Retrofit2 3.0.0 + OkHttp3 5.3.2 |
 | **实时通信** | Socket.IO 2.1.2 |
 | **JSON 解析** | Gson 2.10.1 |
-| **图片加载** | Picasso 2.5.2 + Coil 2.7.0 |
+| **图片加载** | Coil 2.7.0 |
 | **数据存储** | Sugar ORM 1.5 |
 | **Design 系统** | Material3 + Material Design Icons |
 | **主题支持** | Compose Color Tokens + XML 语义属性 |
@@ -174,7 +172,7 @@ Picacg官方app修改版，基于官方app二次开发，支持漫画推荐、�
 | 包名 | `com.picacomic.fregata` |
 | minSdk | 23 (Android 6.0) |
 | targetSdk | 35 (Android 15) |
-| ABI | armeabi-v7a (32 位) |
+| ABI | 默认（全架构支持） |
 
 ## 📚 API 文档参考
 

@@ -99,3 +99,4 @@ node_modules/
 addtheme/
 
 .continue/agents/new-config.yaml
+app/lint-baseline.xml
