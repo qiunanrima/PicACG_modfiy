@@ -163,7 +163,7 @@ fun NotificationScreen(
                                 itemsIndexed(
                                     items = vm.notifications,
                                     key = { index, item ->
-                                        item.notificationId ?: "notification_$index"
+                                        stableLazyKey("notification", index, item.notificationId, item.redirectId, item.title)
                                     }
                                 ) { _, item ->
                                     NotificationListItem(

@@ -152,7 +152,7 @@ fun GameScreen(
                                 itemsIndexed(
                                     items = vm.games,
                                     key = { index, item ->
-                                        item.gameId ?: "game_$index"
+                                        stableLazyKey("game", index, item.gameId, item.title)
                                     }
                                 ) { _, item ->
                                     GameGridItem(item = item) {

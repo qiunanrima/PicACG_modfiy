@@ -184,7 +184,7 @@ public class Socket extends Emitter {
                 int end = hostname.lastIndexOf(']');
                 if (end != -1) hostname = hostname.substring(0, end);
             }
-            opts.hostname = hostname;
+            opts.hostname = normalizeHost(hostname);
         }
 
         this.secure = opts.secure;
@@ -194,7 +194,7 @@ public class Socket extends Emitter {
             opts.port = this.secure ? 443 : 80;
         }
 
-        this.hostname = opts.hostname != null ? opts.hostname : "localhost";
+        this.hostname = opts.hostname != null ? normalizeHost(opts.hostname) : "localhost";
         this.port = opts.port;
         this.query = opts.query != null ?
                 ParseQS.decode(opts.query) : new HashMap<String, String>();
@@ -892,6 +892,16 @@ public class Socket extends Emitter {
             this.heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
         }
         return this.heartbeatScheduler;
+    }
+
+    private static String normalizeHost(String host) {
+        if (host == null) {
+            return null;
+        }
+        while (host.endsWith(".") && host.length() > 1) {
+            host = host.substring(0, host.length() - 1);
+        }
+        return host;
     }
 
     public static class Options extends Transport.Options {

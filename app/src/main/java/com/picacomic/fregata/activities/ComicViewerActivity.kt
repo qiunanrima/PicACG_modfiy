@@ -309,6 +309,16 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.totalPagingPages = this.currentPagingPage + 1
             this.shouldRestoreRecordPosition = true
         }
+        if (this.offlineMode && !j(this.episodeOrder)) {
+            val firstDownloadedEpisode = firstDownloadedEpisodeOrder()
+            if (firstDownloadedEpisode > 0) {
+                this.episodeOrder = firstDownloadedEpisode
+                this.loadedPageOffset = 0
+                this.currentPage = 0
+                this.currentPagingPage = 0
+                this.shouldRestoreRecordPosition = false
+            }
+        }
         loadPanelAnimations()
         bJ()
     }
@@ -1024,6 +1034,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             }
         } else {
             f.D(TAG, "Load DownloadComicEpisodeObject DB FAILED")
+            if (this.offlineMode) {
+                bC()
+                Toast.makeText(this, getString(R.string.downloaded) + " 0", Toast.LENGTH_SHORT).show()
+            }
         }
         logPagingState()
     }
@@ -1294,6 +1308,22 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             ex.printStackTrace()
         } finally {
             bC()
+        }
+    }
+
+    private fun firstDownloadedEpisodeOrder(): Int {
+        return try {
+            val episodes = DownloadComicEpisodeObject.findWithQuery(
+                DownloadComicEpisodeObject::class.java,
+                "SELECT * FROM download_comic_episode_object WHERE comic_id = ? and status != ? ORDER BY episode_order ASC LIMIT 1",
+                this.comicId,
+                "0"
+            )
+                ?.filterIsInstance<DownloadComicEpisodeObject>()
+                .orEmpty()
+            episodes.firstOrNull()?.episodeOrder ?: 0
+        } catch (_: Exception) {
+            0
         }
     }
 

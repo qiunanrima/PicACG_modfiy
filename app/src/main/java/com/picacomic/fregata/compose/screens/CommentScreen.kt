@@ -277,7 +277,7 @@ fun CommentScreen(
                             ) {
                                 itemsIndexed(
                                     items = vm.commentItems,
-                                    key = { index, item -> item.commentId ?: "comment_$index" },
+                                    key = { index, item -> stableLazyKey("comment", index, item.commentId, item.content) },
                                 ) { index, item ->
                                     CommentCard(
                                         context = context,

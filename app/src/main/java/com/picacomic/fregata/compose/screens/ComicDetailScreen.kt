@@ -419,12 +419,13 @@ private fun ComicDetailContent(
             val primarySupportingText = when {
                 historyRecord != null -> "从 ${historyRecord.episodeTitle} P.${historyRecord.page} 开始"
                 previewState?.fromHistory == true -> "从 ${previewState.historyEpisodeTitle} P.${previewState.historyPage} 开始"
+                offlineMode && episodes.isEmpty() -> "仅可阅读本地已下载章节"
                 else -> "从第 ${episodes.firstOrNull()?.order ?: 1} 话开始"
             }
             PicaActionRow(
                 primaryText = if (fromHistory) "继续阅读" else "开始阅读",
                 primarySupportingText = primarySupportingText,
-                primaryEnabled = detail != null,
+                primaryEnabled = detail != null && (!offlineMode || fromHistory || episodes.isNotEmpty()),
                 onPrimaryClick = {
                     val currentDetail = detail ?: return@PicaActionRow
                     if (inPreview) return@PicaActionRow

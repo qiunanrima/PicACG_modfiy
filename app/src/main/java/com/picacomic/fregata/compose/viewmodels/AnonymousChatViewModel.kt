@@ -16,6 +16,7 @@ import com.picacomic.fregata.objects.AnonymousChatDataObject
 import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.objects.responses.UserProfileResponse
+import com.picacomic.fregata.utils.NetworkSecurityHelper
 import com.picacomic.fregata.utils.e
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -340,8 +341,12 @@ class AnonymousChatViewModel(application: Application) : AndroidViewModel(applic
 
     private fun connectSocket() {
         if (socket != null) return
+        val okHttpClient = NetworkSecurityHelper.createSocketClient(getApplication())
         val options = IO.Options().apply {
             transports = arrayOf("websocket")
+            callFactory = okHttpClient
+            webSocketFactory = okHttpClient
+            forceNew = true
         }
         socket = runCatching { IO.socket(SOCKET_URL, options) }.getOrNull()
         socket?.on(EVENT_ACTION, actionListener)

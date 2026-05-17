@@ -373,15 +373,9 @@ fun ProfileScreen(
                             comics = profileComicViewModel?.recentComics.orEmpty(),
                             loading = false,
                             onMore = {
-                                if (!offlineMode) {
-                                    onComicListClick("CATEGORY_RECENT_VIEW")
-                                }
+                                onComicListClick("CATEGORY_RECENT_VIEW")
                             },
-                            onComicClick = {
-                                if (!offlineMode) {
-                                    onComicClick(it)
-                                }
-                            },
+                            onComicClick = onComicClick,
                         )
                     }
                     item {
@@ -392,9 +386,7 @@ fun ProfileScreen(
                             loading = false,
                             subtitleOverrides = profileComicViewModel?.downloadingProgressText.orEmpty(),
                             onMore = {
-                                if (!offlineMode) {
-                                    onComicListClick("CATEGORY_DOWNLOADING")
-                                }
+                                onComicListClick("CATEGORY_DOWNLOADING")
                             },
                             onComicClick = onComicClick,
                         )
@@ -406,9 +398,7 @@ fun ProfileScreen(
                             comics = profileComicViewModel?.downloadedComics.orEmpty(),
                             loading = false,
                             onMore = {
-                                if (!offlineMode) {
-                                    onComicListClick("CATEGORY_DOWNLOADED")
-                                }
+                                onComicListClick("CATEGORY_DOWNLOADED")
                             },
                             onComicClick = onComicClick,
                         )
@@ -426,7 +416,7 @@ fun ProfileScreen(
 
                         else -> {
                             comments.forEachIndexed { index, comment ->
-                                item(key = comment.commentId ?: "profile_comment_$index") {
+                                item(key = stableLazyKey("profile_comment", index, comment.commentId, comment.content)) {
                                     ProfileCommentCard(
                                         comment = comment,
                                         profileUser = profileCommentViewModel?.profileUser,

@@ -449,7 +449,7 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
             emptyList()
         }
         episodes = syncEpisodeLocalState(comicId, downloadedEpisodes)
-        episodeTotal = downloadedEpisodes.size
+        episodeTotal = downloadedEpisodes.size.takeIf { it > 0 } ?: comicDetail?.episodeCount ?: 0
         hasMoreEpisodes = false
         nextEpisodePage = 1
     }

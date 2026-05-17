@@ -113,7 +113,7 @@ fun ApkVersionListScreen(
                                 itemsIndexed(
                                     items = vm.versions,
                                     key = { index, item ->
-                                        item.latestApplicationId ?: "apk_version_$index"
+                                        stableLazyKey("apk_version", index, item.latestApplicationId, item.version, item.createdAt)
                                     }
                                 ) { _, item ->
                                     ApkVersionListItem(item = item) {

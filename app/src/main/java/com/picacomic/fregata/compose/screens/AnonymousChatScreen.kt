@@ -216,7 +216,7 @@ fun AnonymousChatScreen(
                             val messages = if (inPreview) previewMessages else screenViewModel?.messages.orEmpty()
                             itemsIndexed(
                                 items = messages,
-                                key = { index, item -> item.id ?: "${item.userId}_${item.message}_$index" },
+                                key = { index, item -> stableLazyKey("anonymous_message", index, item.id, item.userId, item.message) },
                             ) { _, item ->
                                 AnonymousMessageBubble(
                                     item = item,

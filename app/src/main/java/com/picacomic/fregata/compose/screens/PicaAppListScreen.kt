@@ -114,10 +114,10 @@ fun PicaAppListContent(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(vertical = 8.dp)
                     ) {
-                        itemsIndexed(
-                            items = vm.apps,
-                            key = { index, item ->
-                                item.title ?: "pica_app_$index"
+                            itemsIndexed(
+                                items = vm.apps,
+                                key = { index, item ->
+                                    stableLazyKey("pica_app", index, item.title, item.url)
                             }
                         ) { _, item ->
                             PicaAppListItem(item = item) {

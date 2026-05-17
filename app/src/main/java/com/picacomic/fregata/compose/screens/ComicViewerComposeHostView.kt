@@ -427,7 +427,7 @@ private fun itemKey(pages: List<ComicPageObject>, virtualIndex: Int): String {
         return "ad_$virtualIndex"
     }
     val pageIndex = g.ac(virtualIndex)
-    return pages.getOrNull(pageIndex)?.comicPageId ?: "page_$virtualIndex"
+    return stableLazyKey("page", virtualIndex, pages.getOrNull(pageIndex)?.comicPageId)
 }
 
 private fun Int.lastIndexCoerceAtLeastZero(): Int {

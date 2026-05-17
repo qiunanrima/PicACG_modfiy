@@ -34,6 +34,10 @@ public final class NetworkSecurityHelper {
         return applySslPolicy(new OkHttpClient.Builder(), context).build();
     }
 
+    public static OkHttpClient createSocketClient(Context context) {
+        return applySslPolicy(new OkHttpClient.Builder(), context).build();
+    }
+
     public static OkHttpClient.Builder applySystemTls(OkHttpClient.Builder builder) {
         try {
             f fVar = new f();

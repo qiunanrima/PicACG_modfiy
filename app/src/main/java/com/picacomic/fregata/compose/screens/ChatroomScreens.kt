@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.Icons
@@ -195,7 +196,10 @@ fun ChatroomListContent(
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            itemsIndexed(rooms, key = { index, item -> item.url ?: "chatroom_$index" }) { _, room ->
+            itemsIndexed(
+                rooms,
+                key = { index, item -> stableLazyKey("chatroom", index, item.url, item.title) },
+            ) { _, room ->
                 ChatroomListItem(room = room) {
                     if (room.url.equals("allchatroom", ignoreCase = true)) {
                         onAllRoomsClick(
@@ -458,7 +462,10 @@ private fun ChatroomContent(
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            itemsIndexed(messages, key = { index, item -> item.uniqueId ?: "${item.userId}_${item.message}_$index" }) { _, item ->
+            itemsIndexed(
+                messages,
+                key = { index, item -> stableLazyKey("chat_message", index, item.uniqueId, item.userId, item.message, item.name) },
+            ) { _, item ->
                 ChatroomMessageBubble(
                     item = item,
                     isMine = item.userId == viewModel.userProfile?.userId,
@@ -784,6 +791,13 @@ private fun ChatroomInputBar(
                     singleLine = true,
                     placeholder = { Text(stringResource(R.string.chatroom_message_placeholder)) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(
+                        onSend = {
+                            if (enabled && value.isNotBlank()) {
+                                onSend()
+                            }
+                        },
+                    ),
                 )
                 IconButton(
                     onClick = onSend,

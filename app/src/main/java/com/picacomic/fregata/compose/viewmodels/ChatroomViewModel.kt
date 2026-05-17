@@ -29,6 +29,7 @@ import com.picacomic.fregata.objects.responses.ChatroomListResponse
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.objects.responses.RegisterResponse
 import com.picacomic.fregata.objects.responses.UserProfileResponse
+import com.picacomic.fregata.utils.NetworkSecurityHelper
 import com.picacomic.fregata.utils.e
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -231,8 +232,12 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
         }
         val profile = userProfile
         if (text.isBlank()) return
-        if (profile == null || profile.name.isNullOrBlank()) {
+        if (profile == null) {
             emitToast("你从来没有进入过聊天室！")
+            return
+        }
+        if (privateTo == null && !isPublicChannel && atText.isBlank()) {
+            emitToast("你还未＠人")
             return
         }
         input = ""
@@ -242,10 +247,6 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
             socket?.emit("send_private_message", gson.toJson(message, ChatMessageObject::class.java))
             addMessage(message)
             clearReplyAndAt()
-            return
-        }
-        if (!isPublicChannel && atText.isBlank()) {
-            emitToast("你还未＠人")
             return
         }
         socket?.emit("send_message", gson.toJson(message, ChatMessageObject::class.java))
@@ -269,13 +270,16 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
 
     private fun buildMessage(text: String, image: String, audio: String, type: Int): ChatMessageObject? {
         val profile = userProfile ?: return null
+        val displayName = profile.name.orEmpty()
+            .ifBlank { profile.email.orEmpty().substringBefore("@") }
+            .ifBlank { "Pica" }
         return ChatMessageObject(
             profile.userId.orEmpty(),
-            "",
+            "local_${System.currentTimeMillis()}",
             profile.level,
             profile.email.orEmpty(),
             com.picacomic.fregata.utils.g.b(profile.avatar).orEmpty(),
-            profile.name.orEmpty(),
+            displayName,
             profile.title.orEmpty(),
             profile.gender.orEmpty(),
             "android",
@@ -705,8 +709,12 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
 
     private fun connect(roomUrl: String) {
         disconnect()
+        val okHttpClient = NetworkSecurityHelper.createSocketClient(app)
         val options = IO.Options().apply {
             transports = arrayOf("websocket")
+            callFactory = okHttpClient
+            webSocketFactory = okHttpClient
+            forceNew = true
         }
         socket = try {
             IO.socket(roomUrl, options)
@@ -727,7 +735,7 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
             on("broadcast_image") { args -> handleChatMessage(args, 1) }
             on("broadcast_audio") { args -> handleChatMessage(args, 2) }
             on("got_private_message") { args ->
-                val json = args.firstOrNull() as? JSONObject ?: return@on
+                val json = args.firstJsonObject() ?: return@on
                 val message = parseMessage(json, 3) ?: return@on
                 post {
                     message.to = com.picacomic.fregata.objects.ChatroomToObject(
@@ -741,27 +749,27 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
             }
             on("new_connection") { args ->
                 post {
-                    onlineCount = (args.firstOrNull() as? JSONObject)?.optString("connections").orEmpty()
+                    onlineCount = args.firstJsonObject()?.optString("connections").orEmpty()
                     connectionNotice = "一位绅士加入了对话，现在人数为：$onlineCount"
                 }
             }
             on("connection_close") { args ->
                 post {
-                    onlineCount = (args.firstOrNull() as? JSONObject)?.optString("connections").orEmpty()
+                    onlineCount = args.firstJsonObject()?.optString("connections").orEmpty()
                     connectionNotice = "一位绅士逃跑了，现在人数为：$onlineCount"
                 }
             }
             on("receive_notification") { args ->
-                val notice = (args.firstOrNull() as? JSONObject)?.optString("message").orEmpty()
+                val notice = args.firstJsonObject()?.optString("message").orEmpty()
                 if (notice.isNotBlank()) emitToast(notice)
             }
             on("kick") { args ->
-                val notice = (args.firstOrNull() as? JSONObject)?.optString("message").orEmpty()
+                val notice = args.firstJsonObject()?.optString("message").orEmpty()
                 emitToast(notice.ifBlank { "你已离开聊天室" })
                 disconnect()
             }
             on("set_profile") { args ->
-                val json = args.firstOrNull() as? JSONObject ?: return@on
+                val json = args.firstJsonObject() ?: return@on
                 post {
                     userProfile?.let { profile ->
                         json.optString("name").takeIf { it.isNotBlank() }?.let(profile::setName)
@@ -773,13 +781,13 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
                 }
             }
             on("change_character_icon") { args ->
-                val character = (args.firstOrNull() as? JSONObject)?.optString("character").orEmpty()
+                val character = args.firstJsonObject()?.optString("character").orEmpty()
                 if (character.isNotBlank()) {
                     post { userProfile?.character = character }
                 }
             }
             on("change_title") { args ->
-                val json = args.firstOrNull() as? JSONObject ?: return@on
+                val json = args.firstJsonObject() ?: return@on
                 post {
                     val userId = json.optString("user_id")
                     val title = json.optString("title")
@@ -793,9 +801,46 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun handleChatMessage(args: Array<Any>, type: Int) {
-        val json = args.firstOrNull() as? JSONObject ?: return
+        val json = args.firstJsonObject() ?: return
         val message = parseMessage(json, type) ?: return
         post { addMessage(message) }
+    }
+
+    private fun Array<Any>.firstJsonObject(): JSONObject? {
+        val value = firstOrNull() ?: return null
+        return value.asJsonObject()
+    }
+
+    private fun Any.asJsonObject(): JSONObject? {
+        return when (this) {
+            is JSONObject -> unwrapChatPayload()
+            is JSONArray -> opt(0)?.asJsonObject()
+            is String -> try {
+                JSONObject(this).unwrapChatPayload()
+            } catch (_: Exception) {
+                try {
+                    JSONArray(this).opt(0)?.asJsonObject()
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            is Map<*, *> -> JSONObject(this).unwrapChatPayload()
+            else -> null
+        }
+    }
+
+    private fun JSONObject.unwrapChatPayload(): JSONObject {
+        val data = opt("data")
+        return when (data) {
+            is JSONObject -> data
+            is JSONArray -> data.opt(0) as? JSONObject ?: this
+            is String -> try {
+                JSONObject(data)
+            } catch (_: Exception) {
+                this
+            }
+            else -> this
+        }
     }
 
     fun parseMessage(json: JSONObject, type: Int): ChatMessageObject? {

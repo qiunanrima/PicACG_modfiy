@@ -534,6 +534,7 @@ class MainActivity : BaseActivity() {
 
                             ComicListScreen(
                                 category = category,
+                                offlineMode = offlineMode,
                                 keywords = keywords,
                                 tags = tags,
                                 author = author,
@@ -544,7 +545,9 @@ class MainActivity : BaseActivity() {
                                 creatorName = creatorName,
                                 onBack = { navController.popBackStack() },
                                 onComicClick = { id ->
-                                    navController.navigate(Screen.createComicDetailRoute(id))
+                                    if (!offlineMode || isOfflineLocalComicCategory(category)) {
+                                        navController.navigate(Screen.createComicDetailRoute(id))
+                                    }
                                 }
                             )
                         }
@@ -986,6 +989,12 @@ class MainActivity : BaseActivity() {
             ?.takeIf { it.isNotBlank() }
         intent?.removeExtra(PopupActivity.EXTRA_OPEN_COMIC_ID)
         intent?.removeExtra(PopupActivity.EXTRA_OPEN_GAME_ID)
+    }
+
+    private fun isOfflineLocalComicCategory(category: String?): Boolean {
+        return category == "CATEGORY_RECENT_VIEW" ||
+            category == "CATEGORY_DOWNLOADING" ||
+            category == "CATEGORY_DOWNLOADED"
     }
 
     // -------------------------------------------------------------

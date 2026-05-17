@@ -217,7 +217,7 @@ fun LeaderboardScreen(
                                 itemsIndexed(
                                     items = vm.popularComics,
                                     key = { index, item ->
-                                        "${item.comicId ?: "popular"}_$index"
+                                        stableLazyKey("popular", index, item.comicId, item.title)
                                     }
                                 ) { index, item ->
                                     LeaderboardPopularItem(
@@ -249,7 +249,7 @@ fun LeaderboardScreen(
                                 itemsIndexed(
                                     items = vm.knights,
                                     key = { index, item ->
-                                        "${item.leaderboardKnightId ?: "knight"}_$index"
+                                        stableLazyKey("knight", index, item.leaderboardKnightId, item.name)
                                     }
                                 ) { index, item ->
                                     LeaderboardKnightItem(

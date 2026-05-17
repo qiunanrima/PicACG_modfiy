@@ -74,6 +74,7 @@ import com.picacomic.fregata.utils.views.AlertDialogCenter
 @Composable
 fun ComicListScreen(
     category: String? = null,
+    offlineMode: Boolean = false,
     keywords: String? = null,
     tags: String? = null,
     author: String? = null,
@@ -94,6 +95,9 @@ fun ComicListScreen(
     val isFavourite = category == "CATEGORY_USER_FAVOURITE"
     val isRecent = category == "CATEGORY_RECENT_VIEW"
     val isDownloading = category == "CATEGORY_DOWNLOADING"
+    val isDownloaded = category == "CATEGORY_DOWNLOADED"
+    val isOfflineLocalList = isRecent || isDownloading || isDownloaded
+    val effectiveCategory = if (offlineMode && !isOfflineLocalList) "CATEGORY_RECENT_VIEW" else category
     val isAdvancedSearch = !keywords.isNullOrBlank()
     val canSort = isFavourite || isAdvancedSearch
     var pageText by rememberSaveable(category, keywords, tags, author, translate, creatorId) {
@@ -103,7 +107,7 @@ fun ComicListScreen(
     LaunchedEffect(category, keywords, tags, author, finished, sorting, translate, creatorId, creatorName, inPreview) {
         if (!inPreview) {
             screenViewModel?.init(
-                category = category,
+                category = effectiveCategory,
                 keywords = keywords,
                 tags = tags,
                 author = author,
@@ -275,7 +279,7 @@ fun ComicListScreen(
                     else -> {
                         itemsIndexed(
                             items = comics,
-                            key = { index, item -> item.comicId ?: "comic_$index" },
+                            key = { index, item -> stableLazyKey("comic", index, item.comicId, item.title) },
                         ) { _, item ->
                             PicaComicListCard(
                                 title = item.title.orEmpty(),

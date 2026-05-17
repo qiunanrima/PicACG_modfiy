@@ -133,7 +133,7 @@ fun AnnouncementListScreen(
                                 itemsIndexed(
                                     items = vm.announcements,
                                     key = { index, item ->
-                                        item.announcementId ?: "announcement_$index"
+                                        stableLazyKey("announcement", index, item.announcementId, item.title, item.createdAt)
                                     }
                                 ) { _, item ->
                                     AnnouncementListItem(

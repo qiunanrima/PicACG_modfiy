@@ -51,6 +51,7 @@ public class Url {
             // might happen on some of Samsung Devices such as S4.
             _host = extractHostFromAuthorityPart(uri.getRawAuthority());
         }
+        _host = normalizeHost(_host);
         URI completeUri = URI.create(protocol + "://"
                 + (userInfo != null ? userInfo + "@" : "")
                 + _host
@@ -63,6 +64,15 @@ public class Url {
         return new ParsedURI(completeUri, id);
     }
 
+    private static String normalizeHost(String host) {
+        if (host == null) {
+            return null;
+        }
+        while (host.endsWith(".") && host.length() > 1) {
+            host = host.substring(0, host.length() - 1);
+        }
+        return host;
+    }
 
     private static String extractHostFromAuthorityPart(String authority)
     {

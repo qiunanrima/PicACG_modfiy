@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -174,10 +174,10 @@ fun HomeScreen(
                             contentPadding = PaddingValues(16.dp),
                             verticalArrangement = Arrangement.spacedBy(18.dp),
                         ) {
-                            items(
+                            itemsIndexed(
                                 items = collections,
-                                key = { it.title.orEmpty() },
-                            ) { collection ->
+                                key = { index, item -> stableLazyKey("home_collection", index, item.title) },
+                            ) { _, collection ->
                                 HomeCollectionRow(
                                     collection = collection,
                                     onMoreClick = onMoreClick,
