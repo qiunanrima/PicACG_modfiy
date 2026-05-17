@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -50,6 +51,8 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import com.picacomic.fregata.compose.PicaComposeTheme
 
 class ComicViewerControlsOverlayView @JvmOverloads constructor(
@@ -234,19 +237,29 @@ private fun ReaderBrightnessSlider(
     onBrightnessChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BoxWithConstraints(
-        modifier = modifier,
-        contentAlignment = Alignment.Center,
-    ) {
-        Slider(
-            value = brightness,
-            onValueChange = { onBrightnessChanged(it.toInt()) },
-            valueRange = 0f..255f,
-            modifier = Modifier
-                .width(maxHeight)
-                .rotate(-90f),
-        )
-    }
+    Slider(
+        value = brightness,
+        onValueChange = { onBrightnessChanged(it.toInt()) },
+        valueRange = 0f..255f,
+        modifier = modifier
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(
+                    constraints.copy(
+                        minWidth = constraints.minHeight,
+                        maxWidth = constraints.maxHeight,
+                        minHeight = constraints.minWidth,
+                        maxHeight = constraints.maxWidth,
+                    )
+                )
+                layout(placeable.height, placeable.width) {
+                    placeable.place(
+                        x = -(placeable.width / 2 - placeable.height / 2),
+                        y = -(placeable.height / 2 - placeable.width / 2),
+                    )
+                }
+            }
+            .rotate(-90f)  // 用 rotate() 而不是 graphicsLayer
+    )
 }
 
 @Composable

@@ -6,6 +6,7 @@ import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
@@ -30,7 +31,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -275,6 +278,7 @@ private fun ZoomableReaderLayer(
                 clampOffsets()
             }
             .graphicsLayer {
+                transformOrigin = TransformOrigin(0f, 0f)
                 scaleX = scale
                 scaleY = scale
                 translationX = offsetX
@@ -285,19 +289,26 @@ private fun ZoomableReaderLayer(
                     awaitFirstDown(requireUnconsumed = false)
                     var hasPressedPointers: Boolean
                     do {
-                        val event = awaitPointerEvent()
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
                         val pressedPointers = event.changes.count { it.pressed }
                         hasPressedPointers = pressedPointers > 0
                         val shouldHandle = pressedPointers > 1 || scale > 1f
                         if (shouldHandle) {
-                            if (pressedPointers > 1) {
-                                scale = (scale * event.calculateZoom()).coerceIn(1f, 3f)
-                            }
+                            val oldScale = scale
+                            val zoomChange = if (pressedPointers > 1) event.calculateZoom() else 1f
+                            val newScale = (oldScale * zoomChange).coerceIn(1f, 3f)
+                            val appliedZoom = if (oldScale == 0f) 1f else newScale / oldScale
+                            val centroid = event.calculateCentroid(useCurrent = false)
                             val pan = event.calculatePan()
-                            if (verticalContent) {
-                                offsetX += pan.x * scale
+                            if (pressedPointers > 1) {
+                                scale = newScale
+                                offsetX = (offsetX + pan.x) * appliedZoom +
+                                    centroid.x * (1f - appliedZoom)
+                                offsetY = (offsetY + pan.y) * appliedZoom +
+                                    centroid.y * (1f - appliedZoom)
                             } else {
-                                offsetY += pan.y * scale
+                                offsetX += pan.x
+                                offsetY += pan.y
                             }
                             clampOffsets()
                             event.changes.forEach { it.consume() }
