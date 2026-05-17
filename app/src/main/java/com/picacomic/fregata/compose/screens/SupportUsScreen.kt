@@ -281,7 +281,7 @@ private fun SupportUsAdsGameTab(
     inPreview: Boolean,
 ) {
     var hostedWebView by remember { mutableStateOf<WebView?>(null) }
-    DisposableEffect(hostedWebView) {
+    DisposableEffect(Unit) {
         onDispose {
             hostedWebView?.apply {
                 stopLoading()

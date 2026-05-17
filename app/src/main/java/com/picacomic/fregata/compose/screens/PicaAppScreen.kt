@@ -69,7 +69,7 @@ fun PicaAppScreen(
         }
     }
 
-    DisposableEffect(lifecycleOwner, hostedWebView) {
+    DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> hostedWebView?.onResume()

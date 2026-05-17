@@ -104,8 +104,10 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:3.0.0'
     implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
     
-    // Socket.IO - 实时通信
-    implementation 'io.socket:socket.io-client:2.1.2'
+    // Socket.IO - 实时通信：使用本地 1.x 协议实现，OkHttp 由 engine.io fork 抬到 5.x
+    implementation(project(':socket-io-client')) {
+        exclude group: 'org.json', module: 'json'
+    }
     
     // 其他未混淆UI库
     // Coil - Compose/MD3 screen 图片加载

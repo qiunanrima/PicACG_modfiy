@@ -1,2 +1,6 @@
 rootProject.name = "picacg_orginal"
 include ':app'
+include ':engine-io-client'
+include ':socket-io-client'
+project(':engine-io-client').projectDir = new File('engine.io-client-java')
+project(':socket-io-client').projectDir = new File('socket.io-client-java')

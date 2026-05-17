@@ -229,6 +229,7 @@ fun AnonymousChatScreen(
                             name = screenViewModel?.nameDraft.orEmpty(),
                             onNameChange = { screenViewModel?.updateNameDraft(it) },
                             onMatch = { screenViewModel?.cc() },
+                            onReconnect = { screenViewModel?.reconnect() },
                             matching = screenViewModel?.isMatching == true,
                             connected = screenViewModel?.isSocketConnected == true,
                             statusText = screenViewModel?.statusText ?: "Welcome",
@@ -245,6 +246,7 @@ private fun AnonymousMatchPanel(
     name: String,
     onNameChange: (String) -> Unit,
     onMatch: () -> Unit,
+    onReconnect: () -> Unit,
     matching: Boolean,
     connected: Boolean,
     statusText: String,
@@ -278,19 +280,33 @@ private fun AnonymousMatchPanel(
                 label = { Text(stringResource(R.string.anonymous_chat_name_hint)) },
             )
             Button(
-                onClick = onMatch,
-                enabled = connected && !matching && name.isNotBlank(),
+                onClick = {
+                    if (connected) {
+                        onMatch()
+                    } else {
+                        onReconnect()
+                    }
+                },
+                enabled = !matching && name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(imageVector = Icons.Filled.Search, contentDescription = null)
                 Text(
-                    text = if (matching) "匹配中" else stringResource(R.string.anonymous_chat_match),
+                    text = when {
+                        matching -> "匹配中"
+                        connected -> stringResource(R.string.anonymous_chat_match)
+                        else -> "重新连接"
+                    },
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
             if (!connected) {
                 Text(
-                    text = "正在连接匿名聊天室",
+                    text = if (statusText.startsWith("连接匿名聊天室失败")) {
+                        "连接失败，请检查代理或点重新连接"
+                    } else {
+                        "正在连接匿名聊天室"
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

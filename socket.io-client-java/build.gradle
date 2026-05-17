@@ -1,0 +1,20 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'io.socket'
+version = '1.0.3-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    api project(':engine-io-client')
+    implementation 'org.json:json:20090211'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.hamcrest:hamcrest-library:1.3'
+    testImplementation 'org.skyscreamer:jsonassert:1.5.0'
+}

@@ -1,7 +1,6 @@
 package com.picacomic.fregata.compose.viewmodels
 
 import android.app.Application
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,16 +38,10 @@ class PicaAppViewModel(application: Application) : AndroidViewModel(application)
             return
         }
 
-        authenticatedLink = try {
-            Uri.parse(inputLink)
-                .buildUpon()
-                .appendQueryParameter("token", e.z(appContext).orEmpty())
-                .appendQueryParameter("secret", SECRET)
-                .build()
-                .toString()
-        } catch (_: Exception) {
-            val joiner = if (inputLink.contains("?")) "&" else "?"
-            inputLink + joiner + "token=" + e.z(appContext).orEmpty() + "&secret=" + SECRET
-        }
+        authenticatedLink = inputLink +
+            "?token=" +
+            e.z(appContext).orEmpty() +
+            "&secret=" +
+            SECRET
     }
 }

@@ -32,6 +32,9 @@ class AnonymousChatViewModel(application: Application) : AndroidViewModel(applic
         private const val EVENT_ACTION = "action"
         private const val EVENT_RESPONSE = "response"
         private const val EVENT_CONNECT = "connect"
+        private const val EVENT_CONNECT_ERROR = "connect_error"
+        private const val EVENT_CONNECT_TIMEOUT = "connect_timeout"
+        private const val EVENT_DISCONNECT = "disconnect"
     }
 
     val messages = mutableStateListOf<AnonymousChatDataObject>()
@@ -78,8 +81,31 @@ class AnonymousChatViewModel(application: Application) : AndroidViewModel(applic
     private val connectListener = Emitter.Listener {
         runOnMain {
             isSocketConnected = true
+            if (!isMatched) {
+                statusText = "Welcome"
+            }
             if (!roomId.isNullOrBlank() && !matcherName.isNullOrBlank()) {
                 I(matcherName.orEmpty())
+            }
+        }
+    }
+
+    private val connectErrorListener = Emitter.Listener { args ->
+        val reason = args.firstOrNull()?.toString().orEmpty()
+        runOnMain {
+            isSocketConnected = false
+            isMatching = false
+            if (!isMatched) {
+                statusText = if (reason.isBlank()) "连接匿名聊天室失败" else "连接匿名聊天室失败：$reason"
+            }
+        }
+    }
+
+    private val disconnectListener = Emitter.Listener {
+        runOnMain {
+            isSocketConnected = false
+            if (!isMatched) {
+                statusText = "匿名聊天室已断开"
             }
         }
     }
@@ -112,6 +138,16 @@ class AnonymousChatViewModel(application: Application) : AndroidViewModel(applic
 
     fun updateMessageDraft(value: String) {
         messageDraft = value.take(500)
+    }
+
+    fun reconnect() {
+        if (isSocketConnected) return
+        statusText = "正在连接匿名聊天室"
+        socket?.disconnect()
+        socket?.connect()
+        if (socket == null) {
+            connectSocket()
+        }
     }
 
     fun sendDraft() {
@@ -219,6 +255,9 @@ class AnonymousChatViewModel(application: Application) : AndroidViewModel(applic
             socket?.off(EVENT_ACTION, actionListener)
             socket?.off(EVENT_RESPONSE, responseListener)
             socket?.off(EVENT_CONNECT, connectListener)
+            socket?.off(EVENT_CONNECT_ERROR, connectErrorListener)
+            socket?.off(EVENT_CONNECT_TIMEOUT, connectErrorListener)
+            socket?.off(EVENT_DISCONNECT, disconnectListener)
         }
     }
 
@@ -308,6 +347,10 @@ class AnonymousChatViewModel(application: Application) : AndroidViewModel(applic
         socket?.on(EVENT_ACTION, actionListener)
         socket?.on(EVENT_RESPONSE, responseListener)
         socket?.on(EVENT_CONNECT, connectListener)
+        socket?.on(EVENT_CONNECT_ERROR, connectErrorListener)
+        socket?.on(EVENT_CONNECT_TIMEOUT, connectErrorListener)
+        socket?.on(EVENT_DISCONNECT, disconnectListener)
+        statusText = "正在连接匿名聊天室"
         socket?.connect()
     }
 
