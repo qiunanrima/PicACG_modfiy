@@ -181,11 +181,15 @@ private fun ColorScheme.toExpressiveScheme(): ColorScheme = copy(
     onSecondary = onPrimary,
     secondaryContainer = primaryContainer,
     onSecondaryContainer = onPrimaryContainer,
-    surfaceContainer = surfaceContainerHigh,
-    surfaceContainerHigh = tertiaryContainer,
-    surfaceContainerHighest = primaryContainer,
     outlineVariant = secondaryContainer,
+    surfaceContainerLow = surface,
+    surfaceContainer = surfaceContainerHigh,
+    surfaceContainerHigh = surfaceContainerHighest,
+    surfaceContainerHighest = surfaceVariant,
 )
+
+@Composable
+fun isPicaExpressiveTheme(): Boolean = e.getDesignLanguage(LocalContext.current) == 1
 
 private fun md3LightPalette(
     primary: androidx.compose.ui.graphics.Color,

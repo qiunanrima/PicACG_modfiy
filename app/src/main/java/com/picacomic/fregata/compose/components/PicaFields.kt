@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 @Composable
 fun PicaTextField(
@@ -21,6 +22,7 @@ fun PicaTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
+    val expressive = isPicaExpressiveTheme()
     val placeholderContent: @Composable (() -> Unit)? = placeholder?.let { text ->
         { Text(text = text) }
     }
@@ -44,6 +46,7 @@ fun PicaTextField(
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         supportingText = supportingContent,
+        shape = if (expressive) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
         modifier = modifier.fillMaxWidth()
     )
 }

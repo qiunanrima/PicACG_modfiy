@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.components.PicaConfirmDialog
 import com.picacomic.fregata.compose.components.PicaPrimaryButton
 import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
@@ -397,8 +398,13 @@ private fun SettingsSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val expressive = isPicaExpressiveTheme()
     val sectionContainerColor by animateColorAsState(
-        targetValue = MaterialTheme.colorScheme.surfaceContainerHighest,
+        targetValue = if (expressive) {
+            MaterialTheme.colorScheme.surfaceContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHighest
+        },
         label = "settingsSectionContainer"
     )
     Text(
@@ -411,7 +417,7 @@ private fun SettingsSection(
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize(),
-        shape = MaterialTheme.shapes.large,
+        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = sectionContainerColor,
             contentColor = MaterialTheme.colorScheme.onSurface,

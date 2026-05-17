@@ -4,10 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,10 +37,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveMotion
+import com.picacomic.fregata.compose.PicaExpressiveType
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 // ─── 可点击条目（label + value + 箭头）──────────────────────────────────────
 
@@ -58,40 +60,35 @@ fun PicaValueListItem(
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
 ) {
+    val expressive = isPicaExpressiveTheme()
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (pressed) 0.985f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        animationSpec = PicaExpressiveMotion.Press,
         label = "picaValueListItemScale"
     )
     val containerColor by animateColorAsState(
         targetValue = if (pressed) {
-            MaterialTheme.colorScheme.primaryContainer
+            if (expressive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant
         } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
+            Color.Transparent
         },
         animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
         label = "picaValueListItemContainer"
     )
     val valueColor by animateColorAsState(
         targetValue = if (pressed) {
-            MaterialTheme.colorScheme.onPrimaryContainer
+            if (expressive) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
         } else {
-            MaterialTheme.colorScheme.primary
+            if (expressive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurface
         },
         animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
         label = "picaValueListItemValue"
     )
     val chevronOffset by animateDpAsState(
         targetValue = if (pressed) 4.dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        animationSpec = PicaExpressiveMotion.EmphasizedDp,
         label = "picaValueListItemChevron"
     )
 
@@ -102,9 +99,9 @@ fun PicaValueListItem(
             .heightIn(min = 56.dp)
             .scale(scale)
             .animateContentSize(),
-        shape = MaterialTheme.shapes.medium,
+        shape = if (expressive) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
         color = containerColor,
-        tonalElevation = if (pressed) 2.dp else 0.dp,
+        tonalElevation = if (expressive && pressed) 2.dp else 0.dp,
         interactionSource = interactionSource,
     ) {
         Row(
@@ -150,30 +147,28 @@ fun PicaSwitchListItem(
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
 ) {
+    val expressive = isPicaExpressiveTheme()
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (pressed) 0.985f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        animationSpec = PicaExpressiveMotion.Press,
         label = "picaSwitchListItemScale"
     )
     val containerColor by animateColorAsState(
         targetValue = when {
-            checked -> MaterialTheme.colorScheme.primaryContainer
-            pressed -> MaterialTheme.colorScheme.secondaryContainer
-            else -> MaterialTheme.colorScheme.surfaceContainerHigh
+            checked -> if (expressive) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.secondaryContainer
+            pressed -> if (expressive) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.secondaryContainer
+            else -> Color.Transparent
         },
         animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
         label = "picaSwitchListItemContainer"
     )
     val labelColor by animateColorAsState(
         targetValue = if (checked) {
-            MaterialTheme.colorScheme.onPrimaryContainer
+            if (expressive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer
         } else {
-            MaterialTheme.colorScheme.onSurface
+            if (expressive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
         label = "picaSwitchListItemLabel"
@@ -186,9 +181,9 @@ fun PicaSwitchListItem(
             .heightIn(min = 56.dp)
             .scale(scale)
             .animateContentSize(),
-        shape = MaterialTheme.shapes.medium,
+        shape = if (expressive) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
         color = containerColor,
-        tonalElevation = if (checked || pressed) 2.dp else 0.dp,
+        tonalElevation = if (expressive && (checked || pressed)) 2.dp else 0.dp,
         interactionSource = interactionSource,
     ) {
         Row(
@@ -199,7 +194,7 @@ fun PicaSwitchListItem(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyLarge,
+                style = if (expressive && checked) PicaExpressiveType.LabelEmphasized else MaterialTheme.typography.bodyLarge,
                 color = labelColor,
                 fontWeight = if (checked) FontWeight.SemiBold else FontWeight.Medium,
                 modifier = Modifier.weight(1f),
@@ -209,9 +204,9 @@ fun PicaSwitchListItem(
                 onCheckedChange = onCheckedChange,
                 modifier = Modifier.scale(0.86f),
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                    checkedBorderColor = MaterialTheme.colorScheme.primary,
+                    checkedThumbColor = if (expressive) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary,
+                    checkedTrackColor = if (expressive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
+                    checkedBorderColor = if (expressive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
                     uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                     uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
                     uncheckedBorderColor = MaterialTheme.colorScheme.outline,
@@ -236,30 +231,28 @@ fun PicaRadioListItem(
     modifier: Modifier = Modifier,
     showDivider: Boolean = false,
 ) {
+    val expressive = isPicaExpressiveTheme()
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (pressed) 0.985f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
+        animationSpec = PicaExpressiveMotion.Press,
         label = "picaRadioListItemScale"
     )
     val containerColor by animateColorAsState(
         targetValue = when {
-            selected -> MaterialTheme.colorScheme.primaryContainer
-            pressed -> MaterialTheme.colorScheme.secondaryContainer
-            else -> MaterialTheme.colorScheme.surfaceContainerHigh
+            selected -> if (expressive) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.secondaryContainer
+            pressed -> if (expressive) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.secondaryContainer
+            else -> Color.Transparent
         },
         animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
         label = "picaRadioListItemContainer"
     )
     val contentColor by animateColorAsState(
         targetValue = if (selected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
+            if (expressive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer
         } else {
-            MaterialTheme.colorScheme.onSurface
+            if (expressive) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
         label = "picaRadioListItemContent"
@@ -272,9 +265,9 @@ fun PicaRadioListItem(
             .heightIn(min = 56.dp)
             .scale(scale)
             .animateContentSize(),
-        shape = MaterialTheme.shapes.small,
+        shape = if (expressive) MaterialTheme.shapes.medium else MaterialTheme.shapes.small,
         color = containerColor,
-        tonalElevation = if (selected || pressed) 2.dp else 0.dp,
+        tonalElevation = if (expressive && (selected || pressed)) 2.dp else 0.dp,
         interactionSource = interactionSource,
     ) {
         ListItem(
@@ -295,10 +288,7 @@ fun PicaRadioListItem(
                     enter = fadeIn(animationSpec = tween(120)) +
                         scaleIn(
                             initialScale = 0.78f,
-                            animationSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessMedium
-                            )
+                            animationSpec = PicaExpressiveMotion.Emphasized
                         ),
                     exit = fadeOut(animationSpec = tween(90)) +
                         scaleOut(targetScale = 0.78f, animationSpec = tween(90)),

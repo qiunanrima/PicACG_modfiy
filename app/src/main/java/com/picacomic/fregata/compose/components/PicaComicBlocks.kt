@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 data class PicaActionItem(
     val icon: ImageVector,
@@ -352,8 +353,17 @@ fun PicaRecommendationCard(
         }
     },
 ) {
-    val recommendationContainer = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-    val recommendationBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)
+    val expressive = isPicaExpressiveTheme()
+    val recommendationContainer = if (expressive) {
+        MaterialTheme.colorScheme.tertiaryContainer
+    } else {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+    }
+    val recommendationBorder = if (expressive) {
+        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.32f)
+    } else {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)
+    }
 
     Card(
         modifier = modifier
@@ -362,6 +372,11 @@ fun PicaRecommendationCard(
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = recommendationContainer,
+            contentColor = if (expressive) {
+                MaterialTheme.colorScheme.onTertiaryContainer
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
         ),
         border = BorderStroke(1.dp, recommendationBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -376,7 +391,7 @@ fun PicaRecommendationCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(3f / 4.5f)
-                    .clip(MaterialTheme.shapes.extraSmall),
+                    .clip(if (expressive) MaterialTheme.shapes.medium else MaterialTheme.shapes.extraSmall),
             ) {
                 thumbnail()
             }
@@ -402,6 +417,7 @@ private fun PicaActionStatButton(
     item: PicaActionItem,
     modifier: Modifier = Modifier,
 ) {
+    val expressive = isPicaExpressiveTheme()
     val containerColor = if (item.selected) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
@@ -445,8 +461,16 @@ private fun PicaActionStatButton(
             if (!item.count.isNullOrBlank()) {
                 Badge(
                     modifier = Modifier.align(Alignment.TopEnd),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = if (expressive) {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    contentColor = if (expressive) {
+                        MaterialTheme.colorScheme.onSecondaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
                 ) {
                     Text(
                         text = item.count,

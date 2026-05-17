@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -16,7 +15,9 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 @Composable
 fun PicaTopBar(
@@ -25,11 +26,16 @@ fun PicaTopBar(
     onBack: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
+    val expressive = isPicaExpressiveTheme()
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-        shadowElevation = 2.dp,
-        tonalElevation = 2.dp
+        color = if (expressive) {
+            MaterialTheme.colorScheme.surfaceContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+        },
+        shadowElevation = if (expressive) 0.dp else 2.dp,
+        tonalElevation = if (expressive) 0.dp else 2.dp
     ) {
         Row(
             modifier = Modifier
@@ -47,7 +53,8 @@ fun PicaTopBar(
             }
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = if (expressive) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge,
+                fontWeight = if (expressive) FontWeight.Bold else FontWeight.Normal,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = if (onBack != null) 8.dp else 16.dp)

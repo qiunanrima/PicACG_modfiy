@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRankBadge
@@ -64,6 +66,7 @@ fun LeaderboardScreen(
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(0) }
+    val expressive = isPicaExpressiveTheme()
     val screenViewModel = previewAwareViewModel(viewModel)
     val previewPopular = if (inPreview) leaderboardPopularPreview() else emptyList()
     val previewKnights = if (inPreview) leaderboardKnightPreview() else emptyList()
@@ -127,17 +130,49 @@ fun LeaderboardScreen(
                         ),
                         scrollBehavior = scrollBehavior
                     )
-                    TabRow(selectedTabIndex = selectedTab) {
-                        Tab(
-                            selected = selectedTab == 0,
-                            onClick = { selectedTab = 0 },
-                            text = { Text(text = stringResource(R.string.leaderboard_tab_popular)) }
-                        )
-                        Tab(
-                            selected = selectedTab == 1,
-                            onClick = { selectedTab = 1 },
-                            text = { Text(text = stringResource(R.string.leaderboard_tab_knight)) }
-                        )
+                    if (expressive) {
+                        TabRow(
+                            selectedTabIndex = selectedTab,
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                            indicator = { tabPositions ->
+                                if (selectedTab in tabPositions.indices) {
+                                    Box(
+                                        modifier = Modifier
+                                            .tabIndicatorOffset(tabPositions[selectedTab])
+                                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                                            .fillMaxSize()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = MaterialTheme.shapes.extraLarge,
+                                            ),
+                                    )
+                                }
+                            },
+                        ) {
+                            Tab(
+                                selected = selectedTab == 0,
+                                onClick = { selectedTab = 0 },
+                                text = { Text(text = stringResource(R.string.leaderboard_tab_popular)) }
+                            )
+                            Tab(
+                                selected = selectedTab == 1,
+                                onClick = { selectedTab = 1 },
+                                text = { Text(text = stringResource(R.string.leaderboard_tab_knight)) }
+                            )
+                        }
+                    } else {
+                        TabRow(selectedTabIndex = selectedTab) {
+                            Tab(
+                                selected = selectedTab == 0,
+                                onClick = { selectedTab = 0 },
+                                text = { Text(text = stringResource(R.string.leaderboard_tab_popular)) }
+                            )
+                            Tab(
+                                selected = selectedTab == 1,
+                                onClick = { selectedTab = 1 },
+                                text = { Text(text = stringResource(R.string.leaderboard_tab_knight)) }
+                            )
+                        }
                     }
                     if (selectedTab == 0) {
                         Row(

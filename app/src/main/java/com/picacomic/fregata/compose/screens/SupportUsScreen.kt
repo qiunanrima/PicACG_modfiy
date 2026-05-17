@@ -6,6 +6,7 @@ import android.content.Context
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -64,6 +66,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
@@ -95,6 +98,7 @@ fun SupportUsScreen(
         stringResource(R.string.support_us_tab_ads),
         stringResource(R.string.support_us_tab_paypal),
     )
+    val expressive = isPicaExpressiveTheme()
 
     PicaComposeTheme {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -137,22 +141,57 @@ fun SupportUsScreen(
                         ),
                         scrollBehavior = scrollBehavior,
                     )
-                    TabRow(
-                        selectedTabIndex = selectedTab,
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                    ) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = selectedTab == index,
-                                onClick = { selectedTab = index },
-                                text = {
-                                    Text(
-                                        text = title,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
+                    if (expressive) {
+                        TabRow(
+                            selectedTabIndex = selectedTab,
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                            indicator = { tabPositions ->
+                                if (selectedTab in tabPositions.indices) {
+                                    Box(
+                                        modifier = Modifier
+                                            .tabIndicatorOffset(tabPositions[selectedTab])
+                                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                                            .fillMaxSize()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = MaterialTheme.shapes.extraLarge,
+                                            ),
                                     )
-                                },
-                            )
+                                }
+                            },
+                        ) {
+                            tabs.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = selectedTab == index,
+                                    onClick = { selectedTab = index },
+                                    text = {
+                                        Text(
+                                            text = title,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    } else {
+                        TabRow(
+                            selectedTabIndex = selectedTab,
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        ) {
+                            tabs.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = selectedTab == index,
+                                    onClick = { selectedTab = index },
+                                    text = {
+                                        Text(
+                                            text = title,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    },
+                                )
+                            }
                         }
                     }
                 }
@@ -372,12 +411,18 @@ private fun SupportSectionCard(
     title: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val expressive = isPicaExpressiveTheme()
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = if (expressive) {
+                MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            },
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
+        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -413,14 +458,20 @@ private fun PayPalSupportCard(
     description: String,
     onClick: () -> Unit,
 ) {
+    val expressive = isPicaExpressiveTheme()
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = if (expressive) {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            },
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
+        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
     ) {
         Row(
             modifier = Modifier.padding(14.dp),

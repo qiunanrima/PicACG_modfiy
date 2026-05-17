@@ -12,6 +12,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +60,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -92,6 +94,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.ChatroomListViewModel
@@ -229,6 +232,7 @@ fun ChatroomContainerScreen(
     var selectedTab by rememberSaveable(rooms.size) { mutableIntStateOf(0) }
     val safeRooms = rooms.ifEmpty { rememberChatroomPreviewRooms() }
     val currentRoom = safeRooms[selectedTab.coerceIn(safeRooms.indices)]
+    val expressive = isPicaExpressiveTheme()
 
     LaunchedEffect(Unit) {
         AlertDialogCenter.chatroomRules(context)
@@ -262,22 +266,59 @@ fun ChatroomContainerScreen(
                         ),
                         scrollBehavior = scrollBehavior,
                     )
-                    TabRow(
-                        selectedTabIndex = selectedTab,
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                    ) {
-                        safeRooms.forEachIndexed { index, room ->
-                            Tab(
-                                selected = selectedTab == index,
-                                onClick = { selectedTab = index },
-                                text = {
-                                    Text(
-                                        text = room.title.orEmpty().ifBlank { "Room ${index + 1}" },
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
+                    if (expressive) {
+                        TabRow(
+                            selectedTabIndex = selectedTab,
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                            indicator = { tabPositions ->
+                                if (selectedTab in tabPositions.indices) {
+                                    Box(
+                                        modifier = Modifier
+                                            .tabIndicatorOffset(tabPositions[selectedTab])
+                                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                                            .fillMaxSize()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = MaterialTheme.shapes.extraLarge,
+                                            ),
                                     )
-                                },
-                            )
+                                }
+                            },
+                        ) {
+                            safeRooms.forEachIndexed { index, room ->
+                                Tab(
+                                    selected = selectedTab == index,
+                                    onClick = { selectedTab = index },
+                                    selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    text = {
+                                        Text(
+                                            text = room.title.orEmpty().ifBlank { "Room ${index + 1}" },
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    } else {
+                        TabRow(
+                            selectedTabIndex = selectedTab,
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        ) {
+                            safeRooms.forEachIndexed { index, room ->
+                                Tab(
+                                    selected = selectedTab == index,
+                                    onClick = { selectedTab = index },
+                                    text = {
+                                        Text(
+                                            text = room.title.orEmpty().ifBlank { "Room ${index + 1}" },
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    },
+                                )
+                            }
                         }
                     }
                 }

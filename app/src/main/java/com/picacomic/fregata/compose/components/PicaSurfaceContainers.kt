@@ -14,16 +14,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 @Composable
 fun PicaScreenContainer(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val expressive = isPicaExpressiveTheme()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                if (expressive) {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                } else {
+                    MaterialTheme.colorScheme.background
+                }
+            )
             .then(modifier),
         content = content
     )
@@ -52,18 +60,24 @@ fun PicaCardSection(
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(12.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val expressive = isPicaExpressiveTheme()
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
+        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = if (expressive) {
+                MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            },
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (expressive) 0.dp else 1.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(contentPadding),
+                .padding(if (expressive) PaddingValues(24.dp) else contentPadding),
             verticalArrangement = verticalArrangement,
             content = content
         )

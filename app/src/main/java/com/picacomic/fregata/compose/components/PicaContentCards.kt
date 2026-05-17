@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.picacomic.fregata.R
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 
@@ -183,6 +184,7 @@ fun PicaComicListCard(
     categories: List<String> = emptyList(),
     coverWidth: Dp = 84.dp,
 ) {
+    val expressive = isPicaExpressiveTheme()
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
@@ -190,7 +192,11 @@ fun PicaComicListCard(
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = if (expressive) {
+                MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            },
         ),
     ) {
         Row(
@@ -206,7 +212,7 @@ fun PicaComicListCard(
                 modifier = Modifier
                     .width(coverWidth)
                     .aspectRatio(3f / 4.8f)
-                    .clip(MaterialTheme.shapes.small),
+                    .clip(if (expressive) MaterialTheme.shapes.medium else MaterialTheme.shapes.small),
                 fallbackIcon = Icons.Filled.Category,
             )
             Column(
@@ -236,13 +242,17 @@ fun PicaComicListCard(
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     likes?.takeIf { it > 0 }?.let {
-                        PicaComicMetaText(text = "$it likes", primary = true)
+                        PicaComicMetaText(
+                            text = "$it likes",
+                            expressive = expressive,
+                            primary = true,
+                        )
                     }
                     pages?.let {
-                        PicaComicMetaText(text = "$it pages")
+                        PicaComicMetaText(text = "$it pages", expressive = expressive)
                     }
                     episodes?.let {
-                        PicaComicMetaText(text = "$it eps")
+                        PicaComicMetaText(text = "$it eps", expressive = expressive)
                     }
                 }
                 if (categories.isNotEmpty()) {
@@ -262,12 +272,17 @@ fun PicaComicListCard(
 @Composable
 private fun PicaComicMetaText(
     text: String,
+    expressive: Boolean,
     primary: Boolean = false,
 ) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        color = if (!expressive && primary) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         fontWeight = FontWeight.Medium,
@@ -287,6 +302,7 @@ fun PicaGameCard(
     adult: Boolean = false,
     suggested: Boolean = false,
 ) {
+    val expressive = isPicaExpressiveTheme()
     val badges = buildList {
         if (likes > 0) add("$likes likes")
         if (suggested) add("Pick")
@@ -298,7 +314,13 @@ fun PicaGameCard(
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+        colors = CardDefaults.cardColors(
+            containerColor = if (expressive) {
+                MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            },
+        ),
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -336,7 +358,11 @@ fun PicaGameCard(
                             color = when (badge) {
                                 "Pick" -> MaterialTheme.colorScheme.tertiary
                                 "Adult" -> MaterialTheme.colorScheme.error
-                                else -> MaterialTheme.colorScheme.primary
+                                else -> if (expressive) {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                }
                             },
                         )
                     }

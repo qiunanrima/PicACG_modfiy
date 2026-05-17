@@ -35,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -71,6 +72,7 @@ import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.activities.ImageCropActivity
 import com.picacomic.fregata.b.c
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.components.PicaComicListCard
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaImageUrl
@@ -109,6 +111,7 @@ fun ProfileScreen(
     val inPreview = LocalInspectionMode.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedTab by rememberSaveable { mutableStateOf(0) }
+    val expressive = isPicaExpressiveTheme()
     val screenViewModel = previewAwareViewModel(viewModel)
     val profileComicViewModel: ProfileComicViewModel? = if (inPreview) null else viewModel()
     val profileCommentViewModel: CommentViewModel? = if (inPreview) null else viewModel(key = "profile_comments")
@@ -334,17 +337,49 @@ fun ProfileScreen(
                     }
                 }
                 item {
-                    TabRow(selectedTabIndex = selectedTab) {
-                        Tab(
-                            selected = selectedTab == 0,
-                            onClick = { selectedTab = 0 },
-                            text = { Text(text = stringResource(R.string.comic)) },
-                        )
-                        Tab(
-                            selected = selectedTab == 1,
-                            onClick = { selectedTab = 1 },
-                            text = { Text(text = stringResource(R.string.comment)) },
-                        )
+                    if (expressive) {
+                        TabRow(
+                            selectedTabIndex = selectedTab,
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            indicator = { tabPositions ->
+                                if (selectedTab in tabPositions.indices) {
+                                    Box(
+                                        modifier = Modifier
+                                            .tabIndicatorOffset(tabPositions[selectedTab])
+                                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                                            .fillMaxSize()
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = MaterialTheme.shapes.extraLarge,
+                                            ),
+                                    )
+                                }
+                            },
+                        ) {
+                            Tab(
+                                selected = selectedTab == 0,
+                                onClick = { selectedTab = 0 },
+                                text = { Text(text = stringResource(R.string.comic)) },
+                            )
+                            Tab(
+                                selected = selectedTab == 1,
+                                onClick = { selectedTab = 1 },
+                                text = { Text(text = stringResource(R.string.comment)) },
+                            )
+                        }
+                    } else {
+                        TabRow(selectedTabIndex = selectedTab) {
+                            Tab(
+                                selected = selectedTab == 0,
+                                onClick = { selectedTab = 0 },
+                                text = { Text(text = stringResource(R.string.comic)) },
+                            )
+                            Tab(
+                                selected = selectedTab == 1,
+                                onClick = { selectedTab = 1 },
+                                text = { Text(text = stringResource(R.string.comment)) },
+                            )
+                        }
                     }
                 }
                 if (selectedTab == 0) {

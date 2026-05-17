@@ -2,8 +2,10 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -45,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 private sealed class LovePicaPage {
     data object Directory : LovePicaPage()
@@ -61,6 +65,7 @@ fun LovePicaContainerScreen(
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var page by remember { mutableStateOf<LovePicaPage>(LovePicaPage.Directory) }
+    val expressive = isPicaExpressiveTheme()
 
     fun backToList() {
         page = LovePicaPage.Directory
@@ -132,22 +137,57 @@ fun LovePicaContainerScreen(
                                 ),
                                 scrollBehavior = scrollBehavior,
                             )
-                            TabRow(
-                                selectedTabIndex = selectedTab,
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            ) {
-                                tabs.forEachIndexed { index, title ->
-                                    Tab(
-                                        selected = selectedTab == index,
-                                        onClick = { selectedTab = index },
-                                        text = {
-                                            Text(
-                                                text = title,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
+                            if (expressive) {
+                                TabRow(
+                                    selectedTabIndex = selectedTab,
+                                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                                    indicator = { tabPositions ->
+                                        if (selectedTab in tabPositions.indices) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .tabIndicatorOffset(tabPositions[selectedTab])
+                                                    .padding(horizontal = 8.dp, vertical = 6.dp)
+                                                    .fillMaxSize()
+                                                    .background(
+                                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                                        shape = MaterialTheme.shapes.extraLarge,
+                                                    ),
                                             )
-                                        },
-                                    )
+                                        }
+                                    },
+                                ) {
+                                    tabs.forEachIndexed { index, title ->
+                                        Tab(
+                                            selected = selectedTab == index,
+                                            onClick = { selectedTab = index },
+                                            text = {
+                                                Text(
+                                                    text = title,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                            },
+                                        )
+                                    }
+                                }
+                            } else {
+                                TabRow(
+                                    selectedTabIndex = selectedTab,
+                                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                                ) {
+                                    tabs.forEachIndexed { index, title ->
+                                        Tab(
+                                            selected = selectedTab == index,
+                                            onClick = { selectedTab = index },
+                                            text = {
+                                                Text(
+                                                    text = title,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
