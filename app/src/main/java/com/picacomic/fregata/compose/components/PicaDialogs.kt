@@ -1,7 +1,8 @@
 package com.picacomic.fregata.compose.components
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +41,9 @@ fun PicaConfirmDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = title) },
         text = body?.let { { Text(text = it) } },
+        shape = MaterialTheme.shapes.large,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        tonalElevation = 6.dp,
         confirmButton = {
             TextButton(onClick = {
                 onConfirm()
@@ -83,8 +87,10 @@ fun PicaSingleChoiceDialog(
         title = { Text(text = title) },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(0.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize(),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 options.forEachIndexed { index, option ->
                     PicaRadioListItem(
@@ -98,6 +104,9 @@ fun PicaSingleChoiceDialog(
                 }
             }
         },
+        shape = MaterialTheme.shapes.extraLarge,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 8.dp,
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {

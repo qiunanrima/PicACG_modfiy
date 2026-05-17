@@ -44,7 +44,7 @@ class SplashActivity : BaseActivity() {
 
             LaunchedEffect(viewModel.navigateToOfflineMainEvent) {
                 if (viewModel.navigateToOfflineMainEvent > 0) {
-                    delay(800)
+                    delay(200)
                     navigateToOfflineMain()
                 }
             }

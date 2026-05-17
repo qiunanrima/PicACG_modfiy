@@ -164,6 +164,29 @@ private val PicaShapes = Shapes(
     extraLarge = RoundedCornerShape(24.dp)
 )
 
+private val PicaExpressiveShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(16.dp),
+    medium = RoundedCornerShape(24.dp),
+    large = RoundedCornerShape(28.dp),
+    extraLarge = RoundedCornerShape(32.dp)
+)
+
+private fun ColorScheme.toExpressiveScheme(): ColorScheme = copy(
+    primary = tertiary,
+    onPrimary = onTertiary,
+    primaryContainer = tertiaryContainer,
+    onPrimaryContainer = onTertiaryContainer,
+    secondary = primary,
+    onSecondary = onPrimary,
+    secondaryContainer = primaryContainer,
+    onSecondaryContainer = onPrimaryContainer,
+    surfaceContainer = surfaceContainerHigh,
+    surfaceContainerHigh = tertiaryContainer,
+    surfaceContainerHighest = primaryContainer,
+    outlineVariant = secondaryContainer,
+)
+
 private fun md3LightPalette(
     primary: androidx.compose.ui.graphics.Color,
     onPrimary: androidx.compose.ui.graphics.Color,
@@ -422,7 +445,8 @@ fun PicaComposeTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val colorScheme = when (e.al(context)) {
+    val designLanguage = e.getDesignLanguage(context)
+    val baseColorScheme = when (e.al(context)) {
         2 -> if (darkTheme) NeonDarkColors else NeonLightColors
         3 -> if (darkTheme) BlueDarkColors else BlueLightColors
         4 -> if (darkTheme) GreenDarkColors else GreenLightColors
@@ -434,11 +458,16 @@ fun PicaComposeTheme(
         0 -> if (darkTheme) DarkColors else LightColors
         else -> if (darkTheme) DarkColors else LightColors
     }
+    val colorScheme = if (designLanguage == 1) {
+        baseColorScheme.toExpressiveScheme()
+    } else {
+        baseColorScheme
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        shapes = PicaShapes,
-        typography = PicaTypography,
+        shapes = if (designLanguage == 1) PicaExpressiveShapes else PicaShapes,
+        typography = if (designLanguage == 1) PicaExpressiveTypography else PicaTypography,
         content = content
     )
 }

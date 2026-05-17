@@ -421,6 +421,7 @@ class MainActivity : BaseActivity() {
                                 onScrollDirection = settingsViewModel::openScrollDirectionDialog,
                                 onAutoPaging = settingsViewModel::openAutoPagingDialog,
                                 onImageQuality = settingsViewModel::openImageQualityDialog,
+                                onDesignLanguage = settingsViewModel::openDesignLanguageDialog,
                                 onThemeColor = settingsViewModel::openThemeColorDialog,
                                 onLauncherIcon = settingsViewModel::openLauncherIconDialog,
                                 onCoilCacheSize = settingsViewModel::openCoilCacheSizeDialog,
@@ -467,6 +468,18 @@ class MainActivity : BaseActivity() {
                                 onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
                                 onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
                                 onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
+                                onDesignLanguageSelected = { index ->
+                                    val previous = settingsViewModel.state.designLanguageIndex
+                                    settingsViewModel.selectDesignLanguageIndex(index)
+                                    if (previous != index) {
+                                        startActivity(
+                                            Intent(this@MainActivity, MainActivity::class.java).apply {
+                                                putExtra(EXTRA_OFFLINE_MODE, offlineMode)
+                                            }
+                                        )
+                                        finish()
+                                    }
+                                },
                                 onThemeColorSelected = { index ->
                                     val previous = settingsViewModel.state.themeColorIndex
                                     settingsViewModel.selectThemeColorIndex(index)

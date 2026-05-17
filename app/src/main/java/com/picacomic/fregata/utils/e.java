@@ -376,6 +376,14 @@ public class e {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putInt("KEY_THEME_COLOR", i).commit();
     }
 
+    public static int getDesignLanguage(Context context) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getInt("KEY_DESIGN_LANGUAGE", 0);
+    }
+
+    public static boolean setDesignLanguage(Context context, int i) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putInt("KEY_DESIGN_LANGUAGE", i).commit();
+    }
+
     public static String am(Context context) {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getString("KEY_AD_URL_BASE", "http://pica-juicy.picacomic.com");
     }

@@ -88,6 +88,7 @@ class PopupActivity : BaseActivity() {
                         onScrollDirection = settingsViewModel::openScrollDirectionDialog,
                         onAutoPaging = settingsViewModel::openAutoPagingDialog,
                         onImageQuality = settingsViewModel::openImageQualityDialog,
+                        onDesignLanguage = settingsViewModel::openDesignLanguageDialog,
                         onThemeColor = settingsViewModel::openThemeColorDialog,
                         onLauncherIcon = settingsViewModel::openLauncherIconDialog,
                         onCoilCacheSize = settingsViewModel::openCoilCacheSizeDialog,
@@ -115,6 +116,16 @@ class PopupActivity : BaseActivity() {
                         onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
                         onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
                         onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
+                        onDesignLanguageSelected = { index ->
+                            val previous = settingsViewModel.state.designLanguageIndex
+                            settingsViewModel.selectDesignLanguageIndex(index)
+                            if (previous != index) {
+                                startActivity(Intent(this@PopupActivity, PopupActivity::class.java).apply {
+                                    putExtra(EXTRA_KEY_TYPE, TYPE_KEY_SETTING)
+                                })
+                                finish()
+                            }
+                        },
                         onThemeColorSelected = { index ->
                             val previous = settingsViewModel.state.themeColorIndex
                             settingsViewModel.selectThemeColorIndex(index)

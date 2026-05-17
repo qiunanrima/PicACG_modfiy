@@ -590,6 +590,7 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="setting_pin_title_off">屏蔽密码</string>
     <string name="setting_pin_title_on">屏蔽密码 (使用中)</string>
     <string name="setting_testing_title">测试中功能</string>
+    <string name="setting_design_language">设计语言</string>
     <string name="setting_theme_color">主题颜色</string>
     <string name="setting_version_title">版本</string>
     <string name="sorting_categories">分类</string>

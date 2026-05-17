@@ -1,16 +1,16 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaConfirmDialog
+import com.picacomic.fregata.compose.components.PicaPrimaryButton
 import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
 import com.picacomic.fregata.compose.components.PicaValueListItem
 import com.picacomic.fregata.compose.components.PicaSwitchListItem
@@ -48,6 +50,7 @@ enum class SettingsDialog {
     ScrollDirection,
     AutoPaging,
     ImageQuality,
+    DesignLanguage,
     ThemeColor,
     LauncherIcon,
     CoilCacheSize,
@@ -65,6 +68,8 @@ data class SettingsState(
     val autoPagingDraftIntervalMs: Int = 1000,
     val imageQualityIndex: Int = 0,
     val imageQualityValue: String = "",
+    val designLanguageIndex: Int = 0,
+    val designLanguageValue: String = "",
     val themeColorIndex: Int = 0,
     val themeColorValue: String = "",
     val launcherIconIndex: Int = 0,
@@ -89,6 +94,7 @@ fun SettingsScreen(
     onScrollDirection: () -> Unit,
     onAutoPaging: () -> Unit,
     onImageQuality: () -> Unit,
+    onDesignLanguage: () -> Unit,
     onThemeColor: () -> Unit,
     onLauncherIcon: () -> Unit,
     onCoilCacheSize: () -> Unit,
@@ -107,6 +113,7 @@ fun SettingsScreen(
     onScreenOrientationSelected: (Int) -> Unit,
     onScrollDirectionSelected: (Int) -> Unit,
     onImageQualitySelected: (Int) -> Unit,
+    onDesignLanguageSelected: (Int) -> Unit,
     onThemeColorSelected: (Int) -> Unit,
     onLauncherIconSelected: (Int) -> Unit,
     onCoilCacheSizeDraftChanged: (String) -> Unit,
@@ -117,6 +124,7 @@ fun SettingsScreen(
     val screenOrientationOptions = stringArrayResource(R.array.setting_options_screen_orientations)
     val scrollDirectionOptions = stringArrayResource(R.array.setting_options_scroll_directions)
     val imageQualityOptions = stringArrayResource(R.array.setting_options_image_qualities)
+    val designLanguageOptions = stringArrayResource(R.array.setting_design_languages)
     val themeColorOptions = stringArrayResource(R.array.setting_theme_colors)
     val launcherIconOptions = listOf("默认图标", "Miracle Neon")
 
@@ -201,6 +209,11 @@ fun SettingsScreen(
                         onCheckedChange = onPerformanceChanged
                     )
                     PicaValueListItem(
+                        label = stringResource(R.string.setting_design_language),
+                        value = state.designLanguageValue,
+                        onClick = onDesignLanguage
+                    )
+                    PicaValueListItem(
                         label = stringResource(R.string.setting_theme_color),
                         value = state.themeColorValue,
                         onClick = onThemeColor
@@ -248,14 +261,13 @@ fun SettingsScreen(
                     )
                 }
 
-                Button(
+                PicaPrimaryButton(
+                    text = stringResource(R.string.setting_logout),
                     onClick = onLogout,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp, bottom = 20.dp)
-                ) {
-                    Text(text = stringResource(R.string.setting_logout))
-                }
+                )
             }
         }
 
@@ -281,6 +293,14 @@ fun SettingsScreen(
                 options = imageQualityOptions.toList(),
                 selectedIndex = state.imageQualityIndex,
                 onSelect = onImageQualitySelected,
+                onDismiss = onDialogDismiss,
+            )
+
+            SettingsDialog.DesignLanguage -> PicaSingleChoiceDialog(
+                title = stringResource(R.string.setting_design_language),
+                options = designLanguageOptions.toList(),
+                selectedIndex = state.designLanguageIndex,
+                onSelect = onDesignLanguageSelected,
                 onDismiss = onDialogDismiss,
             )
 
@@ -377,6 +397,10 @@ private fun SettingsSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val sectionContainerColor by animateColorAsState(
+        targetValue = MaterialTheme.colorScheme.surfaceContainerHighest,
+        label = "settingsSectionContainer"
+    )
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
@@ -384,9 +408,12 @@ private fun SettingsSection(
         modifier = Modifier.padding(horizontal = 4.dp)
     )
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = sectionContainerColor,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
@@ -445,6 +472,7 @@ private fun SettingsScreenPreview(
         onScrollDirection = {},
         onAutoPaging = {},
         onImageQuality = {},
+        onDesignLanguage = {},
         onThemeColor = {},
         onLauncherIcon = {},
         onCoilCacheSize = {},
@@ -463,6 +491,7 @@ private fun SettingsScreenPreview(
         onScreenOrientationSelected = {},
         onScrollDirectionSelected = {},
         onImageQualitySelected = {},
+        onDesignLanguageSelected = {},
         onThemeColorSelected = {},
         onLauncherIconSelected = {},
         onCoilCacheSizeDraftChanged = {},

@@ -57,3 +57,16 @@ val PicaTypography = Typography(
         fontWeight = FontWeight.Medium,
     ),
 )
+ 
+val PicaExpressiveTypography = Typography(
+    titleLarge = PicaTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+    headlineSmall = PicaTypography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+    titleMedium = PicaTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+    titleSmall = PicaTypography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+    bodyLarge = PicaTypography.bodyLarge,
+    bodyMedium = PicaTypography.bodyMedium,
+    bodySmall = PicaTypography.bodySmall,
+    labelLarge = PicaTypography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+    labelMedium = PicaTypography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+    labelSmall = PicaTypography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+)
