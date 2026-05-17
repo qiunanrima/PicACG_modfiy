@@ -41,8 +41,9 @@ fun PicaValueListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 56.dp)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -134,6 +135,7 @@ fun PicaRadioListItem(
         } else null,
         modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 56.dp)
             .clickable(onClick = onClick),
     )
     if (showDivider) HorizontalDivider()
