@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -44,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.imageLoader
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ErrorResult
 import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.a_pkg.c
@@ -69,6 +72,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     private var basePageOffset by mutableIntStateOf(0)
     private var scrollTarget by mutableStateOf<Int?>(null)
     private var verticalScroll by mutableStateOf(true)
+    private var offlineMode by mutableStateOf(false)
     private var callback: d? = context as? d
     private var lastLoadedOffset = 0
 
@@ -85,6 +89,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
                             verticalScroll = verticalScroll,
                             testingListMode = testingListMode,
                             performanceMode = performanceMode,
+                            offlineMode = offlineMode,
                             scrollTarget = scrollTarget,
                             onScrollTargetConsumed = { scrollTarget = null },
                             onPageChanged = { page -> callback?.r(page) },
@@ -94,6 +99,10 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
             },
             LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT),
         )
+    }
+
+    fun setOfflineMode(value: Boolean) {
+        offlineMode = value
     }
 
     override fun a(arrayList: ArrayList<ComicPageObject>, i: Int, z: Boolean, z2: Boolean) {
@@ -139,11 +148,24 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
             val imageUrl = resolveComicPageImage(page)
             if (!imageUrl.isNullOrBlank()) {
                 context.imageLoader.enqueue(
-                    ImageRequest.Builder(context)
-                        .data(imageUrl)
-                        .allowHardware(false)
-                        .build()
+                    buildComicPageImageRequest(
+                        context = context,
+                        page = page,
+                        imageUrl = imageUrl,
+                        offlineMode = offlineMode,
+                    ).build()
                 )
+                if (!offlineMode) {
+                    context.imageLoader.enqueue(
+                        buildComicPageImageRequest(
+                            context = context,
+                            page = page,
+                            imageUrl = imageUrl,
+                            offlineMode = false,
+                            stableCacheKey = false,
+                        ).build()
+                    )
+                }
             }
         }
     }
@@ -165,6 +187,7 @@ private fun ComicViewerScreen(
     verticalScroll: Boolean,
     testingListMode: Boolean,
     performanceMode: Boolean,
+    offlineMode: Boolean,
     scrollTarget: Int?,
     onScrollTargetConsumed: () -> Unit,
     onPageChanged: (Int) -> Unit,
@@ -215,6 +238,7 @@ private fun ComicViewerScreen(
                         vertical = true,
                         testingListMode = testingListMode,
                         performanceMode = performanceMode,
+                        offlineMode = offlineMode,
                     )
                 }
             }
@@ -234,6 +258,7 @@ private fun ComicViewerScreen(
                         vertical = false,
                         testingListMode = testingListMode,
                         performanceMode = performanceMode,
+                        offlineMode = offlineMode,
                     )
                 }
             }
@@ -329,6 +354,7 @@ private fun ComicViewerItem(
     vertical: Boolean,
     testingListMode: Boolean,
     performanceMode: Boolean,
+    offlineMode: Boolean,
 ) {
     if (isAdvertisementItem(virtualIndex, pages.size)) {
         Spacer(modifier = Modifier.size(0.dp))
@@ -343,6 +369,7 @@ private fun ComicViewerItem(
         vertical = vertical,
         testingListMode = testingListMode,
         performanceMode = performanceMode,
+        offlineMode = offlineMode,
     )
 }
 
@@ -353,9 +380,11 @@ private fun ComicViewerPage(
     vertical: Boolean,
     testingListMode: Boolean,
     performanceMode: Boolean,
+    offlineMode: Boolean,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val imageUrl = resolveComicPageImage(page)
+    var stableOfflineCacheMiss by remember(imageUrl, page.comicPageId) { mutableStateOf(false) }
     val placeholderRes = if (testingListMode || performanceMode) {
         R.drawable.placeholder_transparent_low
     } else {
@@ -386,12 +415,25 @@ private fun ComicViewerPage(
                 modifier = Modifier.align(Alignment.Center),
             )
             AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(imageUrl)
+                model = buildComicPageImageRequest(
+                    context = context,
+                    page = page,
+                    imageUrl = imageUrl,
+                    offlineMode = offlineMode,
+                    stableCacheKey = !offlineMode || !stableOfflineCacheMiss,
+                )
                     .placeholder(placeholderRes)
                     .error(placeholderRes)
                     .fallback(placeholderRes)
-                    .allowHardware(false)
+                    .listener(
+                        object : ImageRequest.Listener {
+                            override fun onError(request: ImageRequest, result: ErrorResult) {
+                                if (offlineMode && !stableOfflineCacheMiss) {
+                                    stableOfflineCacheMiss = true
+                                }
+                            }
+                        },
+                    )
                     .build(),
                 contentDescription = pageNumber.toString(),
                 contentScale = if (vertical) ContentScale.FillWidth else ContentScale.Fit,
@@ -411,6 +453,46 @@ private fun resolveComicPageImage(page: ComicPageObject): String? {
         }
     }
     return g.b(media)
+}
+
+private fun buildComicPageImageRequest(
+    context: Context,
+    page: ComicPageObject,
+    imageUrl: String,
+    offlineMode: Boolean,
+    stableCacheKey: Boolean = true,
+): ImageRequest.Builder {
+    val cacheKey = comicPageCacheKey(page, imageUrl)
+    val builder = ImageRequest.Builder(context)
+        .data(imageUrl)
+        .allowHardware(false)
+        .applyComicCachePolicy(offlineMode)
+    if (stableCacheKey) {
+        builder.memoryCacheKey(cacheKey)
+        builder.diskCacheKey(cacheKey)
+    }
+    return builder
+}
+
+private fun comicPageCacheKey(page: ComicPageObject, imageUrl: String): String {
+    val mediaPath = page.media?.path
+    return "comic_page:" + when {
+        !mediaPath.isNullOrBlank() -> mediaPath
+        !page.comicPageId.isNullOrBlank() -> page.comicPageId
+        else -> imageUrl
+    }
+}
+
+private fun ImageRequest.Builder.applyComicCachePolicy(offlineMode: Boolean): ImageRequest.Builder {
+    memoryCachePolicy(CachePolicy.ENABLED)
+    if (offlineMode) {
+        diskCachePolicy(CachePolicy.READ_ONLY)
+        networkCachePolicy(CachePolicy.DISABLED)
+    } else {
+        diskCachePolicy(CachePolicy.ENABLED)
+        networkCachePolicy(CachePolicy.ENABLED)
+    }
+    return this
 }
 
 private fun virtualItemCount(pageCount: Int): Int {

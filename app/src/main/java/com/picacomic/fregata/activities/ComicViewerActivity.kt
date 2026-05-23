@@ -295,6 +295,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         this.shouldWarnMobileNetwork = true
         this.comicId = getIntent().getStringExtra("EXTRA_KEY_COMIC_ID")
         this.offlineMode = getIntent().getBooleanExtra("EXTRA_KEY_OFFLINE_MODE", false)
+        this.comicViewerHostView?.setOfflineMode(this.offlineMode)
         this.comicTitle = getIntent().getStringExtra("EXTRA_KEY_COMIC_TITLE")
         this.episodeOrder = getIntent().getIntExtra("EXTRA_KEY_LAST_VIEW_EPISODE_ORDER", 1)
         this.episodeTotal = getIntent().getIntExtra("EXTRA_KEY_EPISODE_TOTAL", 1)
