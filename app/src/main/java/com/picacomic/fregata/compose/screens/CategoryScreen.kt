@@ -55,7 +55,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,6 +62,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaInfoChip
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRemoteImage
@@ -211,8 +211,7 @@ fun CategoryScreen(
                 item(key = "default_title", span = { GridItemSpan(maxLineSpan) }) {
                     Text(
                         text = stringResource(R.string.title_category),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        style = PicaExpressiveType.SectionEmphasized,
                     )
                 }
 
@@ -233,8 +232,7 @@ fun CategoryScreen(
                     item(key = "keywords_title", span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             text = stringResource(R.string.category_keywords_list_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
+                            style = PicaExpressiveType.SectionEmphasized,
                         )
                     }
                     item(key = "keywords", span = { GridItemSpan(maxLineSpan) }) {
@@ -255,8 +253,7 @@ fun CategoryScreen(
                 item(key = "category_title", span = { GridItemSpan(maxLineSpan) }) {
                     Text(
                         text = stringResource(R.string.category_list_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+                        style = PicaExpressiveType.SectionEmphasized,
                     )
                 }
 
@@ -300,10 +297,9 @@ private fun CategoryActionCard(
     modifier: Modifier = Modifier,
 ) {
     Card(
+        onClick = item.onClick,
         modifier = modifier
-            .width(112.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = item.onClick),
+            .width(112.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
         Box(
@@ -341,9 +337,8 @@ private fun RemoteCategoryCard(
     modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
     ) {
         Column(
@@ -361,8 +356,7 @@ private fun RemoteCategoryCard(
             )
             Text(
                 text = category.title.orEmpty(),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
+                style = PicaExpressiveType.TitleSmallEmphasized,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

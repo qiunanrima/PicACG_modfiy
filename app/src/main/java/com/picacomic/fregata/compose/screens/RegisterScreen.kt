@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.filled.Lock
@@ -20,20 +19,15 @@ import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -46,8 +40,8 @@ import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaCardSection
 import com.picacomic.fregata.compose.components.PicaPrimaryButton
 import com.picacomic.fregata.compose.components.PicaTextField
+import com.picacomic.fregata.compose.components.PicaTopBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     username: String,
@@ -82,36 +76,12 @@ fun RegisterScreen(
     BackHandler(onBack = onBack)
 
     PicaComposeTheme {
-        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            modifier = Modifier.fillMaxSize(),
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(R.string.login_register),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        titleContentColor = MaterialTheme.colorScheme.onSurface,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    scrollBehavior = scrollBehavior,
+                PicaTopBar(
+                    title = stringResource(R.string.login_register),
+                    onBack = onBack,
                 )
             },
             bottomBar = {

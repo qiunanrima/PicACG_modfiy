@@ -17,11 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.objects.UserProfileObject
 
@@ -157,8 +157,7 @@ internal fun PreviewListPanel(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                style = PicaExpressiveType.SectionEmphasized
             )
             items.forEachIndexed { index, item ->
                 Row(
@@ -203,8 +202,7 @@ internal fun PreviewGridPanel(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                style = PicaExpressiveType.SectionEmphasized
             )
             items.chunked(columns).forEach { rowItems ->
                 Row(
@@ -255,8 +253,7 @@ internal fun PreviewChatPanel(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                style = PicaExpressiveType.SectionEmphasized
             )
             messages.forEach { (text, isMine) ->
                 Row(

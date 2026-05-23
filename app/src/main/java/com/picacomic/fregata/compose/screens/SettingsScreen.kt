@@ -27,12 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveMotion
+import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.components.PicaConfirmDialog
 import com.picacomic.fregata.compose.components.PicaPrimaryButton
@@ -405,18 +406,18 @@ private fun SettingsSection(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHighest
         },
+        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
         label = "settingsSectionContainer"
     )
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold,
+        style = PicaExpressiveType.SectionEmphasized,
         modifier = Modifier.padding(horizontal = 4.dp)
     )
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(),
+            .animateContentSize(animationSpec = PicaExpressiveMotion.defaultSpatialSpec()),
         shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = sectionContainerColor,

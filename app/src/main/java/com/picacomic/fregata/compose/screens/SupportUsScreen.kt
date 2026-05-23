@@ -36,9 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -61,7 +58,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,6 +66,8 @@ import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveType
+import com.picacomic.fregata.compose.components.PicaTabRow
 import com.picacomic.fregata.utils.a
 import com.picacomic.fregata.utils.g
 
@@ -98,7 +96,6 @@ fun SupportUsScreen(
         stringResource(R.string.support_us_tab_ads),
         stringResource(R.string.support_us_tab_paypal),
     )
-    val expressive = isPicaExpressiveTheme()
 
     PicaComposeTheme {
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -141,59 +138,12 @@ fun SupportUsScreen(
                         ),
                         scrollBehavior = scrollBehavior,
                     )
-                    if (expressive) {
-                        TabRow(
-                            selectedTabIndex = selectedTab,
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            indicator = { tabPositions ->
-                                if (selectedTab in tabPositions.indices) {
-                                    Box(
-                                        modifier = Modifier
-                                            .tabIndicatorOffset(tabPositions[selectedTab])
-                                            .padding(horizontal = 8.dp, vertical = 6.dp)
-                                            .fillMaxSize()
-                                            .background(
-                                                color = MaterialTheme.colorScheme.primaryContainer,
-                                                shape = MaterialTheme.shapes.extraLarge,
-                                            ),
-                                    )
-                                }
-                            },
-                        ) {
-                            tabs.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTab == index,
-                                    onClick = { selectedTab = index },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    } else {
-                        TabRow(
-                            selectedTabIndex = selectedTab,
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        ) {
-                            tabs.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTab == index,
-                                    onClick = { selectedTab = index },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    }
+                    PicaTabRow(
+                        selectedTabIndex = selectedTab,
+                        tabs = tabs,
+                        onTabSelected = { selectedTab = it },
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                    )
                 }
             },
             containerColor = MaterialTheme.colorScheme.background,
@@ -235,8 +185,7 @@ private fun SupportUsQqAlipayTab(context: Context) {
             SupportSectionCard(title = stringResource(R.string.support_us_alipay_title)) {
                 Text(
                     text = stringResource(R.string.support_us_alipay_account_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    style = PicaExpressiveType.SectionEmphasized,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Row(
@@ -248,8 +197,7 @@ private fun SupportUsQqAlipayTab(context: Context) {
                 ) {
                     Text(
                         text = account,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
+                        style = PicaExpressiveType.HeadlineEmphasized,
                         modifier = Modifier.weight(1f),
                     )
                     Icon(
@@ -289,8 +237,7 @@ private fun SupportUsGroupTab(context: Context) {
                 Text(
                     text = stringResource(R.string.support_us_offical_group_warning),
                     modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    style = PicaExpressiveType.TitleSmallEmphasized,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -430,8 +377,7 @@ private fun SupportSectionCard(
             content = {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    style = PicaExpressiveType.SectionEmphasized,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 content()
@@ -460,9 +406,8 @@ private fun PayPalSupportCard(
 ) {
     val expressive = isPicaExpressiveTheme()
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (expressive) {
                 MaterialTheme.colorScheme.surfaceContainerHigh
@@ -489,8 +434,7 @@ private fun PayPalSupportCard(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    style = PicaExpressiveType.SectionEmphasized,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -502,9 +446,8 @@ private fun PayPalSupportCard(
                     )
                     Text(
                         text = price,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = PicaExpressiveType.TitleSmallEmphasized,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
                     )
                 }
                 Text(

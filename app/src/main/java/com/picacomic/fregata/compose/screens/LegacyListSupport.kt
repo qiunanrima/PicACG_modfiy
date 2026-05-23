@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +13,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.compose.components.PicaProgressIndicator
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
@@ -68,6 +68,6 @@ internal fun ListLoadingFooter(
             .padding(vertical = 20.dp),
         contentAlignment = Alignment.Center,
     ) {
-        CircularProgressIndicator()
+        PicaProgressIndicator()
     }
 }

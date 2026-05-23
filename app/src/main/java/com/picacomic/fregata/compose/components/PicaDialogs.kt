@@ -1,9 +1,12 @@
 package com.picacomic.fregata.compose.components
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveMotion
 import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 // ─── 确认 Dialog ────────────────────────────────────────────────────────────
@@ -96,7 +100,9 @@ fun PicaSingleChoiceDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .animateContentSize(),
+                    .heightIn(max = 360.dp)
+                    .verticalScroll(rememberScrollState())
+                    .animateContentSize(animationSpec = PicaExpressiveMotion.defaultSpatialSpec()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 options.forEachIndexed { index, option ->

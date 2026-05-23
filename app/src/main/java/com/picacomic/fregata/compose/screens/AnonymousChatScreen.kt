@@ -46,13 +46,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.AnonymousChatViewModel
 import com.picacomic.fregata.objects.AnonymousChatDataObject
@@ -264,8 +264,7 @@ private fun AnonymousMatchPanel(
         ) {
             Text(
                 text = "匿名匹配",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
+                style = PicaExpressiveType.TitleEmphasized,
             )
             Text(
                 text = statusText,
@@ -334,8 +333,7 @@ private fun AnonymousChatRoomHeader(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = matcherName.ifBlank { "Anonymous" },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    style = PicaExpressiveType.SectionEmphasized,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

@@ -1,6 +1,5 @@
 package com.picacomic.fregata.compose.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,14 +12,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,25 +30,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRankBadge
 import com.picacomic.fregata.compose.components.PicaRemoteImage
+import com.picacomic.fregata.compose.components.PicaTabRow
 import com.picacomic.fregata.compose.components.PicaTwoLineCard
 import com.picacomic.fregata.compose.components.PicaUserAvatar
 import com.picacomic.fregata.compose.viewmodels.LeaderboardViewModel
 import com.picacomic.fregata.objects.LeaderboardComicListObject
 import com.picacomic.fregata.objects.LeaderboardKnightObject
 import com.picacomic.fregata.objects.ThumbnailObject
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.style.TextOverflow
+import com.picacomic.fregata.compose.components.PicaTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,7 +58,6 @@ fun LeaderboardScreen(
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     var selectedTab by remember { mutableIntStateOf(0) }
-    val expressive = isPicaExpressiveTheme()
     val screenViewModel = previewAwareViewModel(viewModel)
     val previewPopular = if (inPreview) leaderboardPopularPreview() else emptyList()
     val previewKnights = if (inPreview) leaderboardKnightPreview() else emptyList()
@@ -105,75 +96,20 @@ fun LeaderboardScreen(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 Column {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = stringResource(R.string.title_leaderboard),
-                                style = MaterialTheme.typography.titleLarge,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.back)
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            titleContentColor = MaterialTheme.colorScheme.onSurface,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        scrollBehavior = scrollBehavior
+                    PicaTopBar(
+                        title = stringResource(R.string.title_leaderboard),
+                        onBack = onBack,
+                        scrollBehavior = scrollBehavior,
                     )
-                    if (expressive) {
-                        TabRow(
-                            selectedTabIndex = selectedTab,
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            indicator = { tabPositions ->
-                                if (selectedTab in tabPositions.indices) {
-                                    Box(
-                                        modifier = Modifier
-                                            .tabIndicatorOffset(tabPositions[selectedTab])
-                                            .padding(horizontal = 8.dp, vertical = 6.dp)
-                                            .fillMaxSize()
-                                            .background(
-                                                color = MaterialTheme.colorScheme.primaryContainer,
-                                                shape = MaterialTheme.shapes.extraLarge,
-                                            ),
-                                    )
-                                }
-                            },
-                        ) {
-                            Tab(
-                                selected = selectedTab == 0,
-                                onClick = { selectedTab = 0 },
-                                text = { Text(text = stringResource(R.string.leaderboard_tab_popular)) }
-                            )
-                            Tab(
-                                selected = selectedTab == 1,
-                                onClick = { selectedTab = 1 },
-                                text = { Text(text = stringResource(R.string.leaderboard_tab_knight)) }
-                            )
-                        }
-                    } else {
-                        TabRow(selectedTabIndex = selectedTab) {
-                            Tab(
-                                selected = selectedTab == 0,
-                                onClick = { selectedTab = 0 },
-                                text = { Text(text = stringResource(R.string.leaderboard_tab_popular)) }
-                            )
-                            Tab(
-                                selected = selectedTab == 1,
-                                onClick = { selectedTab = 1 },
-                                text = { Text(text = stringResource(R.string.leaderboard_tab_knight)) }
-                            )
-                        }
-                    }
+                    PicaTabRow(
+                        selectedTabIndex = selectedTab,
+                        tabs = listOf(
+                            stringResource(R.string.leaderboard_tab_popular),
+                            stringResource(R.string.leaderboard_tab_knight),
+                        ),
+                        onTabSelected = { selectedTab = it },
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                    )
                     if (selectedTab == 0) {
                         Row(
                             modifier = Modifier
@@ -387,17 +323,11 @@ private fun LeaderboardTimeButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    TextButton(
+    FilterChip(
+        selected = selected,
         onClick = onClick,
-        modifier = Modifier
-            .background(
-                if (selected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surfaceVariant,
-                shape = MaterialTheme.shapes.small
-            )
-    ) {
-        Text(text = text)
-    }
+        label = { Text(text = text) },
+    )
 }
 
 @Preview(showBackground = true)

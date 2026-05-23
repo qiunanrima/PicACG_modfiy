@@ -42,7 +42,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val rz = if (e.N(app)) 0 else 1
         val rB = e.R(app)
         val designLanguageIndex = e.getDesignLanguage(app).coerceIn(0, designLanguages.lastIndex)
-        val rD = e.al(app)
+        val rD = e.al(app).coerceIn(0, colors.lastIndex)
         val launcherIconIndex = app.getSharedPreferences(PREFS_NAME, 0)
             .getInt(KEY_LAUNCHER_ICON, if (rD == 2) 1 else 0)
             .coerceIn(0, launcherIcons.lastIndex)
@@ -160,7 +160,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun selectThemeColorIndex(index: Int) {
         state = state.copy(activeDialog = null)
-        e.h(getApplication(), index)
+        e.h(getApplication(), index.coerceIn(0, getApplication<Application>().resources.getStringArray(R.array.setting_theme_colors).lastIndex))
         loadSettings()
     }
 

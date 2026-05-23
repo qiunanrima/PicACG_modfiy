@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -28,12 +27,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveType
+import com.picacomic.fregata.compose.components.PicaProgressIndicator
 
 @Composable
 fun SplashScreen(
@@ -72,7 +72,7 @@ fun SplashScreen(
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 if (isLoading && !showOptions && !showError) {
-                    CircularProgressIndicator()
+                    PicaProgressIndicator()
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = stringResource(id = R.string.loading_general),
@@ -83,8 +83,7 @@ fun SplashScreen(
                     SplashCard {
                         Text(
                             text = stringResource(id = R.string.splash_error),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = PicaExpressiveType.SectionEmphasized
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
@@ -129,8 +128,7 @@ fun SplashScreen(
                     SplashCard {
                         Text(
                             text = stringResource(id = R.string.splash_entering_offline_mode),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = PicaExpressiveType.SectionEmphasized
                         )
                     }
                 }

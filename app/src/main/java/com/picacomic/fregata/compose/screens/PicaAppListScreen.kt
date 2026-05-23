@@ -1,7 +1,6 @@
 package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -156,10 +155,10 @@ private fun PicaAppListItem(
 ) {
     val context = LocalContext.current
     Card(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable(onClick = onClick),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)

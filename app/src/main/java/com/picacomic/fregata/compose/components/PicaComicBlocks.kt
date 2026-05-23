@@ -22,10 +22,15 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 data class PicaActionItem(
@@ -64,45 +70,50 @@ fun PicaTag(
     selected: Boolean = false,
     enabled: Boolean = true,
 ) {
-    val shape = MaterialTheme.shapes.small
-    val containerColor = if (selected) {
-        MaterialTheme.colorScheme.primaryContainer
+    val flatFilterChipElevation = FilterChipDefaults.filterChipElevation(
+        elevation = 0.dp,
+        pressedElevation = 0.dp,
+        focusedElevation = 0.dp,
+        hoveredElevation = 0.dp,
+        draggedElevation = 0.dp,
+        disabledElevation = 0.dp,
+    )
+    val flatSuggestionChipElevation = SuggestionChipDefaults.suggestionChipElevation(
+        elevation = 0.dp,
+        pressedElevation = 0.dp,
+        focusedElevation = 0.dp,
+        hoveredElevation = 0.dp,
+        draggedElevation = 0.dp,
+        disabledElevation = 0.dp,
+    )
+    if (onClick != null) {
+        FilterChip(
+            selected = selected,
+            onClick = onClick,
+            enabled = enabled,
+            label = {
+                Text(
+                    text = text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            modifier = modifier,
+            elevation = flatFilterChipElevation,
+        )
     } else {
-        MaterialTheme.colorScheme.surface
-    }
-    val contentColor = if (selected) {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        MaterialTheme.colorScheme.primary
-    }
-    val borderColor = if (selected) {
-        Color.Transparent
-    } else {
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.32f)
-    }
-
-    Surface(
-        color = containerColor,
-        contentColor = contentColor,
-        shape = shape,
-        tonalElevation = if (selected) 2.dp else 0.dp,
-        border = BorderStroke(1.dp, borderColor),
-        modifier = modifier
-            .clip(shape)
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(enabled = enabled, onClick = onClick)
-                } else {
-                    Modifier
-                }
-            )
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        SuggestionChip(
+            onClick = {},
+            enabled = false,
+            label = {
+                Text(
+                    text = text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            modifier = modifier,
+            elevation = flatSuggestionChipElevation,
         )
     }
 }
@@ -145,8 +156,7 @@ fun PicaStatRow(
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
+                style = PicaExpressiveType.BodyEmphasized,
                 color = valueColor,
                 textAlign = TextAlign.End,
             )
@@ -181,8 +191,7 @@ fun PicaSectionHeader(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = PicaExpressiveType.SectionEmphasized,
             )
             if (!supportingText.isNullOrBlank()) {
                 Text(
@@ -193,15 +202,9 @@ fun PicaSectionHeader(
             }
         }
         if (!actionLabel.isNullOrBlank() && onActionClick != null) {
-            Text(
-                text = actionLabel,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.small)
-                    .clickable(onClick = onActionClick)
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-            )
+            TextButton(onClick = onActionClick) {
+                Text(text = actionLabel)
+            }
         }
     }
 }
@@ -310,9 +313,9 @@ fun PicaEpisodeGridItem(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (state == PicaEpisodeGridItemState.Default) {
-                    FontWeight.Medium
+                    FontWeight.Normal
                 } else {
-                    FontWeight.SemiBold
+                    FontWeight.Medium
                 },
                 textAlign = TextAlign.Center,
                 maxLines = 1,
@@ -357,19 +360,17 @@ fun PicaRecommendationCard(
     val recommendationContainer = if (expressive) {
         MaterialTheme.colorScheme.tertiaryContainer
     } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+        MaterialTheme.colorScheme.surfaceContainerHighest
     }
     val recommendationBorder = if (expressive) {
         MaterialTheme.colorScheme.tertiary.copy(alpha = 0.32f)
     } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)
+        MaterialTheme.colorScheme.outlineVariant
     }
 
     Card(
-        modifier = modifier
-            .height(256.dp)
-            .clip(MaterialTheme.shapes.small)
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier.height(256.dp),
         colors = CardDefaults.cardColors(
             containerColor = recommendationContainer,
             contentColor = if (expressive) {
@@ -428,11 +429,16 @@ private fun PicaActionStatButton(
     } else {
         MaterialTheme.colorScheme.onSurface
     }
-    Surface(
-        color = containerColor,
-        contentColor = contentColor,
+    Card(
+        onClick = item.onClick,
+        enabled = item.enabled,
+        modifier = modifier.height(72.dp),
         shape = MaterialTheme.shapes.medium,
-        tonalElevation = if (item.selected) 3.dp else 1.dp,
+        colors = CardDefaults.cardColors(
+            containerColor = containerColor,
+            contentColor = contentColor,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (item.selected) 3.dp else 1.dp),
         border = BorderStroke(
             width = 1.dp,
             color = if (item.selected) {
@@ -441,10 +447,6 @@ private fun PicaActionStatButton(
                 MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
             },
         ),
-        modifier = modifier
-            .height(72.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(enabled = item.enabled, onClick = item.onClick),
     ) {
         Box(
             modifier = Modifier
@@ -474,7 +476,8 @@ private fun PicaActionStatButton(
                 ) {
                     Text(
                         text = item.count,
-                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }

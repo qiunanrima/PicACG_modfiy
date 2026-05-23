@@ -1,13 +1,17 @@
 package com.picacomic.fregata.compose
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.utils.e
@@ -157,96 +161,87 @@ private val NeonDarkColors = darkColorScheme(
 )
 
 private val PicaShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(24.dp)
-)
-
-private val PicaExpressiveShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(16.dp),
-    medium = RoundedCornerShape(24.dp),
-    large = RoundedCornerShape(28.dp),
-    extraLarge = RoundedCornerShape(32.dp)
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(28.dp)
 )
 
 private fun ColorScheme.toExpressiveScheme(): ColorScheme = copy(
-    primary = tertiary,
-    onPrimary = onTertiary,
-    primaryContainer = tertiaryContainer,
-    onPrimaryContainer = onTertiaryContainer,
-    secondary = primary,
-    onSecondary = onPrimary,
-    secondaryContainer = primaryContainer,
-    onSecondaryContainer = onPrimaryContainer,
-    outlineVariant = secondaryContainer,
-    surfaceContainerLow = surface,
+    surfaceContainerLow = surfaceContainer,
     surfaceContainer = surfaceContainerHigh,
     surfaceContainerHigh = surfaceContainerHighest,
-    surfaceContainerHighest = surfaceVariant,
+    outlineVariant = secondaryContainer,
 )
 
 @Composable
-fun isPicaExpressiveTheme(): Boolean = e.getDesignLanguage(LocalContext.current) == 1
+fun isPicaExpressiveTheme(): Boolean = e.getDesignLanguage(LocalContext.current).coerceIn(0, 1) == 1
 
 private fun md3LightPalette(
-    primary: androidx.compose.ui.graphics.Color,
-    onPrimary: androidx.compose.ui.graphics.Color,
-    primaryContainer: androidx.compose.ui.graphics.Color,
-    onPrimaryContainer: androidx.compose.ui.graphics.Color,
-    secondary: androidx.compose.ui.graphics.Color,
-    secondaryContainer: androidx.compose.ui.graphics.Color,
-    tertiary: androidx.compose.ui.graphics.Color,
-    tertiaryContainer: androidx.compose.ui.graphics.Color,
-    background: androidx.compose.ui.graphics.Color,
-    surfaceVariant: androidx.compose.ui.graphics.Color,
-    surfaceContainerHighest: androidx.compose.ui.graphics.Color = surfaceVariant,
+    primary: Color,
+    onPrimary: Color,
+    primaryContainer: Color,
+    onPrimaryContainer: Color,
+    secondary: Color,
+    secondaryContainer: Color,
+    tertiary: Color,
+    tertiaryContainer: Color,
+    background: Color,
+    surfaceVariant: Color,
+    surfaceContainerLowest: Color = Color.White,
+    surfaceContainerLow: Color = lerp(background, surfaceVariant, 0.16f),
+    surfaceContainer: Color = lerp(background, surfaceVariant, 0.24f),
+    surfaceContainerHigh: Color = lerp(background, surfaceVariant, 0.32f),
+    surfaceContainerHighest: Color = lerp(background, surfaceVariant, 0.40f),
 ): ColorScheme = lightColorScheme(
     primary = primary,
     onPrimary = onPrimary,
     primaryContainer = primaryContainer,
     onPrimaryContainer = onPrimaryContainer,
     secondary = secondary,
-    onSecondary = androidx.compose.ui.graphics.Color.White,
+    onSecondary = Color.White,
     secondaryContainer = secondaryContainer,
     onSecondaryContainer = onPrimaryContainer,
     tertiary = tertiary,
-    onTertiary = androidx.compose.ui.graphics.Color.White,
+    onTertiary = Color.White,
     tertiaryContainer = tertiaryContainer,
     onTertiaryContainer = onPrimaryContainer,
     background = background,
-    onBackground = androidx.compose.ui.graphics.Color(0xFF1B1B1F),
+    onBackground = Color(0xFF1B1B1F),
     surface = background,
-    onSurface = androidx.compose.ui.graphics.Color(0xFF1B1B1F),
-    surfaceContainerLowest = androidx.compose.ui.graphics.Color.White,
-    surfaceContainerLow = background,
-    surfaceContainer = background,
-    surfaceContainerHigh = surfaceVariant,
+    onSurface = Color(0xFF1B1B1F),
+    surfaceContainerLowest = surfaceContainerLowest,
+    surfaceContainerLow = surfaceContainerLow,
+    surfaceContainer = surfaceContainer,
+    surfaceContainerHigh = surfaceContainerHigh,
     surfaceContainerHighest = surfaceContainerHighest,
     surfaceVariant = surfaceVariant,
-    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF44474F),
-    outline = androidx.compose.ui.graphics.Color(0xFF74777F),
+    onSurfaceVariant = Color(0xFF44474F),
+    outline = Color(0xFF74777F),
     outlineVariant = surfaceVariant,
-    inverseSurface = androidx.compose.ui.graphics.Color(0xFF303034),
-    inverseOnSurface = androidx.compose.ui.graphics.Color(0xFFF2F0F4),
+    inverseSurface = Color(0xFF303034),
+    inverseOnSurface = Color(0xFFF2F0F4),
     inversePrimary = primaryContainer,
     surfaceTint = primary
 )
 
 private fun md3DarkPalette(
-    primary: androidx.compose.ui.graphics.Color,
-    onPrimary: androidx.compose.ui.graphics.Color,
-    primaryContainer: androidx.compose.ui.graphics.Color,
-    onPrimaryContainer: androidx.compose.ui.graphics.Color,
-    secondary: androidx.compose.ui.graphics.Color,
-    secondaryContainer: androidx.compose.ui.graphics.Color,
-    tertiary: androidx.compose.ui.graphics.Color,
-    tertiaryContainer: androidx.compose.ui.graphics.Color,
-    background: androidx.compose.ui.graphics.Color,
-    surfaceVariant: androidx.compose.ui.graphics.Color,
-    surfaceContainerHighest: androidx.compose.ui.graphics.Color = surfaceVariant,
+    primary: Color,
+    onPrimary: Color,
+    primaryContainer: Color,
+    onPrimaryContainer: Color,
+    secondary: Color,
+    secondaryContainer: Color,
+    tertiary: Color,
+    tertiaryContainer: Color,
+    background: Color,
+    surfaceVariant: Color,
+    surfaceContainerLowest: Color = background,
+    surfaceContainerLow: Color = lerp(background, surfaceVariant, 0.14f),
+    surfaceContainer: Color = lerp(background, surfaceVariant, 0.22f),
+    surfaceContainerHigh: Color = lerp(background, surfaceVariant, 0.30f),
+    surfaceContainerHighest: Color = lerp(background, surfaceVariant, 0.38f),
 ): ColorScheme = darkColorScheme(
     primary = primary,
     onPrimary = onPrimary,
@@ -261,20 +256,20 @@ private fun md3DarkPalette(
     tertiaryContainer = tertiaryContainer,
     onTertiaryContainer = onPrimaryContainer,
     background = background,
-    onBackground = androidx.compose.ui.graphics.Color(0xFFE4E2E6),
+    onBackground = Color(0xFFE4E2E6),
     surface = background,
-    onSurface = androidx.compose.ui.graphics.Color(0xFFE4E2E6),
-    surfaceContainerLowest = background,
-    surfaceContainerLow = background,
-    surfaceContainer = background,
-    surfaceContainerHigh = surfaceVariant,
+    onSurface = Color(0xFFE4E2E6),
+    surfaceContainerLowest = surfaceContainerLowest,
+    surfaceContainerLow = surfaceContainerLow,
+    surfaceContainer = surfaceContainer,
+    surfaceContainerHigh = surfaceContainerHigh,
     surfaceContainerHighest = surfaceContainerHighest,
     surfaceVariant = surfaceVariant,
-    onSurfaceVariant = androidx.compose.ui.graphics.Color(0xFFC4C6D0),
-    outline = androidx.compose.ui.graphics.Color(0xFF8E9099),
+    onSurfaceVariant = Color(0xFFC4C6D0),
+    outline = Color(0xFF8E9099),
     outlineVariant = surfaceVariant,
-    inverseSurface = androidx.compose.ui.graphics.Color(0xFFE4E2E6),
-    inverseOnSurface = androidx.compose.ui.graphics.Color(0xFF303034),
+    inverseSurface = Color(0xFFE4E2E6),
+    inverseOnSurface = Color(0xFF303034),
     inversePrimary = primaryContainer,
     surfaceTint = primary
 )
@@ -439,7 +434,7 @@ private val RedDarkColors = md3DarkPalette(
 fun PicaComposeTheme(
     darkTheme: Boolean = run {
         val context = LocalContext.current
-        e.L(context) || when (e.al(context)) {
+        e.L(context) || when (e.al(context).coerceIn(0, 8)) {
             1 -> true
             2 -> isSystemInDarkTheme()
             0 -> false
@@ -449,8 +444,9 @@ fun PicaComposeTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val designLanguage = e.getDesignLanguage(context)
-    val baseColorScheme = when (e.al(context)) {
+    val designLanguage = e.getDesignLanguage(context).coerceIn(0, 1)
+    val themeColor = e.al(context).coerceIn(0, 8)
+    val baseColorScheme = when (themeColor) {
         2 -> if (darkTheme) NeonDarkColors else NeonLightColors
         3 -> if (darkTheme) BlueDarkColors else BlueLightColors
         4 -> if (darkTheme) GreenDarkColors else GreenLightColors
@@ -468,10 +464,21 @@ fun PicaComposeTheme(
         baseColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        shapes = if (designLanguage == 1) PicaExpressiveShapes else PicaShapes,
-        typography = if (designLanguage == 1) PicaExpressiveTypography else PicaTypography,
-        content = content
-    )
+    if (designLanguage == 1) {
+        MaterialExpressiveTheme(
+            colorScheme = colorScheme,
+            motionScheme = MotionScheme.expressive(),
+            shapes = Shapes(),
+            typography = PicaExpressiveTypography,
+            content = content,
+        )
+    } else {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            motionScheme = MotionScheme.standard(),
+            shapes = PicaShapes,
+            typography = PicaTypography,
+            content = content,
+        )
+    }
 }

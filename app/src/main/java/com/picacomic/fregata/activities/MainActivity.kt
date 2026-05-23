@@ -29,15 +29,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -74,6 +69,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaNavigationBar
 import com.picacomic.fregata.compose.navigation.Screen
 import com.picacomic.fregata.compose.navigation.navItems
 import com.picacomic.fregata.compose.screens.*
@@ -226,43 +222,22 @@ class MainActivity : BaseActivity() {
                 contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                 bottomBar = {
                     if (showBottomBar) {
-                        NavigationBar(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            tonalElevation = 0.dp
-                        ) {
-                            availableNavItems.forEach { screen ->
-                                NavigationBarItem(
-                                    selected = currentRoute == screen.route,
-                                    onClick = {
-                                        tabRefreshEvent++
-                                        if (currentRoute != screen.route) {
-                                            navController.navigate(screen.route) {
-                                                popUpTo(navController.graph.startDestinationId) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
+                        PicaNavigationBar(
+                            items = availableNavItems,
+                            currentRoute = currentRoute,
+                            onItemClick = { screen ->
+                                tabRefreshEvent++
+                                if (currentRoute != screen.route) {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = true
                                         }
-                                    },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (currentRoute == screen.route)
-                                                screen.selectedIcon!! else screen.unselectedIcon!!,
-                                            contentDescription = stringResource(id = screen.titleRes)
-                                        )
-                                    },
-                                    label = { Text(stringResource(id = screen.titleRes)) },
-                                    colors = NavigationBarItemDefaults.colors(
-                                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                                        selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                                        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                )
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
                             }
-                        }
+                        )
                     }
                 }
             )

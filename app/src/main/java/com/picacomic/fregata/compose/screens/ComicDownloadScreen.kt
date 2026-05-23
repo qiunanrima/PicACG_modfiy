@@ -51,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaCardSection
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaEpisodeGridItem
@@ -319,8 +320,7 @@ private fun ComicDownloadSectionHeader(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                style = PicaExpressiveType.SectionEmphasized,
             )
             Text(
                 text = supportingText,

@@ -57,13 +57,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveMotion
+import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaInfoChip
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
@@ -188,6 +189,7 @@ private fun GameDetailContent(
     var updateExpanded by rememberSaveable(detail.gameId, "update") { mutableStateOf(false) }
     val likeScale by animateFloatAsState(
         targetValue = if (detail.isLiked) 1.18f else 1f,
+        animationSpec = PicaExpressiveMotion.defaultSpatialSpec(),
         label = "game_detail_like_scale",
     )
 
@@ -230,8 +232,7 @@ private fun GameDetailContent(
                             }
                             Text(
                                 text = detail.title.orEmpty(),
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold,
+                                style = PicaExpressiveType.HeadlineEmphasized,
                             )
                             Text(
                                 text = "${detail.publisher.orEmpty()} · ${detail.version.orEmpty()}",

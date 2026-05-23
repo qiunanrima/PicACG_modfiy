@@ -76,8 +76,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import com.picacomic.fregata.compose.PicaExpressiveType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -451,8 +451,7 @@ private fun CommentCard(
                     ) {
                         Text(
                             text = user.name.ifBlank { "Anonymous" },
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
+                            style = PicaExpressiveType.TitleSmallEmphasized,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier

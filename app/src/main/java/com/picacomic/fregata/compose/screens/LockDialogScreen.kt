@@ -39,12 +39,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaExpressiveType
 import kotlinx.coroutines.delay
 
 @Composable
@@ -113,8 +113,7 @@ fun LockDialogContent(
                         } else {
                             MaterialTheme.colorScheme.onSurface
                         },
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
+                        style = PicaExpressiveType.TitleEmphasized,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding(top = 18.dp)
@@ -197,7 +196,6 @@ private fun LockPinDigitField(
         singleLine = true,
         textStyle = MaterialTheme.typography.titleLarge.copy(
             textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
             color = if (hasError) colorScheme.error else colorScheme.onSurface,
         ),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),

@@ -58,9 +58,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -94,9 +91,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
+import com.picacomic.fregata.compose.components.PicaSwitchListItem
+import com.picacomic.fregata.compose.components.PicaTabRow
 import com.picacomic.fregata.compose.viewmodels.ChatroomListViewModel
 import com.picacomic.fregata.compose.viewmodels.ChatroomViewModel
 import com.picacomic.fregata.objects.ChatMessageObject
@@ -232,7 +230,6 @@ fun ChatroomContainerScreen(
     var selectedTab by rememberSaveable(rooms.size) { mutableIntStateOf(0) }
     val safeRooms = rooms.ifEmpty { rememberChatroomPreviewRooms() }
     val currentRoom = safeRooms[selectedTab.coerceIn(safeRooms.indices)]
-    val expressive = isPicaExpressiveTheme()
 
     LaunchedEffect(Unit) {
         AlertDialogCenter.chatroomRules(context)
@@ -266,61 +263,14 @@ fun ChatroomContainerScreen(
                         ),
                         scrollBehavior = scrollBehavior,
                     )
-                    if (expressive) {
-                        TabRow(
-                            selectedTabIndex = selectedTab,
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            indicator = { tabPositions ->
-                                if (selectedTab in tabPositions.indices) {
-                                    Box(
-                                        modifier = Modifier
-                                            .tabIndicatorOffset(tabPositions[selectedTab])
-                                            .padding(horizontal = 8.dp, vertical = 6.dp)
-                                            .fillMaxSize()
-                                            .background(
-                                                color = MaterialTheme.colorScheme.primaryContainer,
-                                                shape = MaterialTheme.shapes.extraLarge,
-                                            ),
-                                    )
-                                }
-                            },
-                        ) {
-                            safeRooms.forEachIndexed { index, room ->
-                                Tab(
-                                    selected = selectedTab == index,
-                                    onClick = { selectedTab = index },
-                                    selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    text = {
-                                        Text(
-                                            text = room.title.orEmpty().ifBlank { "Room ${index + 1}" },
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    } else {
-                        TabRow(
-                            selectedTabIndex = selectedTab,
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        ) {
-                            safeRooms.forEachIndexed { index, room ->
-                                Tab(
-                                    selected = selectedTab == index,
-                                    onClick = { selectedTab = index },
-                                    text = {
-                                        Text(
-                                            text = room.title.orEmpty().ifBlank { "Room ${index + 1}" },
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    }
+                    PicaTabRow(
+                        selectedTabIndex = selectedTab,
+                        tabs = safeRooms.mapIndexed { index, room ->
+                            room.title.orEmpty().ifBlank { "Room ${index + 1}" }
+                        },
+                        onTabSelected = { selectedTab = it },
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                    )
                 }
             },
             containerColor = MaterialTheme.colorScheme.background,
@@ -1192,18 +1142,12 @@ private fun ChatroomSettingSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
-    }
+    PicaSwitchListItem(
+        label = label,
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        showDivider = false,
+    )
 }
 
 @Composable
@@ -1419,9 +1363,8 @@ private fun ChatroomListItem(
 ) {
     val context = LocalContext.current
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
