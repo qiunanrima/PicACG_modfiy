@@ -72,7 +72,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     private var basePageOffset by mutableIntStateOf(0)
     private var scrollTarget by mutableStateOf<Int?>(null)
     private var verticalScroll by mutableStateOf(true)
-    private var offlineMode by mutableStateOf(false)
+    private var isOfflineReader by mutableStateOf(false)
     private var callback: d? = context as? d
     private var lastLoadedOffset = 0
 
@@ -89,7 +89,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
                             verticalScroll = verticalScroll,
                             testingListMode = testingListMode,
                             performanceMode = performanceMode,
-                            offlineMode = offlineMode,
+                            offlineMode = isOfflineReader,
                             scrollTarget = scrollTarget,
                             onScrollTargetConsumed = { scrollTarget = null },
                             onPageChanged = { page -> callback?.r(page) },
@@ -102,7 +102,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     }
 
     fun setOfflineMode(value: Boolean) {
-        offlineMode = value
+        isOfflineReader = value
     }
 
     override fun a(arrayList: ArrayList<ComicPageObject>, i: Int, z: Boolean, z2: Boolean) {
@@ -114,7 +114,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
             scrollTarget = 0
         } else if (prepended) {
             pages.addAll(0, arrayList)
-            scrollTarget = ComicViewerActivity.hq.coerceAtMost(pages.lastIndex.coerceAtLeast(0))
+            scrollTarget = arrayList.size.coerceAtMost(pages.lastIndex.coerceAtLeast(0))
         } else {
             pages.addAll(arrayList)
         }
@@ -127,7 +127,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     }
 
     override fun b(i: Int, z: Boolean) {
-        scrollTarget = i.coerceIn(0, virtualItemCount().lastIndexCoerceAtLeastZero())
+        scrollTarget = i.coerceIn(0, pages.lastIndex.coerceAtLeast(0))
     }
 
     override fun M(i: Int) {
@@ -144,7 +144,8 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     }
 
     private fun prefetch(arrayList: List<ComicPageObject>) {
-        arrayList.forEach { page ->
+        val prefetchLimit = if (performanceMode) PERFORMANCE_PREFETCH_PAGE_LIMIT else PREFETCH_PAGE_LIMIT
+        arrayList.take(prefetchLimit).forEach { page ->
             val imageUrl = resolveComicPageImage(page)
             if (!imageUrl.isNullOrBlank()) {
                 context.imageLoader.enqueue(
@@ -152,20 +153,9 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
                         context = context,
                         page = page,
                         imageUrl = imageUrl,
-                        offlineMode = offlineMode,
+                        offlineMode = isOfflineReader,
                     ).build()
                 )
-                if (!offlineMode) {
-                    context.imageLoader.enqueue(
-                        buildComicPageImageRequest(
-                            context = context,
-                            page = page,
-                            imageUrl = imageUrl,
-                            offlineMode = false,
-                            stableCacheKey = false,
-                        ).build()
-                    )
-                }
             }
         }
     }
@@ -177,6 +167,8 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     companion object {
         private const val TAG = "ComicViewerComposeHostView"
         private const val AD_INTERVAL = 20
+        private const val PREFETCH_PAGE_LIMIT = 12
+        private const val PERFORMANCE_PREFETCH_PAGE_LIMIT = 6
     }
 }
 
@@ -203,7 +195,9 @@ private fun ComicViewerScreen(
     LaunchedEffect(scrollTarget, itemCount) {
         val target = scrollTarget ?: return@LaunchedEffect
         if (itemCount > 0) {
-            listState.scrollToItem(target.coerceIn(0, itemCount.lastIndexCoerceAtLeastZero()))
+            listState.scrollToItem(
+                pageIndexToVirtualIndex(target).coerceIn(0, itemCount.lastIndexCoerceAtLeastZero())
+            )
         }
         onScrollTargetConsumed()
     }
@@ -216,7 +210,11 @@ private fun ComicViewerScreen(
                 ?: listState.firstVisibleItemIndex
         }
             .distinctUntilChanged()
-            .collect { onPageChanged(it) }
+            .collect { virtualIndex ->
+                onPageChanged(
+                    virtualIndexToPageIndex(virtualIndex).coerceIn(0, pages.lastIndex.coerceAtLeast(0))
+                )
+            }
     }
 
     ZoomableReaderLayer(
@@ -496,21 +494,31 @@ private fun ImageRequest.Builder.applyComicCachePolicy(offlineMode: Boolean): Im
 }
 
 private fun virtualItemCount(pageCount: Int): Int {
-    return pageCount + (pageCount / 20) + 1
+    return pageCount + (pageCount / AD_INTERVAL) + 1
 }
 
 private fun isAdvertisementItem(index: Int, pageCount: Int): Boolean {
-    val adCount = (pageCount / 20) + 1
-    return (index != 0 && (index + 1) % 21 == 0) || index == pageCount + adCount - 1
+    val adCount = (pageCount / AD_INTERVAL) + 1
+    return (index != 0 && (index + 1) % (AD_INTERVAL + 1) == 0) || index == pageCount + adCount - 1
 }
 
 private fun itemKey(pages: List<ComicPageObject>, virtualIndex: Int): String {
     if (isAdvertisementItem(virtualIndex, pages.size)) {
         return "ad_$virtualIndex"
     }
-    val pageIndex = g.ac(virtualIndex)
+    val pageIndex = virtualIndexToPageIndex(virtualIndex)
     return stableLazyKey("page", virtualIndex, pages.getOrNull(pageIndex)?.comicPageId)
 }
+
+private fun pageIndexToVirtualIndex(pageIndex: Int): Int {
+    return pageIndex + (pageIndex / AD_INTERVAL)
+}
+
+private fun virtualIndexToPageIndex(virtualIndex: Int): Int {
+    return virtualIndex - ((virtualIndex + 1) / (AD_INTERVAL + 1))
+}
+
+private const val AD_INTERVAL = 20
 
 private fun Int.lastIndexCoerceAtLeastZero(): Int {
     return (this - 1).coerceAtLeast(0)
