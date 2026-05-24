@@ -13,6 +13,7 @@ import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject
 import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
+import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject
 import com.picacomic.fregata.objects.responses.ActionResponse
 import com.picacomic.fregata.objects.responses.ComicDetailResponse
 import com.picacomic.fregata.objects.responses.ComicRandomListResponse
@@ -430,14 +431,14 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun loadDownloadedEpisodesOnly(comicId: String) {
-        val downloadedEpisodes = try {
+        val localEpisodes = try {
             DownloadComicEpisodeObject.find(
                 DownloadComicEpisodeObject::class.java,
-                "comic_id = ? and status != ?",
-                comicId,
-                "0"
+                "comic_id = ?",
+                comicId
             )
                 ?.filterIsInstance<DownloadComicEpisodeObject>()
+                ?.filter { episode -> episode.status != 0 || hasCachedPages(episode.episodeId) }
                 ?.sortedBy { it.episodeOrder }
                 ?.map { episode ->
                     episode.comicEpisodeObject.apply {
@@ -448,10 +449,23 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
         } catch (_: Exception) {
             emptyList()
         }
-        episodes = syncEpisodeLocalState(comicId, downloadedEpisodes)
-        episodeTotal = downloadedEpisodes.size.takeIf { it > 0 } ?: comicDetail?.episodeCount ?: 0
+        episodes = syncEpisodeLocalState(comicId, localEpisodes)
+        episodeTotal = localEpisodes.size.takeIf { it > 0 } ?: comicDetail?.episodeCount ?: 0
         hasMoreEpisodes = false
         nextEpisodePage = 1
+    }
+
+    private fun hasCachedPages(episodeId: String?): Boolean {
+        if (episodeId.isNullOrBlank()) return false
+        return try {
+            DownloadComicPageObject.count<DownloadComicPageObject>(
+                DownloadComicPageObject::class.java,
+                "episode_id = ?",
+                arrayOf(episodeId)
+            ) > 0
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun persistComicDetail(detail: ComicDetailObject) {

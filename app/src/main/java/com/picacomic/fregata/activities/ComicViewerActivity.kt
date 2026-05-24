@@ -350,7 +350,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.totalPagingPages = this.currentPagingPage + 1
             this.shouldRestoreRecordPosition = true
         }
-        if (this.offlineMode && !j(this.episodeOrder)) {
+        if (this.offlineMode && !hasLocalEpisode(this.episodeOrder)) {
             val firstDownloadedEpisode = firstDownloadedEpisodeOrder()
             if (firstDownloadedEpisode > 0) {
                 this.episodeOrder = firstDownloadedEpisode
@@ -993,9 +993,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         val listFind: MutableList<*>? =
             DownloadComicEpisodeObject.find<DownloadComicEpisodeObject?>(
                 DownloadComicEpisodeObject::class.java,
-                "comic_id = ? and episode_order = ?",
+                "comic_id = ? and episode_order = ? and status != ?",
                 this.comicId,
-                i.toString() + ""
+                i.toString() + "",
+                "0"
             )
         if (listFind != null && listFind.size > 0) {
             f.D(TAG, "HAVE DOWNLOAD EP")
@@ -1005,8 +1006,27 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         return false
     }
 
+    private fun hasLocalEpisode(order: Int): Boolean {
+        return findLocalEpisode(order) != null
+    }
+
+    private fun findLocalEpisode(order: Int): DownloadComicEpisodeObject? {
+        return try {
+            DownloadComicEpisodeObject.find<DownloadComicEpisodeObject?>(
+                DownloadComicEpisodeObject::class.java,
+                "comic_id = ? and episode_order = ?",
+                this.comicId,
+                order.toString()
+            )
+                ?.filterIsInstance<DownloadComicEpisodeObject>()
+                ?.firstOrNull()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun bL() {
-        if (this.offlineMode || j(this.episodeOrder)) {
+        if ((this.offlineMode && hasLocalEpisode(this.episodeOrder)) || j(this.episodeOrder)) {
             c(this.episodeOrder, this.currentPagingPage, false)
         } else {
             d(this.episodeOrder, this.currentPagingPage, false)
@@ -1014,7 +1034,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     fun b(i: Int, i2: Int, z: Boolean) {
-        if (this.offlineMode || j(i)) {
+        if ((this.offlineMode && hasLocalEpisode(i)) || j(i)) {
             c(i, i2, z)
         } else {
             d(i, i2, z)
@@ -1031,17 +1051,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 throw th
             }
         }
-        val listFind: MutableList<*>? =
-            DownloadComicEpisodeObject.find<DownloadComicEpisodeObject?>(
-                DownloadComicEpisodeObject::class.java,
-                "comic_id = ? and episode_order = ?",
-                this.comicId,
-                i.toString() + ""
-            )
-        if (listFind != null && listFind.size > 0) {
-            this.currentEpisode =
-                (listFind.get(0) as DownloadComicEpisodeObject).getComicEpisodeObject()
-            this.totalPages = (listFind.get(0) as DownloadComicEpisodeObject).getTotal()
+        val localEpisode = findLocalEpisode(i)
+        if (localEpisode != null) {
+            this.currentEpisode = localEpisode.getComicEpisodeObject()
+            this.totalPages = localEpisode.getTotal()
             if (this.totalPages < hq) {
                 this.totalPagingPages = 1
             } else if (this.totalPages % hq == 0) {
@@ -1151,14 +1164,18 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                         if (this@ComicViewerActivity.pageList == null) {
                             this@ComicViewerActivity.pageList = ArrayList<ComicPageObject?>()
                         }
-                        for (i4 in response.body()!!.data!!.getPages().getDocs().indices) {
-                            this@ComicViewerActivity.pageList!!.add(
-                                response.body()!!.data!!.getPages().getDocs().get(i4)
-                            )
+                        val docs = response.body()!!.data!!.getPages().getDocs()
+                        for (i4 in docs.indices) {
+                            this@ComicViewerActivity.pageList!!.add(docs.get(i4))
                         }
+                        this@ComicViewerActivity.persistCachedEpisodePages(
+                            docs,
+                            this@ComicViewerActivity.currentEpisode,
+                            this@ComicViewerActivity.totalPages
+                        )
                         this@ComicViewerActivity.logPagingState()
                         this@ComicViewerActivity.comicStatusChangeListener!!.a(
-                            response.body()!!.data!!.getPages().getDocs(),
+                            docs,
                             this@ComicViewerActivity.loadedPageOffset,
                             this@ComicViewerActivity.shouldRestoreRecordPosition,
                             z
@@ -1198,6 +1215,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
     fun bM() {
         if (this.offlineMode) {
+            loadPreviousDownloadedPageBlock()
             return
         }
         f.D(TAG, "Call Comic Page ?")
@@ -1223,14 +1241,18 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                         hq = response.body()!!.data!!.getPages().getLimit()
                         this@ComicViewerActivity.totalPages =
                             response.body()!!.data!!.getPages().getTotal()
-                        this@ComicViewerActivity.pageList!!.addAll(
-                            0,
-                            response.body()!!.data!!.getPages().getDocs()
+                        val docs = response.body()!!.data!!.getPages().getDocs()
+                        this@ComicViewerActivity.pageList!!.addAll(0, docs)
+                        this@ComicViewerActivity.loadedPageOffset =
+                            (response.body()!!.data!!.getPages().getPage() - 1) * hq
+                        this@ComicViewerActivity.persistCachedEpisodePages(
+                            docs,
+                            this@ComicViewerActivity.currentEpisode,
+                            this@ComicViewerActivity.totalPages
                         )
-                        this@ComicViewerActivity.loadedPageOffset -= hq
                         this@ComicViewerActivity.logPagingState()
                         this@ComicViewerActivity.comicStatusChangeListener!!.a(
-                            response.body()!!.data!!.getPages().getDocs(),
+                            docs,
                             this@ComicViewerActivity.loadedPageOffset,
                             false,
                             false
@@ -1263,6 +1285,79 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 this@ComicViewerActivity.bC()
             }
         })
+    }
+
+    private fun persistCachedEpisodePages(
+        docs: ArrayList<ComicPageObject>,
+        episode: ComicEpisodeObject?,
+        total: Int
+    ) {
+        if (this.comicId.isNullOrBlank() || episode?.getEpisodeId().isNullOrBlank()) {
+            return
+        }
+        try {
+            val existingEpisode = findLocalEpisode(episode!!.getOrder())
+            if (existingEpisode == null) {
+                DownloadComicEpisodeObject(this.comicId, episode, 0).apply {
+                    setTotal(total)
+                    save()
+                }
+            } else if (existingEpisode.getStatus() == 0) {
+                existingEpisode.setTitle(episode.getTitle())
+                existingEpisode.setUpdatedAt(episode.getUpdatedAt())
+                existingEpisode.setTotal(total)
+                existingEpisode.save()
+            }
+            docs.forEach { page ->
+                val media = page.getMedia()
+                if (page.getComicPageId().isNullOrBlank() || media == null) {
+                    return@forEach
+                }
+                if (b.az(page.getComicPageId()) == null) {
+                    b.a(DownloadComicPageObject(this.comicId, episode.getEpisodeId(), "", page))
+                }
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
+    private fun loadPreviousDownloadedPageBlock() {
+        if (bT() <= 0 || this.isLoading || this.currentEpisode == null) {
+            return
+        }
+        this.isLoading = true
+        val previousPagingPage = bT() - 1
+        try {
+            val downloadedPages = DownloadComicPageObject.findWithQuery<DownloadComicPageObject?>(
+                DownloadComicPageObject::class.java,
+                "SELECT * FROM download_comic_page_object WHERE episode_id = ? LIMIT ? OFFSET ?",
+                this.currentEpisode!!.getEpisodeId(),
+                hq.toString(),
+                (hq * previousPagingPage).toString()
+            )
+                ?.filterIsInstance<DownloadComicPageObject>()
+                .orEmpty()
+            if (downloadedPages.isNotEmpty()) {
+                val previousPages = ArrayList<ComicPageObject?>()
+                downloadedPages.forEach { downloadedPage ->
+                    previousPages.add(downloadedPage.getComicPageObject())
+                }
+                if (this.pageList == null) {
+                    this.pageList = ArrayList<ComicPageObject?>()
+                }
+                this.pageList!!.addAll(0, previousPages)
+                this.loadedPageOffset -= hq
+                this.comicStatusChangeListener!!.a(previousPages, this.loadedPageOffset, false, false)
+                o(this.pageList!!.size)
+                bI()
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        } finally {
+            this.isLoading = false
+            bC()
+        }
     }
 
     private fun logPagingState() {
@@ -1773,7 +1868,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 }
                 return
             }
-            if (this.hasMovedPastFirstLoadedPage && i == 0) {
+            if ((this.hasMovedPastFirstLoadedPage || bT() > 0) && i == 0) {
                 if (bT() > 0) {
                     bM()
                     return
@@ -1801,6 +1896,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.currentPage--
             this.comicStatusChangeListener!!.b(this.currentPage, false)
             r(this.currentPage)
+            return
+        }
+        if (bT() > 0) {
+            bM()
         }
     }
 

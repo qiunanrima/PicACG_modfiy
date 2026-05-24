@@ -55,6 +55,7 @@ import com.picacomic.fregata.activities.ComicViewerActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.objects.ComicPageObject
 import com.picacomic.fregata.utils.b
+import com.picacomic.fregata.utils.c as DirectoryHelper
 import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.utils.f
 import com.picacomic.fregata.utils.g
@@ -445,7 +446,8 @@ private fun resolveComicPageImage(page: ComicPageObject): String? {
     val media = page.media ?: return null
     val downloaded = b.az(page.comicPageId)
     if (downloaded != null) {
-        val file = File(downloaded.storageFolder, downloaded.episodeId + "/" + downloaded.mediaPath)
+        val storageFolder = downloaded.storageFolder?.takeIf { it.isNotBlank() } ?: DirectoryHelper.ec()
+        val file = File(storageFolder, downloaded.episodeId + "/" + downloaded.mediaPath)
         if (file.exists() && file.canRead() && file.length() > 0L) {
             return file.toURI().toString()
         }
