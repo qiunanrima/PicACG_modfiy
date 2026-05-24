@@ -240,7 +240,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
             putExtra("COMIC_ID", targetComicId)
             putExtra("EPISODE_ID", episodeId)
         }
-        getApplication<Application>().startService(intent)
+        DownloadService.startDownload(getApplication<Application>(), intent)
         return true
     }
 

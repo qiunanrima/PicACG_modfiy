@@ -135,7 +135,7 @@ fun ProfileEditScreen(
         ) == PackageManager.PERMISSION_GRANTED
 
         if (!hasCameraPermission) {
-            (activity as? BaseActivity)?.requestPermission()
+            (activity as? BaseActivity)?.requestCameraPermission()
         } else {
             AlertDialog.Builder(context)
                 .setTitle(R.string.alert_dialog_select_title)

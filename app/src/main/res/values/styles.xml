@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <style name="AlertDialog.AppCompat" parent="@style/Base.AlertDialog.AppCompat" />
     <style name="AlertDialog.AppCompat.Light" parent="@style/Base.AlertDialog.AppCompat.Light" />
     <style name="Animation.AppCompat.Dialog" parent="@style/Base.Animation.AppCompat.Dialog" />
@@ -17,7 +17,7 @@
         <item name="android:editTextColor">@color/theme_light_on_surface</item>
         <item name="android:actionMenuTextColor">@color/theme_light_on_surface</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
         <item name="colorPrimary">@color/theme_light_primary</item>
         <item name="colorPrimaryDark">@color/theme_light_primary_dark</item>
         <item name="colorSecondary">@color/theme_light_secondary</item>
@@ -80,7 +80,7 @@
         <item name="android:editTextColor">@color/theme_dark_on_surface</item>
         <item name="android:actionMenuTextColor">@color/theme_dark_on_surface</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
         <item name="colorPrimary">@color/theme_dark_primary</item>
         <item name="colorPrimaryDark">@color/theme_dark_primary_dark</item>
         <item name="colorSecondary">@color/theme_dark_secondary</item>
@@ -120,7 +120,7 @@
         <item name="android:editTextColor">@color/theme_neon_light_on_surface</item>
         <item name="android:actionMenuTextColor">@color/theme_neon_light_on_surface</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
         <item name="colorAccent">@color/theme_neon_light_tertiary</item>
         <item name="colorControlNormal">@color/theme_neon_light_outline</item>
         <item name="colorPrimary">@color/theme_neon_light_primary</item>
@@ -160,7 +160,7 @@
         <item name="android:editTextColor">@color/theme_neon_dark_on_surface</item>
         <item name="android:actionMenuTextColor">@color/theme_neon_dark_on_surface</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
         <item name="colorAccent">@color/theme_neon_dark_tertiary</item>
         <item name="colorControlNormal">@color/theme_neon_dark_outline</item>
         <item name="colorPrimary">@color/theme_neon_dark_primary</item>

@@ -163,7 +163,7 @@ fun ProfileScreen(
         ) == PackageManager.PERMISSION_GRANTED
 
         if (!hasCameraPermission) {
-            (activity as? BaseActivity)?.requestPermission()
+            (activity as? BaseActivity)?.requestCameraPermission()
             return@click
         }
 

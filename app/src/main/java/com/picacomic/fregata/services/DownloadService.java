@@ -1,8 +1,16 @@
 package com.picacomic.fregata.services;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.picacomic.fregata.R;
 import com.picacomic.fregata.b.d;
 import com.picacomic.fregata.objects.ComicPageObject;
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject;
@@ -35,6 +43,8 @@ import retrofit2.Response;
 public class DownloadService extends IntentService {
     public static final String TAG = "DownloadService";
     public static final String tN = DownloadService.class.getName() + ".progress_update";
+    private static final int DOWNLOAD_NOTIFICATION_ID = 2201;
+    private static final String DOWNLOAD_CHANNEL_ID = "comic_downloads";
     Call<GeneralResponse<ComicPagesResponse>> hZ;
     private ExecutorService tO;
     private CompletionService<b> tP;
@@ -65,8 +75,13 @@ public class DownloadService extends IntentService {
         this.tV = Collections.synchronizedSet(new HashSet<String>());
     }
 
+    public static void startDownload(Context context, Intent intent) {
+        ContextCompat.startForegroundService(context, intent);
+    }
+
     @Override // android.app.IntentService, android.app.Service
     public int onStartCommand(Intent intent, int i, int i2) {
+        startForeground(DOWNLOAD_NOTIFICATION_ID, createDownloadNotification());
         boolean z = this.tS;
         return super.onStartCommand(intent, i, i2);
     }
@@ -109,6 +124,26 @@ public class DownloadService extends IntentService {
             dQ();
         }
         f.E(TAG, "Finish All Tasks - Total:" + this.tR.size());
+    }
+
+    private Notification createDownloadNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel(
+                    DOWNLOAD_CHANNEL_ID,
+                    getString(R.string.download),
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            notificationManager.createNotificationChannel(channel);
+        }
+        return new NotificationCompat.Builder(this, DOWNLOAD_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_file_download_black_24dp)
+                .setContentTitle(getString(R.string.download))
+                .setContentText(getString(R.string.alert_continue_download_comic_title))
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build();
     }
 
     public void dQ() {

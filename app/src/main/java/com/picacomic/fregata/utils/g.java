@@ -645,7 +645,7 @@ public class g {
                     Intent intent = new Intent(context, (Class<?>) DownloadService.class);
                     intent.putExtra("COMIC_ID", ((DownloadComicEpisodeObject) listFind.get(i)).getComicId());
                     intent.putExtra("EPISODE_ID", ((DownloadComicEpisodeObject) listFind.get(i)).getEpisodeId());
-                    context.startService(intent);
+                    DownloadService.startDownload(context, intent);
                 }
             }
         });

@@ -19,13 +19,13 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
-    <!-- Android 13+ 细粒度媒体权限，用于相册选图 -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-
     <!-- 硬件相关 -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- 下载服务：Android 8+ 后台 Service 受限，使用 dataSync 前台服务 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- 悬浮窗（聊天室功能，Android 10+ 受限） -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -95,7 +95,8 @@
             android:exported="false" />
         <service
             android:name="com.picacomic.fregata.services.DownloadService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <!-- SplashActivity 本身不导出，通过 activity-alias 启动 -->
         <activity

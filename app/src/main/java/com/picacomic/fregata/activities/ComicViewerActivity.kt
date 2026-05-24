@@ -165,6 +165,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     var shouldRestoreRecordPosition: Boolean = false
     var shouldWarnMobileNetwork: Boolean = false
     var offlineMode: Boolean = false
+    private var pendingBrightnessSettingsPermission = false
     var autoPagingTimer: CountDownTimer? = null
     var episodeButtonFadeTimer: CountDownTimer? = null
     var comicPagesCall: Call<GeneralResponse<ComicPagesResponse?>?>? = null
@@ -888,6 +889,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         ).show()
         val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
         intent.setData(Uri.parse("package:" + getPackageName()))
+        pendingBrightnessSettingsPermission = true
         startActivity(intent)
     }
 
@@ -926,6 +928,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+        if (pendingBrightnessSettingsPermission && (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.System.canWrite(this))) {
+            pendingBrightnessSettingsPermission = false
+            j(this.checkBox_brightnessSystem?.isChecked == true)
         }
     }
 
@@ -1758,22 +1764,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         }
     }
 
-    // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
-    public override fun onRequestPermissionsResult(i: Int, strArr: Array<out String>, iArr: IntArray) {
-        super.onRequestPermissionsResult(i, strArr, iArr)
-        if (i == REQUEST_WRITE_SETTINGS && iArr.size > 0) {
-            if (iArr[0] == PackageManager.PERMISSION_GRANTED) {
-                j(this.checkBox_brightnessSystem!!.isChecked())
-            } else {
-                Toast.makeText(
-                    this,
-                    R.string.comic_viewer_setting_panel_brightness_manual,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
     fun n(i: Int) {
         val networkStatus = this.networkStatusLabel
         if (this.pageList != null) {
@@ -1959,7 +1949,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
     companion object {
         const val TAG: String = "ComicViewerActivity"
-        private const val REQUEST_WRITE_SETTINGS = 2001
         @JvmField
         var hq: Int = 40
     }
