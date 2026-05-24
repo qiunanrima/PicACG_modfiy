@@ -21,6 +21,10 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.view.WindowInsets
+import android.view.WindowInsetsController
+import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.AbsListView
@@ -222,7 +226,9 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
     // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     protected override fun onCreate(bundle: Bundle?) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(bundle)
+        enterReaderFullscreen()
         this.binding = ActivityComicViewerBinding.inflate(getLayoutInflater())
         setContentView(this.binding!!.getRoot())
 
@@ -313,9 +319,34 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             setupComposeControlsOverlay()
             bL()
             bH()
+            enterReaderFullscreen()
             return
         }
         finish()
+    }
+
+    private fun enterReaderFullscreen() {
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            window.insetsController?.let { controller ->
+                controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
     }
 
     fun init() {
@@ -888,6 +919,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     protected override fun onResume() {
         super.onResume()
+        enterReaderFullscreen()
         try {
             if (this.ih != null) {
                 registerReceiver(this.ih, IntentFilter("android.intent.action.BATTERY_CHANGED"))
@@ -1527,6 +1559,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     fun setReaderControlsVisibility(visibility: Int) {
+        enterReaderFullscreen()
         ensurePanelAnimationsLoaded()
         this.relativeLayout_leftPanel!!.setVisibility(View.GONE)
         this.linearLayout_rightPanel!!.setVisibility(View.GONE)
@@ -1715,6 +1748,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, android.content.ComponentCallbacks
     override fun onConfigurationChanged(configuration: Configuration) {
         super.onConfigurationChanged(configuration)
+        enterReaderFullscreen()
         if (configuration.orientation == 2) {
             this.linearLayout_horizontalPagingScrollbar!!.setVisibility(View.VISIBLE)
             this.linearLayout_verticalPagingScrollbar!!.setVisibility(View.GONE)
