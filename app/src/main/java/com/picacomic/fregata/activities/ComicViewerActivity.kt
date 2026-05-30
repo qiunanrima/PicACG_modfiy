@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
@@ -17,6 +19,7 @@ import android.os.CountDownTimer
 import android.provider.Settings
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
@@ -107,14 +110,73 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             val order = episode?.getOrder() ?: (position + 1)
             textView.text = episode?.getTitle()?.takeIf { it.isNotBlank() } ?: "第 $order 话"
             val selected = order == this@ComicViewerActivity.episodeOrder
-            textView.setTextColor(ContextCompat.getColor(this@ComicViewerActivity, R.color.white))
-            textView.setBackgroundColor(
-                ContextCompat.getColor(
-                    this@ComicViewerActivity,
-                    if (selected) R.color.colorPrimary else R.color.black_transparent_30
-                )
-            )
+            val expressive = e.getDesignLanguage(this@ComicViewerActivity).coerceIn(0, 1) == 1
+            textView.applyMd3EpisodeStyle(selected, expressive)
             return textView
+        }
+
+        private fun TextView.applyMd3EpisodeStyle(selected: Boolean, expressive: Boolean) {
+            val cornerRadius = resources.getDimension(R.dimen.size_button_episode_corner_radius)
+            val strokeWidth = resources.getDimensionPixelSize(R.dimen.size_card_style_edge_width)
+            val backgroundColor = resolveThemeColor(
+                if (selected && expressive) {
+                    R.attr.custom_secondary_container_color
+                } else if (selected) {
+                    R.attr.custom_primary_container_color
+                } else {
+                    R.attr.custom_background_color_dark
+                },
+                R.attr.custom_background_color
+            )
+            val textColor = resolveThemeColor(
+                if (selected && expressive) {
+                    R.attr.custom_text_black_color
+                } else if (selected) {
+                    R.attr.custom_text_black_color
+                } else {
+                    R.attr.custom_text_black_color_light
+                },
+                R.attr.custom_text_black_color
+            )
+            val outlineColor = resolveThemeColor(
+                R.attr.custom_text_black_color_light,
+                R.attr.custom_text_black_color
+            )
+
+            setTextColor(textColor)
+            background = GradientDrawable().apply {
+                shape = GradientDrawable.RECTANGLE
+                setColor(if (selected) backgroundColor else backgroundColor.withAlpha(0.72f))
+                setCornerRadius(cornerRadius)
+                setStroke(strokeWidth, if (selected) outlineColor.withAlpha(0.42f) else outlineColor.withAlpha(0.26f))
+            }
+        }
+
+        private fun resolveThemeColor(attr: Int, fallbackAttr: Int): Int {
+            val typedValue = TypedValue()
+            return if (theme.resolveAttribute(attr, typedValue, true)) {
+                typedValue.toColor()
+            } else {
+                theme.resolveAttribute(fallbackAttr, typedValue, true)
+                typedValue.toColor()
+            }
+        }
+
+        private fun TypedValue.toColor(): Int {
+            return if (resourceId != 0) {
+                ContextCompat.getColor(this@ComicViewerActivity, resourceId)
+            } else {
+                data
+            }
+        }
+
+        private fun Int.withAlpha(alpha: Float): Int {
+            return Color.argb(
+                (alpha.coerceIn(0f, 1f) * 255).toInt(),
+                Color.red(this),
+                Color.green(this),
+                Color.blue(this)
+            )
         }
     }
 
