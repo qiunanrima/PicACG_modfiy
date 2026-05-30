@@ -93,7 +93,7 @@ public class DownloadService extends IntentService {
         if (stringExtra == null || stringExtra2 == null) {
             return;
         }
-        DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(stringExtra2);
+        DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(stringExtra, stringExtra2);
         if (downloadComicEpisodeObjectAy != null && downloadComicEpisodeObjectAy.getStatus() == 4) {
             f.E(TAG, "Skip downloaded task " + stringExtra2);
             return;
@@ -210,7 +210,7 @@ public class DownloadService extends IntentService {
         d dVar = new d(this);
         DbComicDetailObject dbComicDetailObjectAw = com.picacomic.fregata.utils.b.aw(str);
         String title2 = dbComicDetailObjectAw != null ? dbComicDetailObjectAw.getTitle() : "";
-        DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(str2);
+        DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(str, str2);
         if (downloadComicEpisodeObjectAy != null && downloadComicEpisodeObjectAy.getStatus() == 4) {
             this.tV.remove(str2);
             return;

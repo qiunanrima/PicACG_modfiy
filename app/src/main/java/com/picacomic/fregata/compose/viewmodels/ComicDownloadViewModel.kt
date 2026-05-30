@@ -141,7 +141,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
                 if (response.code() == 200) {
                     val paging = response.body()?.data?.eps
                     val docs = paging?.docs.orEmpty().map { episode ->
-                        val dbEpisode = b.ay(episode.episodeId)
+                        val dbEpisode = b.ay(targetComicId, episode.episodeId)
                         when (dbEpisode?.status) {
                             1, 2, 3 -> episode.setStatus(1)
                             4 -> episode.setStatus(2)
@@ -230,7 +230,7 @@ class ComicDownloadViewModel(application: Application) : AndroidViewModel(applic
         val targetComicId = comicId ?: return false
         val episode = episodes.getOrNull(index) ?: return false
         val episodeId = episode.episodeId ?: return false
-        val dbEpisode = b.ay(episodeId)
+        val dbEpisode = b.ay(targetComicId, episodeId)
         if (dbEpisode != null) {
             return false
         }

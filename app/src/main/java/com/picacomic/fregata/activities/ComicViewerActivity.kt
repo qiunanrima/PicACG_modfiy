@@ -372,6 +372,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         this.shouldRestoreRecordPosition = false
         this.shouldWarnMobileNetwork = true
         this.comicId = getIntent().getStringExtra("EXTRA_KEY_COMIC_ID")
+        this.comicViewerHostView?.setComicId(this.comicId)
         this.offlineMode = getIntent().getBooleanExtra("EXTRA_KEY_OFFLINE_MODE", false)
         this.comicViewerHostView?.setOfflineMode(this.offlineMode)
         this.comicTitle = getIntent().getStringExtra("EXTRA_KEY_COMIC_TITLE")
@@ -1387,7 +1388,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 if (page.getComicPageId().isNullOrBlank() || media == null) {
                     return@forEach
                 }
-                if (b.az(page.getComicPageId()) == null) {
+                if (b.az(this.comicId, page.getComicPageId()) == null) {
                     b.a(DownloadComicPageObject(this.comicId, episode.getEpisodeId(), "", page))
                 }
             }
@@ -1584,7 +1585,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.totalEpisodePagingPages = 1
             cachedEpisodes.forEach { episode ->
                 this.episodeList!!.add(episode.comicEpisodeObject.apply {
-                    setStatus(b.ay(episode.getEpisodeId())?.getStatus() ?: 0)
+                    setStatus(b.ay(this@ComicViewerActivity.comicId, episode.getEpisodeId())?.getStatus() ?: 0)
                 })
             }
             downloadedEpisodes.forEach { episode ->

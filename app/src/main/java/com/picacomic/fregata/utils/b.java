@@ -66,6 +66,18 @@ public class b {
         return (DownloadComicEpisodeObject) listFind.get(0);
     }
 
+    public static DownloadComicEpisodeObject ay(String str, String str2) {
+        if (str == null || str2 == null) {
+            return null;
+        }
+        List listFind = DownloadComicEpisodeObject.find(DownloadComicEpisodeObject.class, "comic_id = ? and episode_id = ?", str, str2);
+        if (listFind == null || listFind.size() == 0) {
+            return null;
+        }
+        f.E(TAG, "Load Ep DB object size = " + listFind.size());
+        return (DownloadComicEpisodeObject) listFind.get(0);
+    }
+
     public static DownloadComicPageObject az(String str) {
         List listFind = DownloadComicPageObject.find(DownloadComicPageObject.class, "comic_page_id = ?", str);
         if (listFind == null || listFind.size() == 0) {
@@ -75,12 +87,24 @@ public class b {
         return (DownloadComicPageObject) listFind.get(0);
     }
 
+    public static DownloadComicPageObject az(String str, String str2) {
+        if (str == null || str2 == null) {
+            return null;
+        }
+        List listFind = DownloadComicPageObject.find(DownloadComicPageObject.class, "comic_id = ? and comic_page_id = ?", str, str2);
+        if (listFind == null || listFind.size() == 0) {
+            return null;
+        }
+        f.E(TAG, "Load Page DB object size = " + listFind.size());
+        return (DownloadComicPageObject) listFind.get(0);
+    }
+
     public static boolean a(DownloadComicPageObject downloadComicPageObject) {
-        if (downloadComicPageObject == null || downloadComicPageObject.getComicPageId() == null) {
+        if (downloadComicPageObject == null || downloadComicPageObject.getComicId() == null || downloadComicPageObject.getComicPageId() == null) {
             return false;
         }
-        if (az(downloadComicPageObject.getComicPageId()) != null) {
-            DownloadComicPageObject downloadComicPageObjectAz = az(downloadComicPageObject.getComicPageId());
+        if (az(downloadComicPageObject.getComicId(), downloadComicPageObject.getComicPageId()) != null) {
+            DownloadComicPageObject downloadComicPageObjectAz = az(downloadComicPageObject.getComicId(), downloadComicPageObject.getComicPageId());
             downloadComicPageObjectAz.updateWithDownloadComicPageObject(downloadComicPageObject);
             downloadComicPageObjectAz.save();
             f.E(TAG, "Update Page: " + downloadComicPageObject);

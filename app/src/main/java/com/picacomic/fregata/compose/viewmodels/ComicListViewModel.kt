@@ -412,7 +412,9 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             }
 
             val totalCount = DbComicViewRecordObject.count<DbComicViewRecordObject>(
-                DbComicViewRecordObject::class.java
+                DbComicViewRecordObject::class.java,
+                "last_view_timestamp > ?",
+                arrayOf("0")
             )
             totalPage = totalPagesFromCount(totalCount)
             comics = if (shouldResetOnNextLoad) loaded else comics + loaded
@@ -435,7 +437,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         try {
             val records = DbComicDetailObject.findWithQuery(
                 DbComicDetailObject::class.java,
-                "SELECT * FROM db_comic_detail_object WHERE download_status > 0 ORDER BY downloaded_at DESC LIMIT ? OFFSET ?",
+                "SELECT * FROM db_comic_detail_object WHERE download_status = 4 ORDER BY downloaded_at DESC LIMIT ? OFFSET ?",
                 pageLimit.toString(),
                 downloadedOffset.toString()
             ) ?: emptyList<Any>()
@@ -444,7 +446,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             }
             val totalCount = DbComicDetailObject.count<DbComicDetailObject>(
                 DbComicDetailObject::class.java,
-                "download_status > 0",
+                "download_status = 4",
                 null
             )
             totalPage = totalPagesFromCount(totalCount)

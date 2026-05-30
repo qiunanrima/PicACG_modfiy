@@ -319,7 +319,7 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
 
         return sourceEpisodes.map { episode ->
             val downloadEpisode = try {
-                downloadedEpisodesById[episode.episodeId] ?: b.ay(episode.episodeId)
+                downloadedEpisodesById[episode.episodeId] ?: b.ay(comicId, episode.episodeId)
             } catch (_: Exception) {
                 null
             }
@@ -499,7 +499,7 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
                 ?.sortedBy { it.episodeOrder }
                 ?.map { episode ->
                     episode.comicEpisodeObject.apply {
-                        setStatus(mapDownloadStatus(b.ay(episode.episodeId)?.status))
+                        setStatus(mapDownloadStatus(b.ay(comicId, episode.episodeId)?.status))
                     }
                 }
                 .orEmpty()

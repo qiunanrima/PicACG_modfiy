@@ -116,6 +116,8 @@ class ProfileComicViewModel(application: Application) : AndroidViewModel(applica
             }
             qJ = DbComicViewRecordObject.count<DbComicViewRecordObject>(
                 DbComicViewRecordObject::class.java,
+                "last_view_timestamp > ?",
+                arrayOf("0"),
             )
             dw()
         } catch (_: Exception) {

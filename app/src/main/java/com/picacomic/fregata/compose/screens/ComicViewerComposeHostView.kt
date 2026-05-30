@@ -72,6 +72,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     private var scrollTarget by mutableStateOf<Int?>(null)
     private var verticalScroll by mutableStateOf(true)
     private var isOfflineReader by mutableStateOf(false)
+    private var currentComicId by mutableStateOf<String?>(null)
     private var callback: d? = context as? d
     private var lastLoadedOffset = 0
 
@@ -89,6 +90,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
                             testingListMode = testingListMode,
                             performanceMode = performanceMode,
                             offlineMode = isOfflineReader,
+                            comicId = currentComicId,
                             scrollTarget = scrollTarget,
                             onScrollTargetConsumed = { scrollTarget = null },
                             onPageChanged = { page -> callback?.r(page) },
@@ -102,6 +104,10 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
 
     fun setOfflineMode(value: Boolean) {
         isOfflineReader = value
+    }
+
+    fun setComicId(value: String?) {
+        currentComicId = value
     }
 
     override fun a(arrayList: ArrayList<ComicPageObject>, i: Int, z: Boolean, z2: Boolean) {
@@ -145,7 +151,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     private fun prefetch(arrayList: List<ComicPageObject>) {
         val prefetchLimit = if (performanceMode) PERFORMANCE_PREFETCH_PAGE_LIMIT else PREFETCH_PAGE_LIMIT
         arrayList.take(prefetchLimit).forEach { page ->
-            val imageUrl = resolveComicPageImage(page)
+            val imageUrl = resolveComicPageImage(currentComicId, page)
             if (!imageUrl.isNullOrBlank()) {
                 context.imageLoader.enqueue(
                     buildComicPageImageRequest(
@@ -179,6 +185,7 @@ private fun ComicViewerScreen(
     testingListMode: Boolean,
     performanceMode: Boolean,
     offlineMode: Boolean,
+    comicId: String?,
     scrollTarget: Int?,
     onScrollTargetConsumed: () -> Unit,
     onPageChanged: (Int) -> Unit,
@@ -236,6 +243,7 @@ private fun ComicViewerScreen(
                         testingListMode = testingListMode,
                         performanceMode = performanceMode,
                         offlineMode = offlineMode,
+                        comicId = comicId,
                     )
                 }
             }
@@ -256,6 +264,7 @@ private fun ComicViewerScreen(
                         testingListMode = testingListMode,
                         performanceMode = performanceMode,
                         offlineMode = offlineMode,
+                        comicId = comicId,
                     )
                 }
             }
@@ -352,6 +361,7 @@ private fun ComicViewerItem(
     testingListMode: Boolean,
     performanceMode: Boolean,
     offlineMode: Boolean,
+    comicId: String?,
 ) {
     if (isAdvertisementItem(virtualIndex, pages.size)) {
         Spacer(modifier = Modifier.size(0.dp))
@@ -367,6 +377,7 @@ private fun ComicViewerItem(
         testingListMode = testingListMode,
         performanceMode = performanceMode,
         offlineMode = offlineMode,
+        comicId = comicId,
     )
 }
 
@@ -378,9 +389,10 @@ private fun ComicViewerPage(
     testingListMode: Boolean,
     performanceMode: Boolean,
     offlineMode: Boolean,
+    comicId: String?,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val imageUrl = resolveComicPageImage(page)
+    val imageUrl = resolveComicPageImage(comicId, page)
     val placeholderRes = if (testingListMode || performanceMode) {
         R.drawable.placeholder_transparent_low
     } else {
@@ -429,9 +441,9 @@ private fun ComicViewerPage(
     }
 }
 
-private fun resolveComicPageImage(page: ComicPageObject): String? {
+private fun resolveComicPageImage(comicId: String?, page: ComicPageObject): String? {
     val media = page.media ?: return null
-    val downloaded = b.az(page.comicPageId)
+    val downloaded = b.az(comicId, page.comicPageId)
     if (downloaded != null) {
         val storageFolder = downloaded.storageFolder?.takeIf { it.isNotBlank() } ?: DirectoryHelper.ec()
         val file = File(storageFolder, downloaded.episodeId + "/" + downloaded.mediaPath)
