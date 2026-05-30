@@ -73,6 +73,11 @@ class Options(
     val diskCacheKey: String? = null,
 
     /**
+     * 'true' if network fetches should be skipped when a matching disk cache entry exists.
+     */
+    val skipNetworkIfDiskCacheExists: Boolean = false,
+
+    /**
      * The header fields to use for any network requests.
      */
     val headers: Headers = EMPTY_HEADERS,
@@ -113,6 +118,7 @@ class Options(
         allowRgb565: Boolean = this.allowRgb565,
         premultipliedAlpha: Boolean = this.premultipliedAlpha,
         diskCacheKey: String? = this.diskCacheKey,
+        skipNetworkIfDiskCacheExists: Boolean = this.skipNetworkIfDiskCacheExists,
         headers: Headers = this.headers,
         tags: Tags = this.tags,
         parameters: Parameters = this.parameters,
@@ -129,6 +135,7 @@ class Options(
         allowRgb565 = allowRgb565,
         premultipliedAlpha = premultipliedAlpha,
         diskCacheKey = diskCacheKey,
+        skipNetworkIfDiskCacheExists = skipNetworkIfDiskCacheExists,
         headers = headers,
         tags = tags,
         parameters = parameters,
@@ -149,6 +156,7 @@ class Options(
             allowRgb565 == other.allowRgb565 &&
             premultipliedAlpha == other.premultipliedAlpha &&
             diskCacheKey == other.diskCacheKey &&
+            skipNetworkIfDiskCacheExists == other.skipNetworkIfDiskCacheExists &&
             headers == other.headers &&
             tags == other.tags &&
             parameters == other.parameters &&
@@ -167,6 +175,7 @@ class Options(
         result = 31 * result + allowRgb565.hashCode()
         result = 31 * result + premultipliedAlpha.hashCode()
         result = 31 * result + diskCacheKey.hashCode()
+        result = 31 * result + skipNetworkIfDiskCacheExists.hashCode()
         result = 31 * result + headers.hashCode()
         result = 31 * result + tags.hashCode()
         result = 31 * result + parameters.hashCode()

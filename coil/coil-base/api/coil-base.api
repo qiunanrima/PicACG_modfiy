@@ -529,7 +529,7 @@ public final class coil/request/ErrorResult : coil/request/ImageResult {
 }
 
 public final class coil/request/ImageRequest {
-	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/Object;Lcoil/target/Target;Lcoil/request/ImageRequest$Listener;Lcoil/memory/MemoryCache$Key;Ljava/lang/String;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Precision;Lkotlin/Pair;Lcoil/decode/Decoder$Factory;Ljava/util/List;Lcoil/transition/Transition$Factory;Lokhttp3/Headers;Lcoil/request/Tags;ZZZZLcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;Landroidx/lifecycle/Lifecycle;Lcoil/size/SizeResolver;Lcoil/size/Scale;Lcoil/request/Parameters;Lcoil/memory/MemoryCache$Key;Ljava/lang/Integer;Landroid/graphics/drawable/Drawable;Ljava/lang/Integer;Landroid/graphics/drawable/Drawable;Ljava/lang/Integer;Landroid/graphics/drawable/Drawable;Lcoil/request/DefinedRequestOptions;Lcoil/request/DefaultRequestOptions;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Landroid/content/Context;Ljava/lang/Object;Lcoil/target/Target;Lcoil/request/ImageRequest$Listener;Lcoil/memory/MemoryCache$Key;Ljava/lang/String;ZLandroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Precision;Lkotlin/Pair;Lcoil/decode/Decoder$Factory;Ljava/util/List;Lcoil/transition/Transition$Factory;Lokhttp3/Headers;Lcoil/request/Tags;ZZZZLcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;Lkotlinx/coroutines/CoroutineDispatcher;Landroidx/lifecycle/Lifecycle;Lcoil/size/SizeResolver;Lcoil/size/Scale;Lcoil/request/Parameters;Lcoil/memory/MemoryCache$Key;Ljava/lang/Integer;Landroid/graphics/drawable/Drawable;Ljava/lang/Integer;Landroid/graphics/drawable/Drawable;Ljava/lang/Integer;Landroid/graphics/drawable/Drawable;Lcoil/request/DefinedRequestOptions;Lcoil/request/DefaultRequestOptions;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowConversionToBitmap ()Z
 	public final fun getAllowHardware ()Z
@@ -561,6 +561,7 @@ public final class coil/request/ImageRequest {
 	public final fun getPrecision ()Lcoil/size/Precision;
 	public final fun getPremultipliedAlpha ()Z
 	public final fun getScale ()Lcoil/size/Scale;
+	public final fun getSkipNetworkIfDiskCacheExists ()Z
 	public final fun getSizeResolver ()Lcoil/size/SizeResolver;
 	public final fun getTags ()Lcoil/request/Tags;
 	public final fun getTarget ()Lcoil/target/Target;
@@ -632,6 +633,9 @@ public final class coil/request/ImageRequest$Builder {
 	public final fun size (Lcoil/size/Dimension;Lcoil/size/Dimension;)Lcoil/request/ImageRequest$Builder;
 	public final fun size (Lcoil/size/Size;)Lcoil/request/ImageRequest$Builder;
 	public final fun size (Lcoil/size/SizeResolver;)Lcoil/request/ImageRequest$Builder;
+	public final fun skipNetworkIfDiskCacheExists ()Lcoil/request/ImageRequest$Builder;
+	public final fun skipNetworkIfDiskCacheExists (Z)Lcoil/request/ImageRequest$Builder;
+	public static synthetic fun skipNetworkIfDiskCacheExists$default (Lcoil/request/ImageRequest$Builder;ZILjava/lang/Object;)Lcoil/request/ImageRequest$Builder;
 	public final fun tag (Ljava/lang/Class;Ljava/lang/Object;)Lcoil/request/ImageRequest$Builder;
 	public final fun tags (Lcoil/request/Tags;)Lcoil/request/ImageRequest$Builder;
 	public final fun target (Landroid/widget/ImageView;)Lcoil/request/ImageRequest$Builder;
@@ -674,10 +678,10 @@ public final class coil/request/NullRequestDataException : java/lang/RuntimeExce
 }
 
 public final class coil/request/Options {
-	public fun <init> (Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;Lokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;)V
-	public synthetic fun <init> (Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;Lokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;Lokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;)Lcoil/request/Options;
-	public static synthetic fun copy$default (Lcoil/request/Options;Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;Lokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;ILjava/lang/Object;)Lcoil/request/Options;
+	public fun <init> (Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;ZLokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;)V
+	public synthetic fun <init> (Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;ZLokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;ZLokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;)Lcoil/request/Options;
+	public static synthetic fun copy$default (Lcoil/request/Options;Landroid/content/Context;Landroid/graphics/Bitmap$Config;Landroid/graphics/ColorSpace;Lcoil/size/Size;Lcoil/size/Scale;ZZZLjava/lang/String;ZLokhttp3/Headers;Lcoil/request/Tags;Lcoil/request/Parameters;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;Lcoil/request/CachePolicy;ILjava/lang/Object;)Lcoil/request/Options;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowInexactSize ()Z
 	public final fun getAllowRgb565 ()Z
@@ -692,6 +696,7 @@ public final class coil/request/Options {
 	public final fun getParameters ()Lcoil/request/Parameters;
 	public final fun getPremultipliedAlpha ()Z
 	public final fun getScale ()Lcoil/size/Scale;
+	public final fun getSkipNetworkIfDiskCacheExists ()Z
 	public final fun getSize ()Lcoil/size/Size;
 	public final fun getTags ()Lcoil/request/Tags;
 	public fun hashCode ()I
@@ -996,4 +1001,3 @@ public abstract interface class coil/util/Logger {
 	public abstract fun log (Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
 	public abstract fun setLevel (I)V
 }
-

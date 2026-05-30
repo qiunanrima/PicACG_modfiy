@@ -84,6 +84,7 @@ internal class RequestService(
             allowRgb565 = allowRgb565,
             premultipliedAlpha = request.premultipliedAlpha,
             diskCacheKey = request.diskCacheKey,
+            skipNetworkIfDiskCacheExists = request.skipNetworkIfDiskCacheExists,
             headers = request.headers,
             tags = request.tags,
             parameters = request.parameters,

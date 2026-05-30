@@ -38,14 +38,27 @@ internal class HttpUriFetcher(
 
     override suspend fun fetch(): FetchResult {
         var snapshot = readFromDiskCache()
+        var snapshotDiskCacheKey = diskCacheKey
+        if (snapshot == null && options.skipNetworkIfDiskCacheExists && options.diskCacheKey != null) {
+            snapshot = readFromDiskCache(url)
+            snapshotDiskCacheKey = url
+        }
         try {
             // Fast path: fetch the image from the disk cache without performing a network request.
             val cacheStrategy: CacheStrategy
             if (snapshot != null) {
+                if (options.skipNetworkIfDiskCacheExists) {
+                    return SourceResult(
+                        source = snapshot.toImageSource(snapshotDiskCacheKey),
+                        mimeType = getMimeType(url, snapshot.toCacheResponse()?.contentType),
+                        dataSource = DataSource.DISK
+                    )
+                }
+
                 // Always return cached images with empty metadata as they were likely added manually.
                 if (fileSystem.metadata(snapshot.metadata).size == 0L) {
                     return SourceResult(
-                        source = snapshot.toImageSource(),
+                        source = snapshot.toImageSource(snapshotDiskCacheKey),
                         mimeType = getMimeType(url, null),
                         dataSource = DataSource.DISK
                     )
@@ -56,7 +69,7 @@ internal class HttpUriFetcher(
                     cacheStrategy = CacheStrategy.Factory(newRequest(), snapshot.toCacheResponse()).compute()
                     if (cacheStrategy.networkRequest == null && cacheStrategy.cacheResponse != null) {
                         return SourceResult(
-                            source = snapshot.toImageSource(),
+                            source = snapshot.toImageSource(snapshotDiskCacheKey),
                             mimeType = getMimeType(url, cacheStrategy.cacheResponse.contentType),
                             dataSource = DataSource.DISK
                         )
@@ -64,7 +77,7 @@ internal class HttpUriFetcher(
                 } else {
                     // Skip checking the cache headers if the option is disabled.
                     return SourceResult(
-                        source = snapshot.toImageSource(),
+                        source = snapshot.toImageSource(snapshotDiskCacheKey),
                         mimeType = getMimeType(url, snapshot.toCacheResponse()?.contentType),
                         dataSource = DataSource.DISK
                     )
@@ -122,9 +135,9 @@ internal class HttpUriFetcher(
         }
     }
 
-    private fun readFromDiskCache(): DiskCache.Snapshot? {
+    private fun readFromDiskCache(cacheKey: String = diskCacheKey): DiskCache.Snapshot? {
         return if (options.diskCachePolicy.readEnabled) {
-            diskCache.value?.openSnapshot(diskCacheKey)
+            diskCache.value?.openSnapshot(cacheKey)
         } else {
             null
         }
@@ -261,8 +274,8 @@ internal class HttpUriFetcher(
         }
     }
 
-    private fun DiskCache.Snapshot.toImageSource(): ImageSource {
-        return ImageSource(data, fileSystem, diskCacheKey, this)
+    private fun DiskCache.Snapshot.toImageSource(cacheKey: String = diskCacheKey): ImageSource {
+        return ImageSource(data, fileSystem, cacheKey, this)
     }
 
     private fun ResponseBody.toImageSource(): ImageSource {

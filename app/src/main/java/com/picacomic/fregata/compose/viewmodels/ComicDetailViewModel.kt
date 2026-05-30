@@ -12,6 +12,7 @@ import com.picacomic.fregata.objects.ComicDetailObject
 import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.databaseTable.DbComicDetailObject
+import com.picacomic.fregata.objects.databaseTable.DbComicEpisodeObject
 import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
 import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject
 import com.picacomic.fregata.objects.responses.ActionResponse
@@ -273,6 +274,7 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
                 if (response.code() == 200) {
                     val paging = response.body()?.data?.eps
                     val docs = paging?.docs ?: emptyList()
+                    persistEpisodeDirectory(comicId, docs)
                     val merged = if (reset) {
                         docs
                     } else {
@@ -376,6 +378,52 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    private fun persistEpisodeDirectory(comicId: String, sourceEpisodes: List<ComicEpisodeObject>) {
+        if (comicId.isBlank() || sourceEpisodes.isEmpty()) return
+        try {
+            sourceEpisodes.forEach { episode ->
+                if (episode.episodeId.isNullOrBlank()) {
+                    return@forEach
+                }
+                val existing = findCachedEpisode(comicId, episode)
+                if (existing == null) {
+                    DbComicEpisodeObject(comicId, episode).save()
+                } else {
+                    existing.setEpisodeId(episode.episodeId)
+                    existing.setTitle(episode.title)
+                    existing.setEpisodeOrder(episode.order)
+                    existing.setUpdatedAt(episode.updatedAt)
+                    existing.save()
+                }
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun findCachedEpisode(comicId: String, episode: ComicEpisodeObject): DbComicEpisodeObject? {
+        if (comicId.isBlank()) return null
+        return try {
+            val byOrder = DbComicEpisodeObject.find(
+                DbComicEpisodeObject::class.java,
+                "comic_id = ? and episode_order = ?",
+                comicId,
+                episode.order.toString()
+            )
+                ?.filterIsInstance<DbComicEpisodeObject>()
+                ?.firstOrNull()
+            byOrder ?: DbComicEpisodeObject.find(
+                DbComicEpisodeObject::class.java,
+                "comic_id = ? and episode_id = ?",
+                comicId,
+                episode.episodeId
+            )
+                ?.filterIsInstance<DbComicEpisodeObject>()
+                ?.firstOrNull()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun fetchRecommendations(comicId: String) {
         val api = d(getApplication<Application>()).dO()
         val auth = e.z(getApplication<Application>())
@@ -431,7 +479,37 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun loadDownloadedEpisodesOnly(comicId: String) {
-        val localEpisodes = try {
+        val localEpisodes = loadCachedEpisodeDirectory(comicId)
+            .takeIf { it.isNotEmpty() }
+            ?: loadDownloadedEpisodeDirectory(comicId)
+        episodes = syncEpisodeLocalState(comicId, localEpisodes)
+        episodeTotal = localEpisodes.size.takeIf { it > 0 } ?: comicDetail?.episodeCount ?: 0
+        hasMoreEpisodes = false
+        nextEpisodePage = 1
+    }
+
+    private fun loadCachedEpisodeDirectory(comicId: String): List<ComicEpisodeObject> {
+        return try {
+            DbComicEpisodeObject.find(
+                DbComicEpisodeObject::class.java,
+                "comic_id = ?",
+                comicId
+            )
+                ?.filterIsInstance<DbComicEpisodeObject>()
+                ?.sortedBy { it.episodeOrder }
+                ?.map { episode ->
+                    episode.comicEpisodeObject.apply {
+                        setStatus(mapDownloadStatus(b.ay(episode.episodeId)?.status))
+                    }
+                }
+                .orEmpty()
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun loadDownloadedEpisodeDirectory(comicId: String): List<ComicEpisodeObject> {
+        return try {
             DownloadComicEpisodeObject.find(
                 DownloadComicEpisodeObject::class.java,
                 "comic_id = ?",
@@ -449,10 +527,6 @@ class ComicDetailViewModel(application: Application) : AndroidViewModel(applicat
         } catch (_: Exception) {
             emptyList()
         }
-        episodes = syncEpisodeLocalState(comicId, localEpisodes)
-        episodeTotal = localEpisodes.size.takeIf { it > 0 } ?: comicDetail?.episodeCount ?: 0
-        hasMoreEpisodes = false
-        nextEpisodePage = 1
     }
 
     private fun hasCachedPages(episodeId: String?): Boolean {

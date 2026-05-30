@@ -52,6 +52,7 @@ import com.picacomic.fregata.databinding.ActivityComicViewerBinding
 import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicPageObject
 import com.picacomic.fregata.objects.databaseTable.DbComicViewRecordObject
+import com.picacomic.fregata.objects.databaseTable.DbComicEpisodeObject
 import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
 import com.picacomic.fregata.objects.databaseTable.DownloadComicPageObject
 import com.picacomic.fregata.objects.responses.DataClass.ComicEpisodeResponse.ComicEpisodeResponse
@@ -74,6 +75,11 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         TRANSPARENT,
         HIDDEN
     }
+
+    private data class LocalEpisodeSnapshot(
+        val episode: ComicEpisodeObject,
+        val total: Int
+    )
 
     private inner class EpisodeGridAdapter : BaseAdapter() {
         override fun getCount(): Int = this@ComicViewerActivity.episodeList?.size ?: 0
@@ -1045,7 +1051,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     private fun hasLocalEpisode(order: Int): Boolean {
-        return findLocalEpisode(order) != null
+        return findReadableLocalEpisode(order) != null
     }
 
     private fun findLocalEpisode(order: Int): DownloadComicEpisodeObject? {
@@ -1060,6 +1066,40 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 ?.firstOrNull()
         } catch (_: Exception) {
             null
+        }
+    }
+
+    private fun findReadableLocalEpisode(order: Int): LocalEpisodeSnapshot? {
+        val downloadedEpisode = findLocalEpisode(order)
+        if (downloadedEpisode != null) {
+            return LocalEpisodeSnapshot(
+                episode = downloadedEpisode.getComicEpisodeObject(),
+                total = downloadedEpisode.getTotal()
+            )
+        }
+        val cachedEpisode = findCachedEpisodeByOrder(order) ?: return null
+        val cachedPageCount = countCachedPages(cachedEpisode.getEpisodeId())
+        if (cachedPageCount <= 0) {
+            return null
+        }
+        return LocalEpisodeSnapshot(
+            episode = cachedEpisode.getComicEpisodeObject(),
+            total = cachedEpisode.getTotal().takeIf { it > 0 } ?: cachedPageCount
+        )
+    }
+
+    private fun countCachedPages(episodeId: String?): Int {
+        if (episodeId.isNullOrBlank()) {
+            return 0
+        }
+        return try {
+            DownloadComicPageObject.count<DownloadComicPageObject>(
+                DownloadComicPageObject::class.java,
+                "episode_id = ?",
+                arrayOf(episodeId)
+            ).toInt()
+        } catch (_: Exception) {
+            0
         }
     }
 
@@ -1089,10 +1129,10 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 throw th
             }
         }
-        val localEpisode = findLocalEpisode(i)
+        val localEpisode = findReadableLocalEpisode(i)
         if (localEpisode != null) {
-            this.currentEpisode = localEpisode.getComicEpisodeObject()
-            this.totalPages = localEpisode.getTotal()
+            this.currentEpisode = localEpisode.episode
+            this.totalPages = localEpisode.total
             if (this.totalPages < hq) {
                 this.totalPagingPages = 1
             } else if (this.totalPages % hq == 0) {
@@ -1335,17 +1375,13 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         }
         try {
             val existingEpisode = findLocalEpisode(episode!!.getOrder())
-            if (existingEpisode == null) {
-                DownloadComicEpisodeObject(this.comicId, episode, 0).apply {
-                    setTotal(total)
-                    save()
-                }
-            } else if (existingEpisode.getStatus() == 0) {
+            if (existingEpisode != null) {
                 existingEpisode.setTitle(episode.getTitle())
                 existingEpisode.setUpdatedAt(episode.getUpdatedAt())
                 existingEpisode.setTotal(total)
                 existingEpisode.save()
             }
+            upsertCachedEpisode(episode, total)
             docs.forEach { page ->
                 val media = page.getMedia()
                 if (page.getComicPageId().isNullOrBlank() || media == null) {
@@ -1357,6 +1393,45 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
+        }
+    }
+
+    private fun findCachedEpisodeByOrder(order: Int): DbComicEpisodeObject? {
+        return try {
+            DbComicEpisodeObject.find<DbComicEpisodeObject?>(
+                DbComicEpisodeObject::class.java,
+                "comic_id = ? and episode_order = ?",
+                this.comicId,
+                order.toString()
+            )
+                ?.filterIsInstance<DbComicEpisodeObject>()
+                ?.firstOrNull()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun upsertCachedEpisode(episode: ComicEpisodeObject, total: Int? = null) {
+        if (this.comicId.isNullOrBlank() || episode.getEpisodeId().isNullOrBlank()) {
+            return
+        }
+        val existingEpisode = findCachedEpisodeByOrder(episode.getOrder())
+        if (existingEpisode == null) {
+            DbComicEpisodeObject(this.comicId, episode).apply {
+                if (total != null) {
+                    setTotal(total)
+                }
+                save()
+            }
+        } else {
+            existingEpisode.setEpisodeId(episode.getEpisodeId())
+            existingEpisode.setTitle(episode.getTitle())
+            existingEpisode.setEpisodeOrder(episode.getOrder())
+            existingEpisode.setUpdatedAt(episode.getUpdatedAt())
+            if (total != null) {
+                existingEpisode.setTotal(total)
+            }
+            existingEpisode.save()
         }
     }
 
@@ -1442,6 +1517,9 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                                     response.body()!!.data!!.getEps().getDocs().get(i)
                                 )
                             }
+                            this@ComicViewerActivity.persistEpisodeDirectory(
+                                response.body()!!.data!!.getEps().getDocs()
+                            )
                             this@ComicViewerActivity.refreshEpisodeDialog()
                             f.D(TAG, this@ComicViewerActivity.episodeList!!.size.toString() + "")
                         }
@@ -1480,18 +1558,35 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             return
         }
         try {
-            val downloadedEpisodes = DownloadComicEpisodeObject.find(
-                DownloadComicEpisodeObject::class.java,
-                "comic_id = ? and status != ?",
-                this.comicId,
-                "0"
+            val cachedEpisodes = DbComicEpisodeObject.find(
+                DbComicEpisodeObject::class.java,
+                "comic_id = ?",
+                this.comicId
             )
-                ?.filterIsInstance<DownloadComicEpisodeObject>()
+                ?.filterIsInstance<DbComicEpisodeObject>()
                 ?.sortedBy { it.episodeOrder }
                 .orEmpty()
-            this.episodeTotal = downloadedEpisodes.size
+            val downloadedEpisodes = if (cachedEpisodes.isEmpty()) {
+                DownloadComicEpisodeObject.find(
+                    DownloadComicEpisodeObject::class.java,
+                    "comic_id = ? and status != ?",
+                    this.comicId,
+                    "0"
+                )
+                    ?.filterIsInstance<DownloadComicEpisodeObject>()
+                    ?.sortedBy { it.episodeOrder }
+                    .orEmpty()
+            } else {
+                emptyList()
+            }
+            this.episodeTotal = if (cachedEpisodes.isNotEmpty()) cachedEpisodes.size else downloadedEpisodes.size
             this.currentEpisodePagingPage = 1
             this.totalEpisodePagingPages = 1
+            cachedEpisodes.forEach { episode ->
+                this.episodeList!!.add(episode.comicEpisodeObject.apply {
+                    setStatus(b.ay(episode.getEpisodeId())?.getStatus() ?: 0)
+                })
+            }
             downloadedEpisodes.forEach { episode ->
                 this.episodeList!!.add(episode.comicEpisodeObject)
             }
@@ -1505,17 +1600,45 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
     private fun firstDownloadedEpisodeOrder(): Int {
         return try {
-            val episodes = DownloadComicEpisodeObject.findWithQuery(
-                DownloadComicEpisodeObject::class.java,
-                "SELECT * FROM download_comic_episode_object WHERE comic_id = ? and status != ? ORDER BY episode_order ASC LIMIT 1",
-                this.comicId,
-                "0"
+            val cachedEpisodes = DbComicEpisodeObject.findWithQuery(
+                DbComicEpisodeObject::class.java,
+                "SELECT * FROM db_comic_episode_object WHERE comic_id = ? ORDER BY episode_order ASC",
+                this.comicId
             )
-                ?.filterIsInstance<DownloadComicEpisodeObject>()
+                ?.filterIsInstance<DbComicEpisodeObject>()
                 .orEmpty()
-            episodes.firstOrNull()?.episodeOrder ?: 0
+            val firstCachedEpisode = cachedEpisodes.firstOrNull { episode ->
+                countCachedPages(episode.getEpisodeId()) > 0
+            }
+            firstCachedEpisode?.getEpisodeOrder() ?: run {
+                val downloadedEpisodes = DownloadComicEpisodeObject.findWithQuery(
+                    DownloadComicEpisodeObject::class.java,
+                    "SELECT * FROM download_comic_episode_object WHERE comic_id = ? and status != ? ORDER BY episode_order ASC LIMIT 1",
+                    this.comicId,
+                    "0"
+                )
+                    ?.filterIsInstance<DownloadComicEpisodeObject>()
+                    .orEmpty()
+                downloadedEpisodes.firstOrNull()?.getEpisodeOrder() ?: 0
+            }
         } catch (_: Exception) {
             0
+        }
+    }
+
+    private fun persistEpisodeDirectory(docs: List<ComicEpisodeObject>) {
+        if (this.comicId.isNullOrBlank() || docs.isEmpty()) {
+            return
+        }
+        try {
+            docs.forEach { episode ->
+                if (episode.getEpisodeId().isNullOrBlank()) {
+                    return@forEach
+                }
+                upsertCachedEpisode(episode)
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
         }
     }
 

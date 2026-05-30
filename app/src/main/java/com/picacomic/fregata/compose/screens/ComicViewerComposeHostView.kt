@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -46,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import coil.imageLoader
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
-import coil.request.ErrorResult
 import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.a_pkg.c
@@ -383,7 +381,6 @@ private fun ComicViewerPage(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val imageUrl = resolveComicPageImage(page)
-    var stableOfflineCacheMiss by remember(imageUrl, page.comicPageId) { mutableStateOf(false) }
     val placeholderRes = if (testingListMode || performanceMode) {
         R.drawable.placeholder_transparent_low
     } else {
@@ -419,20 +416,10 @@ private fun ComicViewerPage(
                     page = page,
                     imageUrl = imageUrl,
                     offlineMode = offlineMode,
-                    stableCacheKey = !offlineMode || !stableOfflineCacheMiss,
                 )
                     .placeholder(placeholderRes)
                     .error(placeholderRes)
                     .fallback(placeholderRes)
-                    .listener(
-                        object : ImageRequest.Listener {
-                            override fun onError(request: ImageRequest, result: ErrorResult) {
-                                if (offlineMode && !stableOfflineCacheMiss) {
-                                    stableOfflineCacheMiss = true
-                                }
-                            }
-                        },
-                    )
                     .build(),
                 contentDescription = pageNumber.toString(),
                 contentScale = if (vertical) ContentScale.FillWidth else ContentScale.Fit,
@@ -466,6 +453,7 @@ private fun buildComicPageImageRequest(
     val builder = ImageRequest.Builder(context)
         .data(imageUrl)
         .allowHardware(false)
+        .skipNetworkIfDiskCacheExists(offlineMode)
         .applyComicCachePolicy(offlineMode)
     if (stableCacheKey) {
         builder.memoryCacheKey(cacheKey)
@@ -487,7 +475,7 @@ private fun ImageRequest.Builder.applyComicCachePolicy(offlineMode: Boolean): Im
     memoryCachePolicy(CachePolicy.ENABLED)
     if (offlineMode) {
         diskCachePolicy(CachePolicy.READ_ONLY)
-        networkCachePolicy(CachePolicy.DISABLED)
+        networkCachePolicy(CachePolicy.ENABLED)
     } else {
         diskCachePolicy(CachePolicy.ENABLED)
         networkCachePolicy(CachePolicy.ENABLED)

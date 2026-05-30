@@ -76,6 +76,9 @@ class ImageRequest private constructor(
     /** @see Builder.diskCacheKey */
     val diskCacheKey: String?,
 
+    /** @see Builder.skipNetworkIfDiskCacheExists */
+    val skipNetworkIfDiskCacheExists: Boolean,
+
     /** @see Builder.bitmapConfig */
     val bitmapConfig: Bitmap.Config,
 
@@ -189,6 +192,7 @@ class ImageRequest private constructor(
             listener == other.listener &&
             memoryCacheKey == other.memoryCacheKey &&
             diskCacheKey == other.diskCacheKey &&
+            skipNetworkIfDiskCacheExists == other.skipNetworkIfDiskCacheExists &&
             bitmapConfig == other.bitmapConfig &&
             (SDK_INT < 26 || colorSpace == other.colorSpace) &&
             precision == other.precision &&
@@ -231,6 +235,7 @@ class ImageRequest private constructor(
         result = 31 * result + listener.hashCode()
         result = 31 * result + memoryCacheKey.hashCode()
         result = 31 * result + diskCacheKey.hashCode()
+        result = 31 * result + skipNetworkIfDiskCacheExists.hashCode()
         result = 31 * result + bitmapConfig.hashCode()
         result = 31 * result + colorSpace.hashCode()
         result = 31 * result + precision.hashCode()
@@ -307,6 +312,7 @@ class ImageRequest private constructor(
         private var listener: Listener?
         private var memoryCacheKey: MemoryCache.Key?
         private var diskCacheKey: String?
+        private var skipNetworkIfDiskCacheExists: Boolean
         private var bitmapConfig: Bitmap.Config?
         private var colorSpace: ColorSpace? = null
         private var precision: Precision?
@@ -352,6 +358,7 @@ class ImageRequest private constructor(
             listener = null
             memoryCacheKey = null
             diskCacheKey = null
+            skipNetworkIfDiskCacheExists = false
             bitmapConfig = null
             if (SDK_INT >= 26) colorSpace = null
             precision = null
@@ -397,6 +404,7 @@ class ImageRequest private constructor(
             listener = request.listener
             memoryCacheKey = request.memoryCacheKey
             diskCacheKey = request.diskCacheKey
+            skipNetworkIfDiskCacheExists = request.skipNetworkIfDiskCacheExists
             bitmapConfig = request.defined.bitmapConfig
             if (SDK_INT >= 26) colorSpace = request.colorSpace
             precision = request.defined.precision
@@ -482,6 +490,15 @@ class ImageRequest private constructor(
          */
         fun diskCacheKey(key: String?) = apply {
             this.diskCacheKey = key
+        }
+
+        /**
+         * If enabled and a disk cache entry exists, return it without validating or fetching
+         * the image from the network.
+         */
+        @JvmOverloads
+        fun skipNetworkIfDiskCacheExists(enable: Boolean = true) = apply {
+            this.skipNetworkIfDiskCacheExists = enable
         }
 
         /**
@@ -949,6 +966,7 @@ class ImageRequest private constructor(
                 listener = listener,
                 memoryCacheKey = memoryCacheKey,
                 diskCacheKey = diskCacheKey,
+                skipNetworkIfDiskCacheExists = skipNetworkIfDiskCacheExists,
                 bitmapConfig = bitmapConfig ?: defaults.bitmapConfig,
                 colorSpace = colorSpace,
                 precision = precision ?: defaults.precision,
