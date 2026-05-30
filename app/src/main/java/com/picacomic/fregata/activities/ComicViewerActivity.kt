@@ -22,6 +22,7 @@ import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -116,39 +117,39 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         }
 
         private fun TextView.applyMd3EpisodeStyle(selected: Boolean, expressive: Boolean) {
-            val cornerRadius = resources.getDimension(R.dimen.size_button_episode_corner_radius)
+            val cornerRadius = resources.getDimensionPixelSize(R.dimen.padding_1).toFloat()
             val strokeWidth = resources.getDimensionPixelSize(R.dimen.size_card_style_edge_width)
             val backgroundColor = resolveThemeColor(
                 if (selected && expressive) {
-                    R.attr.custom_secondary_container_color
+                    R.attr.custom_secondary_overlay_color
                 } else if (selected) {
-                    R.attr.custom_primary_container_color
+                    R.attr.custom_primary_overlay_color
                 } else {
-                    R.attr.custom_background_color_dark
+                    R.attr.custom_transparent_white
                 },
-                R.attr.custom_background_color
+                R.attr.custom_transparent_white
             )
             val textColor = resolveThemeColor(
-                if (selected && expressive) {
-                    R.attr.custom_text_black_color
-                } else if (selected) {
-                    R.attr.custom_text_black_color
-                } else {
-                    R.attr.custom_text_black_color_light
-                },
-                R.attr.custom_text_black_color
+                R.attr.custom_transparent_white,
+                R.attr.custom_text_black_color_light
             )
             val outlineColor = resolveThemeColor(
-                R.attr.custom_text_black_color_light,
-                R.attr.custom_text_black_color
+                if (selected && expressive) {
+                    R.attr.custom_secondary_overlay_color
+                } else if (selected) {
+                    R.attr.custom_primary_overlay_color
+                } else {
+                    R.attr.custom_transparent_white
+                },
+                R.attr.custom_transparent_white
             )
 
             setTextColor(textColor)
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
-                setColor(if (selected) backgroundColor else backgroundColor.withAlpha(0.72f))
+                setColor(if (selected) backgroundColor.withAlpha(0.48f) else Color.TRANSPARENT)
                 setCornerRadius(cornerRadius)
-                setStroke(strokeWidth, if (selected) outlineColor.withAlpha(0.42f) else outlineColor.withAlpha(0.26f))
+                setStroke(strokeWidth, if (selected) outlineColor.withAlpha(0.95f) else outlineColor.withAlpha(0.18f))
             }
         }
 
@@ -297,9 +298,9 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     protected override fun onCreate(bundle: Bundle?) {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(bundle)
-        enterReaderFullscreen()
         this.binding = ActivityComicViewerBinding.inflate(getLayoutInflater())
         setContentView(this.binding!!.getRoot())
+        enterReaderFullscreen()
 
         this.button_autoPaging = this.binding!!.layoutBottomPanel.buttonComicViewerAutoPaging
         this.button_comment = this.binding!!.layoutRightPanel.buttonComicViewerComment
@@ -401,7 +402,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
-            window.insetsController?.let { controller ->
+            window.decorView.windowInsetsController?.let { controller ->
                 controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
                 controller.systemBarsBehavior =
                     WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -522,6 +523,20 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 this@ComicViewerActivity.bN()
             }
         })
+        this.gridView_episodeDialog!!.setOnTouchListener { gridView, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                val childIndex = this@ComicViewerActivity.gridView_episodeDialog!!.pointToPosition(
+                    event.x.toInt(),
+                    event.y.toInt()
+                )
+                if (childIndex == AdapterView.INVALID_POSITION) {
+                    this@ComicViewerActivity.gridView_episodeDialog!!.visibility = View.GONE
+                    this@ComicViewerActivity.setGesturePanelState(GesturePanelState.TRANSPARENT)
+                    return@setOnTouchListener true
+                }
+            }
+            false
+        }
     }
 
     private fun setupToolbarButtons() {
@@ -807,6 +822,11 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             // from class: com.picacomic.fregata.activities.ComicViewerActivity.19
             // android.view.View.OnClickListener
             override fun onClick(view: View?) {
+                if (this@ComicViewerActivity.gridView_episodeDialog?.visibility == View.VISIBLE) {
+                    this@ComicViewerActivity.gridView_episodeDialog?.visibility = View.GONE
+                    this@ComicViewerActivity.setGesturePanelState(GesturePanelState.TRANSPARENT)
+                    return
+                }
                 this@ComicViewerActivity.setGesturePanelState(GesturePanelState.TRANSPARENT)
                 e.c(this@ComicViewerActivity as Context, false)
             }
@@ -879,15 +899,33 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     private fun toggleEpisodeDialog() {
         if (this.gridView_episodeDialog!!.getVisibility() == View.VISIBLE) {
             this.gridView_episodeDialog!!.setVisibility(View.GONE)
+            setGesturePanelState(GesturePanelState.TRANSPARENT)
             return
         }
         if (this.linearLayout_dialogAutoPaging!!.getVisibility() == View.VISIBLE) {
             this.linearLayout_dialogAutoPaging!!.setVisibility(View.GONE)
         }
+        this.comicViewerControlsOverlayView?.updateControlsVisible(false)
+        setEpisodeDialogDismissLayerVisible()
         this.episodeGridAdapter?.notifyDataSetChanged()
         this.gridView_episodeDialog!!.setVisibility(View.VISIBLE)
+        this.gridView_episodeDialog!!.bringToFront()
         scrollEpisodeDialogToCurrent()
         bN()
+    }
+
+    private fun setEpisodeDialogDismissLayerVisible() {
+        this.button_nextPageRight!!.setVisibility(View.GONE)
+        this.button_nextPageBottom!!.setVisibility(View.GONE)
+        this.button_previousPage!!.setVisibility(View.GONE)
+        this.button_panel!!.setVisibility(View.GONE)
+        this.button_panelLeftCorner!!.setVisibility(View.GONE)
+        this.button_panel!!.setText("")
+        this.button_panelLeftCorner!!.setText("")
+        this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.transparent))
+        this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.transparent))
+        this.frameLayout_gestureArea!!.setBackgroundColor(getResources().getColor(R.color.transparent))
+        this.frameLayout_gestureArea!!.setVisibility(View.VISIBLE)
     }
 
     private fun refreshEpisodeDialog() {

@@ -210,10 +210,20 @@ private fun ComicViewerScreen(
 
     LaunchedEffect(listState, effectiveVerticalScroll, itemCount) {
         snapshotFlow {
-            listState.layoutInfo.visibleItemsInfo
-                .lastOrNull { it.size > 0 }
+            val visibleItems = listState.layoutInfo.visibleItemsInfo.filter { it.size > 0 }
+            val firstVisiblePageIndex = visibleItems
+                .firstOrNull { !isAdvertisementItem(it.index, pages.size) }
+                ?.index
+                ?.let(::virtualIndexToPageIndex)
+            val lastVisibleIndex = visibleItems
+                .lastOrNull()
                 ?.index
                 ?: listState.firstVisibleItemIndex
+            if (firstVisiblePageIndex == 0) {
+                pageIndexToVirtualIndex(0)
+            } else {
+                lastVisibleIndex
+            }
         }
             .distinctUntilChanged()
             .collect { virtualIndex ->
