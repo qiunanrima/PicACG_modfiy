@@ -1,4 +1,12 @@
 rootProject.name = "picacg_orginal"
+includeBuild('coil') {
+    dependencySubstitution {
+        substitute module('io.coil-kt:coil-base') using project(':coil-base')
+        substitute module('io.coil-kt:coil') using project(':coil-singleton')
+        substitute module('io.coil-kt:coil-compose-base') using project(':coil-compose-base')
+        substitute module('io.coil-kt:coil-compose') using project(':coil-compose-singleton')
+    }
+}
 include ':app'
 include ':engine-io-client'
 include ':socket-io-client'
