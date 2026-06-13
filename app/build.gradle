@@ -86,7 +86,7 @@ dependencies {
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0' // 替代 legacy-support-v4
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.compose.foundation:foundation'
-    implementation 'androidx.compose.material3:material3:1.5.0-alpha20'
+    implementation 'androidx.compose.material3:material3:1.5.0-alpha21'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.ui:ui'
     debugImplementation 'androidx.compose.ui:ui-tooling'

@@ -151,13 +151,13 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     private fun prefetch(arrayList: List<ComicPageObject>) {
         val prefetchLimit = if (performanceMode) PERFORMANCE_PREFETCH_PAGE_LIMIT else PREFETCH_PAGE_LIMIT
         arrayList.take(prefetchLimit).forEach { page ->
-            val imageUrl = resolveComicPageImage(currentComicId, page)
-            if (!imageUrl.isNullOrBlank()) {
+            val imageSource = resolveComicPageImageSource(currentComicId, page)
+            if (imageSource != null) {
                 context.imageLoader.enqueue(
                     buildComicPageImageRequest(
                         context = context,
                         page = page,
-                        imageUrl = imageUrl,
+                        imageSource = imageSource,
                         offlineMode = isOfflineReader,
                     ).build()
                 )
@@ -402,7 +402,7 @@ private fun ComicViewerPage(
     comicId: String?,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val imageUrl = resolveComicPageImage(comicId, page)
+    val imageSource = resolveComicPageImageSource(comicId, page)
     val placeholderRes = if (testingListMode || performanceMode) {
         R.drawable.placeholder_transparent_low
     } else {
@@ -418,7 +418,7 @@ private fun ComicViewerPage(
         },
         contentAlignment = Alignment.Center,
     ) {
-        if (imageUrl.isNullOrBlank()) {
+        if (imageSource == null) {
             Text(
                 text = page.comicPageId.orEmpty(),
                 color = Color.White,
@@ -436,7 +436,7 @@ private fun ComicViewerPage(
                 model = buildComicPageImageRequest(
                     context = context,
                     page = page,
-                    imageUrl = imageUrl,
+                    imageSource = imageSource,
                     offlineMode = offlineMode,
                 )
                     .placeholder(placeholderRes)
@@ -451,33 +451,43 @@ private fun ComicViewerPage(
     }
 }
 
-private fun resolveComicPageImage(comicId: String?, page: ComicPageObject): String? {
+private sealed class ComicPageImageSource {
+    data class LocalFile(val file: File) : ComicPageImageSource()
+    data class RemoteUrl(val url: String) : ComicPageImageSource()
+}
+
+private fun resolveComicPageImageSource(comicId: String?, page: ComicPageObject): ComicPageImageSource? {
     val media = page.media ?: return null
     val downloaded = b.az(comicId, page.comicPageId)
     if (downloaded != null) {
         val storageFolder = downloaded.storageFolder?.takeIf { it.isNotBlank() } ?: DirectoryHelper.ec()
         val file = File(storageFolder, downloaded.episodeId + "/" + downloaded.mediaPath)
         if (file.exists() && file.canRead() && file.length() > 0L) {
-            return file.toURI().toString()
+            return ComicPageImageSource.LocalFile(file)
         }
     }
-    return g.b(media)
+    return g.b(media)?.takeIf { it.isNotBlank() }?.let { ComicPageImageSource.RemoteUrl(it) }
 }
 
 private fun buildComicPageImageRequest(
     context: Context,
     page: ComicPageObject,
-    imageUrl: String,
+    imageSource: ComicPageImageSource,
     offlineMode: Boolean,
     stableCacheKey: Boolean = true,
 ): ImageRequest.Builder {
-    val cacheKey = comicPageCacheKey(page, imageUrl)
+    val isLocalFile = imageSource is ComicPageImageSource.LocalFile
+    val requestData = when (imageSource) {
+        is ComicPageImageSource.LocalFile -> imageSource.file
+        is ComicPageImageSource.RemoteUrl -> imageSource.url
+    }
     val builder = ImageRequest.Builder(context)
-        .data(imageUrl)
+        .data(requestData)
         .allowHardware(false)
-        .skipNetworkIfDiskCacheExists(offlineMode)
-        .applyComicCachePolicy(offlineMode)
-    if (stableCacheKey) {
+        .skipNetworkIfDiskCacheExists(!isLocalFile)
+        .applyComicCachePolicy(offlineMode, isLocalFile)
+    if (stableCacheKey && !isLocalFile) {
+        val cacheKey = comicPageCacheKey(page, requestData.toString())
         builder.memoryCacheKey(cacheKey)
         builder.diskCacheKey(cacheKey)
     }
@@ -493,11 +503,17 @@ private fun comicPageCacheKey(page: ComicPageObject, imageUrl: String): String {
     }
 }
 
-private fun ImageRequest.Builder.applyComicCachePolicy(offlineMode: Boolean): ImageRequest.Builder {
+private fun ImageRequest.Builder.applyComicCachePolicy(
+    offlineMode: Boolean,
+    localFile: Boolean
+): ImageRequest.Builder {
     memoryCachePolicy(CachePolicy.ENABLED)
-    if (offlineMode) {
+    if (localFile) {
+        diskCachePolicy(CachePolicy.DISABLED)
+        networkCachePolicy(CachePolicy.DISABLED)
+    } else if (offlineMode) {
         diskCachePolicy(CachePolicy.READ_ONLY)
-        networkCachePolicy(CachePolicy.ENABLED)
+        networkCachePolicy(CachePolicy.DISABLED)
     } else {
         diskCachePolicy(CachePolicy.ENABLED)
         networkCachePolicy(CachePolicy.ENABLED)

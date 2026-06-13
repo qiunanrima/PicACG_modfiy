@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.compose.navigation.Screen
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.resolvePicaDarkTheme
 import com.picacomic.fregata.compose.screens.ApkVersionListScreen
 import com.picacomic.fregata.compose.screens.ChangePasswordScreen
 import com.picacomic.fregata.compose.screens.ChangePinScreen
@@ -81,7 +82,7 @@ class PopupActivity : BaseActivity() {
 
         when (page) {
             PopupSettingsPage.Settings -> {
-                PicaComposeTheme(darkTheme = settingsViewModel.state.nightModeEnabled) {
+                PicaComposeTheme(darkTheme = resolvePicaDarkTheme(forceNightMode = settingsViewModel.state.nightModeEnabled)) {
                     SettingsScreen(
                         state = settingsViewModel.state,
                         onScreenOrientation = settingsViewModel::openScreenOrientationDialog,

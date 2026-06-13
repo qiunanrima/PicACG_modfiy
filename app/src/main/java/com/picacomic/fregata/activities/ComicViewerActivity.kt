@@ -1245,7 +1245,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             if (this.totalPagingPages > i2) {
                 listFindWithQuery = DownloadComicPageObject.findWithQuery<DownloadComicPageObject?>(
                     DownloadComicPageObject::class.java,
-                    "SELECT * FROM download_comic_page_object WHERE episode_id = ? LIMIT ? OFFSET ?",
+                    "SELECT * FROM download_comic_page_object WHERE comic_id = ? and episode_id = ? ORDER BY id ASC LIMIT ? OFFSET ?",
+                    this.comicId,
                     this.currentEpisode!!.getEpisodeId(),
                     hq.toString() + "",
                     (hq * i2).toString() + ""
@@ -1545,7 +1546,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         try {
             val downloadedPages = DownloadComicPageObject.findWithQuery<DownloadComicPageObject?>(
                 DownloadComicPageObject::class.java,
-                "SELECT * FROM download_comic_page_object WHERE episode_id = ? LIMIT ? OFFSET ?",
+                "SELECT * FROM download_comic_page_object WHERE comic_id = ? and episode_id = ? ORDER BY id ASC LIMIT ? OFFSET ?",
+                this.comicId,
                 this.currentEpisode!!.getEpisodeId(),
                 hq.toString(),
                 (hq * previousPagingPage).toString()

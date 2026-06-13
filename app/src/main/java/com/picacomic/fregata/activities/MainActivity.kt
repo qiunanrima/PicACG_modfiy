@@ -69,6 +69,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.resolvePicaDarkTheme
 import com.picacomic.fregata.compose.components.PicaNavigationBar
 import com.picacomic.fregata.compose.navigation.Screen
 import com.picacomic.fregata.compose.navigation.navItems
@@ -217,7 +218,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        PicaComposeTheme(darkTheme = nightModeEnabled) {
+        PicaComposeTheme(darkTheme = resolvePicaDarkTheme(forceNightMode = nightModeEnabled)) {
             Scaffold(
                 contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                 bottomBar = {
