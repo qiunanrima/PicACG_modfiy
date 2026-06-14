@@ -87,6 +87,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             pinTitleValue = if (pin.isNullOrEmpty()) app.getString(R.string.setting_pin_title) else app.getString(R.string.setting_pin_title_on),
             nightModeEnabled = e.L(app),
             volumePagingEnabled = e.Q(app),
+            landscapeCommentsEnabled = e.readerLandscapeComments(app),
             performanceEnabled = e.x(app),
             testingEnabled = e.w(app),
             apkVersionTitle = app.getString(R.string.setting_version_title) + " (" + app.getString(R.string.app_version) + ")"
@@ -214,6 +215,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun toggleVolumePaging(enabled: Boolean) {
         e.g(getApplication(), enabled)
         state = state.copy(volumePagingEnabled = enabled)
+    }
+
+    fun toggleLandscapeComments(enabled: Boolean) {
+        e.setReaderLandscapeComments(getApplication(), enabled)
+        state = state.copy(landscapeCommentsEnabled = enabled)
     }
 
     fun togglePerformance(enabled: Boolean) {

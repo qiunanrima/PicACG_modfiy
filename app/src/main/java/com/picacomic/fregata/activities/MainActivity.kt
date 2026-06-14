@@ -452,6 +452,7 @@ class MainActivity : BaseActivity() {
                                     nightModeEnabled = it
                                 },
                                 onVolumePagingChanged = { settingsViewModel.toggleVolumePaging(it) },
+                                onLandscapeCommentsChanged = { settingsViewModel.toggleLandscapeComments(it) },
                                 onTestingChanged = { settingsViewModel.toggleTesting(it) },
                                 onPerformanceChanged = { settingsViewModel.togglePerformance(it) },
                                 onDialogDismiss = settingsViewModel::dismissDialog,

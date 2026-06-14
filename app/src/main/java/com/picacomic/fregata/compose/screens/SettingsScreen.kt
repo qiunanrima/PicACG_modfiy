@@ -84,6 +84,7 @@ data class SettingsState(
     val pinValue: String = "",
     val nightModeEnabled: Boolean = false,
     val volumePagingEnabled: Boolean = false,
+    val landscapeCommentsEnabled: Boolean = false,
     val testingEnabled: Boolean = false,
     val performanceEnabled: Boolean = false,
     val activeDialog: SettingsDialog? = null,
@@ -110,6 +111,7 @@ fun SettingsScreen(
     onLogout: () -> Unit,
     onNightModeChanged: (Boolean) -> Unit,
     onVolumePagingChanged: (Boolean) -> Unit,
+    onLandscapeCommentsChanged: (Boolean) -> Unit,
     onTestingChanged: (Boolean) -> Unit,
     onPerformanceChanged: (Boolean) -> Unit,
     onDialogDismiss: () -> Unit,
@@ -191,6 +193,11 @@ fun SettingsScreen(
                         label = stringResource(R.string.setting_comic_viewer_volume_paging_control),
                         checked = state.volumePagingEnabled,
                         onCheckedChange = onVolumePagingChanged
+                    )
+                    PicaSwitchListItem(
+                        label = stringResource(R.string.setting_comic_viewer_landscape_comments),
+                        checked = state.landscapeCommentsEnabled,
+                        onCheckedChange = onLandscapeCommentsChanged
                     )
                     PicaValueListItem(
                         label = stringResource(R.string.setting_comic_viewer_image_quality),
@@ -497,6 +504,7 @@ private fun SettingsScreenPreview(
         onLogout = {},
         onNightModeChanged = {},
         onVolumePagingChanged = {},
+        onLandscapeCommentsChanged = {},
         onTestingChanged = {},
         onPerformanceChanged = {},
         onDialogDismiss = {},

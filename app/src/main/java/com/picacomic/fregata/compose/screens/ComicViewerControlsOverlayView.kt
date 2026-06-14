@@ -6,14 +6,17 @@ import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -153,13 +156,21 @@ private fun ComicViewerControlsOverlay(
     if (!visible) {
         return
     }
-    Box(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val isTabletWidth = maxWidth >= 600.dp
+        val sidePadding = if (isTabletWidth) 28.dp else 12.dp
+        val bottomHorizontalPadding = if (isTabletWidth) 32.dp else 14.dp
+        val bottomVerticalPadding = if (isTabletWidth) 20.dp else 12.dp
+        val bottomBarMaxWidth = if (isTabletWidth) 720.dp else maxWidth
+        val sidePanelHeightFraction = if (isTabletWidth) 0.38f else 0.5f
+
         ReaderBrightnessPanel(
             brightness = brightness,
             onBrightnessChanged = onBrightnessChanged,
+            heightFraction = sidePanelHeightFraction,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(start = 12.dp),
+                .padding(start = sidePadding),
         )
 
         ReaderQuickActions(
@@ -169,7 +180,7 @@ private fun ComicViewerControlsOverlay(
             onComment = onComment,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 12.dp),
+                .padding(end = sidePadding),
         )
 
         ReaderBottomBar(
@@ -183,9 +194,10 @@ private fun ComicViewerControlsOverlay(
             onAutoPaging = onAutoPaging,
             onSettings = onSettings,
             onHide = onHide,
+            maxWidth = bottomBarMaxWidth,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = bottomHorizontalPadding, vertical = bottomVerticalPadding),
         )
     }
 }
@@ -194,12 +206,14 @@ private fun ComicViewerControlsOverlay(
 private fun ReaderBrightnessPanel(
     brightness: Float,
     onBrightnessChanged: (Int) -> Unit,
+    heightFraction: Float,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
             .width(52.dp)
-            .fillMaxHeight(0.5f),
+            .fillMaxHeight(heightFraction)
+            .heightIn(min = 220.dp, max = 360.dp),
         shape = RoundedCornerShape(26.dp),
         color = Color.Black.copy(alpha = 0.58f),
         tonalElevation = 6.dp,
@@ -299,10 +313,13 @@ private fun ReaderBottomBar(
     onAutoPaging: () -> Unit,
     onSettings: () -> Unit,
     onHide: () -> Unit,
+    maxWidth: androidx.compose.ui.unit.Dp,
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .widthIn(max = maxWidth)
+            .fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         color = Color.Black.copy(alpha = 0.62f),
         tonalElevation = 8.dp,

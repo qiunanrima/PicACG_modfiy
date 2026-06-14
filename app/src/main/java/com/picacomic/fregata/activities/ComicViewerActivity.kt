@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -47,11 +48,19 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.screens.ComicViewerComposeHostView
 import com.picacomic.fregata.compose.screens.ComicViewerControlsOverlayView
+import com.picacomic.fregata.compose.screens.ReaderCommentSidebar
+import com.picacomic.fregata.compose.viewmodels.CommentViewModel
 import com.picacomic.fregata.databinding.ActivityComicViewerBinding
 import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicPageObject
@@ -184,6 +193,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     var binding: ActivityComicViewerBinding? = null
     var comicViewerHostView: ComicViewerComposeHostView? = null
     var comicViewerControlsOverlayView: ComicViewerControlsOverlayView? = null
+    private var readerCommentSidebarView: ComposeView? = null
+    private var readerCommentSidebarComicId by mutableStateOf<String?>(null)
     var button_autoPaging: Button? = null
     var button_comment: Button? = null
     var button_dialogAutoPagingStart: Button? = null
@@ -234,6 +245,9 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     var shouldRestoreRecordPosition: Boolean = false
     var shouldWarnMobileNetwork: Boolean = false
     var offlineMode: Boolean = false
+    private var isTabletReader: Boolean = false
+    private var readerLandscapeCommentsEnabled by mutableStateOf(false)
+    private var readerCommentSidebarHasContent: Boolean = false
     private var pendingBrightnessSettingsPermission = false
     var autoPagingTimer: CountDownTimer? = null
     var episodeButtonFadeTimer: CountDownTimer? = null
@@ -383,12 +397,14 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                     RelativeLayout.LayoutParams.MATCH_PARENT
                 )
             )
+            setupReaderCommentSidebar()
             a(this.comicViewerHostView)
             init()
             bF()
             setupComposeControlsOverlay()
             bL()
             bH()
+            updateReaderCommentSidebarLayout()
             enterReaderFullscreen()
             return
         }
@@ -419,8 +435,75 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         }
     }
 
+    private fun setupReaderCommentSidebar() {
+        val commentViewModel = ViewModelProvider(this)[CommentViewModel::class.java]
+        val sidebarView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            visibility = View.GONE
+            setContent {
+                ReaderCommentSidebar(
+                    comicId = this@ComicViewerActivity.readerCommentSidebarComicId,
+                    enabled = this@ComicViewerActivity.readerLandscapeCommentsEnabled,
+                    viewModel = commentViewModel,
+                    onHasContentChanged = { hasContent ->
+                        this@ComicViewerActivity.readerCommentSidebarHasContent = hasContent
+                        this@ComicViewerActivity.updateReaderCommentSidebarLayout()
+                    },
+                )
+            }
+        }
+        this.readerCommentSidebarView = sidebarView
+        this.binding!!.root.addView(
+            sidebarView,
+            RelativeLayout.LayoutParams(
+                readerCommentSidebarWidthPx(),
+                RelativeLayout.LayoutParams.MATCH_PARENT
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+            }
+        )
+    }
+
+    private fun updateReaderCommentSidebarLayout() {
+        val sidebarView = this.readerCommentSidebarView ?: return
+        val showSidebar = shouldShowReaderCommentSidebar()
+        sidebarView.visibility = if (showSidebar) View.VISIBLE else View.GONE
+        val sidebarWidth = if (showSidebar) readerCommentSidebarWidthPx() else 0
+        (sidebarView.layoutParams as? RelativeLayout.LayoutParams)?.let { params ->
+            params.width = readerCommentSidebarWidthPx()
+            params.height = RelativeLayout.LayoutParams.MATCH_PARENT
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+            sidebarView.layoutParams = params
+        }
+        findViewById<FrameLayout>(R.id.container)?.let { container ->
+            (container.layoutParams as? RelativeLayout.LayoutParams)?.let { params ->
+                params.width = RelativeLayout.LayoutParams.MATCH_PARENT
+                params.height = RelativeLayout.LayoutParams.MATCH_PARENT
+                params.rightMargin = sidebarWidth
+                container.layoutParams = params
+            }
+        }
+    }
+
+    private fun shouldShowReaderCommentSidebar(): Boolean {
+        return readerLandscapeCommentsEnabled &&
+            readerCommentSidebarHasContent &&
+            resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            !comicId.isNullOrBlank()
+    }
+
+    private fun readerCommentSidebarWidthPx(): Int {
+        val displayMetrics = resources.displayMetrics
+        val preferred = (360f * displayMetrics.density).toInt()
+        val maxWidth = (displayMetrics.widthPixels * 0.42f).toInt()
+        val minWidth = (300f * displayMetrics.density).toInt()
+        return preferred.coerceIn(minWidth, maxWidth.coerceAtLeast(minWidth))
+    }
+
     fun init() {
         this.isVolumeKeyPagingEnabled = e.Q(this)
+        this.isTabletReader = isTabletDevice()
+        this.readerLandscapeCommentsEnabled = e.readerLandscapeComments(this)
         this.isLandscape = e.M(this)
         this.isVerticalScroll = e.N(this)
         this.isNightMode = e.L(this)
@@ -436,6 +519,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         this.shouldWarnMobileNetwork = true
         this.comicId = getIntent().getStringExtra("EXTRA_KEY_COMIC_ID")
         this.comicViewerHostView?.setComicId(this.comicId)
+        this.readerCommentSidebarComicId = this.comicId
         this.offlineMode = getIntent().getBooleanExtra("EXTRA_KEY_OFFLINE_MODE", false)
         this.comicViewerHostView?.setOfflineMode(this.offlineMode)
         this.comicTitle = getIntent().getStringExtra("EXTRA_KEY_COMIC_TITLE")
@@ -1040,6 +1124,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             pendingBrightnessSettingsPermission = false
             j(this.checkBox_brightnessSystem?.isChecked == true)
         }
+        this.readerLandscapeCommentsEnabled = e.readerLandscapeComments(this)
+        updateReaderCommentSidebarLayout()
     }
 
     // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
@@ -1746,20 +1832,25 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     fun h(z: Boolean) {
-        if (this.comicStatusChangeListener != null) {
-            if (!z) {
-                setRequestedOrientation(6)
-                if (this.comicStatusChangeListener != null) {
-                    this.comicStatusChangeListener!!.M(6)
-                    return
-                }
-                return
-            }
-            setRequestedOrientation(7)
-            if (this.comicStatusChangeListener != null) {
-                this.comicStatusChangeListener!!.M(7)
-            }
+        if (isTabletReader) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
+            this.comicStatusChangeListener?.M(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
+            return
         }
+        if (!z) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
+            this.comicStatusChangeListener?.M(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
+            return
+        }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT)
+        this.comicStatusChangeListener?.M(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT)
+    }
+
+    private fun isTabletDevice(): Boolean {
+        val configuration = resources.configuration
+        val windowShortestSideDp = minOf(configuration.screenWidthDp, configuration.screenHeightDp)
+        return configuration.smallestScreenWidthDp >= 600 ||
+            windowShortestSideDp >= 600
     }
 
     fun i(z: Boolean) {
@@ -1980,6 +2071,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, android.content.ComponentCallbacks
     override fun onConfigurationChanged(configuration: Configuration) {
         super.onConfigurationChanged(configuration)
+        this.isTabletReader = isTabletDevice()
         enterReaderFullscreen()
         if (configuration.orientation == 2) {
             this.linearLayout_horizontalPagingScrollbar!!.setVisibility(View.VISIBLE)
@@ -1988,6 +2080,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.linearLayout_horizontalPagingScrollbar!!.setVisibility(View.GONE)
             this.linearLayout_verticalPagingScrollbar!!.setVisibility(View.VISIBLE)
         }
+        updateReaderCommentSidebarLayout()
+        n(this.currentPage)
     }
 
     fun n(i: Int) {

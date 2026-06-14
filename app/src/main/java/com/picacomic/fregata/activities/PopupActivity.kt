@@ -111,6 +111,7 @@ class PopupActivity : BaseActivity() {
                         },
                         onNightModeChanged = settingsViewModel::toggleNightMode,
                         onVolumePagingChanged = settingsViewModel::toggleVolumePaging,
+                        onLandscapeCommentsChanged = settingsViewModel::toggleLandscapeComments,
                         onTestingChanged = settingsViewModel::toggleTesting,
                         onPerformanceChanged = settingsViewModel::togglePerformance,
                         onDialogDismiss = settingsViewModel::dismissDialog,

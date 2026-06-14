@@ -329,6 +329,100 @@ fun CommentScreen(
 }
 
 @Composable
+fun ReaderCommentSidebar(
+    comicId: String?,
+    enabled: Boolean,
+    viewModel: CommentViewModel?,
+    onHasContentChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val listState = rememberLazyListState()
+    val screenViewModel = previewAwareViewModel(viewModel)
+
+    LaunchedEffect(enabled, comicId) {
+        if (enabled && !comicId.isNullOrBlank()) {
+            screenViewModel?.loadComments(comicId = comicId, page = 1, force = true)
+        } else {
+            onHasContentChanged(false)
+        }
+    }
+
+    LaunchedEffect(enabled, screenViewModel?.commentItems?.size, screenViewModel?.isLoading) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        onHasContentChanged(enabled && (vm.isLoading || vm.commentItems.isNotEmpty()))
+    }
+
+    RememberListLoadMore(
+        state = listState,
+        enabled = enabled &&
+            !comicId.isNullOrBlank() &&
+            screenViewModel?.commentItems?.isNotEmpty() == true &&
+            screenViewModel?.isLoading == false &&
+            screenViewModel?.hasMore == true,
+    ) {
+        screenViewModel?.let { vm ->
+            vm.loadComments(comicId = comicId, page = vm.currentPage + 1)
+        }
+    }
+
+    PicaComposeTheme {
+        Surface(
+            modifier = modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+            tonalElevation = 6.dp,
+            shadowElevation = 6.dp,
+        ) {
+            val vm = screenViewModel
+            when {
+                !enabled -> Box(modifier = Modifier.fillMaxSize())
+                vm == null || (vm.commentItems.isEmpty() && vm.isLoading) -> PicaLoadingIndicator()
+                vm.commentItems.isEmpty() -> Box(modifier = Modifier.fillMaxSize())
+                else -> LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    itemsIndexed(
+                        items = vm.commentItems,
+                        key = { index, item -> stableLazyKey("reader_comment", index, item.commentId, item.content) },
+                    ) { index, item ->
+                        CommentCard(
+                            context = context,
+                            item = item,
+                            index = index,
+                            floor = vm.displayFloorCount - index,
+                            expanded = vm.expandedCommentIndex == index,
+                            repliesLoading = vm.loadingReplyIndex == index,
+                            adminMode = false,
+                            profileUser = vm.profileUser,
+                            isProfileMode = vm.isProfileMode,
+                            onReply = { vm.beginReply(index) },
+                            onToggleReplies = { vm.C(index) },
+                            onOpenTarget = {},
+                            onLike = { vm.Q(index) },
+                            onHide = {},
+                            onTop = {},
+                            onDirty = {},
+                            onReport = {},
+                            onLoadMoreReplies = { vm.N(index) },
+                            onReplyLike = { replyIndex -> vm.g(index, replyIndex) },
+                            onReplyHide = {},
+                            onReplyReport = {},
+                            onReplyDirty = {},
+                        )
+                    }
+                    if (vm.isLoading) {
+                        item(key = "reader_comment_loading") { ListLoadingFooter() }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun CommentJumpPageDialog(
     currentPage: Int,
     totalPages: Int,

@@ -10,12 +10,14 @@ import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -236,46 +238,54 @@ private fun ComicViewerScreen(
     ZoomableReaderLayer(
         verticalContent = effectiveVerticalScroll,
     ) {
-        if (effectiveVerticalScroll) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                items(
-                    count = itemCount,
-                    key = { index -> itemKey(pages, index) },
-                ) { index ->
-                    ComicViewerItem(
-                        pages = pages,
-                        virtualIndex = index,
-                        basePageOffset = basePageOffset,
-                        vertical = true,
-                        testingListMode = testingListMode,
-                        performanceMode = performanceMode,
-                        offlineMode = offlineMode,
-                        comicId = comicId,
-                    )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val isTabletWidth = maxWidth >= 600.dp
+            val verticalPageMaxWidth = if (isTabletWidth) TABLET_VERTICAL_PAGE_MAX_WIDTH else maxWidth
+            if (effectiveVerticalScroll) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    items(
+                        count = itemCount,
+                        key = { index -> itemKey(pages, index) },
+                    ) { index ->
+                        ComicViewerItem(
+                            pages = pages,
+                            virtualIndex = index,
+                            basePageOffset = basePageOffset,
+                            vertical = true,
+                            maxPageWidth = verticalPageMaxWidth,
+                            testingListMode = testingListMode,
+                            performanceMode = performanceMode,
+                            offlineMode = offlineMode,
+                            comicId = comicId,
+                        )
+                    }
                 }
-            }
-        } else {
-            LazyRow(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                items(
-                    count = itemCount,
-                    key = { index -> itemKey(pages, index) },
-                ) { index ->
-                    ComicViewerItem(
-                        pages = pages,
-                        virtualIndex = index,
-                        basePageOffset = basePageOffset,
-                        vertical = false,
-                        testingListMode = testingListMode,
-                        performanceMode = performanceMode,
-                        offlineMode = offlineMode,
-                        comicId = comicId,
-                    )
+            } else {
+                LazyRow(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    items(
+                        count = itemCount,
+                        key = { index -> itemKey(pages, index) },
+                    ) { index ->
+                        ComicViewerItem(
+                            pages = pages,
+                            virtualIndex = index,
+                            basePageOffset = basePageOffset,
+                            vertical = false,
+                            maxPageWidth = maxWidth,
+                            testingListMode = testingListMode,
+                            performanceMode = performanceMode,
+                            offlineMode = offlineMode,
+                            comicId = comicId,
+                        )
+                    }
                 }
             }
         }
@@ -368,6 +378,7 @@ private fun ComicViewerItem(
     virtualIndex: Int,
     basePageOffset: Int,
     vertical: Boolean,
+    maxPageWidth: androidx.compose.ui.unit.Dp,
     testingListMode: Boolean,
     performanceMode: Boolean,
     offlineMode: Boolean,
@@ -384,6 +395,7 @@ private fun ComicViewerItem(
         page = page,
         pageNumber = basePageOffset + pageIndex + 1,
         vertical = vertical,
+        maxPageWidth = maxPageWidth,
         testingListMode = testingListMode,
         performanceMode = performanceMode,
         offlineMode = offlineMode,
@@ -396,6 +408,7 @@ private fun ComicViewerPage(
     page: ComicPageObject,
     pageNumber: Int,
     vertical: Boolean,
+    maxPageWidth: androidx.compose.ui.unit.Dp,
     testingListMode: Boolean,
     performanceMode: Boolean,
     offlineMode: Boolean,
@@ -410,7 +423,9 @@ private fun ComicViewerPage(
     }
     Box(
         modifier = if (vertical) {
-            Modifier.fillMaxWidth()
+            Modifier
+                .widthIn(max = maxPageWidth)
+                .fillMaxWidth()
         } else {
             Modifier
                 .fillMaxHeight()
@@ -547,6 +562,7 @@ private fun virtualIndexToPageIndex(virtualIndex: Int): Int {
 }
 
 private const val AD_INTERVAL = 20
+private val TABLET_VERTICAL_PAGE_MAX_WIDTH = 720.dp
 
 private fun Int.lastIndexCoerceAtLeastZero(): Int {
     return (this - 1).coerceAtLeast(0)

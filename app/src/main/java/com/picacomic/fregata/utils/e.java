@@ -192,6 +192,14 @@ public class e {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putBoolean("KEY_COMIC_VIEWER_VOLUME_PAGING_CONTROL", z).commit();
     }
 
+    public static boolean readerLandscapeComments(Context context) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getBoolean("KEY_COMIC_VIEWER_LANDSCAPE_COMMENTS", false);
+    }
+
+    public static boolean setReaderLandscapeComments(Context context, boolean z) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putBoolean("KEY_COMIC_VIEWER_LANDSCAPE_COMMENTS", z).commit();
+    }
+
     public static int R(Context context) {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getInt("KEY_COMIC_VIEWER_IMAGE_QUALITY", 2);
     }
