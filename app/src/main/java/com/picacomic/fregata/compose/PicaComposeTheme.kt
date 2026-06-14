@@ -12,6 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -22,6 +24,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import com.picacomic.fregata.utils.ThemeColorHelper
 import com.picacomic.fregata.utils.e
 
 private val LightColors = lightColorScheme(
@@ -202,7 +205,7 @@ fun isPicaExpressiveTheme(): Boolean = e.getDesignLanguage(LocalContext.current)
 fun resolvePicaDarkTheme(forceNightMode: Boolean = e.L(LocalContext.current)): Boolean {
     val context = LocalContext.current
     val systemDark = isSystemInDarkTheme()
-    return forceNightMode || when (e.al(context).coerceIn(0, 8)) {
+    return forceNightMode || when (ThemeColorHelper.resolveStoredThemeIndex(context).coerceIn(0, ThemeColorHelper.SYSTEM_DYNAMIC_INDEX)) {
         1 -> true
         2 -> systemDark
         0 -> false
@@ -470,8 +473,13 @@ fun PicaComposeTheme(
     val context = LocalContext.current
     val view = LocalView.current
     val designLanguage = e.getDesignLanguage(context).coerceIn(0, 1)
-    val themeColor = e.al(context).coerceIn(0, 8)
+    val themeColor = ThemeColorHelper.resolveStoredThemeIndex(context)
     val baseColorScheme = when (themeColor) {
+        ThemeColorHelper.SYSTEM_DYNAMIC_INDEX -> if (ThemeColorHelper.isSystemDynamicColorAvailable()) {
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        } else {
+            if (darkTheme) DarkColors else LightColors
+        }
         2 -> if (darkTheme) NeonDarkColors else NeonLightColors
         3 -> if (darkTheme) BlueDarkColors else BlueLightColors
         4 -> if (darkTheme) GreenDarkColors else GreenLightColors

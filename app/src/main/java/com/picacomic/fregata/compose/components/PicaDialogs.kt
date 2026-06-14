@@ -102,7 +102,7 @@ fun PicaSingleChoiceDialog(
                     .fillMaxWidth()
                     .heightIn(max = 360.dp)
                     .verticalScroll(rememberScrollState())
-                    .animateContentSize(animationSpec = PicaExpressiveMotion.defaultSpatialSpec()),
+                    .animateContentSize(animationSpec = PicaExpressiveMotion.contentResizeSpec()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 options.forEachIndexed { index, option ->

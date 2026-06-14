@@ -13,6 +13,7 @@ import com.picacomic.fregata.compose.screens.SettingsDialog
 import com.picacomic.fregata.compose.screens.SettingsState
 import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.utils.LauncherIconHelper
+import com.picacomic.fregata.utils.ThemeColorHelper
 import java.io.File
 import java.text.DecimalFormat
 
@@ -35,14 +36,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val directions = app.resources.getStringArray(R.array.setting_options_scroll_directions)
         val qualities = app.resources.getStringArray(R.array.setting_options_image_qualities)
         val designLanguages = app.resources.getStringArray(R.array.setting_design_languages)
-        val colors = app.resources.getStringArray(R.array.setting_theme_colors)
+        val colors = app.resources.getStringArray(R.array.setting_theme_colors).toMutableList().apply {
+            if (ThemeColorHelper.isSystemDynamicColorAvailable()) {
+                add(app.getString(R.string.theme_color_system_dynamic))
+            }
+        }
         val launcherIcons = listOf("默认图标", "Miracle Neon")
 
         val rx = if (e.M(app)) 0 else 1
         val rz = if (e.N(app)) 0 else 1
         val rB = e.R(app)
         val designLanguageIndex = e.getDesignLanguage(app).coerceIn(0, designLanguages.lastIndex)
-        val rD = e.al(app).coerceIn(0, colors.lastIndex)
+        val rD = ThemeColorHelper.resolveStoredThemeIndex(app).coerceIn(0, colors.lastIndex)
         val launcherIconIndex = app.getSharedPreferences(PREFS_NAME, 0)
             .getInt(KEY_LAUNCHER_ICON, if (rD == 2) 1 else 0)
             .coerceIn(0, launcherIcons.lastIndex)
@@ -159,8 +164,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun selectThemeColorIndex(index: Int) {
+        val maxIndex = getApplication<Application>().resources.getStringArray(R.array.setting_theme_colors).lastIndex +
+            if (ThemeColorHelper.isSystemDynamicColorAvailable()) 1 else 0
         state = state.copy(activeDialog = null)
-        e.h(getApplication(), index.coerceIn(0, getApplication<Application>().resources.getStringArray(R.array.setting_theme_colors).lastIndex))
+        e.h(getApplication(), index.coerceIn(0, maxIndex))
         loadSettings()
     }
 

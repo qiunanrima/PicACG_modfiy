@@ -25,19 +25,19 @@ public class BannerWebview extends RelativeLayout {
 
     public BannerWebview(Context context) {
         super(context);
-        this.defaultUrl = g.ag(e.al(context));
+        this.defaultUrl = g.ag(context, e.al(context));
         init(context);
     }
 
     public BannerWebview(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        this.defaultUrl = g.ag(e.al(context));
+        this.defaultUrl = g.ag(context, e.al(context));
         init(context);
     }
 
     public BannerWebview(Context context, AttributeSet attributeSet, int i) {
         super(context, attributeSet, i);
-        this.defaultUrl = g.ag(e.al(context));
+        this.defaultUrl = g.ag(context, e.al(context));
         init(context);
     }
 

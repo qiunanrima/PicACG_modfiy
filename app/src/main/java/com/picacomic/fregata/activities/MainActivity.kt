@@ -25,7 +25,9 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -183,6 +185,18 @@ class MainActivity : BaseActivity() {
             navItems
         }
         val showBottomBar = availableNavItems.any { it.route == currentRoute }
+        val onNavItemClick: (Screen) -> Unit = { screen ->
+            tabRefreshEvent++
+            if (currentRoute != screen.route) {
+                navController.navigate(screen.route) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        }
 
         LaunchedEffect(forceOneTimeUpdate) {
             if (!offlineMode && forceOneTimeUpdate) {
@@ -219,35 +233,35 @@ class MainActivity : BaseActivity() {
         }
 
         PicaComposeTheme(darkTheme = resolvePicaDarkTheme(forceNightMode = nightModeEnabled)) {
-            Scaffold(
-                contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
-                bottomBar = {
-                    if (showBottomBar) {
-                        PicaNavigationBar(
-                            items = availableNavItems,
-                            currentRoute = currentRoute,
-                            onItemClick = { screen ->
-                                tabRefreshEvent++
-                                if (currentRoute != screen.route) {
-                                    navController.navigate(screen.route) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                            }
-                        )
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val useNavigationRail = showBottomBar && maxWidth >= 840.dp && maxWidth > maxHeight
+                Scaffold(
+                    contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+                    bottomBar = {
+                        if (showBottomBar && !useNavigationRail) {
+                            PicaNavigationBar(
+                                items = availableNavItems,
+                                currentRoute = currentRoute,
+                                onItemClick = onNavItemClick,
+                            )
+                        }
                     }
-                }
-            )
-            { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = innerPadding.calculateBottomPadding())
-                ) {
+                )
+                { innerPadding ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = if (useNavigationRail) 0.dp else innerPadding.calculateBottomPadding())
+                    ) {
+                        if (useNavigationRail) {
+                            PicaNavigationBar(
+                                items = availableNavItems,
+                                currentRoute = currentRoute,
+                                onItemClick = onNavItemClick,
+                                vertical = true,
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
                     NavHost(
                         navController = navController,
                         startDestination = if (offlineMode) Screen.Profile.route else Screen.Home.route,
@@ -766,11 +780,13 @@ class MainActivity : BaseActivity() {
                                 }
                             }
                         )
+                        }
+                    }
+                        }
                     }
                 }
             }
         }
-    }
 
     private fun handleTouch(view: View, event: MotionEvent) {
         val x = event.rawX.toInt()

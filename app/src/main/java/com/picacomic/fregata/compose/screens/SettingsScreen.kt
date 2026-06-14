@@ -40,6 +40,7 @@ import com.picacomic.fregata.compose.components.PicaPrimaryButton
 import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
 import com.picacomic.fregata.compose.components.PicaValueListItem
 import com.picacomic.fregata.compose.components.PicaSwitchListItem
+import com.picacomic.fregata.utils.ThemeColorHelper
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -127,7 +128,11 @@ fun SettingsScreen(
     val scrollDirectionOptions = stringArrayResource(R.array.setting_options_scroll_directions)
     val imageQualityOptions = stringArrayResource(R.array.setting_options_image_qualities)
     val designLanguageOptions = stringArrayResource(R.array.setting_design_languages)
-    val themeColorOptions = stringArrayResource(R.array.setting_theme_colors)
+    val themeColorOptions = stringArrayResource(R.array.setting_theme_colors).toMutableList().apply {
+        if (ThemeColorHelper.isSystemDynamicColorAvailable()) {
+            add(stringResource(R.string.theme_color_system_dynamic))
+        }
+    }
     val launcherIconOptions = listOf("默认图标", "Miracle Neon")
 
     PicaComposeTheme {
@@ -308,7 +313,7 @@ fun SettingsScreen(
 
             SettingsDialog.ThemeColor -> PicaSingleChoiceDialog(
                 title = stringResource(R.string.setting_theme_color),
-                options = themeColorOptions.toList(),
+                options = themeColorOptions,
                 selectedIndex = state.themeColorIndex,
                 onSelect = onThemeColorSelected,
                 onDismiss = onDialogDismiss,
@@ -406,7 +411,7 @@ private fun SettingsSection(
         } else {
             MaterialTheme.colorScheme.surfaceContainerHighest
         },
-        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
+        animationSpec = PicaExpressiveMotion.colorStateSpec(),
         label = "settingsSectionContainer"
     )
     Text(
@@ -417,7 +422,7 @@ private fun SettingsSection(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(animationSpec = PicaExpressiveMotion.defaultSpatialSpec()),
+            .animateContentSize(animationSpec = PicaExpressiveMotion.contentResizeSpec()),
         shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = sectionContainerColor,

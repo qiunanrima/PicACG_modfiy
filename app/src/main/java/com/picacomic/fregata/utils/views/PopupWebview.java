@@ -32,19 +32,19 @@ public class PopupWebview extends RelativeLayout {
 
     public PopupWebview(Context context) {
         super(context);
-        this.defaultUrl = g.af(e.al(context));
+        this.defaultUrl = g.af(context, e.al(context));
         init(context);
     }
 
     public PopupWebview(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        this.defaultUrl = g.af(e.al(context));
+        this.defaultUrl = g.af(context, e.al(context));
         init(context);
     }
 
     public PopupWebview(Context context, AttributeSet attributeSet, int i) {
         super(context, attributeSet, i);
-        this.defaultUrl = g.af(e.al(context));
+        this.defaultUrl = g.af(context, e.al(context));
         init(context);
     }
 

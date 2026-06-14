@@ -60,7 +60,7 @@ fun PicaValueListItem(
         } else {
             Color.Transparent
         },
-        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
+        animationSpec = PicaExpressiveMotion.colorStateSpec(),
         label = "picaValueListItemContainer"
     )
     val valueColor by animateColorAsState(
@@ -69,12 +69,12 @@ fun PicaValueListItem(
         } else {
             MaterialTheme.colorScheme.onSurface
         },
-        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
+        animationSpec = PicaExpressiveMotion.colorStateSpec(),
         label = "picaValueListItemValue"
     )
     val chevronOffset by animateDpAsState(
         targetValue = if (expressive && pressed) 4.dp else 0.dp,
-        animationSpec = PicaExpressiveMotion.defaultSpatialSpec(),
+        animationSpec = PicaExpressiveMotion.pressSpatialSpec(),
         label = "picaValueListItemChevron"
     )
 
@@ -83,7 +83,7 @@ fun PicaValueListItem(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .animateContentSize(animationSpec = PicaExpressiveMotion.defaultSpatialSpec()),
+            .animateContentSize(animationSpec = PicaExpressiveMotion.contentResizeSpec()),
         shape = if (expressive) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
         color = containerColor,
         tonalElevation = if (expressive && pressed) 2.dp else 0.dp,
@@ -144,7 +144,7 @@ fun PicaSwitchListItem(
             pressed -> MaterialTheme.colorScheme.surfaceContainer
             else -> Color.Transparent
         },
-        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
+        animationSpec = PicaExpressiveMotion.colorStateSpec(),
         label = "picaSwitchListItemContainer"
     )
     val labelColor by animateColorAsState(
@@ -153,7 +153,7 @@ fun PicaSwitchListItem(
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
+        animationSpec = PicaExpressiveMotion.colorStateSpec(),
         label = "picaSwitchListItemLabel"
     )
 
@@ -162,7 +162,7 @@ fun PicaSwitchListItem(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .animateContentSize(animationSpec = PicaExpressiveMotion.defaultSpatialSpec()),
+            .animateContentSize(animationSpec = PicaExpressiveMotion.contentResizeSpec()),
         shape = if (expressive) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
         color = containerColor,
         tonalElevation = if (expressive && (checked || pressed)) 2.dp else 0.dp,
@@ -211,7 +211,7 @@ fun PicaRadioListItem(
             pressed -> MaterialTheme.colorScheme.surfaceContainer
             else -> Color.Transparent
         },
-        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
+        animationSpec = PicaExpressiveMotion.colorStateSpec(),
         label = "picaRadioListItemContainer"
     )
     val contentColor by animateColorAsState(
@@ -220,7 +220,7 @@ fun PicaRadioListItem(
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        animationSpec = PicaExpressiveMotion.fastEffectsSpec(),
+        animationSpec = PicaExpressiveMotion.colorStateSpec(),
         label = "picaRadioListItemContent"
     )
 
@@ -229,7 +229,7 @@ fun PicaRadioListItem(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .animateContentSize(animationSpec = PicaExpressiveMotion.defaultSpatialSpec()),
+            .animateContentSize(animationSpec = PicaExpressiveMotion.contentResizeSpec()),
         shape = if (expressive) MaterialTheme.shapes.medium else MaterialTheme.shapes.small,
         color = containerColor,
         tonalElevation = if (expressive && (selected || pressed)) 2.dp else 0.dp,

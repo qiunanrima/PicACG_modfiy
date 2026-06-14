@@ -2,6 +2,7 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -141,31 +142,38 @@ fun GameScreen(
                         }
 
                         else -> {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
-                                state = gridState,
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                itemsIndexed(
-                                    items = vm.games,
-                                    key = { index, item ->
-                                        stableLazyKey("game", index, item.gameId, item.title)
-                                    }
-                                ) { _, item ->
-                                    GameGridItem(item = item) {
-                                        item.gameId?.let(onGameClick)
-                                    }
+                            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                                val columnCount = if (maxWidth > maxHeight) {
+                                    if (maxWidth >= 1100.dp) 4 else 3
+                                } else {
+                                    2
                                 }
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(columnCount),
+                                    state = gridState,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    itemsIndexed(
+                                        items = vm.games,
+                                        key = { index, item ->
+                                            stableLazyKey("game", index, item.gameId, item.title)
+                                        }
+                                    ) { _, item ->
+                                        GameGridItem(item = item) {
+                                            item.gameId?.let(onGameClick)
+                                        }
+                                    }
 
-                                if (vm.isLoading) {
-                                    item(
-                                        key = "loading",
-                                        span = { GridItemSpan(maxLineSpan) }
-                                    ) {
-                                        ListLoadingFooter()
+                                    if (vm.isLoading) {
+                                        item(
+                                            key = "loading",
+                                            span = { GridItemSpan(maxLineSpan) }
+                                        ) {
+                                            ListLoadingFooter()
+                                        }
                                     }
                                 }
                             }

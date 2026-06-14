@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Home
@@ -370,7 +371,7 @@ fun PicaRecommendationCard(
 
     Card(
         onClick = onClick,
-        modifier = modifier.height(256.dp),
+        modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = recommendationContainer,
             contentColor = if (expressive) {
@@ -384,7 +385,7 @@ fun PicaRecommendationCard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -433,20 +434,35 @@ private fun PicaActionStatButton(
         onClick = item.onClick,
         enabled = item.enabled,
         modifier = modifier.height(72.dp),
-        shape = MaterialTheme.shapes.medium,
+        shape = if (expressive && item.selected) {
+            CircleShape
+        } else {
+            MaterialTheme.shapes.medium
+        },
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             contentColor = contentColor,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (item.selected) 3.dp else 1.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (item.selected) {
-                MaterialTheme.colorScheme.secondary.copy(alpha = 0.38f)
-            } else {
-                MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = when {
+                expressive && item.selected -> 6.dp
+                expressive -> 0.dp
+                item.selected -> 3.dp
+                else -> 1.dp
             },
         ),
+        border = if (expressive && item.selected) {
+            null
+        } else {
+            BorderStroke(
+                width = 1.dp,
+                color = if (item.selected) {
+                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.38f)
+                } else {
+                    MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+                },
+            )
+        },
     ) {
         Box(
             modifier = Modifier
@@ -458,7 +474,7 @@ private fun PicaActionStatButton(
                 contentDescription = item.contentDescription,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(22.dp),
+                    .size(if (expressive && item.selected) 24.dp else 22.dp),
             )
             if (!item.count.isNullOrBlank()) {
                 Badge(

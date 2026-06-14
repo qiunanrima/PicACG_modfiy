@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -68,7 +69,9 @@ import com.picacomic.fregata.compose.components.PicaActionRow
 import com.picacomic.fregata.compose.components.PicaCardSection
 import com.picacomic.fregata.compose.components.PicaEpisodeGridItem
 import com.picacomic.fregata.compose.components.PicaEpisodeGridItemState
+import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaImageUrl
+import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRecommendationCard
 import com.picacomic.fregata.compose.components.PicaSectionHeader
 import com.picacomic.fregata.compose.components.PicaStatRow
@@ -254,7 +257,7 @@ fun ComicDetailScreen(
             }
         }
     }
-}
+    }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -295,11 +298,20 @@ private fun ComicDetailContent(
     var descriptionExpanded by remember(detail?.comicId) { mutableStateOf(false) }
     val shownTags = if (tagsExpanded || tags.size <= 4) tags else tags.take(4)
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val useLandscapeDetailLayout = maxWidth > maxHeight
+        Row(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1.35f)
+                    .fillMaxSize(),
+                contentPadding = if (useLandscapeDetailLayout) {
+                    PaddingValues(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 16.dp)
+                } else {
+                    PaddingValues(16.dp)
+                },
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
         item {
             PicaCardSection {
                 PicaSectionHeader(
@@ -460,6 +472,7 @@ private fun ComicDetailContent(
                         icon = Icons.AutoMirrored.Filled.Comment,
                         contentDescription = "comments",
                         count = if (canComment) (detail?.commentsCount ?: 0).toString() else "禁",
+                        selected = !canComment,
                         enabled = canComment,
                         onClick = { if (canComment && !offlineMode) onCommentClick(comicId) },
                     ),
@@ -538,36 +551,113 @@ private fun ComicDetailContent(
             }
         }
 
-        if (recommendations.isNotEmpty()) {
+        if (recommendations.isNotEmpty() && !useLandscapeDetailLayout) {
             item {
                 PicaCardSection {
                     PicaSectionHeader(title = "猜你喜欢")
-                    recommendations.chunked(3).forEach { rowRecommendations ->
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            rowRecommendations.forEach { item ->
-                                PicaRecommendationCard(
-                                    title = item.title ?: "",
-                                    supportingText = item.categories?.joinToString(" ").orEmpty(),
-                                    onClick = {
-                                        val targetComicId = item.comicId
-                                        if (!targetComicId.isNullOrBlank()) {
-                                            onComicClick(targetComicId)
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    thumbnail = {
-                                        ComicRecommendationPreview(thumbnail = item.thumb)
-                                    },
-                                )
-                            }
-                            repeat(3 - rowRecommendations.size) {
-                                Box(modifier = Modifier.weight(1f))
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val horizontalSpacing = 12.dp
+                        val columnCount = 3
+                        val cardWidth = (maxWidth - horizontalSpacing * (columnCount - 1)) / columnCount
+                        val cardHeight = cardWidth * 1.72f
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            recommendations.chunked(columnCount).forEach { rowRecommendations ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)) {
+                                    rowRecommendations.forEach { item ->
+                                        PicaRecommendationCard(
+                                            title = item.title ?: "",
+                                            supportingText = item.categories?.joinToString(" ").orEmpty(),
+                                            onClick = {
+                                                val targetComicId = item.comicId
+                                                if (!targetComicId.isNullOrBlank()) {
+                                                    onComicClick(targetComicId)
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .width(cardWidth)
+                                                .height(cardHeight),
+                                            thumbnail = {
+                                                ComicRecommendationPreview(thumbnail = item.thumb)
+                                            },
+                                        )
+                                    }
+                                    repeat(columnCount - rowRecommendations.size) {
+                                        Box(
+                                            modifier = Modifier
+                                                .width(cardWidth)
+                                                .height(cardHeight),
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
+            }
+
+            if (useLandscapeDetailLayout) {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize(),
+                    contentPadding = PaddingValues(start = 8.dp, top = 16.dp, end = 16.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    item {
+                        PicaCardSection {
+                            PicaSectionHeader(title = "猜你喜欢")
+                            when {
+                                recommendations.isNotEmpty() -> {
+                                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                                        val horizontalSpacing = 12.dp
+                                        val columnCount = 2
+                                        val cardWidth = (maxWidth - horizontalSpacing * (columnCount - 1)) / columnCount
+                                        val cardHeight = cardWidth * 1.72f
+                                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                            recommendations.chunked(columnCount).forEach { rowRecommendations ->
+                                                Row(horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)) {
+                                                    rowRecommendations.forEach { item ->
+                                                        PicaRecommendationCard(
+                                                            title = item.title ?: "",
+                                                            supportingText = item.categories?.joinToString(" ").orEmpty(),
+                                                            onClick = {
+                                                                val targetComicId = item.comicId
+                                                                if (!targetComicId.isNullOrBlank()) {
+                                                                    onComicClick(targetComicId)
+                                                                }
+                                                            },
+                                                            modifier = Modifier
+                                                                .width(cardWidth)
+                                                                .height(cardHeight),
+                                                            thumbnail = {
+                                                                ComicRecommendationPreview(thumbnail = item.thumb)
+                                                            },
+                                                        )
+                                                    }
+                                                    repeat(columnCount - rowRecommendations.size) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .width(cardWidth)
+                                                                .height(cardHeight),
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                isLoading -> PicaLoadingIndicator()
+
+                                else -> PicaEmptyState(message = "暂无推荐")
+                            }
+                        }
+                    }
+                }
+            }
+    }
     }
 }
 

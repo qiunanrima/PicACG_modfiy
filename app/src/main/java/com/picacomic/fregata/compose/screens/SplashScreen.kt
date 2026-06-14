@@ -4,13 +4,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -49,113 +52,186 @@ fun SplashScreen(
     onServer3: () -> Unit,
 ) {
     PicaComposeTheme {
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(20.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.icon_256),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
+            val isLandscapeTablet = maxWidth >= 720.dp && maxWidth > maxHeight
+            if (isLandscapeTablet) {
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(28.dp))
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                if (isLoading && !showOptions && !showError) {
-                    PicaProgressIndicator()
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(id = R.string.loading_general),
-                        style = MaterialTheme.typography.bodyMedium
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 40.dp, vertical = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(32.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SplashHero(
+                        modifier = Modifier
+                            .weight(1f)
+                            .widthIn(max = 420.dp),
+                    )
+                    SplashContent(
+                        isLoading = isLoading,
+                        showError = showError,
+                        showOptions = showOptions,
+                        isEnteringOfflineMode = isEnteringOfflineMode,
+                        sslVerificationDisabled = sslVerificationDisabled,
+                        onRetry = onRetry,
+                        onSslVerificationDisabledChanged = onSslVerificationDisabledChanged,
+                        onServer1 = onServer1,
+                        onServer2 = onServer2,
+                        onServer3 = onServer3,
+                        modifier = Modifier
+                            .weight(1f)
+                            .widthIn(max = 520.dp),
                     )
                 }
-                if (showError) {
-                    SplashCard {
-                        Text(
-                            text = stringResource(id = R.string.splash_error),
-                            style = PicaExpressiveType.SectionEmphasized
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = onRetry,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = stringResource(id = R.string.splash_retry))
-                        }
-                    }
-                }
-                if (showOptions) {
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    SplashHero(modifier = Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.height(24.dp))
-                    SplashCard {
-                        Button(
-                            onClick = onServer1,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = stringResource(id = R.string.splash_server_1))
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = stringResource(id = R.string.splash_remark),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        OutlinedButton(
-                            onClick = onServer2,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = stringResource(id = R.string.splash_server_2))
-                        }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        OutlinedButton(
-                            onClick = onServer3,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = stringResource(id = R.string.splash_server_3))
-                        }
-                    }
-                }
-                if (isEnteringOfflineMode) {
-                    SplashCard {
-                        Text(
-                            text = stringResource(id = R.string.splash_entering_offline_mode),
-                            style = PicaExpressiveType.SectionEmphasized
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(24.dp))
-                SplashCard {
-                    Row(
+                    SplashContent(
+                        isLoading = isLoading,
+                        showError = showError,
+                        showOptions = showOptions,
+                        isEnteringOfflineMode = isEnteringOfflineMode,
+                        sslVerificationDisabled = sslVerificationDisabled,
+                        onRetry = onRetry,
+                        onSslVerificationDisabledChanged = onSslVerificationDisabledChanged,
+                        onServer1 = onServer1,
+                        onServer2 = onServer2,
+                        onServer3 = onServer3,
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = sslVerificationDisabled,
-                            onCheckedChange = onSslVerificationDisabledChanged
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(id = R.string.splash_disable_ssl_verification),
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Text(
-                                text = stringResource(id = R.string.splash_disable_ssl_verification_summary),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SplashHero(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(id = R.drawable.icon_256),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(28.dp))
+    )
+}
+
+@Composable
+private fun SplashContent(
+    isLoading: Boolean,
+    showError: Boolean,
+    showOptions: Boolean,
+    isEnteringOfflineMode: Boolean,
+    sslVerificationDisabled: Boolean,
+    onRetry: () -> Unit,
+    onSslVerificationDisabledChanged: (Boolean) -> Unit,
+    onServer1: () -> Unit,
+    onServer2: () -> Unit,
+    onServer3: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (isLoading && !showOptions && !showError) {
+            PicaProgressIndicator()
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(id = R.string.loading_general),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        if (showError) {
+            SplashCard {
+                Text(
+                    text = stringResource(id = R.string.splash_error),
+                    style = PicaExpressiveType.SectionEmphasized
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onRetry,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(id = R.string.splash_retry))
+                }
+            }
+        }
+        if (showOptions) {
+            Spacer(modifier = Modifier.height(24.dp))
+            SplashCard {
+                Button(
+                    onClick = onServer1,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(id = R.string.splash_server_1))
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(id = R.string.splash_remark),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = onServer2,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(id = R.string.splash_server_2))
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = onServer3,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(id = R.string.splash_server_3))
+                }
+            }
+        }
+        if (isEnteringOfflineMode) {
+            SplashCard {
+                Text(
+                    text = stringResource(id = R.string.splash_entering_offline_mode),
+                    style = PicaExpressiveType.SectionEmphasized
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        SplashCard {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = sslVerificationDisabled,
+                    onCheckedChange = onSslVerificationDisabledChanged
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(id = R.string.splash_disable_ssl_verification),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.splash_disable_ssl_verification_summary),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }

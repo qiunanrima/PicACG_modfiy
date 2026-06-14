@@ -11,6 +11,7 @@ import coil.request.CachePolicy;
 import com.orm.SugarApp;
 import com.picacomic.fregata.b.b;
 import com.picacomic.fregata.utils.NetworkSecurityHelper;
+import com.picacomic.fregata.utils.ThemeColorHelper;
 import com.picacomic.fregata.utils.d;
 import com.picacomic.fregata.utils.e;
 import com.picacomic.fregata.utils.f;
@@ -68,16 +69,7 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
         hk = this;
         s(getApplicationContext());
         LauncherIconHelper.syncLauncherIcon(this, e.al(this));
-        setTheme(resolveThemeResId(this));
-    }
-
-    private static int resolveThemeResId(Context context) {
-        int themeIndex = e.al(context);
-        if (themeIndex == 2) {
-            int nightMode = context.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-            return nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES ? R.style.AppThemeNeonDark : R.style.AppThemeNeon;
-        }
-        return themeIndex == 0 ? R.style.AppTheme : R.style.AppThemeBlack;
+        setTheme(ThemeColorHelper.resolveLegacyThemeResId(this));
     }
 
     public static synchronized void refreshCoilImageLoader() {

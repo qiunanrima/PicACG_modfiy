@@ -15,6 +15,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,7 +29,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Scaffold
@@ -292,144 +292,191 @@ fun ProfileScreen(
             containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
             val profile = if (inPreview) previewProfile else screenViewModel?.userProfile
-            LazyColumn(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                item {
-                    ProfileHeader(
-                        profile = profile,
-                        avatarPreviewUri = screenViewModel?.avatarPreviewUri,
-                        isPunchingIn = screenViewModel?.isPunchingIn == true,
-                        onAvatarClick = onAvatarClick,
-                        onPunchIn = {
-                            if (!offlineMode) {
-                                screenViewModel?.punchIn()
-                            }
-                        },
-                    )
-                }
-                item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = MaterialTheme.shapes.large,
-                        tonalElevation = 1.dp,
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                val useTwoPane = maxWidth >= 840.dp && maxWidth > maxHeight
+                Row(modifier = Modifier.fillMaxSize()) {
+                    if (useTwoPane) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(0.82f)
+                                .fillMaxSize(),
+                            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 8.dp, bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
-                            PicaSectionHeader(title = stringResource(R.string.title_profile))
-                            Text(
-                                text = profile?.slogan.orEmpty().ifBlank { "No slogan" },
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            item {
+                                ProfileHeader(
+                                    profile = profile,
+                                    avatarPreviewUri = screenViewModel?.avatarPreviewUri,
+                                    isPunchingIn = screenViewModel?.isPunchingIn == true,
+                                    onAvatarClick = onAvatarClick,
+                                    onPunchIn = {
+                                        if (!offlineMode) {
+                                            screenViewModel?.punchIn()
+                                        }
+                                    },
+                                )
+                            }
+                            item {
+                                ProfileSloganCard(profile = profile)
+                            }
+                        }
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(if (useTwoPane) 1.18f else 1f)
+                            .fillMaxSize(),
+                        contentPadding = if (useTwoPane) {
+                            PaddingValues(start = 8.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
+                        } else {
+                            PaddingValues(16.dp)
+                        },
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        if (!useTwoPane) {
+                            item {
+                                ProfileHeader(
+                                    profile = profile,
+                                    avatarPreviewUri = screenViewModel?.avatarPreviewUri,
+                                    isPunchingIn = screenViewModel?.isPunchingIn == true,
+                                    onAvatarClick = onAvatarClick,
+                                    onPunchIn = {
+                                        if (!offlineMode) {
+                                            screenViewModel?.punchIn()
+                                        }
+                                    },
+                                )
+                            }
+                            item {
+                                ProfileSloganCard(profile = profile)
+                            }
+                        }
+                        item {
+                            PicaTabRow(
+                                selectedTabIndex = selectedTab,
+                                tabs = listOf(
+                                    stringResource(R.string.comic),
+                                    stringResource(R.string.comment),
+                                ),
+                                onTabSelected = { selectedTab = it },
+                                containerColor = MaterialTheme.colorScheme.surface,
                             )
                         }
-                    }
-                }
-                item {
-                    PicaTabRow(
-                        selectedTabIndex = selectedTab,
-                        tabs = listOf(
-                            stringResource(R.string.comic),
-                            stringResource(R.string.comment),
-                        ),
-                        onTabSelected = { selectedTab = it },
-                        containerColor = MaterialTheme.colorScheme.surface,
-                    )
-                }
-                if (selectedTab == 0) {
-                    item {
-                        ProfileComicSection(
-                            title = stringResource(R.string.bookmarked),
-                            total = profileComicViewModel?.bookmarkedTotal?.toLong() ?: 0L,
-                            comics = profileComicViewModel?.bookmarkedComics.orEmpty(),
-                            loading = profileComicViewModel?.isLoading == true,
-                            onMore = {
-                                if (!offlineMode) {
-                                    onComicListClick("CATEGORY_USER_FAVOURITE")
+                        if (selectedTab == 0) {
+                            item {
+                                ProfileComicSection(
+                                    title = stringResource(R.string.bookmarked),
+                                    total = profileComicViewModel?.bookmarkedTotal?.toLong() ?: 0L,
+                                    comics = profileComicViewModel?.bookmarkedComics.orEmpty(),
+                                    loading = profileComicViewModel?.isLoading == true,
+                                    onMore = {
+                                        if (!offlineMode) {
+                                            onComicListClick("CATEGORY_USER_FAVOURITE")
+                                        }
+                                    },
+                                    onComicClick = {
+                                        if (!offlineMode) {
+                                            onComicClick(it)
+                                        }
+                                    },
+                                )
+                            }
+                            item {
+                                ProfileComicSection(
+                                    title = stringResource(R.string.recent_view),
+                                    total = profileComicViewModel?.recentTotal ?: 0L,
+                                    comics = profileComicViewModel?.recentComics.orEmpty(),
+                                    loading = false,
+                                    onMore = {
+                                        onComicListClick("CATEGORY_RECENT_VIEW")
+                                    },
+                                    onComicClick = onComicClick,
+                                )
+                            }
+                            item {
+                                ProfileComicSection(
+                                    title = "正在下载",
+                                    total = profileComicViewModel?.downloadingTotal ?: 0L,
+                                    comics = profileComicViewModel?.downloadingComics.orEmpty(),
+                                    loading = false,
+                                    subtitleOverrides = profileComicViewModel?.downloadingProgressText.orEmpty(),
+                                    onMore = {
+                                        onComicListClick("CATEGORY_DOWNLOADING")
+                                    },
+                                    onComicClick = onComicClick,
+                                )
+                            }
+                            item {
+                                ProfileComicSection(
+                                    title = stringResource(R.string.downloaded),
+                                    total = profileComicViewModel?.downloadedTotal ?: 0L,
+                                    comics = profileComicViewModel?.downloadedComics.orEmpty(),
+                                    loading = false,
+                                    onMore = {
+                                        onComicListClick("CATEGORY_DOWNLOADED")
+                                    },
+                                    onComicClick = onComicClick,
+                                )
+                            }
+                        } else {
+                            val comments = profileCommentViewModel?.commentItems.orEmpty()
+                            when {
+                                profileCommentViewModel?.isLoading == true && comments.isEmpty() -> {
+                                    item { PicaLoadingIndicator() }
                                 }
-                            },
-                            onComicClick = {
-                                if (!offlineMode) {
-                                    onComicClick(it)
+
+                                comments.isEmpty() -> {
+                                    item { PicaEmptyState(message = "No comments") }
                                 }
-                            },
-                        )
-                    }
-                    item {
-                        ProfileComicSection(
-                            title = stringResource(R.string.recent_view),
-                            total = profileComicViewModel?.recentTotal ?: 0L,
-                            comics = profileComicViewModel?.recentComics.orEmpty(),
-                            loading = false,
-                            onMore = {
-                                onComicListClick("CATEGORY_RECENT_VIEW")
-                            },
-                            onComicClick = onComicClick,
-                        )
-                    }
-                    item {
-                        ProfileComicSection(
-                            title = "正在下载",
-                            total = profileComicViewModel?.downloadingTotal ?: 0L,
-                            comics = profileComicViewModel?.downloadingComics.orEmpty(),
-                            loading = false,
-                            subtitleOverrides = profileComicViewModel?.downloadingProgressText.orEmpty(),
-                            onMore = {
-                                onComicListClick("CATEGORY_DOWNLOADING")
-                            },
-                            onComicClick = onComicClick,
-                        )
-                    }
-                    item {
-                        ProfileComicSection(
-                            title = stringResource(R.string.downloaded),
-                            total = profileComicViewModel?.downloadedTotal ?: 0L,
-                            comics = profileComicViewModel?.downloadedComics.orEmpty(),
-                            loading = false,
-                            onMore = {
-                                onComicListClick("CATEGORY_DOWNLOADED")
-                            },
-                            onComicClick = onComicClick,
-                        )
-                    }
-                } else {
-                    val comments = profileCommentViewModel?.commentItems.orEmpty()
-                    when {
-                        profileCommentViewModel?.isLoading == true && comments.isEmpty() -> {
-                            item { PicaLoadingIndicator() }
-                        }
 
-                        comments.isEmpty() -> {
-                            item { PicaEmptyState(message = "No comments") }
-                        }
-
-                        else -> {
-                            comments.forEachIndexed { index, comment ->
-                                item(key = stableLazyKey("profile_comment", index, comment.commentId, comment.content)) {
-                                    ProfileCommentCard(
-                                        comment = comment,
-                                        profileUser = profileCommentViewModel?.profileUser,
-                                        floor = (profileCommentViewModel?.displayFloorCount ?: comments.size) - index,
-                                        onOpenTarget = {
-                                            val comicId = comment.comicId?.comicId
-                                            val gameId = comment.gameId?.gameId
-                                            if (!comicId.isNullOrBlank()) onComicClick(comicId)
-                                            if (!gameId.isNullOrBlank()) onGameClick(gameId)
-                                        },
-                                    )
+                                else -> {
+                                    comments.forEachIndexed { index, comment ->
+                                        item(key = stableLazyKey("profile_comment", index, comment.commentId, comment.content)) {
+                                            ProfileCommentCard(
+                                                comment = comment,
+                                                profileUser = profileCommentViewModel?.profileUser,
+                                                floor = (profileCommentViewModel?.displayFloorCount ?: comments.size) - index,
+                                                onOpenTarget = {
+                                                    val comicId = comment.comicId?.comicId
+                                                    val gameId = comment.gameId?.gameId
+                                                    if (!comicId.isNullOrBlank()) onComicClick(comicId)
+                                                    if (!gameId.isNullOrBlank()) onGameClick(gameId)
+                                                },
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ProfileSloganCard(profile: UserProfileObject?) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            PicaSectionHeader(title = stringResource(R.string.title_profile))
+            Text(
+                text = profile?.slogan.orEmpty().ifBlank { "No slogan" },
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -474,89 +521,89 @@ private fun ProfileHeader(
             )
             Column(
                 modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(128.dp)
-                    .clickable(onClick = onAvatarClick),
-                contentAlignment = Alignment.Center,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (!profile?.character.isNullOrBlank()) {
-                    PicaImageUrl(
-                        imageUrl = profile?.character,
-                        contentDescription = profile?.role,
-                        modifier = Modifier
-                            .size(128.dp)
-                            .align(Alignment.Center),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
                 Box(
                     modifier = Modifier
-                        .size(104.dp)
-                        .clip(MaterialTheme.shapes.medium),
+                        .size(128.dp)
+                        .clickable(onClick = onAvatarClick),
+                    contentAlignment = Alignment.Center,
                 ) {
-                PicaRemoteImage(
-                    thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
-                    contentDescription = profile?.name,
-                    modifier = Modifier.fillMaxSize(),
-                )
-                if (!avatarPreviewUri.isNullOrBlank()) {
-                    PicaImageUrl(
-                        imageUrl = avatarPreviewUri,
-                        contentDescription = profile?.name,
-                        modifier = Modifier.fillMaxSize(),
+                    if (!profile?.character.isNullOrBlank()) {
+                        PicaImageUrl(
+                            imageUrl = profile?.character,
+                            contentDescription = profile?.role,
+                            modifier = Modifier
+                                .size(128.dp)
+                                .align(Alignment.Center),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(104.dp)
+                            .clip(MaterialTheme.shapes.medium),
+                    ) {
+                        PicaRemoteImage(
+                            thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
+                            contentDescription = profile?.name,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        if (!avatarPreviewUri.isNullOrBlank()) {
+                            PicaImageUrl(
+                                imageUrl = avatarPreviewUri,
+                                contentDescription = profile?.name,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                    }
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = displayName(profile),
+                        style = PicaExpressiveType.HeadlineEmphasized,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                    )
+                    if (profile?.isVerified == true) {
+                        Image(
+                            painter = painterResource(R.drawable.verified_icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp),
+                        )
+                    }
+                }
+                val title = profile?.title.orEmpty().trim()
+                if (title.isNotEmpty()) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.82f),
+                        textAlign = TextAlign.Center,
                     )
                 }
-            }
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = displayName(profile),
-                    style = PicaExpressiveType.HeadlineEmphasized,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
+                PicaMetricRow(
+                    metrics = listOf(
+                        "Level" to (profile?.level ?: 0).toString(),
+                        "EXP" to "${profile?.exp ?: 0}/${expForLevel((profile?.level ?: 0) + 1)}",
+                        "Role" to profile?.role.orEmpty().ifBlank { "-" },
+                    ),
                 )
-                if (profile?.isVerified == true) {
-                    Image(
-                        painter = painterResource(R.drawable.verified_icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(22.dp),
-                    )
-                }
-            }
-            val title = profile?.title.orEmpty().trim()
-            if (title.isNotEmpty()) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.82f),
-                    textAlign = TextAlign.Center,
-                )
-            }
-            PicaMetricRow(
-                metrics = listOf(
-                    "Level" to (profile?.level ?: 0).toString(),
-                    "EXP" to "${profile?.exp ?: 0}/${expForLevel((profile?.level ?: 0) + 1)}",
-                    "Role" to profile?.role.orEmpty().ifBlank { "-" },
-                ),
-            )
-            if (profile?.isPunched != true) {
-                Button(
-                    onClick = onPunchIn,
-                    enabled = !isPunchingIn && profile != null,
-                ) {
-                    Text(text = stringResource(R.string.profile_punch_in))
+                if (profile?.isPunched != true) {
+                    Button(
+                        onClick = onPunchIn,
+                        enabled = !isPunchingIn && profile != null,
+                    ) {
+                        Text(text = stringResource(R.string.profile_punch_in))
+                    }
                 }
             }
         }
     }
-}
 }
 
 @Composable

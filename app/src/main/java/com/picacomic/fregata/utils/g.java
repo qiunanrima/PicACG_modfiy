@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.picacomic.fregata.MyApplication;
 import com.picacomic.fregata.R;
+import com.google.android.material.color.DynamicColors;
 import com.picacomic.fregata.objects.ThumbnailObject;
 import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject;
 import com.picacomic.fregata.services.DownloadService;
@@ -658,6 +659,13 @@ public class g {
         return a.dS();
     }
 
+    public static String af(Context context, int i) {
+        if (ThemeColorHelper.isThemeIndexDarkForLegacyContent(context, i)) {
+            return a.dS() + "?color=black";
+        }
+        return a.dS();
+    }
+
     public static String ag(int i) {
         if (i == 1 || i == 2) {
             return a.getDetail() + "?color=black";
@@ -665,15 +673,18 @@ public class g {
         return a.getDetail();
     }
 
+    public static String ag(Context context, int i) {
+        if (ThemeColorHelper.isThemeIndexDarkForLegacyContent(context, i)) {
+            return a.getDetail() + "?color=black";
+        }
+        return a.getDetail();
+    }
+
     public static void aw(Context context) {
         if (Build.VERSION.SDK_INT >= 21) {
-            if (e.al(context) == 0) {
-                context.setTheme(R.style.AppTheme);
-            } else if (e.al(context) == 2) {
-                int nightMode = context.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
-                context.setTheme(nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES ? R.style.AppThemeNeonDark : R.style.AppThemeNeon);
-            } else {
-                context.setTheme(R.style.AppThemeBlack);
+            context.setTheme(ThemeColorHelper.resolveLegacyThemeResId(context));
+            if (ThemeColorHelper.resolveStoredThemeIndex(context) == ThemeColorHelper.SYSTEM_DYNAMIC_INDEX && context instanceof Activity) {
+                DynamicColors.applyToActivityIfAvailable((Activity) context);
             }
         }
     }

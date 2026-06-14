@@ -100,3 +100,5 @@ addtheme/
 
 .continue/agents/new-config.yaml
 app/lint-baseline.xml
+app/src/main/java/com/picacomic/fregata/compose/PicaComposeTheme.kt
+RELEASE_NOTES.md

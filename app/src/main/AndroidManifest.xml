@@ -64,9 +64,9 @@
             android:label="@string/app_name" />
         <activity
             android:name="com.picacomic.fregata.activities.LoginActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
             android:exported="false"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" />
+            android:label="@string/app_name" />
         <activity
             android:name="com.picacomic.fregata.activities.BaseActivity"
             android:exported="false" />
@@ -80,7 +80,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:exported="false"
             android:label="@string/title_activity_comic_viewer"
-            android:screenOrientation="sensorPortrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name="com.picacomic.fregata.activities.ImageCropActivity"
@@ -101,9 +100,9 @@
         <!-- SplashActivity 本身不导出，通过 activity-alias 启动 -->
         <activity
             android:name="com.picacomic.fregata.activities.SplashActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
             android:exported="false"
-            android:label="@string/app_name"
-            android:screenOrientation="sensorPortrait" />
+            android:label="@string/app_name" />
 
         <activity-alias
             android:name="com.picacomic.fregata.alias.Default"

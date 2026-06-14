@@ -656,6 +656,7 @@ http://line.me/ti/p/%40ztj0743u"</string>
     <string name="theme_color_purple">MD3 紫</string>
     <string name="theme_color_orange">MD3 橙</string>
     <string name="theme_color_red">MD3 红</string>
+    <string name="theme_color_system_dynamic">跟随系统</string>
     <string name="time_format_minute_before">分钟前</string>
     <string name="time_format_second_before">秒前</string>
     <string name="time_format_today">今天</string>

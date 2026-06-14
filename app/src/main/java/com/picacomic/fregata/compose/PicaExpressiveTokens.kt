@@ -26,6 +26,22 @@ object PicaExpressiveMotion {
     @Composable
     fun <T> fastEffectsSpec(): FiniteAnimationSpec<T> =
         androidx.compose.material3.MaterialTheme.motionScheme.fastEffectsSpec()
+
+    @Composable
+    fun <T> slowEffectsSpec(): FiniteAnimationSpec<T> =
+        androidx.compose.material3.MaterialTheme.motionScheme.slowEffectsSpec()
+
+    @Composable
+    fun <T> pressSpatialSpec(): FiniteAnimationSpec<T> =
+        fastSpatialSpec()
+
+    @Composable
+    fun <T> contentResizeSpec(): FiniteAnimationSpec<T> =
+        defaultSpatialSpec()
+
+    @Composable
+    fun <T> colorStateSpec(): FiniteAnimationSpec<T> =
+        fastEffectsSpec()
 }
 
 object PicaExpressiveType {

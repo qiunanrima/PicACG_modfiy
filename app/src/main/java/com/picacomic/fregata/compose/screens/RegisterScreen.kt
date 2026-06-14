@@ -2,17 +2,19 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionAnswer
@@ -79,156 +81,171 @@ fun RegisterScreen(
     BackHandler(onBack = onBack)
 
     PicaComposeTheme {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                PicaTopBar(
-                    title = stringResource(R.string.login_register),
-                    onBack = onBack,
-                )
-            },
-            bottomBar = {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.extraSmall,
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                    ),
-                ) {
-                    PicaPrimaryButton(
-                        text = if (isLoading) loadingText else stringResource(R.string.register_register_button),
-                        onClick = onSubmit,
-                        enabled = !isLoading,
-                        modifier = Modifier.padding(16.dp),
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val maxContentWidth = if (maxWidth >= 720.dp && maxWidth > maxHeight) 720.dp else maxWidth
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    PicaTopBar(
+                        title = stringResource(R.string.login_register),
+                        onBack = onBack,
                     )
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.background,
-        ) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                item {
-                    RegisterSection(
-                        title = stringResource(R.string.register_username),
-                        icon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                },
+                bottomBar = {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.extraSmall,
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        ),
                     ) {
-                        PicaTextField(
-                            value = username,
-                            onValueChange = onUsernameChange,
-                            label = stringResource(R.string.register_username),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Text,
-                                imeAction = ImeAction.Next,
-                            ),
-                        )
-                        PicaTextField(
-                            value = email,
-                            onValueChange = onEmailChange,
-                            label = stringResource(R.string.register_pica_id),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Email,
-                                imeAction = ImeAction.Next,
-                            ),
-                        )
-                    }
-                }
-
-                item {
-                    RegisterSection(
-                        title = stringResource(R.string.register_password),
-                        icon = { Icon(Icons.Filled.Lock, contentDescription = null) },
-                    ) {
-                        PicaTextField(
-                            value = password,
-                            onValueChange = onPasswordChange,
-                            label = stringResource(R.string.register_password),
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Next,
-                            ),
-                        )
-                        PicaTextField(
-                            value = passwordConfirm,
-                            onValueChange = onPasswordConfirmChange,
-                            label = stringResource(R.string.register_password_confirm),
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                                imeAction = ImeAction.Next,
-                            ),
-                        )
-                    }
-                }
-
-                item {
-                    RegisterSection(
-                        title = stringResource(R.string.register_date_of_birth),
-                        icon = { Icon(Icons.Filled.CalendarMonth, contentDescription = null) },
-                    ) {
-                        OutlinedButton(
-                            onClick = onBirthdayClick,
+                        Box(
                             modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Text(
-                                text = birthdayText ?: stringResource(R.string.register_date_of_birth),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
+                            PicaPrimaryButton(
+                                text = if (isLoading) loadingText else stringResource(R.string.register_register_button),
+                                onClick = onSubmit,
+                                enabled = !isLoading,
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .widthIn(max = maxContentWidth),
                             )
                         }
-                        GenderSelector(
-                            selectedGenderIndex = selectedGenderIndex,
-                            onGenderChange = onGenderChange,
-                        )
                     }
-                }
+                },
+                containerColor = MaterialTheme.colorScheme.background,
+            ) { padding ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    item {
+                        RegisterSection(
+                            title = stringResource(R.string.register_username),
+                            icon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                            modifier = Modifier.widthIn(max = maxContentWidth),
+                        ) {
+                            PicaTextField(
+                                value = username,
+                                onValueChange = onUsernameChange,
+                                label = stringResource(R.string.register_username),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Next,
+                                ),
+                            )
+                            PicaTextField(
+                                value = email,
+                                onValueChange = onEmailChange,
+                                label = stringResource(R.string.register_pica_id),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Email,
+                                    imeAction = ImeAction.Next,
+                                ),
+                            )
+                        }
+                    }
 
-                item {
-                    RegisterSection(
-                        title = stringResource(R.string.register_question_1),
-                        icon = { Icon(Icons.Filled.QuestionAnswer, contentDescription = null) },
-                    ) {
-                        PicaTextField(
-                            value = question1,
-                            onValueChange = onQuestion1Change,
-                            label = stringResource(R.string.register_question_1),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        )
-                        PicaTextField(
-                            value = answer1,
-                            onValueChange = onAnswer1Change,
-                            label = stringResource(R.string.register_answer_1),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        )
-                        PicaTextField(
-                            value = question2,
-                            onValueChange = onQuestion2Change,
-                            label = stringResource(R.string.register_question_2),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        )
-                        PicaTextField(
-                            value = answer2,
-                            onValueChange = onAnswer2Change,
-                            label = stringResource(R.string.register_answer_2),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        )
-                        PicaTextField(
-                            value = question3,
-                            onValueChange = onQuestion3Change,
-                            label = stringResource(R.string.register_question_3),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        )
-                        PicaTextField(
-                            value = answer3,
-                            onValueChange = onAnswer3Change,
-                            label = stringResource(R.string.register_answer_3),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        )
+                    item {
+                        RegisterSection(
+                            title = stringResource(R.string.register_password),
+                            icon = { Icon(Icons.Filled.Lock, contentDescription = null) },
+                            modifier = Modifier.widthIn(max = maxContentWidth),
+                        ) {
+                            PicaTextField(
+                                value = password,
+                                onValueChange = onPasswordChange,
+                                label = stringResource(R.string.register_password),
+                                visualTransformation = PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Next,
+                                ),
+                            )
+                            PicaTextField(
+                                value = passwordConfirm,
+                                onValueChange = onPasswordConfirmChange,
+                                label = stringResource(R.string.register_password_confirm),
+                                visualTransformation = PasswordVisualTransformation(),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Next,
+                                ),
+                            )
+                        }
+                    }
+
+                    item {
+                        RegisterSection(
+                            title = stringResource(R.string.register_date_of_birth),
+                            icon = { Icon(Icons.Filled.CalendarMonth, contentDescription = null) },
+                            modifier = Modifier.widthIn(max = maxContentWidth),
+                        ) {
+                            OutlinedButton(
+                                onClick = onBirthdayClick,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(
+                                    text = birthdayText ?: stringResource(R.string.register_date_of_birth),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            GenderSelector(
+                                selectedGenderIndex = selectedGenderIndex,
+                                onGenderChange = onGenderChange,
+                            )
+                        }
+                    }
+
+                    item {
+                        RegisterSection(
+                            title = stringResource(R.string.register_question_1),
+                            icon = { Icon(Icons.Filled.QuestionAnswer, contentDescription = null) },
+                            modifier = Modifier.widthIn(max = maxContentWidth),
+                        ) {
+                            PicaTextField(
+                                value = question1,
+                                onValueChange = onQuestion1Change,
+                                label = stringResource(R.string.register_question_1),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            )
+                            PicaTextField(
+                                value = answer1,
+                                onValueChange = onAnswer1Change,
+                                label = stringResource(R.string.register_answer_1),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            )
+                            PicaTextField(
+                                value = question2,
+                                onValueChange = onQuestion2Change,
+                                label = stringResource(R.string.register_question_2),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            )
+                            PicaTextField(
+                                value = answer2,
+                                onValueChange = onAnswer2Change,
+                                label = stringResource(R.string.register_answer_2),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            )
+                            PicaTextField(
+                                value = question3,
+                                onValueChange = onQuestion3Change,
+                                label = stringResource(R.string.register_question_3),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            )
+                            PicaTextField(
+                                value = answer3,
+                                onValueChange = onAnswer3Change,
+                                label = stringResource(R.string.register_answer_3),
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            )
+                        }
                     }
                 }
             }
@@ -240,9 +257,10 @@ fun RegisterScreen(
 private fun RegisterSection(
     title: String,
     icon: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    PicaCardSection {
+    PicaCardSection(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,

@@ -189,7 +189,7 @@ private fun GameDetailContent(
     var updateExpanded by rememberSaveable(detail.gameId, "update") { mutableStateOf(false) }
     val likeScale by animateFloatAsState(
         targetValue = if (detail.isLiked) 1.18f else 1f,
-        animationSpec = PicaExpressiveMotion.defaultSpatialSpec(),
+        animationSpec = PicaExpressiveMotion.pressSpatialSpec(),
         label = "game_detail_like_scale",
     )
 
