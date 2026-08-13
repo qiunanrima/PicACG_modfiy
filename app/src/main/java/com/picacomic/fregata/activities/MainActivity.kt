@@ -23,6 +23,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -114,6 +115,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(bundle: Bundle?) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         super.onCreate(bundle)
+        enableEdgeToEdge()
         offlineMode = intent?.getBooleanExtra(EXTRA_OFFLINE_MODE, false) == true
         nightModeEnabled = e.L(this)
         consumePopupOpenExtras(intent)
@@ -234,7 +236,10 @@ class MainActivity : BaseActivity() {
 
         PicaComposeTheme(darkTheme = resolvePicaDarkTheme(forceNightMode = nightModeEnabled)) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                val useNavigationRail = showBottomBar && maxWidth >= 840.dp && maxWidth > maxHeight
+                // M3 adaptive navigation switches from a bottom bar to a rail at the
+                // compact/medium width boundary. Orientation is not a reliable proxy on
+                // foldables and portrait tablets.
+                val useNavigationRail = showBottomBar && maxWidth >= 600.dp
                 Scaffold(
                     contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                     bottomBar = {

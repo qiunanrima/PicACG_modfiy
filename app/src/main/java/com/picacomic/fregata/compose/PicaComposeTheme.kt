@@ -3,7 +3,6 @@ package com.picacomic.fregata.compose
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
@@ -16,12 +15,14 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.picacomic.fregata.utils.ThemeColorHelper
@@ -179,27 +180,11 @@ private val PicaShapes = Shapes(
     extraLarge = RoundedCornerShape(28.dp)
 )
 
-private val PicaExpressiveShapes = Shapes(
-    extraSmall = RoundedCornerShape(6.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(18.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(32.dp),
-)
-
-private fun ColorScheme.toExpressiveScheme(darkTheme: Boolean): ColorScheme {
-    val accentRatio = if (darkTheme) 0.10f else 0.14f
-    return copy(
-        surfaceContainerLow = lerp(surfaceContainerLow, surfaceContainer, 0.48f),
-        surfaceContainer = lerp(surfaceContainer, primaryContainer, accentRatio),
-        surfaceContainerHigh = lerp(surfaceContainerHigh, secondaryContainer, accentRatio),
-        surfaceContainerHighest = lerp(surfaceContainerHighest, tertiaryContainer, accentRatio),
-        outlineVariant = lerp(outlineVariant, secondaryContainer, if (darkTheme) 0.18f else 0.22f),
-    )
-}
+private val LocalPicaExpressiveTheme = staticCompositionLocalOf { false }
+private val LocalPicaThemeApplied = staticCompositionLocalOf { false }
 
 @Composable
-fun isPicaExpressiveTheme(): Boolean = e.getDesignLanguage(LocalContext.current).coerceIn(0, 1) == 1
+fun isPicaExpressiveTheme(): Boolean = LocalPicaExpressiveTheme.current
 
 @Composable
 fun resolvePicaDarkTheme(forceNightMode: Boolean = e.L(LocalContext.current)): Boolean {
@@ -235,13 +220,13 @@ private fun md3LightPalette(
     primaryContainer = primaryContainer,
     onPrimaryContainer = onPrimaryContainer,
     secondary = secondary,
-    onSecondary = Color.White,
+    onSecondary = secondary.highContrastContentColor(),
     secondaryContainer = secondaryContainer,
-    onSecondaryContainer = onPrimaryContainer,
+    onSecondaryContainer = secondaryContainer.highContrastContentColor(),
     tertiary = tertiary,
-    onTertiary = Color.White,
+    onTertiary = tertiary.highContrastContentColor(),
     tertiaryContainer = tertiaryContainer,
-    onTertiaryContainer = onPrimaryContainer,
+    onTertiaryContainer = tertiaryContainer.highContrastContentColor(),
     background = background,
     onBackground = Color(0xFF1B1B1F),
     surface = background,
@@ -283,13 +268,13 @@ private fun md3DarkPalette(
     primaryContainer = primaryContainer,
     onPrimaryContainer = onPrimaryContainer,
     secondary = secondary,
-    onSecondary = onPrimary,
+    onSecondary = secondary.highContrastContentColor(),
     secondaryContainer = secondaryContainer,
-    onSecondaryContainer = onPrimaryContainer,
+    onSecondaryContainer = secondaryContainer.highContrastContentColor(),
     tertiary = tertiary,
-    onTertiary = onPrimary,
+    onTertiary = tertiary.highContrastContentColor(),
     tertiaryContainer = tertiaryContainer,
-    onTertiaryContainer = onPrimaryContainer,
+    onTertiaryContainer = tertiaryContainer.highContrastContentColor(),
     background = background,
     onBackground = Color(0xFFE4E2E6),
     surface = background,
@@ -308,6 +293,9 @@ private fun md3DarkPalette(
     inversePrimary = primaryContainer,
     surfaceTint = primary
 )
+
+private fun Color.highContrastContentColor(): Color =
+    if (luminance() > 0.179f) Color.Black else Color.White
 
 private val BlueLightColors = md3LightPalette(
     primary = androidx.compose.ui.graphics.Color(0xFF0061A4),
@@ -470,6 +458,11 @@ fun PicaComposeTheme(
     darkTheme: Boolean = resolvePicaDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    if (LocalPicaThemeApplied.current) {
+        content()
+        return
+    }
+
     val context = LocalContext.current
     val view = LocalView.current
     val designLanguage = e.getDesignLanguage(context).coerceIn(0, 1)
@@ -491,22 +484,12 @@ fun PicaComposeTheme(
         0 -> if (darkTheme) DarkColors else LightColors
         else -> if (darkTheme) DarkColors else LightColors
     }
-    val colorScheme = if (designLanguage == 1) {
-        baseColorScheme.toExpressiveScheme(darkTheme)
-    } else {
-        baseColorScheme
-    }
+    val expressive = designLanguage == 1
+    val colorScheme = baseColorScheme
 
     if (!view.isInEditMode) {
-        val statusBarColor = colorScheme.surface.toArgb()
-        val navigationBarColor = colorScheme.surfaceContainer.toArgb()
         SideEffect {
             val window = context.findActivity()?.window ?: return@SideEffect
-            window.statusBarColor = statusBarColor
-            window.navigationBarColor = navigationBarColor
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                window.navigationBarDividerColor = navigationBarColor
-            }
             WindowCompat.getInsetsController(window, view).apply {
                 isAppearanceLightStatusBars = !darkTheme
                 isAppearanceLightNavigationBars = !darkTheme
@@ -514,22 +497,27 @@ fun PicaComposeTheme(
         }
     }
 
-    if (designLanguage == 1) {
-        MaterialExpressiveTheme(
-            colorScheme = colorScheme,
-            motionScheme = MotionScheme.expressive(),
-            shapes = PicaExpressiveShapes,
-            typography = PicaExpressiveTypography,
-            content = content,
-        )
-    } else {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            motionScheme = MotionScheme.standard(),
-            shapes = PicaShapes,
-            typography = PicaTypography,
-            content = content,
-        )
+    CompositionLocalProvider(
+        LocalPicaThemeApplied provides true,
+        LocalPicaExpressiveTheme provides expressive,
+    ) {
+        if (expressive) {
+            MaterialExpressiveTheme(
+                colorScheme = colorScheme,
+                motionScheme = MotionScheme.expressive(),
+                shapes = PicaShapes,
+                typography = PicaTypography,
+                content = content,
+            )
+        } else {
+            MaterialTheme(
+                colorScheme = colorScheme,
+                motionScheme = MotionScheme.standard(),
+                shapes = PicaShapes,
+                typography = PicaTypography,
+                content = content,
+            )
+        }
     }
 }
 

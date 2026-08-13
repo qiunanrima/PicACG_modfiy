@@ -2,12 +2,12 @@ package com.picacomic.fregata.compose.components
 
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailDefaults
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
@@ -28,16 +28,12 @@ fun PicaNavigationBar(
 ) {
     if (vertical) {
         NavigationRail(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(72.dp),
-            containerColor = NavigationBarDefaults.containerColor,
+            modifier = Modifier.fillMaxHeight(),
+            containerColor = NavigationRailDefaults.ContainerColor,
         ) {
             items.forEach { screen ->
                 NavigationRailItem(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 4.dp),
+                    modifier = Modifier.padding(vertical = 4.dp),
                     selected = currentRoute == screen.route,
                     onClick = { onItemClick(screen) },
                     icon = { PicaNavigationIcon(screen, currentRoute) },
@@ -56,7 +52,7 @@ fun PicaNavigationBar(
                     selected = currentRoute == screen.route,
                     onClick = { onItemClick(screen) },
                     icon = { PicaNavigationIcon(screen, currentRoute) },
-                    label = null,
+                    label = { Text(stringResource(id = screen.titleRes)) },
                 )
             }
         }

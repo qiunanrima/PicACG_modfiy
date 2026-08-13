@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +27,7 @@ import com.picacomic.fregata.utils.g
 class PopupActivity : BaseActivity() {
     override fun onCreate(bundle: Bundle?) {
         super.onCreate(bundle)
+        enableEdgeToEdge()
         val type = intent.getStringExtra(EXTRA_KEY_TYPE)
         if (type.isNullOrBlank()) {
             finish()

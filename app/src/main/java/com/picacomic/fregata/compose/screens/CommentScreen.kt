@@ -584,7 +584,7 @@ private fun CommentCard(
                         )
                     }
                 }
-                IconButton(onClick = onReport, modifier = Modifier.size(36.dp)) {
+                IconButton(onClick = onReport) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
                         contentDescription = stringResource(R.string.comment_option_title),
@@ -803,7 +803,7 @@ private fun ReplyRow(
                         )
                     }
                 }
-                IconButton(onClick = onReport, modifier = Modifier.size(32.dp)) {
+                IconButton(onClick = onReport) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
                         contentDescription = stringResource(R.string.comment_option_title),

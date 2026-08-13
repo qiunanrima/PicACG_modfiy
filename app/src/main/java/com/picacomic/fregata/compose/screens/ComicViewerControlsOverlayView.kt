@@ -386,8 +386,13 @@ private fun ReaderActionButton(
             .width(56.dp)
             .background(Color.Transparent, CircleShape),
     ) {
-        IconButton(onClick = onClick, modifier = Modifier.size(38.dp)) {
-            Icon(imageVector = icon, contentDescription = label, tint = Color.White)
+        IconButton(onClick = onClick) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp),
+            )
         }
         Text(
             text = label,

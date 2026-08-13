@@ -46,58 +46,86 @@ object PicaExpressiveMotion {
 
 object PicaExpressiveType {
     val HeadlineEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.headlineSmall.copy(
-            fontWeight = FontWeight.Bold,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.headlineSmall
+            return if (isPicaExpressiveTheme()) base.copy(fontWeight = FontWeight.Bold) else base
+        }
 
     val TitleEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(
-            fontWeight = FontWeight.Bold,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.titleLarge
+            return if (isPicaExpressiveTheme()) base.copy(fontWeight = FontWeight.Bold) else base
+        }
 
     val SectionEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
-            fontSize = 17.sp,
-            lineHeight = 24.sp,
-            fontWeight = FontWeight.Bold,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.titleMedium
+            return if (isPicaExpressiveTheme()) {
+                base.copy(
+                    fontSize = 17.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            } else {
+                base
+            }
+        }
 
     val TitleSmallEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.titleSmall.copy(
-            fontWeight = FontWeight.Bold,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.titleSmall
+            return if (isPicaExpressiveTheme()) base.copy(fontWeight = FontWeight.Bold) else base
+        }
 
     val BodyEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
-            fontWeight = FontWeight.Medium,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.bodyLarge
+            return if (isPicaExpressiveTheme()) base.copy(fontWeight = FontWeight.Medium) else base
+        }
 
     val ListItem: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
-            fontSize = 18.sp,
-            lineHeight = 26.sp,
-            fontWeight = FontWeight.Normal,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.bodyLarge
+            return if (isPicaExpressiveTheme()) {
+                base.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 26.sp,
+                    fontWeight = FontWeight.Normal,
+                )
+            } else {
+                base
+            }
+        }
 
     val ListItemEmphasized: TextStyle
-        @Composable get() = ListItem.copy(
-            fontWeight = FontWeight.Medium,
-        )
+        @Composable get() {
+            val base = ListItem
+            return if (isPicaExpressiveTheme()) base.copy(fontWeight = FontWeight.Medium) else base
+        }
 
     val LabelEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.labelLarge.copy(
-            fontWeight = FontWeight.Bold,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.labelLarge
+            return if (isPicaExpressiveTheme()) base.copy(fontWeight = FontWeight.Bold) else base
+        }
 
     val MetricEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
-            fontSize = 18.sp,
-            lineHeight = 24.sp,
-            fontWeight = FontWeight.ExtraBold,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.titleMedium
+            return if (isPicaExpressiveTheme()) {
+                base.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                )
+            } else {
+                base
+            }
+        }
 
     val CompactMetricEmphasized: TextStyle
-        @Composable get() = androidx.compose.material3.MaterialTheme.typography.labelLarge.copy(
-            fontWeight = FontWeight.Bold,
-        )
+        @Composable get() {
+            val base = androidx.compose.material3.MaterialTheme.typography.labelLarge
+            return if (isPicaExpressiveTheme()) base.copy(fontWeight = FontWeight.Bold) else base
+        }
 }

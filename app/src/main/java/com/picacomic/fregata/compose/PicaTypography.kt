@@ -34,12 +34,12 @@ val PicaTypography = Typography(
     headlineSmall = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
     ),
     titleLarge = TextStyle(
         fontSize = 22.sp,
         lineHeight = 28.sp,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
     ),
     titleMedium = TextStyle(
         fontSize = 16.sp,
@@ -63,7 +63,7 @@ val PicaTypography = Typography(
     ),
     bodySmall = TextStyle(
         fontSize = 12.sp,
-        lineHeight = 18.sp,
+        lineHeight = 16.sp,
         fontWeight = FontWeight.Normal,
     ),
     labelLarge = TextStyle(
@@ -77,26 +77,8 @@ val PicaTypography = Typography(
         fontWeight = FontWeight.Medium,
     ),
     labelSmall = TextStyle(
-        fontSize = 10.sp,
-        lineHeight = 14.sp,
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
         fontWeight = FontWeight.Medium,
     ),
-)
- 
-val PicaExpressiveTypography = Typography(
-    displayLarge = PicaTypography.displayLarge.copy(fontWeight = FontWeight.Bold),
-    displayMedium = PicaTypography.displayMedium.copy(fontWeight = FontWeight.Bold),
-    displaySmall = PicaTypography.displaySmall.copy(fontWeight = FontWeight.Bold),
-    headlineLarge = PicaTypography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-    headlineMedium = PicaTypography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-    headlineSmall = PicaTypography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-    titleLarge = PicaTypography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-    titleMedium = PicaTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-    titleSmall = PicaTypography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-    bodyLarge = PicaTypography.bodyLarge,
-    bodyMedium = PicaTypography.bodyMedium,
-    bodySmall = PicaTypography.bodySmall,
-    labelLarge = PicaTypography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-    labelMedium = PicaTypography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-    labelSmall = PicaTypography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
 )

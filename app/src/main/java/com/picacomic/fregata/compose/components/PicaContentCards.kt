@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -187,7 +188,7 @@ fun PicaComicListCard(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(148.dp),
+            .heightIn(min = 148.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (expressive) {
                 MaterialTheme.colorScheme.surfaceContainer

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.recyclerview.widget.ItemTouchHelper
 import com.picacomic.fregata.R
 import com.picacomic.fregata.b.d
@@ -27,6 +28,7 @@ class ImageCropActivity : BaseActivity(), com.picacomic.fregata.a_pkg.f {
     // com.picacomic.fregata.activities.BaseActivity, androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     override fun onCreate(bundle: Bundle?) {
         super.onCreate(bundle)
+        enableEdgeToEdge()
         val intent = getIntent()
         if (intent != null) {
             this.`is` = intent.getStringExtra("KEY_IMAGE_URI_STRING")

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -299,7 +300,7 @@ fun PicaEpisodeGridItem(
         tonalElevation = if (state == PicaEpisodeGridItemState.Default) 0.dp else 2.dp,
         border = BorderStroke(1.dp, borderColor),
         modifier = modifier
-            .height(46.dp)
+            .heightIn(min = 48.dp)
             .clip(shape)
             .clickable(enabled = enabled, onClick = onClick),
     ) {
