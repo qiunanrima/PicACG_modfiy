@@ -1,11 +1,10 @@
 package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,7 +56,7 @@ import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
 private const val SEARCH_PREFS = "search_history"
 private const val SEARCH_KEY = "queries"
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     onSearch: (String) -> Unit,
@@ -105,7 +104,11 @@ fun SearchScreen(
             containerColor = MaterialTheme.colorScheme.background,
         ) { padding ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 OutlinedTextField(
@@ -118,30 +121,6 @@ fun SearchScreen(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { submit(query) }),
                 )
-
-                if (history.isNotEmpty()) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.search_history_title), style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                        IconButton(onClick = { history = emptyList(); saveSearchHistory(context, history) }) {
-                            Icon(Icons.Filled.DeleteSweep, contentDescription = stringResource(R.string.search_history_clear))
-                        }
-                    }
-                    Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        history.forEach { item ->
-                            Box(
-                                modifier = Modifier.combinedClickable(
-                                    onClick = { query = item; submit(item) },
-                                    onLongClick = {
-                                        history = history.filterNot { it == item }
-                                        saveSearchHistory(context, history)
-                                    },
-                                ),
-                            ) {
-                                PicaInfoChip(text = item, onClick = { query = item; submit(item) })
-                            }
-                        }
-                    }
-                }
 
                 if (keywords.isNotEmpty()) {
                     Text(stringResource(R.string.category_keywords_list_title), style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium)
@@ -161,6 +140,23 @@ fun SearchScreen(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+                if (history.isNotEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.search_history_title), style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { history = emptyList(); saveSearchHistory(context, history) }) {
+                            Icon(Icons.Filled.DeleteSweep, contentDescription = stringResource(R.string.search_history_clear))
+                        }
+                    }
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        history.forEach { item ->
+                            PicaInfoChip(text = item, onClick = { query = item; submit(item) })
                         }
                     }
                 }
