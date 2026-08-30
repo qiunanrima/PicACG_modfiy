@@ -133,15 +133,19 @@ fun SearchScreen(
                 if (keywords.isNotEmpty()) {
                     Text(stringResource(R.string.category_keywords_list_title), style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium)
                     // Two fixed rows keep the popular section compact; overflow continues horizontally.
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth().height(96.dp),
-                        contentPadding = PaddingValues(end = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(keywords.take(40).chunked(2), key = { it.joinToString("\u001f") }) { column ->
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                column.forEach { item ->
-                                    PicaInfoChip(text = item, onClick = { query = item; submit(item) })
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        val visibleKeywords = keywords.take(40)
+                        listOf(visibleKeywords.filterIndexed { index, _ -> index % 2 == 0 }, visibleKeywords.filterIndexed { index, _ -> index % 2 == 1 }).forEach { rowItems ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                rowItems.forEach { item ->
+                                    PicaInfoChip(
+                                        text = item,
+                                        modifier = Modifier.height(44.dp),
+                                        onClick = { query = item; submit(item) },
+                                    )
                                 }
                             }
                         }
