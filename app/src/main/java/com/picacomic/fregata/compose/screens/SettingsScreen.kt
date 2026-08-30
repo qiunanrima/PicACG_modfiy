@@ -58,6 +58,7 @@ enum class SettingsDialog {
     LauncherIcon,
     CoilCacheSize,
     ThemeColorUnsupported,
+    LandscapeCommentsSide,
 }
 
 data class SettingsState(
@@ -85,6 +86,7 @@ data class SettingsState(
     val nightModeEnabled: Boolean = false,
     val volumePagingEnabled: Boolean = false,
     val landscapeCommentsEnabled: Boolean = false,
+    val landscapeCommentsOnLeft: Boolean = false,
     val testingEnabled: Boolean = false,
     val performanceEnabled: Boolean = false,
     val activeDialog: SettingsDialog? = null,
@@ -112,6 +114,7 @@ fun SettingsScreen(
     onNightModeChanged: (Boolean) -> Unit,
     onVolumePagingChanged: (Boolean) -> Unit,
     onLandscapeCommentsChanged: (Boolean) -> Unit,
+    onLandscapeCommentsSide: () -> Unit,
     onTestingChanged: (Boolean) -> Unit,
     onPerformanceChanged: (Boolean) -> Unit,
     onDialogDismiss: () -> Unit,
@@ -121,6 +124,7 @@ fun SettingsScreen(
     onDesignLanguageSelected: (Int) -> Unit,
     onThemeColorSelected: (Int) -> Unit,
     onLauncherIconSelected: (Int) -> Unit,
+    onLandscapeCommentsSideSelected: (Int) -> Unit,
     onCoilCacheSizeDraftChanged: (String) -> Unit,
     onCoilCacheSizeConfirmed: () -> Unit,
     onAutoPagingDraftChanged: (Int) -> Unit,
@@ -135,6 +139,7 @@ fun SettingsScreen(
             add(stringResource(R.string.theme_color_system_dynamic))
         }
     }
+    val landscapeCommentsSideOptions = stringArrayResource(R.array.setting_options_landscape_comments_side)
     val launcherIconOptions = listOf("默认图标", "Miracle Neon")
 
     PicaComposeTheme {
@@ -198,6 +203,11 @@ fun SettingsScreen(
                         label = stringResource(R.string.setting_comic_viewer_landscape_comments),
                         checked = state.landscapeCommentsEnabled,
                         onCheckedChange = onLandscapeCommentsChanged
+                    )
+                    PicaValueListItem(
+                        label = stringResource(R.string.setting_comic_viewer_landscape_comments_side),
+                        value = landscapeCommentsSideOptions[if (state.landscapeCommentsOnLeft) 0 else 1],
+                        onClick = onLandscapeCommentsSide,
                     )
                     PicaValueListItem(
                         label = stringResource(R.string.setting_comic_viewer_image_quality),
@@ -331,6 +341,14 @@ fun SettingsScreen(
                 options = launcherIconOptions,
                 selectedIndex = state.launcherIconIndex,
                 onSelect = onLauncherIconSelected,
+                onDismiss = onDialogDismiss,
+            )
+
+            SettingsDialog.LandscapeCommentsSide -> PicaSingleChoiceDialog(
+                title = stringResource(R.string.setting_comic_viewer_landscape_comments_side),
+                options = landscapeCommentsSideOptions.toList(),
+                selectedIndex = if (state.landscapeCommentsOnLeft) 0 else 1,
+                onSelect = onLandscapeCommentsSideSelected,
                 onDismiss = onDialogDismiss,
             )
 
@@ -505,6 +523,7 @@ private fun SettingsScreenPreview(
         onNightModeChanged = {},
         onVolumePagingChanged = {},
         onLandscapeCommentsChanged = {},
+        onLandscapeCommentsSide = {},
         onTestingChanged = {},
         onPerformanceChanged = {},
         onDialogDismiss = {},
@@ -514,6 +533,7 @@ private fun SettingsScreenPreview(
         onDesignLanguageSelected = {},
         onThemeColorSelected = {},
         onLauncherIconSelected = {},
+        onLandscapeCommentsSideSelected = {},
         onCoilCacheSizeDraftChanged = {},
         onCoilCacheSizeConfirmed = {},
         onAutoPagingDraftChanged = {},

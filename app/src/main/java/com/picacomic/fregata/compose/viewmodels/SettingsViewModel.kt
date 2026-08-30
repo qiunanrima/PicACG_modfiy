@@ -88,6 +88,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             nightModeEnabled = e.L(app),
             volumePagingEnabled = e.Q(app),
             landscapeCommentsEnabled = e.readerLandscapeComments(app),
+            landscapeCommentsOnLeft = e.readerLandscapeCommentsOnLeft(app),
             performanceEnabled = e.x(app),
             testingEnabled = e.w(app),
             apkVersionTitle = app.getString(R.string.setting_version_title) + " (" + app.getString(R.string.app_version) + ")"
@@ -220,6 +221,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun toggleLandscapeComments(enabled: Boolean) {
         e.setReaderLandscapeComments(getApplication(), enabled)
         state = state.copy(landscapeCommentsEnabled = enabled)
+    }
+
+    fun openLandscapeCommentsSideDialog() {
+        state = state.copy(activeDialog = SettingsDialog.LandscapeCommentsSide)
+    }
+
+    fun selectLandscapeCommentsSide(index: Int) {
+        state = state.copy(activeDialog = null)
+        e.setReaderLandscapeCommentsOnLeft(getApplication(), index == 0)
+        loadSettings()
     }
 
     fun togglePerformance(enabled: Boolean) {

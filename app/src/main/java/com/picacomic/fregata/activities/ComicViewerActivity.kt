@@ -247,6 +247,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     var offlineMode: Boolean = false
     private var isTabletReader: Boolean = false
     private var readerLandscapeCommentsEnabled by mutableStateOf(false)
+    private var readerLandscapeCommentsOnLeft: Boolean = false
     private var readerCommentSidebarHasContent: Boolean = false
     private var pendingBrightnessSettingsPermission = false
     var autoPagingTimer: CountDownTimer? = null
@@ -459,7 +460,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 readerCommentSidebarWidthPx(),
                 RelativeLayout.LayoutParams.MATCH_PARENT
             ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+                addRule(if (readerLandscapeCommentsOnLeft) RelativeLayout.ALIGN_PARENT_LEFT else RelativeLayout.ALIGN_PARENT_RIGHT)
             }
         )
     }
@@ -472,14 +473,21 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         (sidebarView.layoutParams as? RelativeLayout.LayoutParams)?.let { params ->
             params.width = readerCommentSidebarWidthPx()
             params.height = RelativeLayout.LayoutParams.MATCH_PARENT
-            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+            params.addRule(
+                if (readerLandscapeCommentsOnLeft) RelativeLayout.ALIGN_PARENT_LEFT else RelativeLayout.ALIGN_PARENT_RIGHT
+            )
+            params.addRule(
+                if (readerLandscapeCommentsOnLeft) RelativeLayout.ALIGN_PARENT_RIGHT else RelativeLayout.ALIGN_PARENT_LEFT,
+                0
+            )
             sidebarView.layoutParams = params
         }
         findViewById<FrameLayout>(R.id.container)?.let { container ->
             (container.layoutParams as? RelativeLayout.LayoutParams)?.let { params ->
                 params.width = RelativeLayout.LayoutParams.MATCH_PARENT
                 params.height = RelativeLayout.LayoutParams.MATCH_PARENT
-                params.rightMargin = sidebarWidth
+                params.leftMargin = if (readerLandscapeCommentsOnLeft) sidebarWidth else 0
+                params.rightMargin = if (readerLandscapeCommentsOnLeft) 0 else sidebarWidth
                 container.layoutParams = params
             }
         }
@@ -504,6 +512,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         this.isVolumeKeyPagingEnabled = e.Q(this)
         this.isTabletReader = isTabletDevice()
         this.readerLandscapeCommentsEnabled = e.readerLandscapeComments(this)
+        this.readerLandscapeCommentsOnLeft = e.readerLandscapeCommentsOnLeft(this)
         this.isLandscape = e.M(this)
         this.isVerticalScroll = e.N(this)
         this.isNightMode = e.L(this)
@@ -1125,6 +1134,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             j(this.checkBox_brightnessSystem?.isChecked == true)
         }
         this.readerLandscapeCommentsEnabled = e.readerLandscapeComments(this)
+        this.readerLandscapeCommentsOnLeft = e.readerLandscapeCommentsOnLeft(this)
         updateReaderCommentSidebarLayout()
     }
 

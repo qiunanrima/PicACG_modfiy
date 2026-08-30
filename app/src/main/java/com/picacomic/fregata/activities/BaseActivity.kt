@@ -13,6 +13,7 @@ import android.os.CountDownTimer
 import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
@@ -26,6 +27,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.picacomic.fregata.a_pkg.i
+import com.picacomic.fregata.MyApplication
 import com.picacomic.fregata.compose.screens.ImagePopupDialogContent
 import com.picacomic.fregata.compose.screens.LockDialogContent
 import com.picacomic.fregata.compose.screens.ProgressDialogContent
@@ -56,6 +58,11 @@ open class BaseActivity : AppCompatActivity() {
     override fun onCreate(bundle: Bundle?) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         super.onCreate(bundle)
+        // Keep sensitive pages out of the recent-task preview on all supported Android versions.
+        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            setRecentsScreenshotEnabled(false)
+        }
         g.aw(this)
     }
 
@@ -423,12 +430,6 @@ open class BaseActivity : AppCompatActivity() {
             this.hn!!.cancel()
             this.hn = null
         }
-        if ((this is LoginActivity) || (this is PopupActivity) || (e.y(this)
-                .also { strY = it }) == null || strY!!.length <= 0
-        ) {
-            return
-        }
-        bD()
     }
 
     // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
@@ -440,6 +441,10 @@ open class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         g.ar(this)
+        if (this !is LoginActivity && this !is PopupActivity &&
+            MyApplication.bx().consumeLockOnNextResume() && !e.y(this).isNullOrBlank()) {
+            bD()
+        }
     }
 
     companion object {

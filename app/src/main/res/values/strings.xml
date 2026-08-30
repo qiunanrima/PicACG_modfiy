@@ -577,6 +577,7 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="setting_comic_viewer_title">阅读设置</string>
     <string name="setting_comic_viewer_volume_paging_control">音键翻页</string>
     <string name="setting_comic_viewer_landscape_comments">横屏显示评论侧栏</string>
+    <string name="setting_comic_viewer_landscape_comments_side">评论侧栏位置</string>
     <string name="setting_faq">打开查看</string>
     <string name="setting_faq_title">常见问题解答（FAQ）</string>
     <string name="setting_logout">绅士注销</string>

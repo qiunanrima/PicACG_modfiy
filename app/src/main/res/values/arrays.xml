@@ -106,6 +106,10 @@
         <item>@string/theme_color_orange</item>
         <item>@string/theme_color_red</item>
     </string-array>
+    <string-array name="setting_options_landscape_comments_side">
+        <item>左侧</item>
+        <item>右侧</item>
+    </string-array>
     <string-array name="setting_design_languages">
         <item>MD3</item>
         <item>MD3E</item>

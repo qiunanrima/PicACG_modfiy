@@ -458,6 +458,7 @@ class MainActivity : BaseActivity() {
                                 },
                                 onVolumePagingChanged = { settingsViewModel.toggleVolumePaging(it) },
                                 onLandscapeCommentsChanged = { settingsViewModel.toggleLandscapeComments(it) },
+                                onLandscapeCommentsSide = settingsViewModel::openLandscapeCommentsSideDialog,
                                 onTestingChanged = { settingsViewModel.toggleTesting(it) },
                                 onPerformanceChanged = { settingsViewModel.togglePerformance(it) },
                                 onDialogDismiss = settingsViewModel::dismissDialog,
@@ -489,6 +490,7 @@ class MainActivity : BaseActivity() {
                                     }
                                 },
                                 onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
+                                onLandscapeCommentsSideSelected = settingsViewModel::selectLandscapeCommentsSide,
                                 onCoilCacheSizeDraftChanged = settingsViewModel::updateCoilCacheDraftValue,
                                 onCoilCacheSizeConfirmed = settingsViewModel::confirmCoilCacheSize,
                                 onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,

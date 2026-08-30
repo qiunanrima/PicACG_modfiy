@@ -114,6 +114,7 @@ class PopupActivity : BaseActivity() {
                         onNightModeChanged = settingsViewModel::toggleNightMode,
                         onVolumePagingChanged = settingsViewModel::toggleVolumePaging,
                         onLandscapeCommentsChanged = settingsViewModel::toggleLandscapeComments,
+                        onLandscapeCommentsSide = settingsViewModel::openLandscapeCommentsSideDialog,
                         onTestingChanged = settingsViewModel::toggleTesting,
                         onPerformanceChanged = settingsViewModel::togglePerformance,
                         onDialogDismiss = settingsViewModel::dismissDialog,
@@ -141,6 +142,7 @@ class PopupActivity : BaseActivity() {
                             }
                         },
                         onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
+                        onLandscapeCommentsSideSelected = settingsViewModel::selectLandscapeCommentsSide,
                         onCoilCacheSizeDraftChanged = settingsViewModel::updateCoilCacheDraftValue,
                         onCoilCacheSizeConfirmed = settingsViewModel::confirmCoilCacheSize,
                         onAutoPagingDraftChanged = settingsViewModel::updateAutoPagingDraftProgress,
