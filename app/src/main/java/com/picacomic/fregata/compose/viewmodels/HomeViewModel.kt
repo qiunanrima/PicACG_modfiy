@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.picacomic.fregata.b.d
 import com.picacomic.fregata.objects.CollectionObject
+import com.picacomic.fregata.objects.responses.DataClass.ComicListResponse.ComicListResponse
 import com.picacomic.fregata.objects.responses.DataClass.CollectionsResponse
 import com.picacomic.fregata.objects.responses.GeneralResponse
 import com.picacomic.fregata.utils.e
@@ -30,7 +31,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     private var collectionsCall: Call<GeneralResponse<CollectionsResponse>>? = null
+    private val categoryCalls = mutableListOf<Call<GeneralResponse<ComicListResponse>>>()
+    private val categoryCollections = linkedMapOf<String, CollectionObject>()
     private var pendingCount = 0
+
+    private val homeCategoryTitles = listOf("大家都在看", "官方都在看")
 
     init {
         hasNotification = e.ak(application)
@@ -38,9 +43,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadData() {
         collectionsCall?.cancel()
+        categoryCalls.forEach { it.cancel() }
+        categoryCalls.clear()
+        categoryCollections.clear()
+        collections = emptyList()
         isLoading = true
         pendingCount = 0
         fetchCollections()
+        homeCategoryTitles.forEach(::fetchCategoryCollection)
     }
 
     fun refreshNotificationState() {
@@ -58,7 +68,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             ) {
                 if (call.isCanceled) return
                 if (response.code() == 200) {
-                    collections = response.body()?.data?.collections ?: emptyList()
+                    rebuildCollections(response.body()?.data?.collections.orEmpty())
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
                 }
@@ -71,6 +81,55 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 checkLoadingFinished()
             }
         })
+    }
+
+    /** Load the same category-backed feeds exposed from the category screen. */
+    private fun fetchCategoryCollection(title: String) {
+        val context = getApplication<Application>()
+        pendingCount += 1
+        val call = d(context).dO().a(
+            e.z(context),
+            1,
+            title,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+        )
+        categoryCalls += call
+        call.enqueue(object : Callback<GeneralResponse<ComicListResponse>> {
+            override fun onResponse(
+                call: Call<GeneralResponse<ComicListResponse>>,
+                response: Response<GeneralResponse<ComicListResponse>>,
+            ) {
+                if (call.isCanceled) return
+                if (response.code() == 200) {
+                    val comics = response.body()?.data?.comics?.docs.orEmpty()
+                    if (comics.isNotEmpty()) {
+                        categoryCollections[title] = CollectionObject(title, ArrayList(comics))
+                        rebuildCollections(collections)
+                    }
+                } else {
+                    emitHttpError(response.code(), safeErrorBody(response))
+                }
+                checkLoadingFinished()
+            }
+
+            override fun onFailure(call: Call<GeneralResponse<ComicListResponse>>, t: Throwable) {
+                if (call.isCanceled) return
+                emitNetworkError()
+                checkLoadingFinished()
+            }
+        })
+    }
+
+    private fun rebuildCollections(base: List<CollectionObject>) {
+        val supplemental = homeCategoryTitles.mapNotNull { categoryCollections[it] }
+        collections = base.filterNot { item ->
+            homeCategoryTitles.any { it.equals(item.title, ignoreCase = true) }
+        } + supplemental
     }
 
     private fun checkLoadingFinished() {
@@ -100,6 +159,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         collectionsCall?.cancel()
+        categoryCalls.forEach { it.cancel() }
         super.onCleared()
     }
 }

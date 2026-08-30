@@ -2,7 +2,9 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -79,7 +81,6 @@ fun SearchScreen(
         val cleaned = value.trim()
         if (cleaned.isEmpty()) return
         history = listOf(cleaned) + history.filterNot { it.equals(cleaned, ignoreCase = true) }
-            .take(19)
         saveSearchHistory(context, history)
         onSearch(cleaned)
     }
@@ -104,8 +105,8 @@ fun SearchScreen(
             containerColor = MaterialTheme.colorScheme.background,
         ) { padding ->
             Column(
-                modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 OutlinedTextField(
                     value = query,
@@ -126,24 +127,36 @@ fun SearchScreen(
                         }
                     }
                     Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        history.forEach { item -> PicaInfoChip(text = item, onClick = { query = item; submit(item) }) }
+                        history.forEach { item ->
+                            Box(
+                                modifier = Modifier.combinedClickable(
+                                    onClick = { query = item; submit(item) },
+                                    onLongClick = {
+                                        history = history.filterNot { it == item }
+                                        saveSearchHistory(context, history)
+                                    },
+                                ),
+                            ) {
+                                PicaInfoChip(text = item, onClick = { query = item; submit(item) })
+                            }
+                        }
                     }
                 }
 
                 if (keywords.isNotEmpty()) {
                     Text(stringResource(R.string.category_keywords_list_title), style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium)
                     // Two fixed rows keep the popular section compact; overflow continues horizontally.
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
                         val visibleKeywords = keywords.take(40)
                         listOf(visibleKeywords.filterIndexed { index, _ -> index % 2 == 0 }, visibleKeywords.filterIndexed { index, _ -> index % 2 == 1 }).forEach { rowItems ->
                             Row(
                                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
                                 rowItems.forEach { item ->
                                     PicaInfoChip(
                                         text = item,
-                                        modifier = Modifier.height(44.dp),
+                                        modifier = Modifier.height(38.dp),
                                         onClick = { query = item; submit(item) },
                                     )
                                 }

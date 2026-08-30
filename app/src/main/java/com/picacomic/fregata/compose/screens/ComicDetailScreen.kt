@@ -559,7 +559,8 @@ private fun ComicDetailContent(
                         val horizontalSpacing = 12.dp
                         val columnCount = 3
                         val cardWidth = (maxWidth - horizontalSpacing * (columnCount - 1)) / columnCount
-                        val cardHeight = cardWidth * 1.72f
+                        // Reserve enough room for the cover, a two-line title, and categories.
+                        val cardHeight = cardWidth * 1.5f + 60.dp
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             recommendations.chunked(columnCount).forEach { rowRecommendations ->
                                 Row(horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)) {
@@ -614,7 +615,8 @@ private fun ComicDetailContent(
                                         val horizontalSpacing = 12.dp
                                         val columnCount = 2
                                         val cardWidth = (maxWidth - horizontalSpacing * (columnCount - 1)) / columnCount
-                                        val cardHeight = cardWidth * 1.72f
+                                        // Reserve enough room for the cover, a two-line title, and categories.
+                                        val cardHeight = cardWidth * 1.5f + 60.dp
                                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                             recommendations.chunked(columnCount).forEach { rowRecommendations ->
                                                 Row(horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)) {

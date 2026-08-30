@@ -171,8 +171,8 @@ fun HomeScreen(
                     else -> {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(18.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
                             itemsIndexed(
                                 items = collections,
@@ -199,7 +199,7 @@ private fun HomeCollectionRow(
     onComicClick: (String) -> Unit,
 ) {
     val comics = collection.comics.orEmpty()
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PicaSectionHeader(
             title = collection.title.orEmpty(),
             actionLabel = stringResource(R.string.more),
@@ -207,7 +207,7 @@ private fun HomeCollectionRow(
         )
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             comics.forEach { comic ->
                 PicaComicListCard(
@@ -253,6 +253,8 @@ private fun homePreviewState(): HomePreviewState {
         collections = listOf(
             CollectionObject("Latest", ArrayList(comics)),
             CollectionObject("Popular", ArrayList(comics.reversed())),
+            CollectionObject("大家都在看", ArrayList(comics)),
+            CollectionObject("官方都在看", ArrayList(comics.reversed())),
         ),
     )
 }

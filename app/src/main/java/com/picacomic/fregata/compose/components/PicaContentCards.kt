@@ -181,14 +181,14 @@ fun PicaComicListCard(
     pages: Int? = null,
     episodes: Int? = null,
     categories: List<String> = emptyList(),
-    coverWidth: Dp = 84.dp,
+    coverWidth: Dp = 76.dp,
 ) {
     val expressive = isPicaExpressiveTheme()
     Card(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 148.dp),
+            .heightIn(min = 136.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (expressive) {
                 MaterialTheme.colorScheme.surfaceContainer
@@ -201,8 +201,8 @@ fun PicaComicListCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.Top,
         ) {
             PicaRemoteImage(
@@ -218,7 +218,7 @@ fun PicaComicListCard(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(5.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
                 Text(
                     text = title,
@@ -237,7 +237,7 @@ fun PicaComicListCard(
                 }
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
                 ) {
                     likes?.takeIf { it > 0 }?.let {
                         PicaComicMetaText(

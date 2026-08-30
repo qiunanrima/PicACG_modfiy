@@ -251,8 +251,8 @@ fun ComicListScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 item(key = "filters") {
                     ComicListControlPanel(
@@ -268,9 +268,9 @@ fun ComicListScreen(
                     )
                     if (screenViewModel?.selectedAdvancedCategories?.isNotEmpty() == true) {
                         FlowRow(
-                            modifier = Modifier.padding(top = 10.dp),
+                            modifier = Modifier.padding(top = 6.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             screenViewModel.selectedAdvancedCategories.forEach { category ->
                                 AssistChip(onClick = {}, label = { Text(category) })

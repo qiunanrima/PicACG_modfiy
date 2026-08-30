@@ -402,6 +402,7 @@ fun PicaRecommendationCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodySmall,
+                minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
