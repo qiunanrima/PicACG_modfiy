@@ -13,7 +13,6 @@ import android.os.CountDownTimer
 import android.provider.Settings
 import android.view.KeyEvent
 import android.view.View
-import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
@@ -58,8 +57,7 @@ open class BaseActivity : AppCompatActivity() {
     override fun onCreate(bundle: Bundle?) {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         super.onCreate(bundle)
-        // Keep sensitive pages out of the recent-task preview on all supported Android versions.
-        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        // Disable only the system's recent-task snapshot; in-app screenshots remain available.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setRecentsScreenshotEnabled(false)
         }
@@ -423,7 +421,6 @@ open class BaseActivity : AppCompatActivity() {
 
     // androidx.fragment.app.FragmentActivity, android.app.Activity
     override fun onPause() {
-        var strY: String? = null
         super.onPause()
         if (this.hn != null) {
             bC()
@@ -441,8 +438,9 @@ open class BaseActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         g.ar(this)
+        val shouldLock = MyApplication.bx().consumeLockOnNextResume()
         if (this !is LoginActivity && this !is PopupActivity &&
-            MyApplication.bx().consumeLockOnNextResume() && !e.y(this).isNullOrBlank()) {
+            shouldLock && !e.y(this).isNullOrBlank()) {
             bD()
         }
     }

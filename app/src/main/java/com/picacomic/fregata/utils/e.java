@@ -240,6 +240,16 @@ public class e {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putBoolean(ur[i], z).commit();
     }
 
+    public static String getComicCustomBlockWords(Context context) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0)
+                .getString("KEY_COMIC_CUSTOM_BLOCK_WORDS", "");
+    }
+
+    public static boolean setComicCustomBlockWords(Context context, String value) {
+        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit()
+                .putString("KEY_COMIC_CUSTOM_BLOCK_WORDS", value == null ? "" : value).commit();
+    }
+
     public static boolean T(Context context) {
         return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getBoolean("KEY_CHATROOM_SETTING_NIGHT_MODE", false);
     }

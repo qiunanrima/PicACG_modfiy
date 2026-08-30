@@ -1,5 +1,6 @@
 package com.picacomic.fregata.compose.screens
 
+import android.app.AlertDialog
 import android.content.DialogInterface
 import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
@@ -23,7 +24,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
@@ -222,7 +224,14 @@ fun ComicListScreen(
                             }
                         }
                         if (isRecent) {
-                            IconButton(onClick = { screenViewModel?.clearRecentView() }) {
+                            IconButton(onClick = {
+                                AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
+                                    .setTitle(R.string.alert_clear_recent_title)
+                                    .setMessage(R.string.alert_clear_recent_message)
+                                    .setNegativeButton(R.string.cancel, null)
+                                    .setPositiveButton(R.string.ok) { _, _ -> screenViewModel?.clearRecentView() }
+                                    .show()
+                            }) {
                                 Icon(Icons.Filled.ClearAll, contentDescription = stringResource(R.string.action_clear_recent))
                             }
                         }
@@ -248,10 +257,13 @@ fun ComicListScreen(
                 item(key = "filters") {
                     ComicListControlPanel(
                         filterStates = screenViewModel?.filterStates.orEmpty(),
+                        customBlockedWords = screenViewModel?.customBlockedWords.orEmpty(),
                         totalPage = screenViewModel?.totalPage ?: previewState?.totalPage ?: 1,
                         pageText = pageText,
                         onPageTextChange = { pageText = it },
                         onToggleFilter = { screenViewModel?.toggleFilter(it) },
+                        onAddCustomBlockedWord = { screenViewModel?.addCustomBlockedWord(it) },
+                        onRemoveCustomBlockedWord = { screenViewModel?.removeCustomBlockedWord(it) },
                         onJump = { screenViewModel?.jumpToPage(pageText.toIntOrNull() ?: 1) },
                     )
                     if (screenViewModel?.selectedAdvancedCategories?.isNotEmpty() == true) {
@@ -315,12 +327,16 @@ fun ComicListScreen(
 @Composable
 private fun ComicListControlPanel(
     filterStates: List<Boolean>,
+    customBlockedWords: List<String>,
     totalPage: Int,
     pageText: String,
     onPageTextChange: (String) -> Unit,
     onToggleFilter: (Int) -> Unit,
+    onAddCustomBlockedWord: (String) -> Unit,
+    onRemoveCustomBlockedWord: (String) -> Unit,
     onJump: () -> Unit,
 ) {
+    var customWordInput by rememberSaveable { mutableStateOf("") }
     val filterLabels = listOf(
         stringResource(R.string.comic_list_filter_button_forbidden),
         stringResource(R.string.comic_list_filter_button_non_chinese),
@@ -364,7 +380,7 @@ private fun ComicListControlPanel(
                         leadingIcon = if (selected) {
                             {
                                 Icon(
-                                    imageVector = Icons.Filled.Check,
+                                    imageVector = Icons.Filled.Close,
                                     contentDescription = null,
                                     modifier = Modifier.size(FilterChipDefaults.IconSize),
                                 )
@@ -378,6 +394,44 @@ private fun ComicListControlPanel(
                             selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                         ),
                     )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedTextField(
+                    value = customWordInput,
+                    onValueChange = { customWordInput = it },
+                    label = { Text("自定义屏蔽词") },
+                    placeholder = { Text("可用逗号分隔多个词") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(
+                    onClick = {
+                        onAddCustomBlockedWord(customWordInput)
+                        customWordInput = ""
+                    },
+                    enabled = customWordInput.isNotBlank(),
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "添加屏蔽词")
+                }
+            }
+            if (customBlockedWords.isNotEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    customBlockedWords.forEach { word ->
+                        AssistChip(
+                            onClick = { onRemoveCustomBlockedWord(word) },
+                            label = { Text(word, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            trailingIcon = { Icon(Icons.Filled.Close, contentDescription = "移除屏蔽词") },
+                        )
+                    }
                 }
             }
 

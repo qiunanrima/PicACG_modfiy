@@ -90,6 +90,9 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
     var filterStates by mutableStateOf(List(FILTER_COUNT) { false })
         private set
 
+    var customBlockedWords by mutableStateOf<List<String>>(emptyList())
+        private set
+
     var advancedCategoryTitles by mutableStateOf<List<String>>(emptyList())
         private set
 
@@ -280,7 +283,27 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         updated[index] = !updated[index]
         filterStates = updated
         e.a(getApplication<Application>(), index, updated[index])
+        resetState()
+        loadData()
         return updated[index]
+    }
+
+    fun addCustomBlockedWord(value: String) {
+        val words = value.split(',', '\n', '\r')
+            .map { it.trim() }.filter { it.isNotEmpty() }
+        if (words.isEmpty()) return
+        val updated = (customBlockedWords + words).distinctBy { it.lowercase() }
+        customBlockedWords = updated
+        e.setComicCustomBlockWords(getApplication(), updated.joinToString("\n"))
+        resetState()
+        loadData()
+    }
+
+    fun removeCustomBlockedWord(value: String) {
+        customBlockedWords = customBlockedWords.filterNot { it.equals(value, true) }
+        e.setComicCustomBlockWords(getApplication(), customBlockedWords.joinToString("\n"))
+        resetState()
+        loadData()
     }
 
     private fun fetchRemote(request: ComicListRequest, favourite: Boolean) {
@@ -332,7 +355,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
                 if (call.isCanceled) return
                 if (response.code() == 200) {
                     val paging = response.body()?.data?.comics
-                    val docs = paging?.docs ?: emptyList()
+                    val docs = (paging?.docs ?: emptyList()).filterNot(::isComicBlocked)
                     pageLimit = paging?.limit ?: pageLimit
                     val base = if (shouldResetOnNextLoad) emptyList() else comics
                     comics = base + docs
@@ -370,7 +393,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             ) {
                 if (call.isCanceled) return
                 if (response.code() == 200) {
-                    comics = response.body()?.data?.comics ?: emptyList()
+                    comics = (response.body()?.data?.comics ?: emptyList()).filterNot(::isComicBlocked)
                     hasMore = false
                     totalPage = 1
                     page = 2
@@ -417,8 +440,9 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
                 arrayOf("0")
             )
             totalPage = totalPagesFromCount(totalCount)
-            comics = if (shouldResetOnNextLoad) loaded else comics + loaded
-            recentOffset = comics.size
+            val filtered = loaded.filterNot(::isComicBlocked)
+            comics = if (shouldResetOnNextLoad) filtered else comics + filtered
+            recentOffset += loaded.size
             hasMore = recentOffset < totalCount
             if (loaded.isNotEmpty()) {
                 page += 1
@@ -450,8 +474,9 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
                 null
             )
             totalPage = totalPagesFromCount(totalCount)
-            comics = if (shouldResetOnNextLoad) loaded else comics + loaded
-            downloadedOffset = comics.size
+            val filtered = loaded.filterNot(::isComicBlocked)
+            comics = if (shouldResetOnNextLoad) filtered else comics + filtered
+            downloadedOffset += loaded.size
             hasMore = downloadedOffset < totalCount
             if (loaded.isNotEmpty()) {
                 page += 1
@@ -487,13 +512,14 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
                 null
             )
             totalPage = totalPagesFromCount(totalCount)
-            comics = if (shouldResetOnNextLoad) loaded else comics + loaded
+            val filtered = loaded.filterNot(::isComicBlocked)
+            comics = if (shouldResetOnNextLoad) filtered else comics + filtered
             downloadingProgressText = if (shouldResetOnNextLoad) {
                 loadedProgress
             } else {
                 downloadingProgressText + loadedProgress
             }
-            downloadingOffset = comics.size
+            downloadingOffset += loaded.size
             hasMore = downloadingOffset < totalCount
             if (loaded.isNotEmpty()) {
                 page += 1
@@ -526,6 +552,9 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
     private fun refreshPreferenceState() {
         val appContext = getApplication<Application>()
         filterStates = List(FILTER_COUNT) { index -> e.d(appContext, index) }
+        customBlockedWords = e.getComicCustomBlockWords(appContext)
+            .split('\n', ',', ';').map { it.trim() }.filter { it.isNotEmpty() }
+            .distinctBy { it.lowercase() }
 
         val categoriesJson = e.D(appContext)
         if (!categoriesJson.isNullOrBlank()) {
@@ -547,6 +576,25 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         selectedAdvancedCategories = advancedCategorySelections.mapIndexedNotNull { index, selected ->
             if (selected) advancedCategoryTitles.getOrNull(index) else null
         }
+    }
+
+    private fun isComicBlocked(comic: ComicListObject): Boolean {
+        val text = listOf(comic.title, comic.author).plus(comic.categories.orEmpty())
+            .filterNotNull().joinToString(" ").lowercase()
+        val aliases = arrayOf(
+            listOf("禁书", "禁書", "forbidden"),
+            listOf("生肉", "日文", "japanese"),
+            listOf("耽美", "bl"),
+            listOf("重口", "heavy"),
+            listOf("纯爱", "純愛", "pure love"),
+            listOf("伪娘", "偽娘", "fake girl"),
+            listOf("扶她", "扶他", "futari"),
+            listOf("webtoon")
+        )
+        val builtInBlocked = filterStates.withIndex().any { (index, enabled) ->
+            enabled && aliases[index].any { text.contains(it) }
+        }
+        return builtInBlocked || customBlockedWords.any { text.contains(it.lowercase()) }
     }
 
     private fun buildTitle(request: ComicListRequest): String {

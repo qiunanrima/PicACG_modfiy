@@ -460,9 +460,7 @@ private fun ChatroomContent(
                 ChatroomMessageBubble(
                     item = item,
                     isMine = item.userId == viewModel.userProfile?.userId,
-                    showTimestamp = viewModel.showTimestamp,
                     onReply = { viewModel.setReplyTarget(item) },
-                    onPrivate = { viewModel.setPrivateTarget(item) },
                     onImageClick = {
                         if (item.type == 11 && !item.at.isNullOrBlank()) {
                             g.A(context, item.at)
@@ -581,9 +579,7 @@ private fun ChatroomStatusBar(
 private fun ChatroomMessageBubble(
     item: ChatMessageObject,
     isMine: Boolean,
-    showTimestamp: Boolean,
     onReply: () -> Unit,
-    onPrivate: () -> Unit,
     onImageClick: () -> Unit,
     onAudioClick: () -> Unit,
 ) {
@@ -675,14 +671,6 @@ private fun ChatroomMessageBubble(
                         text = stringResource(R.string.chatroom_send_ads),
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = if (showTimestamp) item.platform.orEmpty().ifBlank { "android" } else "",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    AssistChip(onClick = onPrivate, label = { Text("@") })
                 }
             }
         }
