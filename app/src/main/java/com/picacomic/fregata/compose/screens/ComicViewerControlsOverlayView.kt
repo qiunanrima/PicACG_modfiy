@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.layout
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.PicaControlTokens
 import com.picacomic.fregata.compose.PicaExpressiveType
 
 class ComicViewerControlsOverlayView @JvmOverloads constructor(
@@ -365,7 +366,7 @@ private fun ReaderIconButton(
     onClick: () -> Unit,
     selected: Boolean = false,
 ) {
-    IconButton(onClick = onClick, modifier = Modifier.size(48.dp)) {
+    IconButton(onClick = onClick, modifier = Modifier.size(PicaControlTokens.IconButtonSize)) {
         Icon(
             imageVector = icon,
             contentDescription = null,

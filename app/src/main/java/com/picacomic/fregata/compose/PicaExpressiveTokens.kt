@@ -5,6 +5,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
+
+/** Shared dimensions for custom controls. Values use the largest size required by
+ * a control when multiple variants are shown together. */
+object PicaControlTokens {
+    val ButtonHeight = 56.dp
+    val TextFieldMinHeight = 56.dp
+    val IconButtonSize = 48.dp
+    val ActionRowHeight = 72.dp
+    val EpisodeItemMinHeight = 48.dp
+}
 
 object PicaExpressiveMotion {
     @Composable

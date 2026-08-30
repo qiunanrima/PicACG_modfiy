@@ -9,6 +9,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +48,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -398,6 +402,19 @@ private fun GameDetailPopup(
     onScreenshotChange: (Int) -> Unit,
 ) {
     var dragDistance = 0f
+    var imageScale by remember(selectedIndex) { mutableFloatStateOf(1f) }
+    var imageOffsetX by remember(selectedIndex) { mutableFloatStateOf(0f) }
+    var imageOffsetY by remember(selectedIndex) { mutableFloatStateOf(0f) }
+    val transformState = rememberTransformableState { zoomChange, panChange, _ ->
+        imageScale = (imageScale * zoomChange).coerceIn(1f, 4f)
+        if (imageScale > 1f) {
+            imageOffsetX += panChange.x
+            imageOffsetY += panChange.y
+        } else {
+            imageOffsetX = 0f
+            imageOffsetY = 0f
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -443,7 +460,14 @@ private fun GameDetailPopup(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp)
-                    .aspectRatio(16f / 9f),
+                    .aspectRatio(16f / 9f)
+                    .graphicsLayer {
+                        scaleX = imageScale
+                        scaleY = imageScale
+                        translationX = imageOffsetX
+                        translationY = imageOffsetY
+                    }
+                    .transformable(state = transformState),
             )
             Text(
                 text = "${selectedIndex + 1} / ${screenshots.size}",

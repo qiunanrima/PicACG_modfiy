@@ -340,6 +340,8 @@ fun PicaGameCard(
                 text = listOf(publisher, version).filter { it.isNotBlank() }.joinToString(" · "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                // Reserve two lines so cards in the same grid row have equal heights.
+                modifier = Modifier.heightIn(min = 40.dp),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -361,6 +363,8 @@ fun PicaGameCard(
                         )
                     }
                 }
+            } else {
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }

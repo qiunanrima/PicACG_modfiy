@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.compose.PicaControlTokens
 import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
@@ -31,7 +31,7 @@ fun PicaPrimaryButton(
         ),
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = if (expressive) 56.dp else 48.dp)
+            .heightIn(min = PicaControlTokens.ButtonHeight)
     ) {
         Text(
             text = text,

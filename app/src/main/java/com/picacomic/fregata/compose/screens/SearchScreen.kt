@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -131,14 +133,18 @@ fun SearchScreen(
                 if (keywords.isNotEmpty()) {
                     Text(stringResource(R.string.category_keywords_list_title), style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium)
                     // Two fixed rows keep the popular section compact; overflow continues horizontally.
-                    LazyHorizontalGrid(
-                        rows = GridCells.Fixed(2),
+                    LazyRow(
                         modifier = Modifier.fillMaxWidth().height(96.dp),
                         contentPadding = PaddingValues(end = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(keywords.take(40), key = { it }) { item -> PicaInfoChip(text = item, onClick = { query = item; submit(item) }) }
+                        items(keywords.take(40).chunked(2), key = { it.joinToString("\u001f") }) { column ->
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                column.forEach { item ->
+                                    PicaInfoChip(text = item, onClick = { query = item; submit(item) })
+                                }
+                            }
+                        }
                     }
                 }
                 if (false && popularCategories.isNotEmpty()) {
@@ -149,7 +155,7 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(popularCategories, key = { it.title.orEmpty() }) { item ->
+                        gridItems(popularCategories, key = { it.title.orEmpty() }) { item ->
                             PicaInfoChip(text = item.title.orEmpty(), onClick = { onCategoryClick(item.title.orEmpty()) })
                         }
                     }

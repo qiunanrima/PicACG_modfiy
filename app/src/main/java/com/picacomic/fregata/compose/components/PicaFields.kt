@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.foundation.layout.heightIn
+import com.picacomic.fregata.compose.PicaControlTokens
 import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 @Composable
@@ -47,6 +49,8 @@ fun PicaTextField(
         keyboardOptions = keyboardOptions,
         supportingText = supportingContent,
         shape = if (expressive) MaterialTheme.shapes.large else MaterialTheme.shapes.medium,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = PicaControlTokens.TextFieldMinHeight)
     )
 }

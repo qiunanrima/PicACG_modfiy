@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.PicaExpressiveType
+import com.picacomic.fregata.compose.PicaControlTokens
 import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 data class PicaActionItem(
@@ -230,7 +231,7 @@ fun PicaActionRow(
             enabled = primaryEnabled,
             modifier = Modifier
                 .weight(1.6f)
-                .height(72.dp),
+                .height(PicaControlTokens.ActionRowHeight),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -300,7 +301,7 @@ fun PicaEpisodeGridItem(
         tonalElevation = if (state == PicaEpisodeGridItemState.Default) 0.dp else 2.dp,
         border = BorderStroke(1.dp, borderColor),
         modifier = modifier
-            .heightIn(min = 48.dp)
+            .heightIn(min = PicaControlTokens.EpisodeItemMinHeight)
             .clip(shape)
             .clickable(enabled = enabled, onClick = onClick),
     ) {
@@ -434,7 +435,7 @@ private fun PicaActionStatButton(
     Card(
         onClick = item.onClick,
         enabled = item.enabled,
-        modifier = modifier.height(72.dp),
+        modifier = modifier.height(PicaControlTokens.ActionRowHeight),
         shape = if (expressive && item.selected) {
             CircleShape
         } else {
