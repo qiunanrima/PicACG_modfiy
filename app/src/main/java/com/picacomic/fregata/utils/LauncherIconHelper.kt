@@ -5,23 +5,31 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 object LauncherIconHelper {
+    const val PREFS_NAME = "PICACOMIC_FREGATA"
+    const val KEY_LAUNCHER_ICON = "KEY_LAUNCHER_ICON"
+
     private const val DEFAULT_ALIAS = "com.picacomic.fregata.alias.Default"
     private const val NEON_ALIAS = "com.picacomic.fregata.alias.Neon"
 
     @JvmStatic
-    fun syncLauncherIcon(context: Context, themeIndex: Int = e.al(context)) {
+    @JvmOverloads
+    fun syncLauncherIcon(context: Context, iconIndex: Int = context
+        .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        .getInt(KEY_LAUNCHER_ICON, 0)
+    ) {
+        val selectedIndex = iconIndex.coerceIn(0, 1)
         val packageManager = context.packageManager
         setAliasState(
             packageManager = packageManager,
             context = context,
             aliasName = DEFAULT_ALIAS,
-            enabled = themeIndex != 2,
+            enabled = selectedIndex == 0,
         )
         setAliasState(
             packageManager = packageManager,
             context = context,
             aliasName = NEON_ALIAS,
-            enabled = themeIndex == 2,
+            enabled = selectedIndex == 1,
         )
     }
 

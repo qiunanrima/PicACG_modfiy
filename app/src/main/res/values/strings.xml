@@ -686,7 +686,7 @@ http://line.me/ti/p/%40ztj0743u"</string>
     <string name="title_pica_app">哔咔小程序</string>
     <string name="title_profile">我的</string>
     <string name="title_profile_edit">编辑我的</string>
-    <string name="title_search">搜索：</string>
+    <string name="title_search">搜索 </string>
     <string name="title_setting">哔咔设定</string>
     <string name="title_support_us">支持哔咔</string>
     <string name="toast_block_user_failed">封锁用户失败，请重试</string>

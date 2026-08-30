@@ -74,7 +74,7 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
         androidx.appcompat.app.AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         hk = this;
         s(getApplicationContext());
-        LauncherIconHelper.syncLauncherIcon(this, e.al(this));
+        LauncherIconHelper.syncLauncherIcon(this);
         setTheme(ThemeColorHelper.resolveLegacyThemeResId(this));
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override public void onActivityStarted(Activity activity) {

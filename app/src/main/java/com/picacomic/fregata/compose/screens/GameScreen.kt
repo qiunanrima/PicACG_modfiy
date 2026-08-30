@@ -209,7 +209,7 @@ private fun GameGridItem(
         version = item.version.orEmpty(),
         icon = item.icon,
         likes = item.likesCount,
-        //adult = item.isAdult,
+        adult = item.isAdult,
         suggested = item.isSuggest,
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),

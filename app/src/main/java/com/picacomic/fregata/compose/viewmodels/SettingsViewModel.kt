@@ -19,8 +19,8 @@ import java.text.DecimalFormat
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     companion object {
-        private const val PREFS_NAME = "PICACOMIC_FREGATA"
-        private const val KEY_LAUNCHER_ICON = "KEY_LAUNCHER_ICON"
+        private const val PREFS_NAME = LauncherIconHelper.PREFS_NAME
+        private const val KEY_LAUNCHER_ICON = LauncherIconHelper.KEY_LAUNCHER_ICON
     }
 
     var state by mutableStateOf(SettingsState())
@@ -49,7 +49,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val designLanguageIndex = e.getDesignLanguage(app).coerceIn(0, designLanguages.lastIndex)
         val rD = ThemeColorHelper.resolveStoredThemeIndex(app).coerceIn(0, colors.lastIndex)
         val launcherIconIndex = app.getSharedPreferences(PREFS_NAME, 0)
-            .getInt(KEY_LAUNCHER_ICON, if (rD == 2) 1 else 0)
+            .getInt(KEY_LAUNCHER_ICON, 0)
             .coerceIn(0, launcherIcons.lastIndex)
         val hM = e.O(app)
         val pin = e.y(app)
@@ -181,7 +181,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             .edit()
             .putInt(KEY_LAUNCHER_ICON, safeIndex)
             .apply()
-        LauncherIconHelper.syncLauncherIcon(app, if (safeIndex == 1) 2 else 0)
+        LauncherIconHelper.syncLauncherIcon(app, safeIndex)
         loadSettings()
     }
 
