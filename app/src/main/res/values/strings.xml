@@ -557,6 +557,10 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="register_username">匿称（2-50字）</string>
     <string name="restart_application">请重新打开应用</string>
     <string name="search_hint">名称／作者之类</string>
+    <string name="search_history_title">搜索历史</string>
+    <string name="search_history_clear">清除搜索历史</string>
+    <string name="search_popular_title">大家都在看</string>
+    <string name="action_back">返回</string>
     <string name="search_menu_title">Search</string>
     <string name="second">秒</string>
     <string name="setting_cache">前往清除</string>

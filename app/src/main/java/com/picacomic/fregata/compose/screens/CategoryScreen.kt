@@ -66,6 +66,7 @@ import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaInfoChip
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRemoteImage
+import com.picacomic.fregata.compose.components.PicaTopBar
 import com.picacomic.fregata.compose.viewmodels.CategoryViewModel
 import com.picacomic.fregata.objects.CategoryObject
 import com.picacomic.fregata.objects.ThumbnailObject
@@ -77,6 +78,7 @@ import com.picacomic.fregata.utils.views.AlertDialogCenter
 fun CategoryScreen(
     viewModel: CategoryViewModel? = null,
     refreshEvent: Int = 0,
+    onOpenSearch: () -> Unit = {},
     onSearch: (String) -> Unit,
     onCategoryClick: (String) -> Unit,
     onWebCategoryClick: (title: String, link: String) -> Unit = { _, _ -> },
@@ -88,7 +90,6 @@ fun CategoryScreen(
     onLatestClick: () -> Unit = {},
     onRandomClick: () -> Unit = {},
 ) {
-    var query by rememberSaveable { mutableStateOf("") }
     val inPreview = LocalInspectionMode.current
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
@@ -125,68 +126,23 @@ fun CategoryScreen(
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                Surface(
-                    tonalElevation = 2.dp,
-                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 14.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.title_category),
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            OutlinedTextField(
-                                value = query,
-                                onValueChange = { query = it },
-                                label = { Text(text = stringResource(R.string.search_hint)) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                keyboardActions = KeyboardActions(
-                                    onSearch = {
-                                        val submitted = query.trim()
-                                        if (submitted.isNotEmpty()) onSearch(submitted)
-                                    },
-                                ),
-                                trailingIcon = {
-                                    IconButton(
-                                        onClick = {
-                                            val submitted = query.trim()
-                                            if (submitted.isNotEmpty()) onSearch(submitted)
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Search,
-                                            contentDescription = stringResource(R.string.action_search),
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.weight(1f),
-                            )
-                            Button(
-                                onClick = {
-                                    val submitted = query.trim()
-                                    if (submitted.isNotEmpty()) onSearch(submitted)
-                                },
-                            ) {
-                                Text(text = stringResource(R.string.action_search))
-                            }
+                PicaTopBar(
+                    title = stringResource(R.string.title_category),
+                    scrollBehavior = scrollBehavior,
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                    ),
+                    actions = {
+                        IconButton(onClick = onOpenSearch) {
+                            Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.action_search))
                         }
-                    }
-                }
+                    },
+                )
             },
             containerColor = MaterialTheme.colorScheme.background,
         ) { innerPadding ->
             val categories = if (inPreview) previewState.orEmpty() else screenViewModel?.categories.orEmpty()
-            val keywords = if (inPreview) categoryKeywordPreviewItems() else screenViewModel?.keywords.orEmpty()
             val defaultActions = listOf(
                 CategoryAction(stringResource(R.string.category_title_support), R.drawable.cat_support, onSupportClick),
                 CategoryAction(stringResource(R.string.category_title_leaderboard), R.drawable.cat_leaderboard, onLeaderboardClick),
@@ -224,28 +180,6 @@ fun CategoryScreen(
                     ) {
                         defaultActions.forEach { item ->
                             CategoryActionCard(item = item)
-                        }
-                    }
-                }
-
-                if (keywords.isNotEmpty()) {
-                    item(key = "keywords_title", span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = stringResource(R.string.category_keywords_list_title),
-                            style = PicaExpressiveType.SectionEmphasized,
-                        )
-                    }
-                    item(key = "keywords", span = { GridItemSpan(maxLineSpan) }) {
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            keywords.take(18).forEach { keyword ->
-                                PicaInfoChip(
-                                    text = keyword,
-                                    onClick = { onSearch(keyword) },
-                                )
-                            }
                         }
                     }
                 }

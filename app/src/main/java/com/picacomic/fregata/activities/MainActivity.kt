@@ -295,6 +295,7 @@ class MainActivity : BaseActivity() {
                         composable(Screen.Category.route) {
                             CategoryScreen(
                                 refreshEvent = tabRefreshEvent,
+                                onOpenSearch = { navController.navigate(Screen.Search.route) },
                                 onSearch = { query ->
                                     val value = query.trim()
                                     val route = when {
@@ -373,6 +374,22 @@ class MainActivity : BaseActivity() {
                                         Screen.createComicListRoute(category = "CATEGORY_RANDOM")
                                     )
                                 },
+                            )
+                        }
+                        composable(Screen.Search.route) {
+                            SearchScreen(
+                                onSearch = { query ->
+                                    val value = query.trim()
+                                    if (value.isNotEmpty()) {
+                                        val route = when {
+                                            value.startsWith("author:", ignoreCase = true) -> Screen.createComicListRoute(author = value.substringAfter(":").trim().ifEmpty { value })
+                                            value.startsWith("tag:", ignoreCase = true) -> Screen.createComicListRoute(tags = value.substringAfter(":").trim().ifEmpty { value })
+                                            else -> Screen.createComicListRoute(keywords = value)
+                                        }
+                                        navController.navigate(route) { launchSingleTop = true }
+                                    }
+                                },
+                                onBack = { navController.popBackStack() },
                             )
                         }
                         composable(Screen.Game.route) {

@@ -5,10 +5,10 @@ import android.widget.MediaController
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +25,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Comment
-import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
@@ -52,10 +53,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -168,6 +169,7 @@ fun GameDetailScreen(
                 selectedIndex = screenViewModel.selectedScreenshotIndex,
                 showVideo = screenViewModel.showVideoInPopup,
                 onClose = screenViewModel::closePopup,
+                onScreenshotChange = screenViewModel::selectScreenshot,
             )
         }
     }
@@ -195,8 +197,8 @@ private fun GameDetailContent(
 
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             PicaRemoteImage(
@@ -215,8 +217,8 @@ private fun GameDetailContent(
                 tonalElevation = 1.dp,
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         PicaRemoteImage(
@@ -255,14 +257,15 @@ private fun GameDetailContent(
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = onDownload, modifier = Modifier.weight(1f)) {
-                            Icon(Icons.Filled.Download, contentDescription = null)
-                            Text("Download")
+                            Icon(
+                                Icons.Filled.Download,
+                                contentDescription = stringResource(R.string.download),
+                            )
                         }
                         IconButton(onClick = onGift) {
-                            Image(
-                                painter = painterResource(R.drawable.icon_gift_off),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
+                            Icon(
+                                imageVector = Icons.Filled.CardGiftcard,
+                                contentDescription = "Gift",
                             )
                         }
                         IconButton(onClick = onComment) {
@@ -295,8 +298,8 @@ private fun GameDetailContent(
                 tonalElevation = 1.dp,
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     PicaSectionHeader(title = stringResource(R.string.game_detail_description_title))
                     GameDetailExpandableText(
@@ -392,11 +395,26 @@ private fun GameDetailPopup(
     selectedIndex: Int,
     showVideo: Boolean,
     onClose: () -> Unit,
+    onScreenshotChange: (Int) -> Unit,
 ) {
+    var dragDistance = 0f
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.88f)),
+            .background(Color.Black.copy(alpha = 0.88f))
+            .pointerInput(showVideo, screenshots, selectedIndex) {
+                if (showVideo || screenshots.size < 2) return@pointerInput
+                detectHorizontalDragGestures(
+                    onDragStart = { dragDistance = 0f },
+                    onHorizontalDrag = { _, dragAmount -> dragDistance += dragAmount },
+                    onDragEnd = {
+                        if (kotlin.math.abs(dragDistance) > 72f) {
+                            val next = if (dragDistance < 0) selectedIndex + 1 else selectedIndex - 1
+                            if (next in screenshots.indices) onScreenshotChange(next)
+                        }
+                    },
+                )
+            },
         contentAlignment = Alignment.Center,
     ) {
         if (showVideo && !detail.videoLink.isNullOrBlank()) {
@@ -424,8 +442,16 @@ private fun GameDetailPopup(
                 contentDescription = detail.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(horizontal = 12.dp)
                     .aspectRatio(16f / 9f),
+            )
+            Text(
+                text = "${selectedIndex + 1} / ${screenshots.size}",
+                color = Color.White,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 20.dp),
             )
         }
         IconButton(
@@ -434,11 +460,7 @@ private fun GameDetailPopup(
                 .align(Alignment.TopEnd)
                 .padding(12.dp),
         ) {
-            Image(
-                painter = painterResource(R.drawable.icon_cross),
-                contentDescription = null,
-                modifier = Modifier.size(28.dp),
-            )
+            Icon(Icons.Filled.Close, contentDescription = "Close")
         }
     }
 }

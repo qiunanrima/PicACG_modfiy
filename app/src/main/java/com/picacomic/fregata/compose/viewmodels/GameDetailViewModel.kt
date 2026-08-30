@@ -180,6 +180,12 @@ class GameDetailViewModel(application: Application) : AndroidViewModel(applicati
         popupVisible = true
     }
 
+    fun selectScreenshot(index: Int) {
+        if (screenshots.isEmpty()) return
+        selectedScreenshotIndex = index.coerceIn(0, screenshots.lastIndex)
+        showVideoInPopup = false
+    }
+
     fun openVideoPopup() {
         if (gameDetail?.videoLink.isNullOrBlank()) return
         showVideoInPopup = true

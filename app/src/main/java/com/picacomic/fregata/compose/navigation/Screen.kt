@@ -23,6 +23,7 @@ sealed class Screen(
 ) {
     object Home : Screen("home", R.string.title_home, Icons.Filled.Home, Icons.Outlined.Home)
     object Category : Screen("category", R.string.title_category, Icons.Filled.Category, Icons.Outlined.Category)
+    object Search : Screen("search", R.string.title_search)
     object Game : Screen("game", R.string.title_game_list, Icons.Filled.SportsEsports, Icons.Outlined.SportsEsports)
     object Profile : Screen("profile", R.string.title_profile, Icons.Filled.Person, Icons.Outlined.Person)
     object Settings : Screen("settings", R.string.title_setting, Icons.Filled.Settings, Icons.Outlined.Settings)
