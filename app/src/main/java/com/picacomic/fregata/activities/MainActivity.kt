@@ -415,7 +415,9 @@ class MainActivity : BaseActivity() {
                                     }
                                 },
                                 onComicListClick = { category ->
-                                    if (!offlineMode) {
+                                    // Offline mode still supports the locally persisted history and
+                                    // download lists. Remote categories remain unavailable offline.
+                                    if (!offlineMode || isOfflineLocalComicCategory(category)) {
                                         navController.navigate(Screen.createComicListRoute(category = category))
                                     }
                                 }
@@ -993,7 +995,7 @@ class MainActivity : BaseActivity() {
         creatorId: String? = null,
         creatorName: String? = null
     ) {
-        if (offlineMode) return
+        if (offlineMode && !isOfflineLocalComicCategory(category)) return
         navControllerRef?.navigate(
             Screen.createComicListRoute(
                 category = category,
