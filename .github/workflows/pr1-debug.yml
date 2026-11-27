@@ -1,0 +1,46 @@
+name: Build PR 1 Debug APK
+on:
+  push:
+    branches: [debug-md3e-2025]
+    paths: [.github/workflows/pr1-debug.yml]
+permissions:
+  contents: read
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: df9a27ec1f66823c72eb5d156b9885efd045146e
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Prepare debug signing and isolated application ID
+        run: |
+          sed -i '/^org.gradle.java.home=/d' gradle.properties
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('app/build.gradle')
+          s = p.read_text()
+          s = s.replace("applicationId 'com.picacomic.fregata'", "applicationId 'com.picacomic.fregata.test016b0029'")
+          s = re.sub(r'(?ms)^    signingConfigs \{.*?^    \}\n\n', '', s)
+          s = re.sub(r'(?m)^ +signingConfig signingConfigs.debug\n', '', s)
+          p.write_text(s)
+          PY
+      - name: Build and verify APK
+        run: |
+          sdkmanager --install 'platforms;android-34' 'platforms;android-37.0' 'build-tools;37.0.0'
+          bash gradlew :app:assembleDebug --console=plain
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify "$apk"
+          "$ANDROID_HOME/build-tools/37.0.0/aapt" dump badging "$apk" > /tmp/badging.txt
+          grep -m 1 "package: name='com.picacomic.fregata.test016b0029'" /tmp/badging.txt
+          cp "$apk" PicACG-PR1-debug-test016b0029.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PicACG-PR1-debug-test016b0029
+          path: PicACG-PR1-debug-test016b0029.apk
+          if-no-files-found: error
