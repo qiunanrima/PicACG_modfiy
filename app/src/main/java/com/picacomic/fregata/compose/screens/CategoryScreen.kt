@@ -29,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,7 +41,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -131,8 +131,8 @@ fun CategoryScreen(
                     title = stringResource(R.string.title_category),
                     scrollBehavior = scrollBehavior,
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     actions = {
                         IconButton(onClick = onOpenSearch) {
@@ -141,7 +141,7 @@ fun CategoryScreen(
                     },
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             val categories = if (inPreview) previewState.orEmpty() else screenViewModel?.categories.orEmpty()
             val defaultActions = listOf(
@@ -235,7 +235,7 @@ private fun CategoryActionCard(
         onClick = item.onClick,
         modifier = modifier
             .width(112.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Box(
             modifier = Modifier
@@ -274,7 +274,7 @@ private fun RemoteCategoryCard(
     Card(
         onClick = onClick,
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Column(
             modifier = Modifier.padding(10.dp),

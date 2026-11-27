@@ -5,11 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.PicaExpressiveType
@@ -20,18 +21,24 @@ fun ProgressDialogContent(
     message: String?,
 ) {
     PicaComposeTheme {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
-            PicaProgressIndicator(
-                modifier = Modifier.size(96.dp),
-            )
-            Text(
-                text = message.orEmpty(),
-                color = Color.White,
-                style = PicaExpressiveType.BodyEmphasized,
-            )
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                PicaProgressIndicator(
+                    modifier = Modifier.size(96.dp),
+                )
+                Text(
+                    text = message.orEmpty(),
+                    style = PicaExpressiveType.BodyEmphasized,
+                )
+            }
         }
     }
 }
