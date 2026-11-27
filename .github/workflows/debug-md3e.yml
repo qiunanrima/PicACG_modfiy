@@ -1,0 +1,46 @@
+name: Build MD3E test APK
+on:
+  push:
+    branches: [debug-md3e-2025]
+    paths: [ci-md3e/ready]
+permissions:
+  contents: read
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Prepare test source
+        run: |
+          cat ci-md3e/parts/*.patch-part > /tmp/md3e.patch
+          sha256sum -c ci-md3e/ready
+          git apply /tmp/md3e.patch
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('app/build.gradle')
+          s = p.read_text()
+          s = s.replace("applicationId 'com.picacomic.fregata'", "applicationId 'com.picacomic.fregata.test016b0029'")
+          s = re.sub(r'(?ms)^    signingConfigs \{.*?^    \}\n\n', '', s)
+          s = re.sub(r'(?m)^ +signingConfig signingConfigs.debug\n', '', s)
+          p.write_text(s)
+          PY
+          sed -i '/^org.gradle.java.home=/d' gradle.properties
+      - name: Install SDK and build
+        run: |
+          sdkmanager --install 'platforms;android-34' 'platforms;android-37.0' 'build-tools;37.0.0'
+          bash gradlew :app:assembleDebug --console=plain
+          apk=app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify "$apk"
+          "$ANDROID_HOME/build-tools/37.0.0/aapt" dump badging "$apk" | grep -m 1 "package: name='com.picacomic.fregata.test016b0029'"
+          cp "$apk" PicACG-MD3E-debug-test016b0029.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PicACG-MD3E-debug-test016b0029
+          path: PicACG-MD3E-debug-test016b0029.apk
+          if-no-files-found: error
