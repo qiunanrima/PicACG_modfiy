@@ -31,6 +31,8 @@ jobs:
           p.write_text(s)
           PY
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Build and verify APK
         run: |
           sdkmanager --install 'platforms;android-34' 'platforms;android-37.0' 'build-tools;37.0.0'
