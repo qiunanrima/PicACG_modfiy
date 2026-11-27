@@ -30,6 +30,7 @@ jobs:
           s = re.sub(r'(?m)^ +signingConfig signingConfigs.debug\n', '', s)
           p.write_text(s)
           PY
+      - uses: android-actions/setup-android@v3
       - name: Build and verify APK
         run: |
           sdkmanager --install 'platforms;android-34' 'platforms;android-37.0' 'build-tools;37.0.0'
