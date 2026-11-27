@@ -3,7 +3,6 @@ package com.picacomic.fregata.compose.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +17,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -55,7 +57,7 @@ fun SplashScreen(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             val isLandscapeTablet = maxWidth >= 720.dp && maxWidth > maxHeight
             if (isLandscapeTablet) {
@@ -165,6 +167,7 @@ private fun SplashContent(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = onRetry,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -176,6 +179,7 @@ private fun SplashContent(
             Spacer(modifier = Modifier.height(24.dp))
             SplashCard {
                 Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = onServer1,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -215,13 +219,14 @@ private fun SplashContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Checkbox(
                     checked = sslVerificationDisabled,
+                    colors = CheckboxDefaults.colors(uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant),
                     onCheckedChange = onSslVerificationDisabledChanged
                 )
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f).padding(top = 12.dp)) {
                     Text(
                         text = stringResource(id = R.string.splash_disable_ssl_verification),
                         style = MaterialTheme.typography.bodyLarge,
@@ -239,7 +244,10 @@ private fun SplashContent(
 
 @Composable
 private fun SplashCard(content: @Composable () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -1,10 +1,14 @@
+@file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
 package com.picacomic.fregata.compose.components
 
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -18,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SportsEsports
@@ -42,7 +45,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaExpressiveType
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.objects.ThumbnailObject
 import com.picacomic.fregata.utils.g
 
@@ -183,20 +185,15 @@ fun PicaComicListCard(
     categories: List<String> = emptyList(),
     coverWidth: Dp = 76.dp,
 ) {
-    val expressive = isPicaExpressiveTheme()
     Card(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 136.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (expressive) {
-                MaterialTheme.colorScheme.surfaceContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            },
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (expressive) 1.dp else 0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Row(
             modifier = Modifier
@@ -211,7 +208,7 @@ fun PicaComicListCard(
                 modifier = Modifier
                     .width(coverWidth)
                     .aspectRatio(3f / 4.8f)
-                    .clip(if (expressive) MaterialTheme.shapes.medium else MaterialTheme.shapes.small),
+                    .clip(MaterialTheme.shapes.medium),
                 fallbackIcon = Icons.Filled.Category,
             )
             Column(
@@ -222,7 +219,7 @@ fun PicaComicListCard(
             ) {
                 Text(
                     text = title,
-                    style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium,
+                    style = PicaExpressiveType.SectionEmphasized,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -242,21 +239,20 @@ fun PicaComicListCard(
                     likes?.takeIf { it > 0 }?.let {
                         PicaComicMetaText(
                             text = "$it likes",
-                            expressive = expressive,
                             primary = true,
                         )
                     }
                     pages?.let {
-                        PicaComicMetaText(text = "$it pages", expressive = expressive)
+                        PicaComicMetaText(text = "$it pages")
                     }
                     episodes?.let {
-                        PicaComicMetaText(text = "$it eps", expressive = expressive)
+                        PicaComicMetaText(text = "$it eps")
                     }
                 }
                 if (categories.isNotEmpty()) {
                     Text(
                         text = categories.take(3).joinToString(" / "),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -270,17 +266,12 @@ fun PicaComicListCard(
 @Composable
 private fun PicaComicMetaText(
     text: String,
-    expressive: Boolean,
     primary: Boolean = false,
 ) {
     Text(
         text = text,
-        style = if (expressive && primary) PicaExpressiveType.CompactMetricEmphasized else MaterialTheme.typography.bodySmall,
-        color = if (!expressive && primary) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
+        style = if (primary) PicaExpressiveType.CompactMetricEmphasized else MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.fillMaxWidth(),
@@ -299,22 +290,18 @@ fun PicaGameCard(
     adult: Boolean = false,
     suggested: Boolean = false,
 ) {
-    val expressive = isPicaExpressiveTheme()
     val badges = buildList {
         if (likes > 0) add("$likes likes")
         if (suggested) add("Pick")
         if (adult) add("Adult")
     }
 
-    Card(
+    OutlinedCard(
         onClick = onClick,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (expressive) {
-                MaterialTheme.colorScheme.surfaceContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
     ) {
         Column(
@@ -332,7 +319,7 @@ fun PicaGameCard(
             )
             Text(
                 text = title,
-                style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium,
+                style = PicaExpressiveType.SectionEmphasized,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -346,21 +333,22 @@ fun PicaGameCard(
                 overflow = TextOverflow.Ellipsis,
             )
             if (badges.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     badges.forEach { badge ->
-                        Text(
-                            text = badge,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = when (badge) {
-                                "Pick" -> MaterialTheme.colorScheme.tertiary
-                                "Adult" -> MaterialTheme.colorScheme.error
-                                else -> if (expressive) {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                }
-                            },
-                        )
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ) {
+                            Text(
+                                text = badge,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            )
+                        }
                     }
                 }
             } else {
@@ -402,7 +390,6 @@ fun PicaTwoLineCard(
     trailing: (@Composable () -> Unit)? = null,
     supporting: String? = null,
 ) {
-    val expressive = isPicaExpressiveTheme()
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -420,7 +407,7 @@ fun PicaTwoLineCard(
             ) {
                 Text(
                     text = title,
-                    style = if (expressive) PicaExpressiveType.SectionEmphasized else MaterialTheme.typography.titleMedium,
+                    style = PicaExpressiveType.SectionEmphasized,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -449,7 +436,6 @@ fun PicaMetricRow(
     metrics: List<Pair<String, String>>,
     modifier: Modifier = Modifier,
 ) {
-    val expressive = isPicaExpressiveTheme()
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -458,7 +444,7 @@ fun PicaMetricRow(
             Surface(
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
@@ -466,9 +452,8 @@ fun PicaMetricRow(
                 ) {
                     Text(
                         text = value,
-                        style = if (expressive) PicaExpressiveType.MetricEmphasized else MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleSmall,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
