@@ -22,9 +22,11 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.PicaControlTokens
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 data class PicaActionItem(
     val icon: ImageVector,
@@ -102,6 +103,16 @@ fun PicaTag(
                 )
             },
             modifier = modifier,
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
+            leadingIcon = if (selected) {
+                { Icon(Icons.Filled.Check, contentDescription = null) }
+            } else {
+                null
+            },
             elevation = flatFilterChipElevation,
         )
     } else {
@@ -227,6 +238,7 @@ fun PicaActionRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Button(
+            shapes = ButtonDefaults.shapes(),
             onClick = onPrimaryClick,
             enabled = primaryEnabled,
             modifier = Modifier
@@ -359,28 +371,15 @@ fun PicaRecommendationCard(
         }
     },
 ) {
-    val expressive = isPicaExpressiveTheme()
-    val recommendationContainer = if (expressive) {
-        MaterialTheme.colorScheme.tertiaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHighest
-    }
-    val recommendationBorder = if (expressive) {
-        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.32f)
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
-    }
+    val recommendationContainer = MaterialTheme.colorScheme.surfaceContainerLow
+    val recommendationBorder = MaterialTheme.colorScheme.outlineVariant
 
     Card(
         onClick = onClick,
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = recommendationContainer,
-            contentColor = if (expressive) {
-                MaterialTheme.colorScheme.onTertiaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
         border = BorderStroke(1.dp, recommendationBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -395,7 +394,7 @@ fun PicaRecommendationCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(3f / 4.5f)
-                    .clip(if (expressive) MaterialTheme.shapes.medium else MaterialTheme.shapes.extraSmall),
+                    .clip(MaterialTheme.shapes.medium),
             ) {
                 thumbnail()
             }
@@ -422,7 +421,6 @@ private fun PicaActionStatButton(
     item: PicaActionItem,
     modifier: Modifier = Modifier,
 ) {
-    val expressive = isPicaExpressiveTheme()
     val containerColor = if (item.selected) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
@@ -437,7 +435,7 @@ private fun PicaActionStatButton(
         onClick = item.onClick,
         enabled = item.enabled,
         modifier = modifier.height(PicaControlTokens.ActionRowHeight),
-        shape = if (expressive && item.selected) {
+        shape = if (item.selected) {
             CircleShape
         } else {
             MaterialTheme.shapes.medium
@@ -447,14 +445,9 @@ private fun PicaActionStatButton(
             contentColor = contentColor,
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = when {
-                expressive && item.selected -> 6.dp
-                expressive -> 0.dp
-                item.selected -> 3.dp
-                else -> 1.dp
-            },
+            defaultElevation = if (item.selected) 6.dp else 0.dp,
         ),
-        border = if (expressive && item.selected) {
+        border = if (item.selected) {
             null
         } else {
             BorderStroke(
@@ -477,21 +470,13 @@ private fun PicaActionStatButton(
                 contentDescription = item.contentDescription,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .size(if (expressive && item.selected) 24.dp else 22.dp),
+                    .size(if (item.selected) 24.dp else 22.dp),
             )
             if (!item.count.isNullOrBlank()) {
                 Badge(
                     modifier = Modifier.align(Alignment.TopEnd),
-                    containerColor = if (expressive) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.primary
-                    },
-                    contentColor = if (expressive) {
-                        MaterialTheme.colorScheme.onSecondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onPrimary
-                    },
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 ) {
                     Text(
                         text = item.count,
