@@ -2,6 +2,9 @@ package com.picacomic.fregata.compose
 
 import android.app.Activity
 import android.content.Context
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
 import android.content.ContextWrapper
 import android.view.Window
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -29,6 +32,12 @@ fun resolvePicaDarkTheme(
     val systemDark = isSystemInDarkTheme()
     return ThemeColorHelper.resolveDarkTheme(themeIndex, systemDark, forceNightMode)
 }
+
+private val PicaShapes = Shapes(
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(28.dp),
+)
 
 @Composable
 fun PicaComposeTheme(
@@ -63,6 +72,7 @@ fun PicaComposeTheme(
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
             motionScheme = MotionScheme.expressive(),
+            shapes = PicaShapes,
             content = content,
         )
     }

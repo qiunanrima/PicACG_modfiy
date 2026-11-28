@@ -11,6 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +43,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -103,22 +109,25 @@ fun PicaImageUrl(
         } else {
             val context = androidx.compose.ui.platform.LocalContext.current
             val failed = remember(safeUrl) { mutableStateOf(false) }
-            AsyncImage(
-                model = remember(context, safeUrl) {
-                    ImageRequest.Builder(context)
-                        .data(safeUrl)
-                        .allowHardware(false)
-                        .crossfade(true)
-                        .build()
-                },
-                contentDescription = contentDescription,
-                placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainerHigh),
-                onLoading = { failed.value = false },
-                onSuccess = { failed.value = false },
-                onError = { failed.value = true },
-                contentScale = contentScale,
-                modifier = Modifier.fillMaxSize(),
-            )
+            val attempt = remember(safeUrl) { mutableIntStateOf(0) }
+            key(safeUrl, attempt.intValue) {
+                AsyncImage(
+                    model = remember(context, safeUrl) {
+                        ImageRequest.Builder(context)
+                            .data(safeUrl)
+                            .allowHardware(false)
+                            .crossfade(true)
+                            .build()
+                    },
+                    contentDescription = contentDescription,
+                    placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    onLoading = { failed.value = false },
+                    onSuccess = { failed.value = false },
+                    onError = { failed.value = true },
+                    contentScale = contentScale,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
             if (failed.value) {
                 Surface(
                     modifier = Modifier.matchParentSize(),
@@ -126,7 +135,9 @@ fun PicaImageUrl(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(imageVector = fallbackIcon, contentDescription = null)
+                        IconButton(onClick = { attempt.intValue++ }) {
+                            Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.retry_image_load))
+                        }
                     }
                 }
             }
@@ -177,8 +188,8 @@ fun PicaInfoChip(
         Surface(
             modifier = modifier,
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -188,7 +199,7 @@ fun PicaInfoChip(
                 if (icon != null) {
                     Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
                 }
-                Text(text = text, style = MaterialTheme.typography.labelSmall)
+                Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
             }
         }
         return
@@ -228,10 +239,13 @@ fun PicaComicListCard(
     episodes: Int? = null,
     categories: List<String> = emptyList(),
     coverWidth: Dp = 76.dp,
+    shape: androidx.compose.ui.graphics.Shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+    quickAction: (@Composable () -> Unit)? = null,
+    lastViewedAt: Long? = null,
 ) {
-    OutlinedCard(
+    androidx.compose.material3.Card(
         onClick = onClick,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shape = shape,
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 136.dp),
@@ -262,38 +276,60 @@ fun PicaComicListCard(
                 Text(
                     text = title,
                     style = PicaExpressiveType.SectionEmphasized,
+                    minLines = 2,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (subtitle.isNotBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    val metrics = listOfNotNull(
+                        likes?.takeIf { it > 0 }?.let { stringResource(R.string.comic_list_likes, compactCount(it)) },
+                        pages?.let { stringResource(R.string.comic_list_pages, it) },
+                        episodes?.let { stringResource(R.string.comic_list_episodes, it) },
+                    )
                     Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = metrics.joinToString(" · "),
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                     )
                 }
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    likes?.takeIf { it > 0 }?.let {
-                        PicaComicMetaText(
-                            text = stringResource(R.string.comic_list_likes, compactCount(it)),
-                            primary = true,
+                val tags = categories.filter(String::isNotBlank).take(3)
+                val time = lastViewedAt?.let {
+                        android.text.format.DateUtils.formatDateTime(
+                            androidx.compose.ui.platform.LocalContext.current, it,
+                            android.text.format.DateUtils.FORMAT_SHOW_DATE or android.text.format.DateUtils.FORMAT_SHOW_YEAR or
+                                android.text.format.DateUtils.FORMAT_NUMERIC_DATE or android.text.format.DateUtils.FORMAT_SHOW_TIME,
                         )
                     }
-                    pages?.let {
-                        PicaComicMetaText(text = stringResource(R.string.comic_list_pages, it))
-                    }
-                    episodes?.let {
-                        PicaComicMetaText(text = stringResource(R.string.comic_list_episodes, it))
+                Text(
+                    text = if (time == null) "" else stringResource(R.string.comic_last_viewed_at, time),
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    if (tags.isEmpty()) {
+                        Text("", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(vertical = 4.dp))
+                    } else {
+                        tags.forEach { PicaInfoChip(text = it) }
                     }
                 }
-                PicaCategoryChips(categories.filter(String::isNotBlank).take(3))
             }
+            if (quickAction != null) Box(Modifier.align(Alignment.Bottom)) { quickAction() }
         }
     }
 }
@@ -320,20 +356,6 @@ internal fun compactCount(count: Int): String {
     val tenth = count % divisor / (divisor / 10)
     val number = if (tenth == 0) whole.toString() else "$whole.$tenth"
     return stringResource(if (divisor == 10_000) R.string.count_wan else R.string.count_yi, number)
-}
-
-@Composable
-private fun PicaComicMetaText(
-    text: String,
-    primary: Boolean = false,
-) {
-    Text(
-        text = text,
-        style = if (primary) PicaExpressiveType.CompactMetricEmphasized else MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-    )
 }
 
 @Composable

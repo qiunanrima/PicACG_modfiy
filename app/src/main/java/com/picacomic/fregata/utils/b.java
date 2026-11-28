@@ -36,19 +36,19 @@ public class b {
     }
 
     public static DbComicViewRecordObject ax(String str) {
-        List listFind = DbComicViewRecordObject.find(DbComicViewRecordObject.class, "comic_id = ?", str);
+        List listFind = DbComicViewRecordObject.findWithQuery(DbComicViewRecordObject.class, "SELECT * FROM db_comic_view_record_object WHERE comic_id = ? ORDER BY last_view_timestamp DESC, id DESC LIMIT 1", str);
         if (listFind == null || listFind.size() == 0) {
             return null;
         }
         return (DbComicViewRecordObject) listFind.get(0);
     }
 
-    public static boolean a(DbComicViewRecordObject dbComicViewRecordObject) {
+    public static synchronized boolean a(DbComicViewRecordObject dbComicViewRecordObject) {
         if (dbComicViewRecordObject == null || dbComicViewRecordObject.getComicId() == null) {
             return false;
         }
-        if (ax(dbComicViewRecordObject.getComicId()) != null) {
-            DbComicViewRecordObject dbComicViewRecordObjectAx = ax(dbComicViewRecordObject.getComicId());
+        DbComicViewRecordObject dbComicViewRecordObjectAx = ax(dbComicViewRecordObject.getComicId());
+        if (dbComicViewRecordObjectAx != null) {
             dbComicViewRecordObjectAx.updateDbComicViewRecordObject(dbComicViewRecordObject);
             dbComicViewRecordObjectAx.save();
             return true;

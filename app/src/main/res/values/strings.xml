@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="comic_last_viewed_at">上次观看 %1$s</string>
     <string name="abc_action_bar_home_description">Navigate home</string>
     <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
     <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
@@ -258,6 +259,7 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="category_title_game">游戏推荐</string>
     <string name="game_tag_recommended">推荐</string>
     <string name="game_tag_adult">成人</string>
+    <string name="retry_image_load">重新加载图片</string>
     <string name="category_title_latest">最新更新</string>
     <string name="category_title_leaderboard">哔咔排行榜</string>
     <string name="category_title_least_viewed">最冷门</string>
@@ -559,6 +561,8 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="profile_popup_remove_comment">删除所有留言</string>
     <string name="profile_popup_woo">污头像</string>
     <string name="profile_punch_in">打哔卡</string>
+    <string name="profile_punch_in_done">今日已打哔卡</string>
+    <string name="profile_punch_in_pending">正在打哔卡…</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="quit">离开</string>

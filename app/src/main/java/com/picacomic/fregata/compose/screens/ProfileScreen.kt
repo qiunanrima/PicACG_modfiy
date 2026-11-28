@@ -1,5 +1,7 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -17,6 +19,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.ui.text.font.FontWeight
+import com.picacomic.fregata.compose.components.PicaChoiceRow
+import com.picacomic.fregata.compose.components.PicaRecommendationCard
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -30,6 +44,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -220,8 +235,8 @@ fun ProfileScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(screenViewModel?.punchInSuccessEvent) {
-        if ((screenViewModel?.punchInSuccessEvent ?: 0) > 0) {
+    LaunchedEffect(screenViewModel?.hasPendingPunchInSuccess) {
+        if (screenViewModel?.consumePunchInSuccess() == true) {
             android.widget.Toast.makeText(context, R.string.alert_punch_in_success, android.widget.Toast.LENGTH_SHORT).show()
         }
     }
@@ -312,6 +327,7 @@ fun ProfileScreen(
                                     profile = profile,
                                     avatarPreviewUri = screenViewModel?.avatarPreviewUri,
                                     isPunchingIn = screenViewModel?.isPunchingIn == true,
+                                    offlineMode = offlineMode,
                                     onAvatarClick = onAvatarClick,
                                     onPunchIn = {
                                         if (!offlineMode) {
@@ -343,6 +359,7 @@ fun ProfileScreen(
                                     profile = profile,
                                     avatarPreviewUri = screenViewModel?.avatarPreviewUri,
                                     isPunchingIn = screenViewModel?.isPunchingIn == true,
+                                    offlineMode = offlineMode,
                                     onAvatarClick = onAvatarClick,
                                     onPunchIn = {
                                         if (!offlineMode) {
@@ -356,14 +373,12 @@ fun ProfileScreen(
                             }
                         }
                         item {
-                            PicaTabRow(
-                                selectedTabIndex = selectedTab,
-                                tabs = listOf(
+                            PicaChoiceRow(
+                                labels = listOf(
                                     stringResource(R.string.comic),
                                     stringResource(R.string.comment),
-                                ),
-                                onTabSelected = { selectedTab = it },
-                                containerColor = MaterialTheme.colorScheme.surface,
+                                ), selected = selectedTab, onSelect = { selectedTab = it },
+                                modifier = Modifier.fillMaxWidth(), expand = true,
                             )
                         }
                         if (selectedTab == 0) {
@@ -461,23 +476,9 @@ fun ProfileScreen(
 
 @Composable
 private fun ProfileSloganCard(profile: UserProfileObject?) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 1.dp,
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            PicaSectionHeader(title = stringResource(R.string.title_profile))
-            Text(
-                text = profile?.slogan.orEmpty().ifBlank { "No slogan" },
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+    val slogan = profile?.slogan?.takeIf(String::isNotBlank) ?: return
+    Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Text(slogan, Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -486,6 +487,7 @@ private fun ProfileHeader(
     profile: UserProfileObject?,
     avatarPreviewUri: String?,
     isPunchingIn: Boolean,
+    offlineMode: Boolean,
     onAvatarClick: () -> Unit,
     onPunchIn: () -> Unit,
 ) {
@@ -522,7 +524,7 @@ private fun ProfileHeader(
                 Box(
                     modifier = Modifier
                         .size(104.dp)
-                        .clip(MaterialTheme.shapes.medium),
+                        .border(2.dp, colors.primaryContainer, CircleShape).padding(2.dp).clip(CircleShape),
                 ) {
                     if (!avatarPreviewUri.isNullOrBlank()) {
                         PicaImageUrl(
@@ -545,8 +547,10 @@ private fun ProfileHeader(
             ) {
                 Text(
                     text = displayName(profile),
-                    style = PicaExpressiveType.HeadlineEmphasized,
-                    color = colors.tertiary,
+                    modifier = Modifier.weight(1f, fill = false),
+                    style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    color = colors.onSurface,
                     textAlign = TextAlign.Center,
                 )
                 if (profile?.isVerified == true) {
@@ -566,20 +570,27 @@ private fun ProfileHeader(
                     textAlign = TextAlign.Center,
                 )
             }
-            PicaMetricRow(
-                metrics = listOf(
-                    "Level" to (profile?.level ?: 0).toString(),
-                    "EXP" to "${profile?.exp ?: 0}/${expForLevel((profile?.level ?: 0) + 1)}",
-                    "Role" to profile?.role.orEmpty().ifBlank { "-" },
-                ),
-            )
-            if (profile?.isPunched != true) {
-                Button(
-                    onClick = onPunchIn,
-                    enabled = !isPunchingIn && profile != null,
-                ) {
-                    Text(text = stringResource(R.string.profile_punch_in))
+            profile?.let { user ->
+                val next = expForLevel(user.level + 1).coerceAtLeast(1)
+                Surface(shape = CircleShape, color = colors.tertiaryContainer) {
+                    Text("等级 ${user.level}", Modifier.padding(horizontal = 12.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
                 }
+                Text("经验 ${user.exp} / $next", style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+                LinearProgressIndicator(progress = { (user.exp.toFloat() / next).coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape), color = colors.tertiary, trackColor = colors.surfaceContainerHigh)
+                user.role?.takeIf { it.isNotBlank() && it != "-" }?.let { Text(it, style = MaterialTheme.typography.labelMedium) }
+            }
+            val punched = profile?.isPunched == true
+            Button(
+                onClick = onPunchIn,
+                shapes = ButtonDefaults.shapes(),
+                enabled = profile != null && !offlineMode && !isPunchingIn && !punched,
+            ) {
+                Text(stringResource(when {
+                    punched -> R.string.profile_punch_in_done
+                    isPunchingIn -> R.string.profile_punch_in_pending
+                    else -> R.string.profile_punch_in
+                }))
             }
         }
     }
@@ -595,46 +606,23 @@ private fun ProfileComicSection(
     onMore: () -> Unit,
     onComicClick: (String) -> Unit,
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shape = MaterialTheme.shapes.large,
-        tonalElevation = 1.dp,
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            PicaSectionHeader(
-                title = title,
-                supportingText = total.toString(),
-                actionLabel = stringResource(R.string.more),
-                onActionClick = onMore,
-            )
-            when {
-                loading && comics.isEmpty() -> PicaLoadingIndicator()
-                comics.isEmpty() -> PicaEmptyState(message = "No comics")
-                else -> {
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        comics.forEach { comic ->
-                            PicaComicListCard(
-                                title = comic.title.orEmpty(),
-                                subtitle = subtitleOverrides[comic.comicId.orEmpty()] ?: comic.author.orEmpty(),
-                                thumbnail = comic.thumb,
-                                likes = comic.likesCount,
-                                pages = comic.pagesCount,
-                                episodes = comic.episodeCount,
-                                categories = comic.categories.orEmpty(),
-                                onClick = {
-                                    val comicId = comic.comicId
-                                    if (!comicId.isNullOrBlank()) onComicClick(comicId)
-                                },
-                                modifier = Modifier.width(240.dp),
-                            )
-                        }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+                Text(total.toString(), Modifier.padding(horizontal = 8.dp, vertical = 2.dp), style = MaterialTheme.typography.labelMedium)
+            }
+            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+            FilledTonalIconButton(onClick = onMore) { Icon(Icons.AutoMirrored.Filled.ArrowForward, stringResource(R.string.more)) }
+        }
+        when {
+            comics.isEmpty() && loading -> PicaLoadingIndicator()
+            comics.isEmpty() -> Text("暂无${title}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            else -> LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(comics) { comic ->
+                    PicaRecommendationCard(comic.title.orEmpty(), { comic.comicId?.takeIf(String::isNotBlank)?.let(onComicClick) },
+                        modifier = Modifier.width(140.dp), categories = listOfNotNull(subtitleOverrides[comic.comicId]) + comic.categories.orEmpty()) {
+                        PicaRemoteImage(thumbnail = comic.thumb, contentDescription = null, modifier = Modifier.fillMaxSize())
                     }
                 }
             }

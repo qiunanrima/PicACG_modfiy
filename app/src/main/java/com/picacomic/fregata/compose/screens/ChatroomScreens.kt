@@ -7,6 +7,18 @@ import androidx.compose.ui.semantics.Role
 import com.picacomic.fregata.compose.components.PicaImageUrl
 import com.picacomic.fregata.compose.components.PicaTag
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import com.picacomic.fregata.compose.components.PicaChoiceRow
+import com.picacomic.fregata.compose.viewmodels.SYSTEM_NOTICE
 import android.Manifest
 import android.content.Context
 import android.media.MediaPlayer
@@ -234,6 +246,8 @@ fun ChatroomContainerScreen(
     val safeRooms = rooms.ifEmpty { rememberChatroomPreviewRooms() }
     val currentRoom = safeRooms[selectedTab.coerceIn(safeRooms.indices)]
 
+    val chat: ChatroomViewModel = viewModel(key = "chatroom_${currentRoom.url.orEmpty()}")
+
     LaunchedEffect(Unit) {
         AlertDialogCenter.chatroomRules(context)
     }
@@ -246,11 +260,7 @@ fun ChatroomContainerScreen(
                 Column {
                     TopAppBar(
                         title = {
-                            Text(
-                                text = stringResource(R.string.title_chatroom),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                            ChatTitle(stringResource(R.string.title_chatroom), chat)
                         },
                         navigationIcon = {
                             IconButton(onClick = onBack) {
@@ -278,12 +288,13 @@ fun ChatroomContainerScreen(
             },
             containerColor = MaterialTheme.colorScheme.surface,
         ) { padding ->
-            ChatroomContent(
-                roomUrl = currentRoom.url,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-            )
+            androidx.compose.runtime.key(currentRoom.url) {
+                ChatroomContent(
+                    roomUrl = currentRoom.url,
+                    viewModel = chat,
+                    modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding(),
+                )
+            }
         }
     }
 }
@@ -296,6 +307,7 @@ fun ChatroomScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
+    val chat: ChatroomViewModel = viewModel(key = "chatroom_${roomUrl.orEmpty()}")
     BackHandler(onBack = onBack)
     LaunchedEffect(Unit) {
         AlertDialogCenter.chatroomRules(context)
@@ -307,11 +319,7 @@ fun ChatroomScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            text = roomTitle.ifBlank { stringResource(R.string.title_chatroom) },
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        ChatTitle(roomTitle.ifBlank { stringResource(R.string.title_chatroom) }, chat)
                     },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
@@ -332,6 +340,7 @@ fun ChatroomScreen(
         ) { padding ->
             ChatroomContent(
                 roomUrl = roomUrl,
+                viewModel = chat,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -346,15 +355,16 @@ fun ChatroomScreen(
 private fun ChatroomContent(
     roomUrl: String?,
     modifier: Modifier = Modifier,
-    viewModel: ChatroomViewModel = viewModel(key = "chatroom_${roomUrl.orEmpty()}"),
+    viewModel: ChatroomViewModel,
 ) {
     val context = LocalContext.current
     val inPreview = LocalInspectionMode.current
     val messages = if (inPreview) rememberChatroomPreviewMessages() else viewModel.messages
+    var choosingMention by remember { mutableStateOf(false) }
     var showAdminPanel by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var previewImage by remember { mutableStateOf<String?>(null) }
-    val audioController = remember(context, inPreview) {
+    val audioController = remember(context, inPreview, viewModel) {
         ChatroomAudioController(
             context = context,
             onRecorded = { base64 -> if (!inPreview) viewModel.sendAudio(base64) },
@@ -380,7 +390,7 @@ private fun ChatroomContent(
         }
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(audioController) {
         onDispose { audioController.release() }
     }
 
@@ -414,18 +424,13 @@ private fun ChatroomContent(
                 color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.18f),
             ) {
                 Text(
-                    text = "NIGHT ON",
+                    text = stringResource(R.string.chatroom_setting_night_mode),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
-        ChatroomStatusBar(
-            isConnected = inPreview || viewModel.isConnected,
-            onlineCount = viewModel.onlineCount,
-            notice = viewModel.connectionNotice,
-        )
         ChatroomContextBar(
             replyName = viewModel.replyName,
             atText = viewModel.atText,
@@ -450,31 +455,49 @@ private fun ChatroomContent(
                 onStopAi = viewModel::stopAiTalk,
             )
         }
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            reverseLayout = true,
-            contentPadding = PaddingValues(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            itemsIndexed(
-                messages,
-                key = { index, item -> stableLazyKey("chat_message", index, item.uniqueId, item.userId, item.message, item.name) },
-            ) { _, item ->
-                ChatroomMessageBubble(
-                    item = item,
-                    isMine = item.userId == viewModel.userProfile?.userId,
-                    onReply = { viewModel.setReplyTarget(item) },
-                    onImageClick = {
-                        if (item.type == 11 && !item.at.isNullOrBlank()) {
-                            g.A(context, item.at)
-                        } else {
-                            previewImage = item.image
-                        }
-                    },
-                    onAudioClick = { audioController.playBase64(item.audio.orEmpty()) },
-                )
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                reverseLayout = true,
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                itemsIndexed(
+                    messages,
+                    key = { index, item -> stableLazyKey("chat_message", index, item.uniqueId, item.userId, item.message, item.name) },
+                ) { _, item ->
+                    ChatroomMessageBubble(
+                        item = item,
+                        isMine = !item.userId.isNullOrBlank() && item.userId == viewModel.userProfile?.userId,
+                        onReply = { if (viewModel.isPublicChannel) viewModel.setReplyTarget(item) else viewModel.setPrivateTarget(item) },
+                        onImageClick = {
+                            if (item.type == 11 && !item.at.isNullOrBlank()) {
+                                g.A(context, item.at)
+                            } else {
+                                previewImage = item.image
+                            }
+                        },
+                        onAudioClick = { audioController.playBase64(item.audio.orEmpty()) },
+                    )
+                }
+            }
+            var visible by remember(viewModel) { mutableStateOf(false) }
+            LaunchedEffect(viewModel, viewModel.connectionEvent) {
+                val stamp = viewModel.connectionEvent
+                val remaining = stamp + 2500L - android.os.SystemClock.elapsedRealtime()
+                visible = stamp > 0 && remaining > 0 && viewModel.connectionNotice != null
+                if (visible) {
+                    kotlinx.coroutines.delay(remaining)
+                    visible = false
+                }
+            }
+            androidx.compose.animation.AnimatedVisibility(visible && viewModel.connectionNotice != null, Modifier.align(Alignment.TopCenter).padding(top = 6.dp),
+                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { -it / 2 },
+                exit = androidx.compose.animation.fadeOut()) {
+                Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                    Text(viewModel.connectionNotice.orEmpty(), Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
         ChatroomInputBar(
@@ -485,6 +508,7 @@ private fun ChatroomContent(
             isPublicChannel = viewModel.isPublicChannel,
             onChannelChange = viewModel::updatePublicChannel,
             onEmojiClick = viewModel::appendEmoji,
+            onMentionClick = { choosingMention = true },
             onCommandClick = {
                 viewModel.updateInput("@指令")
                 viewModel.cr()
@@ -511,6 +535,22 @@ private fun ChatroomContent(
         )
     }
 
+    if (choosingMention) {
+        val participants = messages.filter { !it.userId.isNullOrBlank() && !it.name.isNullOrBlank() }.distinctBy { it.userId }
+        AlertDialog(onDismissRequest = { choosingMention = false }, title = { Text("提及聊天成员") },
+            text = {
+                if (participants.isEmpty()) Text("暂无发言成员")
+                else LazyColumn(Modifier.heightIn(max = 320.dp)) {
+                    items(participants.size) { index ->
+                        val member = participants[index]
+                        TextButton(onClick = {
+                            if (viewModel.isPublicChannel) viewModel.setReplyTarget(member) else viewModel.setPrivateTarget(member)
+                            choosingMention = false
+                        }, modifier = Modifier.fillMaxWidth()) { Text(member.name.orEmpty()) }
+                    }
+                }
+            }, confirmButton = { TextButton({ choosingMention = false }) { Text(stringResource(R.string.cancel)) } })
+    }
     if (showSettingsDialog) {
         ChatroomSettingsDialog(
             viewModel = viewModel,
@@ -541,39 +581,11 @@ private fun ChatroomContent(
 }
 
 @Composable
-private fun ChatroomStatusBar(
-    isConnected: Boolean,
-    onlineCount: String,
-    notice: String?,
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Chat,
-                contentDescription = null,
-                tint = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = when {
-                    notice != null -> notice
-                    onlineCount.isNotBlank() -> stringResource(R.string.chatroom_connection_total_user) + onlineCount
-                    isConnected -> stringResource(R.string.chatroom_setting_running)
-                    else -> stringResource(R.string.loading_chat)
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+private fun ChatTitle(title: String, chat: ChatroomViewModel) {
+    Column {
+        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(if (chat.onlineCount.isNotBlank()) "${chat.onlineCount} 人在线" else stringResource(if (chat.isConnected) R.string.chatroom_setting_running else R.string.loading_chat),
+            color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
     }
 }
 
@@ -585,51 +597,44 @@ private fun ChatroomMessageBubble(
     onImageClick: () -> Unit,
     onAudioClick: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start,
-    ) {
+    val colors = MaterialTheme.colorScheme
+    if (item.type == SYSTEM_NOTICE || (item.userId.isNullOrBlank() && !item.message.isNullOrBlank() &&
+            (item.name == "聊天室提示" || item.message.startsWith("聊天室提示")))) {
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Surface(shape = RoundedCornerShape(16.dp), color = colors.surfaceContainerLowest) {
+                Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(Icons.Filled.Info, contentDescription = null, tint = colors.tertiary, modifier = Modifier.size(18.dp))
+                    Text(item.message.orEmpty(), style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+        return
+    }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start) {
         Card(
             modifier = Modifier.widthIn(max = 320.dp),
-            shape = MaterialTheme.shapes.medium,
-            colors = CardDefaults.cardColors(
-                containerColor = if (isMine) {
-                    MaterialTheme.colorScheme.tertiaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainer
-                },
-                contentColor = if (isMine) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface,
-            ),
+            shape = RoundedCornerShape(if (isMine) 20.dp else 4.dp, if (isMine) 4.dp else 20.dp, 20.dp, 20.dp),
+            colors = CardDefaults.cardColors(containerColor = if (isMine) colors.primaryContainer else colors.surfaceContainer,
+                contentColor = if (isMine) colors.onPrimaryContainer else colors.onSurface),
         ) {
-            Column(
-                modifier = Modifier
-                    .clickable(onClick = onReply)
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = item.name.orEmpty().ifBlank { "Pica" },
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+            Column(Modifier.clickable(onClick = onReply).padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(item.name.orEmpty().ifBlank { "Pica" }, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                     if (!item.title.isNullOrBlank()) {
-                        Text(
-                            text = item.title,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Surface(shape = RoundedCornerShape(6.dp),
+                            color = if (item.isVerified) colors.tertiaryContainer else colors.secondaryContainer) {
+                            Text(item.title, Modifier.padding(horizontal = 6.dp, vertical = 2.dp), style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
                     }
                 }
                 if (!item.replyName.isNullOrBlank() || !item.reply.isNullOrBlank()) {
-                    Text(
-                        text = "↪ ${item.replyName.orEmpty()} ${item.reply.orEmpty()}",
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Row(Modifier.clip(RoundedCornerShape(10.dp)).background(colors.surfaceContainerHigh).height(IntrinsicSize.Min)) {
+                        Spacer(Modifier.width(3.dp).fillMaxHeight().background(colors.primary))
+                        Text(listOf(item.replyName, item.reply).filterNot { it.isNullOrBlank() }.joinToString(" · "),
+                            Modifier.padding(horizontal = 8.dp, vertical = 5.dp), style = MaterialTheme.typography.labelMedium,
+                            color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                 }
                 when {
                     !item.message.isNullOrBlank() -> Text(
@@ -675,6 +680,7 @@ private fun ChatroomInputBar(
     isPublicChannel: Boolean,
     onChannelChange: (Boolean) -> Unit,
     onEmojiClick: (Int) -> Unit,
+    onMentionClick: () -> Unit,
     onCommandClick: () -> Unit,
     onImageClick: () -> Unit,
     onAudioClick: () -> Unit,
@@ -686,36 +692,21 @@ private fun ChatroomInputBar(
 ) {
     var showEmoji by remember { mutableStateOf(false) }
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 2.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                PicaTag(
-                    selected = isPublicChannel,
-                    onClick = { onChannelChange(true) },
-                    text = "Public",
-                )
-                PicaTag(
-                    selected = !isPublicChannel,
-                    onClick = { onChannelChange(false) },
-                    text = "Private",
-                )
-                IconButton(onClick = { showEmoji = !showEmoji }) {
-                    Icon(
-                        Icons.Filled.InsertEmoticon,
-                        contentDescription = stringResource(
-                            if (showEmoji) R.string.chatroom_hide_emoji else R.string.chatroom_show_emoji,
-                        ),
-                    )
+                PicaChoiceRow(listOf("公聊", "私聊"), if (isPublicChannel) 0 else 1, { onChannelChange(it == 0) })
+                IconButton(onClick = onCommandClick, enabled = enabled) {
+                    Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = "聊天室指令")
                 }
-                IconButton(onClick = onImageClick) {
+                IconButton(onClick = onImageClick, enabled = enabled && isPublicChannel) {
                     Icon(Icons.Filled.Image, contentDescription = stringResource(R.string.chatroom_control_image_title))
                 }
-                IconButton(onClick = onAudioClick) {
+                IconButton(onClick = onAudioClick, enabled = enabled && (isPublicChannel || isRecording)) {
                     Icon(
                         Icons.Filled.Mic,
                         contentDescription = stringResource(
@@ -725,13 +716,13 @@ private fun ChatroomInputBar(
                     )
                 }
                 IconButton(onClick = onSettingsClick) {
-                    Icon(Icons.Filled.Settings, contentDescription = null)
+                    Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.chatroom_setting_title))
                 }
                 if (adminMode) {
                     PicaTag(
                         selected = showAdminPanel,
                         onClick = onAdminToggle,
-                        text = "Control",
+                        text = stringResource(R.string.chatroom_setting_control_panel),
                     )
                 }
             }
@@ -755,10 +746,13 @@ private fun ChatroomInputBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                IconButton(onClick = onCommandClick, enabled = enabled) {
-                    Icon(Icons.Filled.AlternateEmail, contentDescription = null)
-                }
-                OutlinedTextField(
+                TextField(
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh, unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent, disabledIndicatorColor = Color.Transparent),
+                    leadingIcon = { IconButton(onMentionClick, enabled = enabled) { Icon(Icons.Filled.AlternateEmail, "提及") } },
+                    trailingIcon = { IconButton({ showEmoji = !showEmoji }) { Icon(Icons.Filled.InsertEmoticon, stringResource(if (showEmoji) R.string.chatroom_hide_emoji else R.string.chatroom_show_emoji)) } },
                     value = value,
                     onValueChange = onValueChange,
                     modifier = Modifier.weight(1f),
@@ -774,13 +768,18 @@ private fun ChatroomInputBar(
                         },
                     ),
                 )
+                val canSend = enabled && value.isNotBlank()
+                val sendColor by animateColorAsState(if (canSend) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                    MaterialTheme.motionScheme.fastEffectsSpec())
                 IconButton(
                     onClick = onSend,
-                    enabled = enabled && value.isNotBlank(),
+                    enabled = canSend,
+                    modifier = Modifier.background(sendColor, CircleShape),
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary, disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = null,
+                        contentDescription = "发送",
                     )
                 }
             }
@@ -807,9 +806,9 @@ private fun ChatroomContextBar(
         ) {
             Text(
                 text = listOfNotNull(
-                    privateTo.takeIf { it.isNotBlank() }?.let { "Private: $it" },
-                    selectedName.takeIf { it.isNotBlank() }?.let { "Target: $it" },
-                    replyName.takeIf { it.isNotBlank() }?.let { "Reply: $it" },
+                    privateTo.takeIf { it.isNotBlank() }?.let { "私聊 · $it" },
+                    selectedName.takeIf { it.isNotBlank() }?.let { "对象 · $it" },
+                    replyName.takeIf { it.isNotBlank() }?.let { "回复 · $it" },
                     atText.takeIf { it.isNotBlank() },
                 ).joinToString("  "),
                 modifier = Modifier.weight(1f),

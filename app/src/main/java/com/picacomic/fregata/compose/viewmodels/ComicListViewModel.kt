@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.picacomic.fregata.b.d
@@ -59,6 +61,23 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
 
     var comics by mutableStateOf<List<ComicListObject>>(emptyList())
         private set
+
+    suspend fun lastViewedTimes(items: List<ComicListObject>): Map<String, Long> = withContext(Dispatchers.IO) {
+        val latest = mutableMapOf<String, Long>()
+        val ids = items.mapNotNull { it.comicId?.takeIf(String::isNotBlank) }.distinct()
+        for (batch in ids.chunked(500)) {
+            val placeholders = batch.joinToString(",") { "?" }
+            val records = DbComicViewRecordObject.find(
+                DbComicViewRecordObject::class.java,
+                "last_view_timestamp > 0 AND comic_id IN ($placeholders)",
+                *batch.toTypedArray(),
+            )
+            for (record in records.orEmpty().filterIsInstance<DbComicViewRecordObject>()) {
+                latest[record.comicId] = maxOf(latest[record.comicId] ?: 0L, record.lastViewTimestamp)
+            }
+        }
+        latest
+    }
 
     var isLoading by mutableStateOf(false)
         private set

@@ -37,7 +37,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     var levelUpEvent by mutableIntStateOf(0)
         private set
 
-    var punchInSuccessEvent by mutableIntStateOf(0)
+    var hasPendingPunchInSuccess by mutableStateOf(false)
         private set
 
     var errorEvent by mutableIntStateOf(0)
@@ -191,12 +191,18 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         errorEvent++
     }
 
+    fun consumePunchInSuccess(): Boolean {
+        if (!hasPendingPunchInSuccess) return false
+        hasPendingPunchInSuccess = false
+        return true
+    }
+
     private fun emitFirstPunchInSuccess() {
         val prefs = context.getSharedPreferences(PREFS_NAME, 0)
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
         if (prefs.getString(KEY_PUNCH_IN_SUCCESS_SHOWN_DATE, "") == today) return
         prefs.edit().putString(KEY_PUNCH_IN_SUCCESS_SHOWN_DATE, today).apply()
-        punchInSuccessEvent++
+        hasPendingPunchInSuccess = true
     }
 
     private fun loadCachedProfile() {

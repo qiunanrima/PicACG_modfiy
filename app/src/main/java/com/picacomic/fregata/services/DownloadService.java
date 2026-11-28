@@ -198,165 +198,65 @@ public class DownloadService extends IntentService {
         this.tO.shutdown();
     }
 
-    public void B(String str, String str2) {
-        int i;
-        int pages;
-        boolean z;
-        Response<GeneralResponse<ComicPagesResponse>> responseExecute = null;
-        int total = 0;
-        int limit = 0;
-        String title = "";
-        f.D(TAG, "Call Comic Page ?");
-        d dVar = new d(this);
-        DbComicDetailObject dbComicDetailObjectAw = com.picacomic.fregata.utils.b.aw(str);
-        String title2 = dbComicDetailObjectAw != null ? dbComicDetailObjectAw.getTitle() : "";
-        DownloadComicEpisodeObject downloadComicEpisodeObjectAy = com.picacomic.fregata.utils.b.ay(str, str2);
-        if (downloadComicEpisodeObjectAy != null && downloadComicEpisodeObjectAy.getStatus() == 4) {
-            this.tV.remove(str2);
-            return;
-        }
-        boolean z2 = false;
-        int i2 = 1;
-        boolean z3 = false;
-        int i3 = 0;
-        while (i3 < i2) {
-            if (downloadComicEpisodeObjectAy != null) {
-                downloadComicEpisodeObjectAy.setStatus(2);
-                downloadComicEpisodeObjectAy.save();
-            } else {
-                f.D(TAG, "DB error, missing DownloadComicEpisodeObject, episodeId = " + str2);
-            }
-            int i4 = i3 + 1;
-            this.hZ = dVar.dO().e(e.z(this), str2, i4);
-            try {
-                responseExecute = this.hZ.execute();
-            } catch (Exception e) {
-                e.printStackTrace();
-                i = i4;
-                pages = i2;
-            }
-            if (responseExecute == null || responseExecute.code() != 200) {
-                i = i4;
-                i3 = i;
-                z2 = false;
-            } else {
-                f.F(TAG, responseExecute.body().data.getPages().toString());
-                pages = responseExecute.body().data.getPages().getPages();
-                try {
-                    total = responseExecute.body().data.getPages().getTotal();
-                    limit = responseExecute.body().data.getPages().getLimit();
-                    title = responseExecute.body().data.getEp().getTitle();
-                    if (z3 || downloadComicEpisodeObjectAy == null) {
-                        z = z3;
-                    } else {
-                        try {
-                            downloadComicEpisodeObjectAy.setTotal(total);
-                            downloadComicEpisodeObjectAy.save();
-                            z = true;
-                        } catch (Exception e2) {
-                            Exception e = e2;
-                            z = z3;
-                            i = i4;
-                            e.printStackTrace();
-                            i2 = pages;
-                            z3 = z;
-                            i3 = i;
-                            z2 = false;
-                        }
-                    }
-                } catch (Exception e3) {
-                    Exception e = e3;
-                    i = i4;
-                    z = z3;
-                    e.printStackTrace();
-                    i2 = pages;
-                    z3 = z;
-                    i3 = i;
-                    z2 = false;
+    public void B(String comicId, String episodeId) throws Exception {
+        try {
+            var episode = com.picacomic.fregata.utils.b.ay(comicId, episodeId);
+            if (episode == null) throw new java.io.IOException("Missing episode " + episodeId);
+            if (episode.getStatus() == 4) return;
+            episode.setStatus(2);
+            episode.save();
+            var comic = com.picacomic.fregata.utils.b.aw(comicId);
+            String comicTitle = comic == null ? "" : comic.getTitle();
+            var api = new d(this).dO();
+            int batches = 1;
+            int total = 0;
+            int downloaded = 0;
+            String title = "";
+            for (int batch = 1; batch <= batches; batch++) {
+                var request = api.e(e.z(this), episodeId, batch);
+                this.hZ = request;
+                var response = request.execute();
+                if (!response.isSuccessful() || response.body() == null || response.body().data == null) {
+                    throw new java.io.IOException("Failed to load batch " + batch);
                 }
-                try {
-                    if (responseExecute.body().data == null || responseExecute.body().data.getPages().getDocs() == null) {
-                        i = i4;
-                    } else {
-                        if (downloadComicEpisodeObjectAy != null) {
-                            downloadComicEpisodeObjectAy.setStatus(2);
-                            downloadComicEpisodeObjectAy.save();
-                        } else {
-                            f.D(TAG, "DB error, missing DownloadComicEpisodeObject, episodeId = " + str2);
-                        }
-                        int i5 = 0;
-                        while (i5 < responseExecute.body().data.getPages().getDocs().size()) {
-                            ComicPageObject comicPageObject = responseExecute.body().data.getPages().getDocs().get(i5);
-                            String strEc = c.ec();
-                            File file = new File(strEc, str2 + "/" + comicPageObject.getMedia().getPath());
-                            if (!file.exists() && !file.getParentFile().exists()) {
-                                file.getParentFile().mkdirs();
-                            }
-                            try {
-                                g.a(g.b(comicPageObject.getMedia()), file, z2);
-                            } catch (Exception e4) {
-                                e4.printStackTrace();
-                            }
-                            DownloadComicPageObject downloadComicPageObject = new DownloadComicPageObject(str, str2, strEc, comicPageObject);
-                            com.picacomic.fregata.utils.b.a(downloadComicPageObject);
-                            String str3 = TAG;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("Downloaded ");
-                            sb.append(str2);
-                            sb.append(" Image");
-                            int i6 = i5 + 1;
-                            sb.append(i6);
-                            sb.append("/");
-                            sb.append(total);
-                            sb.append(": ");
-                            sb.append(file.getAbsolutePath());
-                            sb.append("\n");
-                            sb.append(downloadComicPageObject);
-                            f.F(str3, sb.toString());
-                            int i7 = total;
-                            i = i4;
-                            try {
-                                a(str, str2, title2, title, (i3 * limit) + i5 + 1, i7);
-                                i5 = i6;
-                                total = i7;
-                                i4 = i;
-                                z2 = false;
-                            } catch (Exception e5) {
-                                Exception e = e5;
-                                e.printStackTrace();
-                                i2 = pages;
-                                z3 = z;
-                                i3 = i;
-                                z2 = false;
-                            }
-                        }
-                        i = i4;
-                        if (downloadComicEpisodeObjectAy != null) {
-                            downloadComicEpisodeObjectAy.setStatus(4);
-                            downloadComicEpisodeObjectAy.save();
-                            updateComicDownloadStatus(str);
-                        } else {
-                            f.D(TAG, "DB error, missing DownloadComicEpisodeObject, episodeId = " + str2);
-                        }
-                    }
-                } catch (Exception e6) {
-                    Exception e = e6;
-                    i = i4;
-                    e.printStackTrace();
-                    i2 = pages;
-                    z3 = z;
-                    i3 = i;
-                    z2 = false;
+                var data = response.body().data;
+                var pages = data.getPages();
+                if (pages == null || pages.getDocs() == null || pages.getPages() < batch) {
+                    throw new java.io.IOException("Invalid episode batch " + batch);
                 }
-                i2 = pages;
-                z3 = z;
-                i3 = i;
-                z2 = false;
+                if (batch == 1) {
+                    total = pages.getTotal();
+                    batches = pages.getPages();
+                    episode.setTotal(total);
+                    episode.save();
+                } else if (pages.getTotal() != total || pages.getPages() != batches) {
+                    throw new java.io.IOException("Episode changed during download");
+                }
+                title = data.getEp().getTitle();
+                for (ComicPageObject page : pages.getDocs()) {
+                    String root = c.ec();
+                    File file = new File(root, episodeId + "/" + page.getMedia().getPath());
+                    File parent = file.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs() && !parent.isDirectory()) {
+                        throw new java.io.IOException("Cannot create " + parent);
+                    }
+                    g.a(g.b(page.getMedia()), file, false);
+                    if (!com.picacomic.fregata.utils.b.a(new DownloadComicPageObject(comicId, episodeId, root, page))) {
+                        throw new java.io.IOException("Cannot save downloaded page");
+                    }
+                    downloaded++;
+                    if (downloaded < total) a(comicId, episodeId, comicTitle, title, downloaded, total);
+                }
             }
+            if (downloaded != total) throw new java.io.IOException("Incomplete episode " + episodeId);
+            episode.setStatus(4);
+            episode.save();
+            updateComicDownloadStatus(comicId);
+            a(comicId, episodeId, comicTitle, title, downloaded, total);
+        } finally {
+            this.tV.remove(episodeId);
         }
-        this.tV.remove(str2);
     }
-
     private void updateComicDownloadStatus(String str) {
         try {
             DbComicDetailObject dbComicDetailObjectAw = com.picacomic.fregata.utils.b.aw(str);

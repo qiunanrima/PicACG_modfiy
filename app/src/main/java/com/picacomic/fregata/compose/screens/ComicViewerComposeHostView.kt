@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -248,6 +249,7 @@ private fun ComicViewerScreen(
 
     ZoomableReaderLayer(
         verticalContent = effectiveVerticalScroll,
+        scrollBy = { listState.dispatchRawDelta(it) },
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
             val isTabletWidth = maxWidth >= 600.dp
@@ -306,6 +308,7 @@ private fun ComicViewerScreen(
 @Composable
 private fun ZoomableReaderLayer(
     verticalContent: Boolean,
+    scrollBy: (Float) -> Unit,
     content: @Composable () -> Unit,
 ) {
     var scale by androidx.compose.runtime.remember { mutableStateOf(1f) }
@@ -339,13 +342,6 @@ private fun ZoomableReaderLayer(
                 size = it
                 clampOffsets()
             }
-            .graphicsLayer {
-                transformOrigin = TransformOrigin(0f, 0f)
-                scaleX = scale
-                scaleY = scale
-                translationX = offsetX
-                translationY = offsetY
-            }
             .pointerInput(verticalContent) {
                 awaitEachGesture {
                     awaitFirstDown(requireUnconsumed = false)
@@ -354,7 +350,7 @@ private fun ZoomableReaderLayer(
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         val pressedPointers = event.changes.count { it.pressed }
                         hasPressedPointers = pressedPointers > 0
-                        val shouldHandle = pressedPointers > 1 || scale > 1f
+                        val shouldHandle = pressedPointers > 1 || (pressedPointers == 1 && scale > 1f)
                         if (shouldHandle) {
                             val oldScale = scale
                             val zoomChange = if (pressedPointers > 1) event.calculateZoom() else 1f
@@ -371,12 +367,23 @@ private fun ZoomableReaderLayer(
                             } else {
                                 offsetX += pan.x
                                 offsetY += pan.y
+                                val requested = if (verticalContent) offsetY else offsetX
+                                clampOffsets()
+                                val clamped = if (verticalContent) offsetY else offsetX
+                                if (requested != clamped) scrollBy((clamped - requested) / scale)
                             }
                             clampOffsets()
                             event.changes.forEach { it.consume() }
                         }
                     } while (hasPressedPointers)
                 }
+            }
+            .graphicsLayer {
+                transformOrigin = TransformOrigin(0f, 0f)
+                scaleX = scale
+                scaleY = scale
+                translationX = offsetX
+                translationY = offsetY
             },
     ) {
         content()
@@ -470,33 +477,40 @@ private fun ComicViewerPage(
                     modifier = Modifier.align(Alignment.Center).clearAndSetSemantics {},
                 )
             }
-            AsyncImage(
-                model = buildComicPageImageRequest(
-                    context = context,
-                    page = page,
-                    imageSource = imageSource,
-                    offlineMode = offlineMode,
+            val attempt = remember(imageSource) { mutableIntStateOf(0) }
+            key(imageSource, attempt.intValue) {
+                AsyncImage(
+                    model = buildComicPageImageRequest(
+                        context = context,
+                        page = page,
+                        imageSource = imageSource,
+                        offlineMode = offlineMode,
+                    )
+                        .placeholder(placeholderRes)
+                        .error(placeholderRes)
+                        .fallback(placeholderRes)
+                        .build(),
+                    contentDescription = if (loadFailed) null else stringResource(R.string.comic_viewer_page_label, pageNumber),
+                    onLoading = { loadFailed = false },
+                    onSuccess = { loadFailed = false },
+                    onError = { loadFailed = true },
+                    contentScale = if (vertical) ContentScale.FillWidth else ContentScale.Fit,
+                    modifier = if (vertical) Modifier.fillMaxWidth() else Modifier.fillMaxSize(),
                 )
-                    .placeholder(placeholderRes)
-                    .error(placeholderRes)
-                    .fallback(placeholderRes)
-                    .build(),
-                contentDescription = if (loadFailed) null else stringResource(R.string.comic_viewer_page_label, pageNumber),
-                onLoading = { loadFailed = false },
-                onSuccess = { loadFailed = false },
-                onError = { loadFailed = true },
-                contentScale = if (vertical) ContentScale.FillWidth else ContentScale.Fit,
-                modifier = if (vertical) Modifier.fillMaxWidth() else Modifier.fillMaxSize(),
-            )
+            }
             if (loadFailed) {
-                Text(
-                    text = stringResource(R.string.comic_viewer_page_image_load_failed, pageNumber),
-                    modifier = Modifier.align(Alignment.Center)
-                        .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
-                        .padding(12.dp),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                androidx.compose.material3.TextButton(
+                    onClick = { attempt.intValue++ },
+                    modifier = Modifier.align(Alignment.Center),
+                    colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    ),
+                ) {
+                    Text(
+                        text = stringResource(R.string.comic_viewer_page_image_load_failed, pageNumber) + " · " + stringResource(R.string.retry_image_load),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
         }
     }

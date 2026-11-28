@@ -117,6 +117,8 @@ public class MyApplication extends SugarApp implements ImageLoaderFactory {
 
     private static ImageLoader createCoilImageLoader(Context context) {
         return new ImageLoader.Builder(context)
+                .components(new coil.ComponentRegistry.Builder()
+                        .add(com.picacomic.fregata.utils.ImageTimeoutRetry.INSTANCE).build())
                 .okHttpClient(createImageOkHttpClientBuilder(context).build())
                 .diskCache(() -> new DiskCache.Builder()
                         .directory(new File(context.getCacheDir(), "coil_cache"))

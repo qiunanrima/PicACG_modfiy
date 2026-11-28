@@ -77,7 +77,17 @@ import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRecommendationCard
 import com.picacomic.fregata.compose.components.compactCount
 import com.picacomic.fregata.compose.components.PicaSectionHeader
-import com.picacomic.fregata.compose.components.PicaStatRow
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.picacomic.fregata.compose.components.PicaTag
 import com.picacomic.fregata.compose.viewmodels.ComicDetailViewModel
 import com.picacomic.fregata.objects.ComicDetailObject
@@ -157,23 +167,13 @@ fun ComicDetailScreen(
     PicaComposeTheme {
         // MD3: 使用 pinnedScrollBehavior 让 TopAppBar 在滚动时保持固定
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-        val topBarDetail = if (inPreview) previewDetail else screenViewModel?.comicDetail
 
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 // MD3 标准 TopAppBar
                 TopAppBar(
-                    title = {
-                        Text(
-                            text = screenViewModel?.comicDetail?.title
-                                ?: previewDetail?.title
-                                ?: stringResource(R.string.title_comic_detail_default),
-                            style = MaterialTheme.typography.titleLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
+                    title = { Text(stringResource(R.string.title_comic_detail_default)) },
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
@@ -183,22 +183,6 @@ fun ComicDetailScreen(
                             )
                         }
                     },
-                    actions = {
-                        IconButton(
-                            enabled = topBarDetail != null,
-                            onClick = {
-                                val currentDetail = topBarDetail ?: return@IconButton
-                                if (inPreview) return@IconButton
-                                onDownloadClick(comicId, currentDetail.title)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Download,
-                                contentDescription = stringResource(R.string.download),
-                            )
-                        }
-                    },
-                    // MD3: TopAppBar 颜色跟随 colorScheme，滚动后自动显示 surfaceContainer 背景
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -296,8 +280,8 @@ private fun ComicDetailContent(
     val inPreview = LocalInspectionMode.current
     val historyRecord = if (inPreview) null else com.picacomic.fregata.utils.b.ax(comicId)
     val canComment = detail?.isAllowComment == true
-    val categories = detail?.categories.orEmpty().filter(String::isNotBlank)
-    val tags = detail?.tags.orEmpty()
+    val categories = detail?.categories.orEmpty().map(String::trim).filter(String::isNotEmpty).distinct()
+    val tags = detail?.tags.orEmpty().map(String::trim).filter(String::isNotEmpty).distinct()
     var tagsExpanded by remember(tags) { mutableStateOf(false) }
     var descriptionExpanded by remember(detail?.comicId) { mutableStateOf(false) }
     val shownTags = if (tagsExpanded || tags.size <= 4) tags else tags.take(4)
@@ -316,263 +300,215 @@ private fun ComicDetailContent(
                 },
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-        item {
-            PicaCardSection {
-                PicaSectionHeader(
-                    title = "漫画信息",
-                    supportingText = if (detail == null && isLoading) "加载中" else "",
-                )
-
-                if (detail == null) {
-                    Text(
-                        text = "正在获取漫画信息",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        ComicCoverPreview(
-                            thumbnail = detail.thumb,
-                            title = detail.title,
-                            onShowImage = onShowImage,
-                        )
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                        ) {
-                            PicaStatRow(
-                                label = "名称",
-                                value = detail.title.orEmpty(),
-                                onClick = {
-                                    copyComicTitle(context, detail.title)
-                                },
-                            )
-                            PicaStatRow(
-                                label = "作者",
-                                value = detail.author.orEmpty(),
-                                onClick = {
-                                    if (!detail.author.isNullOrBlank()) {
-                                        onComicListClick(null, null, detail.author, null, null, null)
+                item(key = "hero") {
+                    if (detail == null) {
+                        PicaLoadingIndicator()
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            val credits: @Composable () -> Unit = {
+                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Text(
+                                        text = detail.title.orEmpty(),
+                                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.sp),
+                                        modifier = Modifier.clickable { copyComicTitle(context, detail.title) },
+                                    )
+                                    detail.author?.takeIf(String::isNotBlank)?.let { name ->
+                                        CreditChip("作者", name, Icons.Filled.Person) { onComicListClick(null, null, name, null, null, null) }
                                     }
-                                },
-                            )
-                            PicaStatRow(
-                                label = "汉化",
-                                value = detail.chineseTeam.orEmpty(),
-                                onClick = {
-                                    if (!detail.chineseTeam.isNullOrBlank()) {
-                                        onComicListClick(null, null, null, detail.chineseTeam, null, null)
+                                    detail.chineseTeam?.takeIf(String::isNotBlank)?.let { name ->
+                                        CreditChip("汉化", name, Icons.Filled.Translate) { onComicListClick(null, null, null, name, null, null) }
                                     }
-                                },
-                            )
-                            PicaStatRow(
-                                label = "骑士",
-                                value = detail.creator?.name.orEmpty(),
-                                onClick = {
-                                    val creator = detail.creator
-                                    if (!creator?.creatorId.isNullOrBlank() && !creator?.name.isNullOrBlank()) {
-                                        onComicListClick(null, null, null, null, creator?.creatorId, creator?.name)
+                                    detail.creator?.let { creator ->
+                                        creator.name?.takeIf(String::isNotBlank)?.let { name ->
+                                            CreditChip("骑士", name, Icons.Filled.Badge, !creator.creatorId.isNullOrBlank()) {
+                                                onComicListClick(null, null, null, null, creator.creatorId, name)
+                                            }
+                                        }
                                     }
-                                },
-                            )
-                        }
-                    }
-
-                    if (categories.isNotEmpty()) {
-                        PicaSectionHeader(title = "分类")
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            categories.forEach { category ->
-                                PicaTag(
-                                    text = category,
-                                    onClick = { onComicListClick(category, null, null, null, null, null) },
-                                )
+                                }
+                            }
+                            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                                if (maxWidth < 280.dp * LocalDensity.current.fontScale) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        ComicCoverPreview(detail.thumb, detail.title, onShowImage)
+                                        credits()
+                                    }
+                                } else {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        ComicCoverPreview(detail.thumb, detail.title, onShowImage)
+                                        Column(Modifier.weight(1f)) { credits() }
+                                    }
+                                }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                DetailMetric(detail.pagesCount.toString(), "页数", Modifier.weight(1f))
+                                DetailMetric(compactCount(detail.viewsCount), "浏览", Modifier.weight(1f))
                             }
                         }
                     }
-                    Text(
-                        text = "页数 ${detail.pagesCount} / 浏览 ${compactCount(detail.viewsCount)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    CollapsibleDescriptionRow(
-                        description = detail.description.orEmpty(),
-                        expanded = descriptionExpanded,
-                        onToggle = { descriptionExpanded = !descriptionExpanded },
-                        supportingText = "点赞 ${compactCount(detail.likesCount)} / 评论 ${if (canComment) compactCount(detail.commentsCount) else "禁"}",
-                    )
                 }
-            }
-        }
 
-        if (tags.isNotEmpty()) {
-            item {
-                PicaCardSection {
-                    PicaSectionHeader(
-                        title = "标签",
-                        actionLabel = if (tags.size > 4) {
-                            if (tagsExpanded) "收起" else "展开"
-                        } else {
-                            null
-                        },
-                        onActionClick = { tagsExpanded = !tagsExpanded },
-                    )
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        shownTags.forEach { tag ->
-                            PicaTag(
-                                text = tag,
-                                onClick = { onComicListClick(null, tag, null, null, null, null) },
-                            )
-                        }
+                item {
+                    val fromHistory = historyRecord != null || previewState?.fromHistory == true
+                    val primarySupportingText = when {
+                        historyRecord != null -> "从 ${historyRecord.episodeTitle} P.${historyRecord.page} 开始"
+                        previewState?.fromHistory == true -> "从 ${previewState.historyEpisodeTitle} P.${previewState.historyPage} 开始"
+                        offlineMode && episodes.isEmpty() -> "暂无可离线阅读的缓存章节"
+                        else -> "从第 ${episodes.firstOrNull()?.order ?: 1} 话开始"
                     }
-                }
-            }
-        }
-
-        item {
-            val fromHistory = historyRecord != null || previewState?.fromHistory == true
-            val primarySupportingText = when {
-                historyRecord != null -> "从 ${historyRecord.episodeTitle} P.${historyRecord.page} 开始"
-                previewState?.fromHistory == true -> "从 ${previewState.historyEpisodeTitle} P.${previewState.historyPage} 开始"
-                offlineMode && episodes.isEmpty() -> "暂无可离线阅读的缓存章节"
-                else -> "从第 ${episodes.firstOrNull()?.order ?: 1} 话开始"
-            }
-            PicaActionRow(
-                primaryText = if (fromHistory) "继续阅读" else "开始阅读",
-                primarySupportingText = primarySupportingText,
-                primaryEnabled = detail != null && (!offlineMode || fromHistory || episodes.isNotEmpty()),
-                onPrimaryClick = {
-                    val currentDetail = detail ?: return@PicaActionRow
-                    if (inPreview) return@PicaActionRow
-                    val episodeTotal = if (totalEpisodes > 0) totalEpisodes else currentDetail.episodeCount
-                    val record = com.picacomic.fregata.utils.b.ax(comicId)
-                    if (record != null) {
-                        openComicViewer(
-                            context = context,
-                            comicId = comicId,
-                            title = currentDetail.title,
-                            episodeOrder = record.episodeOrder,
-                            page = record.page,
-                            episodeTotal = if (record.episodeTotal > 0) record.episodeTotal else episodeTotal,
-                            fromRecord = true,
-                            offlineMode = offlineMode,
-                        )
-                    } else {
-                        openComicViewer(
-                            context = context,
-                            comicId = comicId,
-                            title = currentDetail.title,
-                            episodeOrder = episodes.firstOrNull()?.order ?: 1,
-                            page = 1,
-                            episodeTotal = episodeTotal,
-                            fromRecord = false,
-                            offlineMode = offlineMode,
-                        )
-                    }
-                },
-                actions = listOf(
-                    PicaActionItem(
-                        icon = Icons.AutoMirrored.Filled.Comment,
-                        contentDescription = stringResource(R.string.comic_viewer_setting_panel_comment),
-                        count = if (canComment) compactCount(detail?.commentsCount ?: 0) else "禁",
-                        selected = !canComment,
-                        enabled = canComment,
-                        onClick = { if (canComment && !offlineMode) onCommentClick(comicId) },
-                    ),
-                    PicaActionItem(
-                        icon = Icons.Filled.Favorite,
-                        contentDescription = stringResource(R.string.comic_action_like),
-                        count = compactCount(detail?.likesCount ?: 0),
-                        selected = detail?.isLiked == true,
-                        enabled = detail != null && !isActionLoading && !offlineMode,
-                        onClick = onToggleLike,
-                        reportsSelection = true,
-                    ),
-                    PicaActionItem(
-                        icon = Icons.Filled.Bookmark,
-                        contentDescription = stringResource(R.string.comic_action_bookmark),
-                        selected = detail?.isFavourite == true,
-                        enabled = detail != null && !isActionLoading && !offlineMode,
-                        onClick = onToggleFavourite,
-                        reportsSelection = true,
-                    ),
-                    PicaActionItem(
-                        icon = Icons.Filled.Download,
-                        contentDescription = stringResource(R.string.download),
-                        enabled = detail != null && !offlineMode,
-                        onClick = {
-                            val currentDetail = detail ?: return@PicaActionItem
-                            onDownloadClick(comicId, currentDetail.title)
-                        },
-                    ),
-                ),
-            )
-        }
-
-        if (episodes.isNotEmpty()) {
-            item {
-                PicaCardSection {
-                    PicaSectionHeader(
-                        title = "章节",
-                        supportingText = "已加载 ${episodes.size} / 共 $totalEpisodes 话",
-                        actionLabel = if (hasMoreEpisodes) "更多" else null,
-                        onActionClick = onLoadMoreEpisodes,
-                    )
-                    PicaEpisodeGrid(episodes) { _, episode, cellModifier ->
-                        val state = when {
-                            episode.isSelected -> PicaEpisodeGridItemState.Selected
-                            episode.status == 1 -> PicaEpisodeGridItemState.Downloading
-                            episode.status == 2 -> PicaEpisodeGridItemState.Downloaded
-                            else -> PicaEpisodeGridItemState.Default
-                        }
-                        PicaEpisodeGridItem(
-                            title = episode.title?.takeIf { it.isNotBlank() } ?: "第 ${episode.order} 话",
-                            subtitle = listOfNotNull(
-                                if (episode.isSelected) stringResource(R.string.comic_episode_last_read) else null,
-                                when (episode.status) {
-                                    1 -> stringResource(R.string.comic_episode_downloading)
-                                    2 -> stringResource(R.string.downloaded)
-                                    else -> null
-                                },
-                            ).joinToString("\n"),
-                            state = state,
-                            onClick = {
-                                val currentDetail = detail ?: return@PicaEpisodeGridItem
-                                if (inPreview) return@PicaEpisodeGridItem
+                    PicaActionRow(
+                        primaryText = if (fromHistory) "继续阅读" else "开始阅读",
+                        primarySupportingText = primarySupportingText,
+                        primaryEnabled = detail != null && (!offlineMode || fromHistory || episodes.isNotEmpty()),
+                        onPrimaryClick = {
+                            val currentDetail = detail ?: return@PicaActionRow
+                            if (inPreview) return@PicaActionRow
+                            val episodeTotal = if (totalEpisodes > 0) totalEpisodes else currentDetail.episodeCount
+                            val record = com.picacomic.fregata.utils.b.ax(comicId)
+                            if (record != null) {
                                 openComicViewer(
                                     context = context,
                                     comicId = comicId,
                                     title = currentDetail.title,
-                                    episodeOrder = episode.order,
+                                    episodeOrder = record.episodeOrder,
+                                    page = record.page,
+                                    episodeTotal = if (record.episodeTotal > 0) record.episodeTotal else episodeTotal,
+                                    fromRecord = true,
+                                    offlineMode = offlineMode,
+                                )
+                            } else {
+                                openComicViewer(
+                                    context = context,
+                                    comicId = comicId,
+                                    title = currentDetail.title,
+                                    episodeOrder = episodes.firstOrNull()?.order ?: 1,
                                     page = 1,
-                                    episodeTotal = if (totalEpisodes > 0) totalEpisodes else currentDetail.episodeCount,
+                                    episodeTotal = episodeTotal,
                                     fromRecord = false,
                                     offlineMode = offlineMode,
                                 )
-                            },
-                            modifier = cellModifier,
-                        )
+                            }
+                        },
+                        actions = listOf(
+                            PicaActionItem(
+                                icon = Icons.AutoMirrored.Filled.Comment,
+                                contentDescription = stringResource(R.string.comic_viewer_setting_panel_comment),
+                                count = if (canComment) compactCount(detail?.commentsCount ?: 0) else "禁",
+                                enabled = canComment && !offlineMode,
+                                onClick = { if (canComment && !offlineMode) onCommentClick(comicId) },
+                            ),
+                            PicaActionItem(
+                                icon = Icons.Filled.Favorite,
+                                contentDescription = stringResource(R.string.comic_action_like),
+                                count = compactCount(detail?.likesCount ?: 0),
+                                selected = detail?.isLiked == true,
+                                enabled = detail != null && !isActionLoading && !offlineMode,
+                                onClick = onToggleLike,
+                                reportsSelection = true,
+                            ),
+                            PicaActionItem(
+                                icon = Icons.Filled.Bookmark,
+                                contentDescription = stringResource(R.string.comic_action_bookmark),
+                                selected = detail?.isFavourite == true,
+                                enabled = detail != null && !isActionLoading && !offlineMode,
+                                onClick = onToggleFavourite,
+                                reportsSelection = true,
+                            ),
+                            PicaActionItem(
+                                icon = Icons.Filled.Download,
+                                contentDescription = stringResource(R.string.download),
+                                enabled = detail != null && !offlineMode,
+                                onClick = {
+                                    val currentDetail = detail ?: return@PicaActionItem
+                                    onDownloadClick(comicId, currentDetail.title)
+                                },
+                            ),
+                        ),
+                    )
+                }
+
+                if (categories.isNotEmpty() || tags.isNotEmpty()) {
+                    item(key = "genres") {
+                        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            if (categories.isNotEmpty()) {
+                                DetailTagGroup("分类", categories) { name ->
+                                    onComicListClick(name, null, null, null, null, null)
+                                }
+                            }
+                            if (shownTags.isNotEmpty()) {
+                                Column(Modifier.fillMaxWidth().animateContentSize(MaterialTheme.motionScheme.defaultSpatialSpec())) {
+                                    DetailTagGroup("标签", shownTags) { tag ->
+                                        onComicListClick(null, tag, null, null, null, null)
+                                    }
+                                    if (tags.size > 4) {
+                                        TextButton(onClick = { tagsExpanded = !tagsExpanded }, modifier = Modifier.align(Alignment.End)) {
+                                            Text(if (tagsExpanded) "收起标签" else "更多标签")
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        }
-
-        if (recommendations.isNotEmpty() && !useTwoPaneLayout) {
-            item {
-                PicaCardSection(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp)) {
-                    PicaSectionHeader(title = "猜你喜欢")
-                    ComicRecommendationRow(recommendations, onComicClick)
+                detail?.description?.takeIf(String::isNotBlank)?.let { description ->
+                    item(key = "description") { CollapsibleDescriptionRow(description, descriptionExpanded) { descriptionExpanded = !descriptionExpanded } }
                 }
-            }
-        }
+                if (episodes.isNotEmpty()) {
+                    item {
+                        PicaCardSection {
+                            PicaSectionHeader(
+                                title = "章节",
+                                supportingText = "已加载 ${episodes.size} / 共 $totalEpisodes 话",
+                                actionLabel = if (hasMoreEpisodes) "更多" else null,
+                                onActionClick = onLoadMoreEpisodes,
+                            )
+                            PicaEpisodeGrid(episodes) { _, episode, cellModifier ->
+                                val state = when {
+                                    episode.isSelected -> PicaEpisodeGridItemState.Selected
+                                    episode.status == 1 -> PicaEpisodeGridItemState.Downloading
+                                    episode.status == 2 -> PicaEpisodeGridItemState.Downloaded
+                                    else -> PicaEpisodeGridItemState.Default
+                                }
+                                PicaEpisodeGridItem(
+                                    title = episode.title?.takeIf { it.isNotBlank() } ?: "第 ${episode.order} 话",
+                                    subtitle = listOfNotNull(
+                                        if (episode.isSelected) stringResource(R.string.comic_episode_last_read) else null,
+                                        when (episode.status) {
+                                            1 -> stringResource(R.string.comic_episode_downloading)
+                                            2 -> stringResource(R.string.downloaded)
+                                            else -> null
+                                        },
+                                    ).joinToString("\n"),
+                                    state = state,
+                                    onClick = {
+                                        val currentDetail = detail ?: return@PicaEpisodeGridItem
+                                        if (inPreview) return@PicaEpisodeGridItem
+                                        openComicViewer(
+                                            context = context,
+                                            comicId = comicId,
+                                            title = currentDetail.title,
+                                            episodeOrder = episode.order,
+                                            page = 1,
+                                            episodeTotal = if (totalEpisodes > 0) totalEpisodes else currentDetail.episodeCount,
+                                            fromRecord = false,
+                                            offlineMode = offlineMode,
+                                        )
+                                    },
+                                    modifier = cellModifier,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (recommendations.isNotEmpty() && !useTwoPaneLayout) {
+                    item {
+                        PicaCardSection(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp)) {
+                            PicaSectionHeader(title = "猜你喜欢")
+                            ComicRecommendationRow(recommendations, onComicClick)
+                        }
+                    }
+                }
             }
 
             if (useTwoPaneLayout) {
@@ -599,53 +535,64 @@ private fun ComicDetailContent(
                     }
                 }
             }
-    }
+        }
     }
 }
 
 @Composable
-private fun CollapsibleDescriptionRow(
-    description: String,
-    expanded: Boolean,
-    onToggle: () -> Unit,
-    supportingText: String,
-) {
-    val shouldCollapse = description.length > 90 || description.count { it == '\n' } > 2
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(enabled = shouldCollapse, onClick = onToggle)
-            .padding(vertical = 6.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Text(
-            text = "简介",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Column(
+private fun CreditChip(role: String, name: String, icon: ImageVector, enabled: Boolean = true, onClick: () -> Unit) {
+    Surface(onClick = onClick, enabled = enabled, shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+        Row(Modifier.padding(horizontal = 12.dp, vertical = 7.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = role, modifier = Modifier.size(16.dp))
+            Text(name, style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
+
+@Composable
+private fun DetailMetric(value: String, label: String, modifier: Modifier) {
+    Surface(modifier = modifier, shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Column(Modifier.padding(12.dp)) {
+            Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun DetailTagGroup(title: String, labels: List<String>, onClick: (String) -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            labels.forEach { label ->
+                Surface(onClick = { onClick(label) }, shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+                    Text(label, Modifier.padding(horizontal = 14.dp, vertical = 8.dp), maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelLarge)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CollapsibleDescriptionRow(description: String, expanded: Boolean, onToggle: () -> Unit) {
+    var overflows by remember(description) { mutableStateOf(false) }
+    Surface(shape = RoundedCornerShape(28.dp), color = MaterialTheme.colorScheme.surfaceContainer) {
+        Column(Modifier.fillMaxWidth().animateContentSize(MaterialTheme.motionScheme.defaultSpatialSpec()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("简介", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                maxLines = if (shouldCollapse && !expanded) 5 else Int.MAX_VALUE,
-                overflow = if (shouldCollapse && !expanded) TextOverflow.Ellipsis else TextOverflow.Clip,
+                maxLines = if (expanded) Int.MAX_VALUE else 4,
+                overflow = TextOverflow.Ellipsis,
+                onTextLayout = { if (!expanded) overflows = it.hasVisualOverflow },
             )
-            Text(
-                text = if (shouldCollapse) {
-                    if (expanded) "收起 · $supportingText" else "展开 · $supportingText"
-                } else {
-                    supportingText
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = if (shouldCollapse) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-            )
+            if (expanded || overflows) TextButton(onClick = onToggle, modifier = Modifier.align(Alignment.End)) { Text(if (expanded) "收起" else "展开全部") }
         }
     }
 }
@@ -659,9 +606,9 @@ private fun ComicCoverPreview(
     val imageUrl = thumbnail?.let { g.b(it) }.orEmpty()
     Box(
         modifier = Modifier
-            .width(92.dp)
-            .height(128.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .width(112.dp)
+            .height(156.dp)
+            .clip(RoundedCornerShape(24.dp))
             .clickable(enabled = imageUrl.isNotBlank()) { onShowImage(imageUrl) },
         contentAlignment = Alignment.Center,
     ) {
@@ -683,31 +630,31 @@ private fun ComicCoverPreview(
 }
 
 @Composable
-private fun ComicRecommendationRow(
+internal fun ComicRecommendationRow(
     recommendations: List<ComicListObject>,
     onComicClick: (String) -> Unit,
 ) {
-    BoxWithConstraints {
-        val spacing = 12.dp
-        val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
-        val minCardWidth = 144.dp * fontScale
-        val cardWidth = if (maxWidth < minCardWidth * 2 + spacing) {
-            maxWidth
-        } else {
-            ((maxWidth - spacing) / 2).coerceAtMost(220.dp * fontScale)
-        }
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(spacing)) {
-            items(recommendations) { comic ->
-                PicaRecommendationCard(
-                    title = comic.title.orEmpty(),
-                    categories = comic.categories.orEmpty(),
-                    onClick = { comic.comicId?.takeIf { it.isNotBlank() }?.let(onComicClick) },
-                    modifier = Modifier.width(cardWidth),
-                    thumbnail = { ComicRecommendationPreview(thumbnail = comic.thumb) },
-                )
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        recommendations.chunked(2).forEach { pair ->
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                pair.forEach { comic ->
+                    ComicRecommendationPoster(comic, onComicClick, Modifier.weight(1f))
+                }
+                if (pair.size == 1) androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
             }
         }
     }
+}
+
+@Composable
+internal fun ComicRecommendationPoster(comic: ComicListObject, onComicClick: (String) -> Unit, modifier: Modifier = Modifier) {
+    PicaRecommendationCard(
+        title = comic.title.orEmpty(),
+        categories = comic.categories.orEmpty(),
+        onClick = { comic.comicId?.takeIf(String::isNotBlank)?.let(onComicClick) },
+        modifier = modifier,
+        thumbnail = { ComicRecommendationPreview(comic.thumb) },
+    )
 }
 
 @Composable
@@ -742,7 +689,7 @@ private fun copyComicTitle(context: Context, title: String?) {
     Toast.makeText(context, "已复制漫画名称", Toast.LENGTH_SHORT).show()
 }
 
-private fun openComicViewer(
+internal fun openComicViewer(
     context: Context,
     comicId: String,
     title: String?,

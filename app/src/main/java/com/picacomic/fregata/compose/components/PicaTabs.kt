@@ -42,7 +42,7 @@ fun PicaTabRow(
         indicator = {
             TabRowDefaults.PrimaryIndicator(
                 modifier = Modifier.tabIndicatorOffset(activeIndex, matchContentSize = true),
-                color = MaterialTheme.colorScheme.tertiary,
+                color = MaterialTheme.colorScheme.primary,
             )
         },
     ) {
@@ -50,7 +50,7 @@ fun PicaTabRow(
             Tab(
                 selected = activeIndex == index,
                 onClick = { onTabSelected(index) },
-                selectedContentColor = MaterialTheme.colorScheme.tertiary,
+                selectedContentColor = MaterialTheme.colorScheme.primary,
                 unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 text = {
                     Text(

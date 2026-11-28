@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.ui.res.colorResource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
@@ -142,7 +143,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     var isNightMode: Boolean = false
     var currentPagingPage: Int = 0
     var totalPagingPages: Int = 0
-    var totalPages: Int = 0
+    var totalPages by androidx.compose.runtime.mutableIntStateOf(0)
     var currentEpisodePagingPage: Int = 0
     var totalEpisodePagingPages: Int = 0
     var currentEpisode: ComicEpisodeObject? = null
@@ -188,6 +189,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
 
     private var readerStatusText by mutableStateOf("")
+    private var readerLeftMarginPx by androidx.compose.runtime.mutableIntStateOf(0)
+    private var readerRightMarginPx by androidx.compose.runtime.mutableIntStateOf(0)
     private var gesturePanelState by mutableStateOf(GesturePanelState.HIDDEN)
     private var showEpisodeDialog by mutableStateOf(false)
     private var episodeChoices by mutableStateOf<List<ComicEpisodeObject>>(emptyList())
@@ -220,7 +223,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         super.onCreate(bundle)
         readerTheme = ThemeColorHelper.resolveStoredThemeIndex(this) to e.L(this)
         val matchParent = RelativeLayout.LayoutParams.MATCH_PARENT
-        val wrapContent = RelativeLayout.LayoutParams.WRAP_CONTENT
         readerRoot = RelativeLayout(this).apply {
             setBackgroundColor(readerColorScheme().surface.toArgb())
             addView(
@@ -228,21 +230,13 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 RelativeLayout.LayoutParams(matchParent, matchParent),
             )
         }
-        val readerStatus = ComposeView(this).apply {
-            consumeWindowInsets = false
-        }
-        readerRoot.addView(readerStatus, RelativeLayout.LayoutParams(wrapContent, wrapContent).apply {
-            addRule(RelativeLayout.ALIGN_PARENT_START)
-            addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-            val margin = resources.getDimensionPixelSize(R.dimen.padding_2)
-            marginStart = margin
-            bottomMargin = margin
-        })
         val readerActions = ComposeView(this).apply {
             consumeWindowInsets = false
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 ReaderTheme {
+                    if (showEpisodeDialog) ReaderEpisodeDialog()
+                    if (showAutoPagingDialog) ReaderAutoPagingDialog()
                     Box(Modifier.fillMaxSize()) {
                         if (gesturePanelState != GesturePanelState.HIDDEN) {
                             ReaderGesturePanel(gesturePanelState == GesturePanelState.HINT)
@@ -268,6 +262,27 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                         if (readerNightMaskVisible) {
                             Box(Modifier.fillMaxSize().background(colorResource(R.color.night_mode_mask)))
                         }
+                        if (readerStatusText.isNotEmpty()) {
+                            val density = androidx.compose.ui.platform.LocalDensity.current
+                            Box(Modifier.fillMaxSize().absolutePadding(
+                                left = with(density) { readerLeftMarginPx.toDp() },
+                                right = with(density) { readerRightMarginPx.toDp() },
+                            ), contentAlignment = androidx.compose.ui.AbsoluteAlignment.BottomLeft) {
+                                Surface(
+                                    onClick = { setReaderControlsVisibility(View.VISIBLE); bP() },
+                                    modifier = Modifier.windowInsetsPadding(ComposeWindowInsets.safeDrawing.only(WindowInsetsSides.Left + WindowInsetsSides.Bottom)).padding(2.dp),
+                                    color = colors.surfaceContainerHighest,
+                                    shape = MaterialTheme.shapes.small,
+                                ) {
+                                    Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(painterResource(R.drawable.ic_action_action_settings),
+                                            stringResource(R.string.comic_viewer_setting_panel_setting_menu), Modifier.size(20.dp))
+                                        Text(readerStatusText, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -276,48 +291,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         setContentView(readerRoot)
         enterReaderFullscreen()
 
-        readerStatus.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                if (showEpisodeDialog) {
-                    ReaderTheme {
-                        ReaderEpisodeDialog()
-                    }
-                }
-                if (showAutoPagingDialog) {
-                    ReaderTheme {
-                        ReaderAutoPagingDialog()
-                    }
-                }
-                if (readerStatusText.isNotEmpty()) {
-                    ReaderTheme {
-                        val colors = MaterialTheme.colorScheme
-                        Surface(
-                            modifier = Modifier.windowInsetsPadding(
-                                ComposeWindowInsets.safeDrawing.only(WindowInsetsSides.Start + WindowInsetsSides.Bottom)
-                            ),
-                            color = colors.surfaceContainerHighest,
-                            shape = MaterialTheme.shapes.small,
-                            border = BorderStroke(1.dp, colors.outlineVariant),
-                        ) {
-                            Row(
-                                modifier = Modifier.heightIn(min = 28.dp).padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                Icon(
-                                    painterResource(R.drawable.ic_action_action_settings),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = colors.onSurfaceVariant,
-                                )
-                                Text(readerStatusText, style = MaterialTheme.typography.labelSmall)
-                            }
-                        }
-                    }
-                }
-            }
-        }
         if (bundle == null) {
             this.comicViewerHostView = ComicViewerComposeHostView(this)
             findViewById<FrameLayout>(R.id.container).addView(
@@ -429,6 +402,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 params.leftMargin = if (readerLandscapeCommentsOnLeft) sidebarWidth else 0
                 params.rightMargin = if (readerLandscapeCommentsOnLeft) 0 else sidebarWidth
                 container.layoutParams = params
+                readerLeftMarginPx = params.leftMargin
+                readerRightMarginPx = params.rightMargin
             }
         }
     }
@@ -1754,16 +1729,17 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         val networkStatus = this.networkStatusLabel
         if (this.pageList != null) {
             val i2 = this.totalPages
+            val statusSuffix = "$networkStatus 電量:$batteryLevelText"
             val pageIndex = if (this.comicViewerHostView != null) i else g.ac(i)
             if (pageIndex + 1 > this.pageList!!.size) {
                 readerPageLabel = "完/$i2"
-                readerStatusText = "$readerPageLabel $networkStatus 電量:$batteryLevelText"
+                readerStatusText = "$readerPageLabel $statusSuffix"
                 this.comicViewerControlsOverlayView?.setPage("完/$i2")
                 return
             }
             val pageText = (pageIndex + 1 + bU()).toString() + "/" + i2
             readerPageLabel = pageText
-            readerStatusText = "P.$pageText $networkStatus 電量:$batteryLevelText"
+            readerStatusText = "P.$pageText $statusSuffix"
             this.comicViewerControlsOverlayView?.setPage(pageText)
         }
     }

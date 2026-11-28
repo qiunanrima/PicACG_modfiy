@@ -44,6 +44,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.remember
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -107,6 +114,7 @@ fun PicaTag(
             },
             modifier = modifier,
             colors = FilterChipDefaults.filterChipColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -122,6 +130,8 @@ fun PicaTag(
             } else {
                 null
             },
+            border = null,
+            shape = RoundedCornerShape(animateDpAsState(if (selected) 8.dp else 24.dp, MaterialTheme.motionScheme.fastSpatialSpec()).value),
             elevation = flatFilterChipElevation,
         )
     } else {
@@ -204,7 +214,7 @@ fun PicaSectionHeader(
                 text = title,
                 style = PicaExpressiveType.SectionEmphasized,
                 modifier = Modifier.semantics { heading() },
-                color = MaterialTheme.colorScheme.tertiary,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             if (!supportingText.isNullOrBlank()) {
                 Text(
@@ -233,6 +243,7 @@ fun PicaActionRow(
 ) {
     val primaryButton: @Composable (Modifier) -> Unit = { buttonModifier ->
         Button(
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp),
             shapes = ButtonDefaults.shapes(),
             onClick = onPrimaryClick,
             enabled = primaryEnabled,
@@ -265,29 +276,24 @@ fun PicaActionRow(
 
     BoxWithConstraints(modifier.fillMaxWidth()) {
         val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
-        val stackActions = actions.isNotEmpty() && maxWidth < 400.dp * fontScale
+        val stackActions = actions.isNotEmpty() && maxWidth < 350.dp * fontScale
         if (stackActions) {
-            val gap = 8.dp
+            val gap = 3.dp
             val actionsPerRow = ((maxWidth + gap) / (64.dp * fontScale + gap)).toInt().coerceAtLeast(1)
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 primaryButton(Modifier.fillMaxWidth())
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    maxItemsInEachRow = actionsPerRow,
-                    horizontalArrangement = Arrangement.spacedBy(gap),
-                    verticalArrangement = Arrangement.spacedBy(gap),
-                ) {
-                    actions.forEach { PicaActionStatButton(it, Modifier.weight(1f)) }
+                actions.chunked(actionsPerRow).forEach { group ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(gap)) { ActionButtons(group) }
                 }
             }
         } else {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 primaryButton(Modifier.weight(1.6f))
-                actions.forEach { PicaActionStatButton(it, Modifier.weight(1f)) }
+                ActionButtons(actions)
             }
         }
     }
@@ -375,19 +381,19 @@ fun PicaEpisodeGridItem(
                     FontWeight.Medium
                 },
                 textAlign = TextAlign.Center,
+                minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (!subtitle.isNullOrBlank()) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = contentColor,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            Text(
+                text = subtitle.orEmpty(),
+                style = MaterialTheme.typography.labelSmall,
+                color = contentColor,
+                textAlign = TextAlign.Center,
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
@@ -414,7 +420,6 @@ fun PicaRecommendationCard(
     },
 ) {
     val recommendationContainer = MaterialTheme.colorScheme.surfaceContainerLow
-    val recommendationBorder = MaterialTheme.colorScheme.outlineVariant
 
     Card(
         onClick = onClick,
@@ -423,7 +428,7 @@ fun PicaRecommendationCard(
             containerColor = recommendationContainer,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
-        border = BorderStroke(1.dp, recommendationBorder),
+        shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
@@ -435,10 +440,16 @@ fun PicaRecommendationCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(3f / 4.5f)
-                    .clip(MaterialTheme.shapes.medium),
+                    .aspectRatio(3f / 4f)
+                    .clip(RoundedCornerShape(18.dp)),
             ) {
                 thumbnail()
+                categories.firstOrNull(String::isNotBlank)?.let { badge ->
+                    Surface(Modifier.align(Alignment.BottomStart).padding(6.dp), shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryFixed, contentColor = MaterialTheme.colorScheme.onPrimaryFixed) {
+                        Text(badge, Modifier.padding(horizontal = 8.dp, vertical = 2.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
             }
             Text(
                 text = title,
@@ -447,28 +458,35 @@ fun PicaRecommendationCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            PicaCategoryChips(categories.filter(String::isNotBlank).take(3))
+
         }
+    }
+}
+
+@Composable
+private fun androidx.compose.foundation.layout.RowScope.ActionButtons(actions: List<PicaActionItem>) {
+    actions.forEach { item ->
+        val interaction = remember { MutableInteractionSource() }
+        val pressed = interaction.collectIsPressedAsState()
+        val weight = animateFloatAsState(if (pressed.value) 1.18f else 1f, MaterialTheme.motionScheme.fastSpatialSpec())
+        PicaActionStatButton(item, interaction, Modifier.weight(weight.value))
     }
 }
 
 @Composable
 private fun PicaActionStatButton(
     item: PicaActionItem,
+    interaction: MutableInteractionSource,
     modifier: Modifier = Modifier,
 ) {
-    val containerColor = if (item.selected) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
-    val contentColor = if (item.selected) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
+    val colors = MaterialTheme.colorScheme
+    val containerColor = animateColorAsState(if (item.selected) colors.tertiaryContainer else colors.secondaryContainer, MaterialTheme.motionScheme.fastEffectsSpec())
+    val contentColor = animateColorAsState(if (item.selected) colors.onTertiaryContainer else colors.onSecondaryContainer, MaterialTheme.motionScheme.fastEffectsSpec())
+    val iconSize = animateDpAsState(if (item.selected) 24.dp else 22.dp, MaterialTheme.motionScheme.fastSpatialSpec())
+    val radius = animateDpAsState(if (item.selected) 12.dp else 32.dp, MaterialTheme.motionScheme.fastSpatialSpec())
     Card(
         onClick = item.onClick,
+        interactionSource = interaction,
         enabled = item.enabled,
         modifier = modifier.semantics {
             if (item.reportsSelection) {
@@ -476,23 +494,11 @@ private fun PicaActionStatButton(
                 toggleableState = ToggleableState(item.selected)
             }
         },
-        shape = if (item.selected) {
-            CircleShape
-        } else {
-            MaterialTheme.shapes.medium
-        },
+        shape = RoundedCornerShape(radius.value),
         colors = CardDefaults.cardColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
+            containerColor = containerColor.value,
+            contentColor = contentColor.value,
         ),
-        border = if (item.selected) {
-            null
-        } else {
-            BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
-        },
     ) {
         Column(
             modifier = Modifier
@@ -505,7 +511,7 @@ private fun PicaActionStatButton(
             Icon(
                 imageVector = item.icon,
                 contentDescription = item.contentDescription,
-                modifier = Modifier.size(if (item.selected) 24.dp else 22.dp),
+                modifier = Modifier.size(iconSize.value),
             )
             if (!item.count.isNullOrBlank()) {
                 Badge(

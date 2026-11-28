@@ -39,6 +39,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+internal const val SYSTEM_NOTICE = 100
+
 class ChatroomListViewModel(application: Application) : AndroidViewModel(application) {
     private val app = getApplication<Application>()
     private val gson = Gson()
@@ -157,6 +159,8 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
         private set
     var onlineCount by mutableStateOf("")
         private set
+    var connectionEvent by androidx.compose.runtime.mutableLongStateOf(0L)
+        private set
     var connectionNotice by mutableStateOf<String?>(null)
         private set
     var replyName by mutableStateOf("")
@@ -236,7 +240,7 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
             emitToast("你从来没有进入过聊天室！")
             return
         }
-        if (privateTo == null && !isPublicChannel && atText.isBlank()) {
+        if (privateTo == null && !isPublicChannel) {
             emitToast("你还未＠人")
             return
         }
@@ -255,6 +259,7 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun sendImage(base64Image: String) {
+        if (!isPublicChannel) return emitToast("私聊仅支持文字")
         val message = buildMessage(text = "", image = base64Image, audio = "", type = 4) ?: return
         socket?.emit("send_image", gson.toJson(message, ChatMessageObject::class.java))
         addMessage(message)
@@ -262,6 +267,7 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun sendAudio(base64Audio: String) {
+        if (!isPublicChannel) return emitToast("私聊仅支持文字")
         val message = buildMessage(text = "", image = "", audio = base64Audio, type = 5) ?: return
         socket?.emit("send_audio", gson.toJson(message, ChatMessageObject::class.java))
         addMessage(message)
@@ -330,7 +336,7 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
 
     fun updatePublicChannel(public: Boolean) {
         isPublicChannel = public
-        if (public) privateTo = null
+        if (public) privateTo = null else selectedTarget?.let(::setPrivateTarget)
     }
 
     fun emitSystemAction(action: ChatroomSystemAction, type: Class<out ChatroomSystemAction>) {
@@ -730,6 +736,13 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
                     }
                 }
             }
+            on("disconnect") {
+                post {
+                    isConnected = false
+                    onlineCount = ""
+                    connectionNotice = null
+                }
+            }
             on("broadcast_message") { args -> handleChatMessage(args, 0) }
             on("broadcast_ads") { args -> handleChatMessage(args, 11) }
             on("broadcast_image") { args -> handleChatMessage(args, 1) }
@@ -750,18 +763,20 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
             on("new_connection") { args ->
                 post {
                     onlineCount = args.firstJsonObject()?.optString("connections").orEmpty()
-                    connectionNotice = "一位绅士加入了对话，现在人数为：$onlineCount"
+                    connectionNotice = "一位绅士加入了对话"
+                    connectionEvent = android.os.SystemClock.elapsedRealtime()
                 }
             }
             on("connection_close") { args ->
                 post {
                     onlineCount = args.firstJsonObject()?.optString("connections").orEmpty()
-                    connectionNotice = "一位绅士逃跑了，现在人数为：$onlineCount"
+                    connectionNotice = "一位绅士离开了对话"
+                    connectionEvent = android.os.SystemClock.elapsedRealtime()
                 }
             }
             on("receive_notification") { args ->
                 val notice = args.firstJsonObject()?.optString("message").orEmpty()
-                if (notice.isNotBlank()) emitToast(notice)
+                if (notice.isNotBlank()) parseMessage(JSONObject().put("message", notice), SYSTEM_NOTICE)?.let { message -> post { addMessage(message) } }
             }
             on("kick") { args ->
                 val notice = args.firstJsonObject()?.optString("message").orEmpty()
@@ -947,6 +962,8 @@ class ChatroomViewModel(application: Application) : AndroidViewModel(application
         socket?.disconnect()
         socket?.off()
         socket = null
+        onlineCount = ""
+        connectionNotice = null
         isConnected = false
     }
 

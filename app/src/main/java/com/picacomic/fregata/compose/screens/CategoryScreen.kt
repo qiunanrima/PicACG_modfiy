@@ -158,7 +158,7 @@ fun CategoryScreen(
             )
 
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 156.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
+                columns = if (androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp >= 600) GridCells.Adaptive(160.dp) else GridCells.Fixed(2),
                 state = gridState,
                 modifier = Modifier
                     .fillMaxSize()
@@ -175,17 +175,8 @@ fun CategoryScreen(
                     )
                 }
 
-                item(key = "default_actions", span = { GridItemSpan(maxLineSpan) }) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        defaultActions.forEach { item ->
-                            CategoryActionCard(item = item)
-                        }
-                    }
+                itemsIndexed(defaultActions, key = { index, _ -> "default_action_$index" }) { _, item ->
+                    CategoryActionCard(item = item)
                 }
 
                 item(key = "category_title", span = { GridItemSpan(maxLineSpan) }) {
@@ -236,8 +227,7 @@ private fun CategoryActionCard(
 ) {
     Card(
         onClick = item.onClick,
-        modifier = modifier
-            .width(112.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Box(
@@ -253,7 +243,7 @@ private fun CategoryActionCard(
             ) {
                 Surface(
                     shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ) {
                     Box(modifier = Modifier.size(56.dp), contentAlignment = Alignment.Center) {
                         Image(

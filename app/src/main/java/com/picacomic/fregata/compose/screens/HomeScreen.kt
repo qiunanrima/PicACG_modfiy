@@ -3,16 +3,14 @@ package com.picacomic.fregata.compose.screens
 import android.widget.Toast
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,7 +27,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,7 +40,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
-import com.picacomic.fregata.compose.components.PicaComicListCard
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaSectionHeader
@@ -102,9 +98,9 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(punchInViewModel?.punchInSuccessEvent) {
+    LaunchedEffect(punchInViewModel?.hasPendingPunchInSuccess) {
         val vm = punchInViewModel ?: return@LaunchedEffect
-        if (inPreview || vm.punchInSuccessEvent <= 0) return@LaunchedEffect
+        if (inPreview || !vm.consumePunchInSuccess()) return@LaunchedEffect
         Toast.makeText(context, R.string.alert_punch_in_success, Toast.LENGTH_SHORT).show()
     }
 
@@ -158,7 +154,7 @@ fun HomeScreen(
             containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             val collections = if (inPreview) previewState?.collections.orEmpty() else screenViewModel?.collections.orEmpty()
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -174,63 +170,33 @@ fun HomeScreen(
                     }
 
                     else -> {
-                        LazyColumn(
+                        val gap = 10.dp
+                        val contentWidth = maxWidth - 32.dp
+                        val columns = ((contentWidth + gap) / (160.dp + gap)).toInt().coerceAtLeast(2)
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(columns),
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(gap),
                             verticalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
-                            itemsIndexed(
-                                items = collections,
-                                key = { index, item -> stableLazyKey("home_collection", index, item.title) },
-                            ) { _, collection ->
-                                HomeCollectionRow(
-                                    collection = collection,
-                                    onMoreClick = onMoreClick,
-                                    onComicClick = onComicClick,
-                                )
+                            collections.forEachIndexed { sectionIndex, collection ->
+                                val section = stableLazyKey("home_collection", sectionIndex, collection.title)
+                                item(key = section, span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+                                    PicaSectionHeader(
+                                        title = collection.title.orEmpty(),
+                                        actionLabel = stringResource(R.string.more),
+                                        onActionClick = { onMoreClick(collection.title.orEmpty()) },
+                                    )
+                                }
+                                itemsIndexed(collection.comics.orEmpty(), key = { index, comic ->
+                                    stableLazyKey(section, index, comic.comicId, comic.title)
+                                }, contentType = { _, _ -> "poster" }) { _, comic ->
+                                    ComicRecommendationPoster(comic, onComicClick)
+                                }
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HomeCollectionRow(
-    collection: CollectionObject,
-    onMoreClick: (String) -> Unit,
-    onComicClick: (String) -> Unit,
-) {
-    val comics = collection.comics.orEmpty()
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PicaSectionHeader(
-            title = collection.title.orEmpty(),
-            actionLabel = stringResource(R.string.more),
-            onActionClick = { onMoreClick(collection.title.orEmpty()) },
-        )
-        BoxWithConstraints {
-            val cardWidth = (240.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(maxWidth)
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                itemsIndexed(
-                    items = comics,
-                    key = { index, comic -> stableLazyKey("home_comic", index, comic.comicId, comic.title) },
-                ) { _, comic ->
-                    PicaComicListCard(
-                        title = comic.title.orEmpty(),
-                        subtitle = comic.author.orEmpty(),
-                        thumbnail = comic.thumb,
-                        likes = comic.likesCount,
-                        pages = comic.pagesCount,
-                        episodes = comic.episodeCount,
-                        categories = comic.categories.orEmpty(),
-                        onClick = {
-                            val comicId = comic.comicId
-                            if (!comicId.isNullOrBlank()) onComicClick(comicId)
-                        },
-                        modifier = Modifier.width(cardWidth),
-                    )
                 }
             }
         }
@@ -267,7 +233,8 @@ private fun homePreviewState(): HomePreviewState {
     )
 }
 
-@Preview(showBackground = true)
+@Preview(name = "手机", widthDp = 360, heightDp = 800, showBackground = true)
+@Preview(name = "平板内容区", widthDp = 960, heightDp = 720, showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(

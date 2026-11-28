@@ -42,6 +42,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.TextField
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.produceState
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import com.picacomic.fregata.objects.databaseTable.DownloadComicEpisodeObject
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -57,7 +75,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -102,6 +119,7 @@ fun ComicListScreen(
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     val previewState = if (inPreview) comicListPreviewState(category, keywords, tags, author, translate, creatorName) else null
     val isFavourite = category == "CATEGORY_USER_FAVOURITE"
     val isRecent = category == "CATEGORY_RECENT_VIEW"
@@ -111,9 +129,6 @@ fun ComicListScreen(
     val effectiveCategory = if (offlineMode && !isOfflineLocalList) "CATEGORY_RECENT_VIEW" else category
     val isAdvancedSearch = !keywords.isNullOrBlank()
     val canSort = isFavourite || isAdvancedSearch
-    var pageText by rememberSaveable(category, keywords, tags, author, translate, creatorId) {
-        mutableStateOf("1")
-    }
 
     LaunchedEffect(category, keywords, tags, author, finished, sorting, translate, creatorId, creatorName, inPreview) {
         if (!inPreview) {
@@ -131,11 +146,6 @@ fun ComicListScreen(
         }
     }
 
-    LaunchedEffect(screenViewModel?.pageJumpBase) {
-        if (!inPreview) {
-            pageText = (screenViewModel?.pageJumpBase ?: 1).toString()
-        }
-    }
 
     LaunchedEffect(screenViewModel?.errorEvent) {
         val vm = screenViewModel ?: return@LaunchedEffect
@@ -299,9 +309,26 @@ fun ComicListScreen(
                     scrollBehavior = scrollBehavior,
                 )
             },
+            bottomBar = {
+                val pages = screenViewModel?.totalPage ?: previewState?.totalPage ?: 1
+                if (pages > 1) {
+                    val current = ((screenViewModel?.page ?: 2) - 1).coerceIn(1, pages)
+                    PagePicker(current, pages, screenViewModel?.isLoading != true) { page ->
+                        screenViewModel?.jumpToPage(page)
+                        scope.launch { listState.scrollToItem(0) }
+                    }
+                }
+            },
             containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             val comics = if (inPreview) previewState?.comics.orEmpty() else screenViewModel?.comics.orEmpty()
+            val owner = LocalLifecycleOwner.current
+            val lastViewed by produceState(emptyMap<String, Long>(), screenViewModel, comics, owner) {
+                val vm = screenViewModel ?: return@produceState
+                owner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    value = vm.lastViewedTimes(comics)
+                }
+            }
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -310,19 +337,15 @@ fun ComicListScreen(
                     .consumeWindowInsets(innerPadding)
                     .imePadding(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 item(key = "filters") {
                     ComicListControlPanel(
                         filterStates = screenViewModel?.filterStates.orEmpty(),
                         customBlockedWords = screenViewModel?.customBlockedWords.orEmpty(),
-                        totalPage = screenViewModel?.totalPage ?: previewState?.totalPage ?: 1,
-                        pageText = pageText,
-                        onPageTextChange = { pageText = it },
                         onToggleFilter = { screenViewModel?.toggleFilter(it) },
                         onAddCustomBlockedWord = { screenViewModel?.addCustomBlockedWord(it) },
                         onRemoveCustomBlockedWord = { screenViewModel?.removeCustomBlockedWord(it) },
-                        onJump = { screenViewModel?.jumpToPage(pageText.toIntOrNull() ?: 1) },
                     )
                     if (screenViewModel?.selectedAdvancedCategories?.isNotEmpty() == true) {
                         FlowRow(
@@ -343,15 +366,44 @@ fun ComicListScreen(
                     }
 
                     comics.isEmpty() -> {
-                        item(key = "empty") { PicaEmptyState(message = "No comics") }
+                        item(key = "empty") { PicaEmptyState(message = if (isDownloaded) "暂无下载" else "暂无漫画") }
                     }
 
                     else -> {
                         itemsIndexed(
                             items = comics,
                             key = { index, item -> stableLazyKey("comic", index, item.comicId, item.title) },
-                        ) { _, item ->
+                        ) { index, item ->
+                            val top = if (index == 0) 24.dp else 4.dp
+                            val bottom = if (index == comics.lastIndex) 24.dp else 4.dp
                             PicaComicListCard(
+                                lastViewedAt = lastViewed[item.comicId],
+                                shape = RoundedCornerShape(top, top, bottom, bottom),
+                                quickAction = if (isDownloaded || !isOfflineLocalList && !offlineMode) ({
+                                    FilledTonalIconButton(enabled = !item.comicId.isNullOrBlank(), onClick = {
+                                        val id = item.comicId ?: return@FilledTonalIconButton
+                                        scope.launch {
+                                            if (!isDownloaded) {
+                                                val saved = withContext(Dispatchers.IO) { com.picacomic.fregata.utils.b.ax(id) }
+                                                openComicViewer(
+                                                    context, id, item.title, saved?.episodeOrder ?: 1, saved?.page ?: 1,
+                                                    maxOf(saved?.episodeTotal ?: 0, item.episodeCount, 1), saved != null, false,
+                                                )
+                                                return@launch
+                                            }
+                                            val (orders, record) = withContext(Dispatchers.IO) {
+                                                val downloaded = DownloadComicEpisodeObject.find(DownloadComicEpisodeObject::class.java, "comic_id = ?", id)
+                                                    .orEmpty().filterIsInstance<DownloadComicEpisodeObject>()
+                                                    .filter { it.status == 2 || it.status == 4 }.map { it.episodeOrder }.sorted()
+                                                downloaded to com.picacomic.fregata.utils.b.ax(id)
+                                            }
+                                            val saved = record?.takeIf { it.episodeOrder in orders }
+                                            val order = saved?.episodeOrder ?: orders.firstOrNull()
+                                            if (order == null) onComicClick(id) else openComicViewer(context, id, item.title, order,
+                                                saved?.page ?: 1, maxOf(item.episodeCount, orders.last()), saved != null, true)
+                                        }
+                                    }) { Icon(Icons.Filled.PlayArrow, if (isDownloaded) "离线阅读" else "阅读") }
+                                }) else null,
                                 title = item.title.orEmpty(),
                                 subtitle = if (isDownloading) {
                                     screenViewModel?.downloadingProgressText?.get(item.comicId.orEmpty()).orEmpty()
@@ -386,13 +438,9 @@ fun ComicListScreen(
 private fun ComicListControlPanel(
     filterStates: List<Boolean>,
     customBlockedWords: List<String>,
-    totalPage: Int,
-    pageText: String,
-    onPageTextChange: (String) -> Unit,
     onToggleFilter: (Int) -> Unit,
     onAddCustomBlockedWord: (String) -> Unit,
     onRemoveCustomBlockedWord: (String) -> Unit,
-    onJump: () -> Unit,
 ) {
     var customWordInput by rememberSaveable { mutableStateOf("") }
     val filterLabels = listOf(
@@ -406,136 +454,48 @@ private fun ComicListControlPanel(
         stringResource(R.string.comic_list_filter_button_webtoon),
     )
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 1.dp,
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                filterLabels.forEachIndexed { index, label ->
-                    val selected = filterStates.getOrNull(index) == true
-                    PicaTag(
-                        text = label,
-                        selected = selected,
-                        onClick = { onToggleFilter(index) },
-                        selectedIcon = Icons.Filled.Close,
-                    )
-                }
+    var editing by rememberSaveable { mutableStateOf(false) }
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+        filterLabels.forEachIndexed { index, label ->
+            PicaTag(label, { onToggleFilter(index) }, selected = filterStates.getOrNull(index) == true)
+        }
+        FilledTonalButton(onClick = { editing = true }) { Text("+ 屏蔽词") }
+    }
+    if (editing) ModalBottomSheet(onDismissRequest = { editing = false }) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).navigationBarsPadding().imePadding().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("自定义屏蔽词", style = MaterialTheme.typography.titleLarge)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextField(customWordInput, { customWordInput = it }, Modifier.weight(1f), singleLine = true,
+                    shape = RoundedCornerShape(16.dp), placeholder = { Text("可用逗号分隔多个词") })
+                IconButton({
+                    onAddCustomBlockedWord(customWordInput)
+                    customWordInput = ""
+                }, enabled = customWordInput.isNotBlank()) { Icon(Icons.Filled.Add, "添加屏蔽词") }
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                OutlinedTextField(
-                    value = customWordInput,
-                    onValueChange = { customWordInput = it },
-                    label = { Text("自定义屏蔽词") },
-                    placeholder = { Text("可用逗号分隔多个词") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(
-                    onClick = {
-                        onAddCustomBlockedWord(customWordInput)
-                        customWordInput = ""
-                    },
-                    enabled = customWordInput.isNotBlank(),
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = "添加屏蔽词")
-                }
-            }
-            if (customBlockedWords.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    customBlockedWords.forEach { word ->
-                        AssistChip(
-                            onClick = { onRemoveCustomBlockedWord(word) },
-                            label = { Text(word, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                            trailingIcon = { Icon(Icons.Filled.Close, contentDescription = "移除屏蔽词") },
-                        )
-                    }
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.comment_jump_page_title),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                )
-                OutlinedTextField(
-                    value = pageText,
-                    onValueChange = { onPageTextChange(it.filter(Char::isDigit).take(5)) },
-                    placeholder = { Text("1") },
-                    suffix = {
-                        Text(
-                            text = "/ $totalPage",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                    keyboardActions = KeyboardActions(onGo = { onJump() }),
-                    shape = MaterialTheme.shapes.large,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.48f),
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedSuffixColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unfocusedSuffixColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .heightIn(min = 52.dp),
-                )
-                Button(
-                    shapes = ButtonDefaults.shapes(),
-                    onClick = onJump,
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                    ),
-                    modifier = Modifier.heightIn(min = 52.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.KeyboardDoubleArrowRight,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.ok),
-                        modifier = Modifier.padding(start = 6.dp),
-                    )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                customBlockedWords.forEach { word ->
+                    PicaTag(word, { onRemoveCustomBlockedWord(word) }, selected = true, selectedIcon = Icons.Filled.Close)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PagePicker(current: Int, total: Int, enabled: Boolean, onJump: (Int) -> Unit) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    var text by rememberSaveable(current) { mutableStateOf(current.toString()) }
+    Box(Modifier.fillMaxWidth().navigationBarsPadding(), contentAlignment = Alignment.Center) {
+        FilledTonalButton(enabled = enabled, onClick = { text = current.toString(); open = true }) { Text("$current / $total") }
+    }
+    if (open) {
+        val page = text.toIntOrNull()?.takeIf { it in 1..total }
+        AlertDialog(onDismissRequest = { open = false }, title = { Text(stringResource(R.string.comment_jump_page_title)) },
+            text = { TextField(text, { text = it.filter(Char::isDigit).take(8) }, singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number), suffix = { Text("/ $total") }) },
+            confirmButton = { FilledTonalButton(onClick = { page?.let(onJump); open = false }, enabled = enabled && page != null) { Text(stringResource(R.string.ok)) } },
+            dismissButton = { TextButton({ open = false }) { Text(stringResource(R.string.cancel)) } })
     }
 }
 

@@ -73,8 +73,8 @@ fun PicaEmptyState(
         Surface(
             modifier = Modifier.size(64.dp),
             shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(32.dp))
