@@ -276,20 +276,26 @@ fun PicaComicListCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                Text(
-                    text = title,
-                    style = PicaExpressiveType.SectionEmphasized,
-                    minLines = 2,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                val titleStyle = PicaExpressiveType.SectionEmphasized
+                val subtitleStyle = MaterialTheme.typography.bodyMedium
+                val headingHeight = with(androidx.compose.ui.platform.LocalDensity.current) {
+                    titleStyle.lineHeight.toDp() * 2 + subtitleStyle.lineHeight.toDp() + 2.dp
+                }
+                Column(Modifier.heightIn(min = headingHeight), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = title,
+                        style = titleStyle,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = subtitle,
+                        style = subtitleStyle,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
