@@ -523,6 +523,14 @@ interface ImageLoader {
         }
 
         /**
+         * Check connectivity using the app's default network on API 24 and higher.
+         * Defaults to false, which checks all networks with internet capability.
+         */
+        fun observeDefaultNetwork(observeDefaultNetwork: Boolean) = apply {
+            this.options = this.options.copy(observeDefaultNetwork = observeDefaultNetwork)
+        }
+
+        /**
          * Create a new [ImageLoader] instance.
          */
         fun build(): ImageLoader {

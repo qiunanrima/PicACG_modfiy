@@ -22,7 +22,6 @@
 # Manifest 组件和 launcher alias 目标必须保持稳定，避免系统按旧类名启动失败。
 -keep class com.picacomic.fregata.activities.** { *; }
 -keep class com.picacomic.fregata.services.** { *; }
--keep class com.picacomic.fregata.DemoLoginActivity { *; }
 
 # ===== Gson =====
 -keepattributes SerializedName

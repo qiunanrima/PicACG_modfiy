@@ -1,5 +1,12 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import com.picacomic.fregata.compose.components.PicaImageUrl
+import com.picacomic.fregata.compose.components.PicaTag
+
 import android.Manifest
 import android.content.Context
 import android.media.MediaPlayer
@@ -19,6 +26,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,10 +53,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -83,13 +91,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaSwitchListItem
+import com.picacomic.fregata.compose.components.picaSegmentShape
 import com.picacomic.fregata.compose.components.PicaTabRow
 import com.picacomic.fregata.compose.viewmodels.ChatroomListViewModel
 import com.picacomic.fregata.compose.viewmodels.ChatroomViewModel
@@ -265,7 +272,7 @@ fun ChatroomContainerScreen(
                             room.title.orEmpty().ifBlank { "Room ${index + 1}" }
                         },
                         onTabSelected = { selectedTab = it },
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        topAppBarState = scrollBehavior.state,
                     )
                 }
             },
@@ -327,7 +334,9 @@ fun ChatroomScreen(
                 roomUrl = roomUrl,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .padding(padding)
+                    .consumeWindowInsets(padding)
+                    .imePadding(),
             )
         }
     }
@@ -512,17 +521,14 @@ private fun ChatroomContent(
 
     previewImage?.let { image ->
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             onDismissRequest = { previewImage = null },
             confirmButton = {
                 TextButton(onClick = { previewImage = null }) { Text(stringResource(R.string.ok)) }
             },
             text = {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(image)
-                        .allowHardware(false)
-                        .crossfade(true)
-                        .build(),
+                PicaImageUrl(
+                    imageUrl = image,
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
@@ -588,11 +594,11 @@ private fun ChatroomMessageBubble(
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(
                 containerColor = if (isMine) {
-                    MaterialTheme.colorScheme.surfaceContainerHigh
+                    MaterialTheme.colorScheme.tertiaryContainer
                 } else {
                     MaterialTheme.colorScheme.surfaceContainer
                 },
-                contentColor = MaterialTheme.colorScheme.onSurface,
+                contentColor = if (isMine) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface,
             ),
         ) {
             Column(
@@ -612,7 +618,6 @@ private fun ChatroomMessageBubble(
                         Text(
                             text = item.title,
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -622,7 +627,6 @@ private fun ChatroomMessageBubble(
                     Text(
                         text = "↪ ${item.replyName.orEmpty()} ${item.reply.orEmpty()}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -632,15 +636,8 @@ private fun ChatroomMessageBubble(
                         text = item.message,
                         style = MaterialTheme.typography.bodyMedium,
                     )
-                    !item.image.isNullOrBlank() -> AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(item.image)
-                            .placeholder(R.drawable.placeholder_avatar_2)
-                            .error(R.drawable.placeholder_avatar_2)
-                            .fallback(R.drawable.placeholder_avatar_2)
-                            .allowHardware(false)
-                            .crossfade(true)
-                            .build(),
+                    !item.image.isNullOrBlank() -> PicaImageUrl(
+                        imageUrl = item.image,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -697,26 +694,33 @@ private fun ChatroomInputBar(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                FilterChip(
+                PicaTag(
                     selected = isPublicChannel,
                     onClick = { onChannelChange(true) },
-                    label = { Text("Public") },
+                    text = "Public",
                 )
-                FilterChip(
+                PicaTag(
                     selected = !isPublicChannel,
                     onClick = { onChannelChange(false) },
-                    label = { Text("Private") },
+                    text = "Private",
                 )
                 IconButton(onClick = { showEmoji = !showEmoji }) {
-                    Icon(Icons.Filled.InsertEmoticon, contentDescription = null)
+                    Icon(
+                        Icons.Filled.InsertEmoticon,
+                        contentDescription = stringResource(
+                            if (showEmoji) R.string.chatroom_hide_emoji else R.string.chatroom_show_emoji,
+                        ),
+                    )
                 }
                 IconButton(onClick = onImageClick) {
-                    Icon(Icons.Filled.Image, contentDescription = null)
+                    Icon(Icons.Filled.Image, contentDescription = stringResource(R.string.chatroom_control_image_title))
                 }
                 IconButton(onClick = onAudioClick) {
                     Icon(
                         Icons.Filled.Mic,
-                        contentDescription = null,
+                        contentDescription = stringResource(
+                            if (isRecording) R.string.chatroom_stop_recording else R.string.chatroom_start_recording,
+                        ),
                         tint = if (isRecording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -724,10 +728,10 @@ private fun ChatroomInputBar(
                     Icon(Icons.Filled.Settings, contentDescription = null)
                 }
                 if (adminMode) {
-                    FilterChip(
+                    PicaTag(
                         selected = showAdminPanel,
                         onClick = onAdminToggle,
-                        label = { Text("Control") },
+                        text = "Control",
                     )
                 }
             }
@@ -878,12 +882,12 @@ private fun ChatroomAdminPanel(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Button(shapes = ButtonDefaults.shapes(), onClick = { titleDialog = true }) { Text(stringResource(R.string.alert_action_change_title)) }
-                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleTime(true) }) { Text("Time ON") }
-                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleTime(false) }) { Text("Time OFF") }
-                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleImage(true) }) { Text("Image ON") }
-                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleImage(false) }) { Text("Image OFF") }
-                Button(shapes = ButtonDefaults.shapes(), onClick = { aiDialog = true }) { Text(stringResource(R.string.alert_action_ai_script_title)) }
+                FilledTonalButton(shapes = ButtonDefaults.shapes(), onClick = { titleDialog = true }) { Text(stringResource(R.string.alert_action_change_title)) }
+                FilledTonalButton(shapes = ButtonDefaults.shapes(), onClick = { onToggleTime(true) }) { Text("Time ON") }
+                FilledTonalButton(shapes = ButtonDefaults.shapes(), onClick = { onToggleTime(false) }) { Text("Time OFF") }
+                FilledTonalButton(shapes = ButtonDefaults.shapes(), onClick = { onToggleImage(true) }) { Text("Image ON") }
+                FilledTonalButton(shapes = ButtonDefaults.shapes(), onClick = { onToggleImage(false) }) { Text("Image OFF") }
+                FilledTonalButton(shapes = ButtonDefaults.shapes(), onClick = { aiDialog = true }) { Text(stringResource(R.string.alert_action_ai_script_title)) }
                 TextButton(onClick = onStopAi) { Text("Stop AI") }
             }
         }
@@ -891,6 +895,7 @@ private fun ChatroomAdminPanel(
 
     if (titleDialog) {
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             onDismissRequest = { titleDialog = false },
             title = { Text(stringResource(R.string.alert_action_change_title)) },
             text = {
@@ -915,6 +920,7 @@ private fun ChatroomAdminPanel(
 
     if (avatarExtraDialog) {
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             onDismissRequest = { avatarExtraDialog = false },
             title = { Text(stringResource(R.string.profile_edit_avatar)) },
             text = {
@@ -940,6 +946,7 @@ private fun ChatroomAdminPanel(
 
     if (aiDialog) {
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             onDismissRequest = { aiDialog = false },
             title = { Text(stringResource(R.string.alert_action_ai_script_title)) },
             text = {
@@ -1000,6 +1007,7 @@ private fun ChatroomSettingsDialog(
     )
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.chatroom_setting_title)) },
         text = {
@@ -1020,19 +1028,53 @@ private fun ChatroomSettingsDialog(
                         Text(stringResource(R.string.profile_edit_update))
                     }
                 }
-                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_night_mode), nightMode) { nightMode = it } }
-                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_timestamp), showTimestamp) { showTimestamp = it } }
-                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_fix_image_size), fixImageSize) { fixImageSize = it } }
-                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_hide_all_avatar), hideAvatar) { hideAvatar = it } }
-                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_speech), speechEnabled) { speechEnabled = it } }
-                item { ChatroomSettingSwitch(stringResource(R.string.chatroom_setting_speech_with_name), speechWithName) { speechWithName = it } }
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        PicaSwitchListItem(
+                            label = stringResource(R.string.chatroom_setting_night_mode),
+                            checked = nightMode,
+                            onCheckedChange = { nightMode = it },
+                            segmentShape = picaSegmentShape(0, 5),
+                        )
+                        PicaSwitchListItem(
+                            label = stringResource(R.string.chatroom_setting_timestamp),
+                            checked = showTimestamp,
+                            onCheckedChange = { showTimestamp = it },
+                            segmentShape = picaSegmentShape(1, 5),
+                        )
+                        PicaSwitchListItem(
+                            label = stringResource(R.string.chatroom_setting_fix_image_size),
+                            checked = fixImageSize,
+                            onCheckedChange = { fixImageSize = it },
+                            segmentShape = picaSegmentShape(2, 5),
+                        )
+                        PicaSwitchListItem(
+                            label = stringResource(R.string.chatroom_setting_hide_all_avatar),
+                            checked = hideAvatar,
+                            onCheckedChange = { hideAvatar = it },
+                            segmentShape = picaSegmentShape(3, 5),
+                        )
+                        PicaSwitchListItem(
+                            label = stringResource(R.string.chatroom_setting_speech),
+                            checked = speechEnabled,
+                            onCheckedChange = { speechEnabled = it },
+                            segmentShape = picaSegmentShape(4, 5),
+                        )
+                        PicaSwitchListItem(
+                            label = stringResource(R.string.chatroom_setting_speech_with_name),
+                            checked = speechWithName,
+                            onCheckedChange = { speechWithName = it },
+                            segmentShape = picaSegmentShape(5, 5),
+                        )
+                    }
+                }
                 item {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         itemsIndexed(languages) { _, item ->
-                            FilterChip(
+                            PicaTag(
                                 selected = speechLanguage == item.first,
                                 onClick = { speechLanguage = item.first },
-                                label = { Text(item.second) },
+                                text = item.second,
                             )
                         }
                     }
@@ -1117,20 +1159,6 @@ private fun ChatroomSettingsDialog(
 }
 
 @Composable
-private fun ChatroomSettingSwitch(
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    PicaSwitchListItem(
-        label = label,
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-        showDivider = false,
-    )
-}
-
-@Composable
 private fun ChatroomBlacklistDialog(
     blacklist: List<ChatroomBlacklistObject>,
     onRemove: (Int) -> Unit,
@@ -1139,6 +1167,7 @@ private fun ChatroomBlacklistDialog(
 ) {
     val selected = remember(blacklist.size) { mutableStateListOf<Int>() }
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.chatroom_setting_blacklist_clear)) },
         text = {
@@ -1147,24 +1176,29 @@ private fun ChatroomBlacklistDialog(
             } else {
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 360.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     itemsIndexed(blacklist) { index, item ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
-                                    if (selected.contains(index)) selected.remove(index) else selected.add(index)
-                                }
-                                .padding(vertical = 4.dp),
+                                .heightIn(min = 48.dp)
+                                .clip(picaSegmentShape(index, blacklist.lastIndex))
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .toggleable(
+                                    value = index in selected,
+                                    role = Role.Checkbox,
+                                    onValueChange = { checked ->
+                                        if (checked) selected.add(index) else selected.remove(index)
+                                    },
+                                )
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             Checkbox(
                                 checked = selected.contains(index),
-                                onCheckedChange = {
-                                    if (it) selected.add(index) else selected.remove(index)
-                                },
+                                onCheckedChange = null,
                             )
                             Text(
                                 text = item.username.orEmpty(),
@@ -1192,7 +1226,12 @@ private fun ChatroomBlacklistDialog(
                         onClear()
                         onDismiss()
                     },
-                ) { Text(stringResource(R.string.chatroom_setting_blacklist_clear_all)) }
+                ) {
+                    Text(
+                        text = stringResource(R.string.chatroom_setting_blacklist_clear_all),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
             }
         },
@@ -1341,12 +1380,11 @@ private fun ChatroomListItem(
     room: ChatroomListObject,
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(
@@ -1356,18 +1394,10 @@ private fun ChatroomListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(room.avatar)
-                    .placeholder(R.drawable.placeholder_avatar_2)
-                    .error(R.drawable.placeholder_avatar_2)
-                    .fallback(R.drawable.placeholder_avatar_2)
-                    .allowHardware(false)
-                    .crossfade(true)
-                    .build(),
+            PicaImageUrl(
+                imageUrl = room.avatar,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.widthIn(min = 72.dp, max = 72.dp),
+                modifier = Modifier.size(72.dp),
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(

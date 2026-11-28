@@ -1,6 +1,7 @@
 package com.picacomic.fregata.compose.screens
 
 import android.webkit.WebView
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -125,6 +126,7 @@ fun PicaAppScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
             ) {
                 if (inPreview) {
                     val previewTitle = screenViewModel?.title?.ifBlank { title.ifBlank { "Pica App" } }

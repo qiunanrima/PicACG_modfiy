@@ -2078,9 +2078,7 @@
     <public type="layout" name="abc_search_dropdown_item_icons_2line" id="0x7f0b0018" />
     <public type="layout" name="abc_search_view" id="0x7f0b0019" />
     <public type="layout" name="abc_select_dialog_material" id="0x7f0b001a" />
-    <public type="layout" name="activity_comic_viewer" id="0x7f0b001b" />
     <public type="layout" name="activity_comment" id="0x7f0b001c" />
-    <public type="layout" name="activity_demo_login" id="0x7f0b001d" />
     <public type="layout" name="activity_image_crop" id="0x7f0b001e" />
     <public type="layout" name="activity_login" id="0x7f0b001f" />
     <public type="layout" name="activity_main" id="0x7f0b0020" />
@@ -2104,18 +2102,12 @@
     <public type="layout" name="design_navigation_menu" id="0x7f0b0032" />
     <public type="layout" name="design_navigation_menu_item" id="0x7f0b0033" />
     <public type="layout" name="design_text_input_password_icon" id="0x7f0b0034" />
-    <public type="layout" name="dialog_announcement_alert" id="0x7f0b0035" />
     <public type="layout" name="dialog_auto_paging_content_view" id="0x7f0b0036" />
-    <public type="layout" name="dialog_chatroom_setting" id="0x7f0b0037" />
     <public type="layout" name="dialog_custom_alert" id="0x7f0b0038" />
     <public type="layout" name="dialog_edittext_content_view" id="0x7f0b0039" />
-    <public type="layout" name="dialog_exp_content_view" id="0x7f0b003a" />
-    <public type="layout" name="dialog_faq_alert" id="0x7f0b003b" />
-    <public type="layout" name="dialog_forgot_password_content_view" id="0x7f0b003c" />
     <public type="layout" name="dialog_set_avatar_extra_content_view" id="0x7f0b003d" />
     <public type="layout" name="dialog_set_system_talk_content_view" id="0x7f0b003e" />
     <public type="layout" name="dialog_set_user_title_content_view" id="0x7f0b003f" />
-    <public type="layout" name="dialog_update_apk_alert" id="0x7f0b0040" />
     <public type="layout" name="fragment_announcement_list" id="0x7f0b0041" />
     <public type="layout" name="fragment_anonymous_chat" id="0x7f0b0042" />
     <public type="layout" name="fragment_apk_version_list" id="0x7f0b0043" />
@@ -2126,7 +2118,6 @@
     <public type="layout" name="fragment_chatroom_container" id="0x7f0b0048" />
     <public type="layout" name="fragment_chatroom_game" id="0x7f0b0049" />
     <public type="layout" name="fragment_chatroom_list" id="0x7f0b004a" />
-    <public type="layout" name="fragment_chatroom_setting" id="0x7f0b004b" />
     <public type="layout" name="fragment_comic_detail" id="0x7f0b004c" />
     <public type="layout" name="fragment_comic_download" id="0x7f0b004d" />
     <public type="layout" name="fragment_comic_list" id="0x7f0b004e" />
@@ -2215,20 +2206,10 @@
     <public type="layout" name="item_support_us_paypal_recycler_view_cell" id="0x7f0b00a1" />
     <public type="layout" name="item_testing_recycler_view" id="0x7f0b00a2" />
     <public type="layout" name="layout_announcement_cell" id="0x7f0b00a3" />
-    <public type="layout" name="layout_banner_webview" id="0x7f0b00a4" />
     <public type="layout" name="layout_chatroom_avatar" id="0x7f0b00a5" />
     <public type="layout" name="layout_chatroom_name_and_title" id="0x7f0b00a6" />
     <public type="layout" name="layout_comic_collection_view_cell" id="0x7f0b00a7" />
-    <public type="layout" name="layout_comic_viewer_auto_paging" id="0x7f0b00a8" />
-    <public type="layout" name="layout_comic_viewer_bottom_panel" id="0x7f0b00a9" />
-    <public type="layout" name="layout_comic_viewer_control_panel" id="0x7f0b00aa" />
-    <public type="layout" name="layout_comic_viewer_left_panel" id="0x7f0b00ab" />
-    <public type="layout" name="layout_comic_viewer_right_panel" id="0x7f0b00ac" />
-    <public type="layout" name="layout_comic_viewer_toolbar" id="0x7f0b00ad" />
     <public type="layout" name="layout_news_cell" id="0x7f0b00ae" />
-    <public type="layout" name="layout_popup_webview" id="0x7f0b00af" />
-    <public type="layout" name="layout_separator" id="0x7f0b00b0" />
-    <public type="layout" name="layout_separator_full" id="0x7f0b00b1" />
     <public type="layout" name="notification_action" id="0x7f0b00b2" />
     <public type="layout" name="notification_action_tombstone" id="0x7f0b00b3" />
     <public type="layout" name="notification_media_action" id="0x7f0b00b4" />

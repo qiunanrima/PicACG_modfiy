@@ -2,6 +2,12 @@
 
 package com.picacomic.fregata.compose.components
 
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -17,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -83,7 +90,7 @@ fun PicaImageUrl(
         if (safeUrl.isBlank()) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -95,19 +102,34 @@ fun PicaImageUrl(
             }
         } else {
             val context = androidx.compose.ui.platform.LocalContext.current
+            val failed = remember(safeUrl) { mutableStateOf(false) }
             AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(safeUrl)
-                    .placeholder(R.drawable.placeholder_avatar_2)
-                    .error(R.drawable.placeholder_avatar_2)
-                    .fallback(R.drawable.placeholder_avatar_2)
-                    .allowHardware(false)
-                    .crossfade(true)
-                    .build(),
+                model = remember(context, safeUrl) {
+                    ImageRequest.Builder(context)
+                        .data(safeUrl)
+                        .allowHardware(false)
+                        .crossfade(true)
+                        .build()
+                },
                 contentDescription = contentDescription,
+                placeholder = ColorPainter(MaterialTheme.colorScheme.surfaceContainerHigh),
+                onLoading = { failed.value = false },
+                onSuccess = { failed.value = false },
+                onError = { failed.value = true },
                 contentScale = contentScale,
                 modifier = Modifier.fillMaxSize(),
             )
+            if (failed.value) {
+                Surface(
+                    modifier = Modifier.matchParentSize(),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(imageVector = fallbackIcon, contentDescription = null)
+                    }
+                }
+            }
         }
     }
 }
@@ -118,7 +140,7 @@ fun PicaRankBadge(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.size(36.dp),
+        modifier = modifier.defaultMinSize(minWidth = 36.dp, minHeight = 36.dp),
         shape = CircleShape,
         color = when (rank) {
             1 -> MaterialTheme.colorScheme.primary
@@ -137,6 +159,8 @@ fun PicaRankBadge(
             Text(
                 text = rank.toString(),
                 style = PicaExpressiveType.CompactMetricEmphasized,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                maxLines = 1,
             )
         }
     }
@@ -205,26 +229,26 @@ fun PicaComicListCard(
     categories: List<String> = emptyList(),
     coverWidth: Dp = 76.dp,
 ) {
-    Card(
+    OutlinedCard(
         onClick = onClick,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 136.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.Top,
         ) {
             PicaRemoteImage(
                 thumbnail = thumbnail,
-                contentDescription = title,
+                contentDescription = null,
                 modifier = Modifier
                     .width(coverWidth)
                     .aspectRatio(3f / 4.8f)
@@ -232,15 +256,13 @@ fun PicaComicListCard(
                 fallbackIcon = Icons.Filled.Category,
             )
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize(),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
                 Text(
                     text = title,
                     style = PicaExpressiveType.SectionEmphasized,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (subtitle.isNotBlank()) {
@@ -252,35 +274,52 @@ fun PicaComicListCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Column(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(1.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     likes?.takeIf { it > 0 }?.let {
                         PicaComicMetaText(
-                            text = "$it likes",
+                            text = stringResource(R.string.comic_list_likes, compactCount(it)),
                             primary = true,
                         )
                     }
                     pages?.let {
-                        PicaComicMetaText(text = "$it pages")
+                        PicaComicMetaText(text = stringResource(R.string.comic_list_pages, it))
                     }
                     episodes?.let {
-                        PicaComicMetaText(text = "$it eps")
+                        PicaComicMetaText(text = stringResource(R.string.comic_list_episodes, it))
                     }
                 }
-                if (categories.isNotEmpty()) {
-                    Text(
-                        text = categories.take(3).joinToString(" / "),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                PicaCategoryChips(categories.filter(String::isNotBlank).take(3))
             }
         }
     }
+}
+
+@Composable
+internal fun PicaCategoryChips(categories: List<String>) {
+    if (categories.isEmpty()) return
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        categories.forEach { PicaInfoChip(text = it) }
+    }
+}
+
+@Composable
+internal fun compactCount(count: Int): String {
+    val divisor = when {
+        count >= 100_000_000 -> 100_000_000
+        count >= 10_000 -> 10_000
+        else -> return count.toString()
+    }
+    val whole = count / divisor
+    val tenth = count % divisor / (divisor / 10)
+    val number = if (tenth == 0) whole.toString() else "$whole.$tenth"
+    return stringResource(if (divisor == 10_000) R.string.count_wan else R.string.count_yi, number)
 }
 
 @Composable
@@ -290,11 +329,10 @@ private fun PicaComicMetaText(
 ) {
     Text(
         text = text,
-        style = if (primary) PicaExpressiveType.CompactMetricEmphasized else MaterialTheme.typography.bodySmall,
+        style = if (primary) PicaExpressiveType.CompactMetricEmphasized else MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.fillMaxWidth(),
     )
 }
 
@@ -311,9 +349,9 @@ fun PicaGameCard(
     suggested: Boolean = false,
 ) {
     val badges = buildList {
-        if (likes > 0) add("$likes likes")
-        if (suggested) add("Pick")
-        if (adult) add("Adult")
+        if (likes > 0) add(stringResource(R.string.comic_list_likes, compactCount(likes)))
+        if (suggested) add(stringResource(R.string.game_tag_recommended))
+        if (adult) add(stringResource(R.string.game_tag_adult))
     }
 
     OutlinedCard(
@@ -330,7 +368,7 @@ fun PicaGameCard(
         ) {
             PicaRemoteImage(
                 thumbnail = icon,
-                contentDescription = title,
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)
@@ -340,18 +378,20 @@ fun PicaGameCard(
             Text(
                 text = title,
                 style = PicaExpressiveType.SectionEmphasized,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = listOf(publisher, version).filter { it.isNotBlank() }.joinToString(" · "),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                // Reserve two lines so cards in the same grid row have equal heights.
-                modifier = Modifier.heightIn(min = 40.dp),
+                minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
+            val metadata = listOf(publisher, version).filter(String::isNotBlank).joinToString(" · ")
+            if (metadata.isNotEmpty()) {
+                Text(
+                    text = metadata,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             if (badges.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -361,8 +401,6 @@ fun PicaGameCard(
                         PicaInfoChip(text = badge)
                     }
                 }
-            } else {
-                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
@@ -378,12 +416,13 @@ fun PicaUserAvatar(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         PicaRemoteImage(
             thumbnail = thumbnail,
-            contentDescription = name,
+            contentDescription = name?.takeIf { it.isNotBlank() }
+                ?: if (onClick != null) stringResource(R.string.profile_edit_avatar) else null,
             modifier = Modifier.fillMaxSize(),
             fallbackIcon = Icons.Filled.Person,
         )
@@ -399,11 +438,12 @@ fun PicaTwoLineCard(
     leading: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
     supporting: String? = null,
+    categories: List<String> = emptyList(),
 ) {
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -418,7 +458,7 @@ fun PicaTwoLineCard(
                 Text(
                     text = title,
                     style = PicaExpressiveType.SectionEmphasized,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
@@ -435,6 +475,7 @@ fun PicaTwoLineCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                PicaCategoryChips(categories.filter(String::isNotBlank))
             }
             trailing?.invoke()
         }
@@ -456,6 +497,7 @@ fun PicaMetricRow(
                 modifier = Modifier.widthIn(min = 72.dp),
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
@@ -463,15 +505,15 @@ fun PicaMetricRow(
                 ) {
                     Text(
                         text = value,
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        style = PicaExpressiveType.CompactMetricEmphasized,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                     )
                 }
             }

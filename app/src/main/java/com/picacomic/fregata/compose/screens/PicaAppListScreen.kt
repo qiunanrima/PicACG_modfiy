@@ -1,5 +1,8 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.ui.draw.clip
+import com.picacomic.fregata.compose.PicaExpressiveType
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import com.picacomic.fregata.compose.components.PicaImageUrl
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
@@ -153,14 +154,13 @@ private fun PicaAppListItem(
     item: PicaAppObject,
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     Card(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
@@ -169,18 +169,10 @@ private fun PicaAppListItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(item.icon)
-                    .placeholder(R.drawable.placeholder_avatar_2)
-                    .error(R.drawable.placeholder_avatar_2)
-                    .fallback(R.drawable.placeholder_avatar_2)
-                    .allowHardware(false)
-                    .crossfade(true)
-                    .build(),
+            PicaImageUrl(
+                imageUrl = item.icon,
                 contentDescription = null,
-                modifier = Modifier.size(80.dp),
-                contentScale = ContentScale.Crop
+                modifier = Modifier.size(80.dp).clip(MaterialTheme.shapes.medium),
             )
             Column(
                 modifier = Modifier
@@ -189,9 +181,9 @@ private fun PicaAppListItem(
             ) {
                 Text(
                     text = item.title.orEmpty(),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = PicaExpressiveType.SectionEmphasized,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(

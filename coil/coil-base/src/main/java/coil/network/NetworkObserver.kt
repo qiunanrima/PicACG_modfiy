@@ -5,8 +5,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
 import android.net.NetworkRequest
+import android.os.Build.VERSION.SDK_INT
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.content.getSystemService
@@ -21,7 +23,8 @@ private const val TAG = "NetworkObserver"
 internal fun NetworkObserver(
     context: Context,
     listener: Listener,
-    logger: Logger?
+    logger: Logger?,
+    observeDefaultNetwork: Boolean,
 ): NetworkObserver {
     val connectivityManager: ConnectivityManager? = context.getSystemService()
     if (connectivityManager == null || !context.isPermissionGranted(ACCESS_NETWORK_STATE)) {
@@ -30,7 +33,7 @@ internal fun NetworkObserver(
     }
 
     return try {
-        RealNetworkObserver(connectivityManager, listener)
+        RealNetworkObserver(connectivityManager, listener, observeDefaultNetwork)
     } catch (e: Exception) {
         logger?.log(TAG, RuntimeException("Failed to register network observer.", e))
         EmptyNetworkObserver()
@@ -70,22 +73,48 @@ internal class EmptyNetworkObserver : NetworkObserver {
 @Suppress("DEPRECATION") // TODO: Remove uses of 'allNetworks'.
 private class RealNetworkObserver(
     private val connectivityManager: ConnectivityManager,
-    private val listener: Listener
+    private val listener: Listener,
+    observeDefaultNetwork: Boolean,
 ) : NetworkObserver {
 
+    private val useDefaultNetwork = observeDefaultNetwork && SDK_INT >= 24
+
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) = onConnectivityChange(network, true)
-        override fun onLost(network: Network) = onConnectivityChange(network, false)
+        override fun onAvailable(network: Network) {
+            if (!useDefaultNetwork) onConnectivityChange(network, true)
+        }
+
+        override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+            if (useDefaultNetwork) {
+                listener.onConnectivityChange(capabilities.hasCapability(NET_CAPABILITY_INTERNET))
+            }
+        }
+
+        override fun onLost(network: Network) {
+            if (useDefaultNetwork) {
+                listener.onConnectivityChange(false)
+            } else {
+                onConnectivityChange(network, false)
+            }
+        }
     }
 
     override val isOnline: Boolean
-        get() = connectivityManager.allNetworks.any { it.isOnline() }
+        get() = if (useDefaultNetwork) {
+            connectivityManager.activeNetwork?.isOnline() == true
+        } else {
+            connectivityManager.allNetworks.any { it.isOnline() }
+        }
 
     init {
-        val request = NetworkRequest.Builder()
-            .addCapability(NET_CAPABILITY_INTERNET)
-            .build()
-        connectivityManager.registerNetworkCallback(request, networkCallback)
+        if (observeDefaultNetwork && SDK_INT >= 24) {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        } else {
+            val request = NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .build()
+            connectivityManager.registerNetworkCallback(request, networkCallback)
+        }
     }
 
     override fun shutdown() {

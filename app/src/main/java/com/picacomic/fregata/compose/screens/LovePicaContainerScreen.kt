@@ -2,6 +2,7 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -133,7 +134,7 @@ fun LovePicaContainerScreen(
                                 selectedTabIndex = selectedTab,
                                 tabs = tabs,
                                 onTabSelected = { selectedTab = it },
-                                containerColor = MaterialTheme.colorScheme.surface,
+                                topAppBarState = scrollBehavior.state,
                             )
                         }
                     },
@@ -143,7 +144,8 @@ fun LovePicaContainerScreen(
                         0 -> LovePicaChatTab(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(innerPadding),
+                                .padding(innerPadding)
+                                .consumeWindowInsets(innerPadding),
                             onAnonymousChatClick = {
                                 page = LovePicaPage.AnonymousChat
                             },
@@ -164,7 +166,8 @@ fun LovePicaContainerScreen(
                         else -> PicaAppListContent(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(innerPadding),
+                                .padding(innerPadding)
+                                .consumeWindowInsets(innerPadding),
                             onPicaAppClick = { title, link ->
                                 if (title.equals("嗶咔萌約", ignoreCase = true)) {
                                     page = LovePicaPage.AnonymousChat

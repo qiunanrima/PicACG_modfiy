@@ -1,9 +1,22 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
+import com.picacomic.fregata.R
+
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,6 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -21,6 +35,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.ExpandMore
@@ -32,6 +48,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -53,6 +70,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.layout
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.resolvePicaDarkTheme
+import com.picacomic.fregata.utils.ThemeColorHelper
+import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.compose.PicaControlTokens
 import com.picacomic.fregata.compose.PicaExpressiveType
 
@@ -62,13 +82,20 @@ class ComicViewerControlsOverlayView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs) {
     var controlsVisible by mutableStateOf(false)
         private set
+    internal var readerTheme by mutableStateOf(ThemeColorHelper.resolveStoredThemeIndex(context) to e.L(context))
+
     private var pageLabel by mutableStateOf("")
     private var pageProgress by mutableIntStateOf(0)
     private var pageMax by mutableIntStateOf(1)
     private var brightness by mutableFloatStateOf(0f)
+    private var automaticBrightness by mutableStateOf(false)
     private var autoPagingSeconds by mutableStateOf("1.0s")
     private var isNightMode by mutableStateOf(false)
+    private var comicTitle by mutableStateOf("")
+    private var episodeTitle by mutableStateOf("")
 
+    var onBack: (() -> Unit)? = null
+    var onHint: (() -> Unit)? = null
     var onHide: (() -> Unit)? = null
     var onScreenOrientation: (() -> Unit)? = null
     var onScrollOrientation: (() -> Unit)? = null
@@ -79,19 +106,31 @@ class ComicViewerControlsOverlayView @JvmOverloads constructor(
     var onComment: (() -> Unit)? = null
     var onPageChanged: ((Int) -> Unit)? = null
     var onBrightnessChanged: ((Int) -> Unit)? = null
+    var onBrightnessModeChanged: ((Boolean) -> Unit)? = null
 
     init {
         addView(
             ComposeView(context).apply {
+                consumeWindowInsets = false
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
                 setContent {
-                    PicaComposeTheme {
+                    val (themeIndex, forceNightMode) = readerTheme
+                    PicaComposeTheme(
+                        darkTheme = resolvePicaDarkTheme(forceNightMode, themeIndex),
+                        themeColorIndex = themeIndex,
+                    ) {
                         ComicViewerControlsOverlay(
                             visible = controlsVisible,
+                            comicTitle = comicTitle,
+                            episodeTitle = episodeTitle,
+                            onBack = { onBack?.invoke() },
+                            onHint = { onHint?.invoke() },
                             pageLabel = pageLabel,
                             pageProgress = pageProgress,
                             pageMax = pageMax,
                             brightness = brightness,
+                            automaticBrightness = automaticBrightness,
+                            onBrightnessModeChanged = { onBrightnessModeChanged?.invoke(it) },
                             autoPagingSeconds = autoPagingSeconds,
                             isNightMode = isNightMode,
                             onHide = { onHide?.invoke() },
@@ -126,6 +165,10 @@ class ComicViewerControlsOverlayView @JvmOverloads constructor(
         brightness = value.coerceIn(0, 255).toFloat()
     }
 
+    fun setBrightnessMode(automatic: Boolean) {
+        automaticBrightness = automatic
+    }
+
     fun setAutoPagingInterval(intervalMs: Int) {
         autoPagingSeconds = String.format("%.1fs", intervalMs / 1000.0f)
     }
@@ -133,15 +176,26 @@ class ComicViewerControlsOverlayView @JvmOverloads constructor(
     fun setNightModeValue(enabled: Boolean) {
         isNightMode = enabled
     }
+
+    fun setReaderTitles(comic: String, episode: String) {
+        comicTitle = comic
+        episodeTitle = episode
+    }
 }
 
 @Composable
 private fun ComicViewerControlsOverlay(
     visible: Boolean,
+    comicTitle: String,
+    episodeTitle: String,
+    onBack: () -> Unit,
+    onHint: () -> Unit,
     pageLabel: String,
     pageProgress: Int,
     pageMax: Int,
     brightness: Float,
+    automaticBrightness: Boolean,
+    onBrightnessModeChanged: (Boolean) -> Unit,
     autoPagingSeconds: String,
     isNightMode: Boolean,
     onHide: () -> Unit,
@@ -166,8 +220,45 @@ private fun ComicViewerControlsOverlay(
         val bottomBarMaxWidth = if (isTabletWidth) 720.dp else maxWidth
         val sidePanelHeightFraction = if (isTabletWidth) 0.38f else 0.5f
 
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            shape = MaterialTheme.shapes.extraLarge,
+            modifier = Modifier.align(Alignment.TopCenter)
+                .padding(horizontal = sidePadding, vertical = 12.dp)
+                .widthIn(max = 720.dp)
+                .fillMaxWidth(),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
+                }
+                Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
+                    Text(
+                        episodeTitle.ifBlank { comicTitle },
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (episodeTitle.isNotBlank() && comicTitle.isNotBlank()) {
+                        Text(
+                            comicTitle,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                IconButton(onClick = onHint) {
+                    Icon(Icons.Filled.Info, stringResource(R.string.comic_viewer_setting_panel_hint))
+                }
+            }
+        }
+
         ReaderBrightnessPanel(
             brightness = brightness,
+            automaticBrightness = automaticBrightness,
+            onBrightnessModeChanged = onBrightnessModeChanged,
             onBrightnessChanged = onBrightnessChanged,
             heightFraction = sidePanelHeightFraction,
             modifier = Modifier
@@ -207,6 +298,8 @@ private fun ComicViewerControlsOverlay(
 @Composable
 private fun ReaderBrightnessPanel(
     brightness: Float,
+    automaticBrightness: Boolean,
+    onBrightnessModeChanged: (Boolean) -> Unit,
     onBrightnessChanged: (Int) -> Unit,
     heightFraction: Float,
     modifier: Modifier = Modifier,
@@ -217,19 +310,24 @@ private fun ReaderBrightnessPanel(
             .fillMaxHeight(heightFraction)
             .heightIn(min = 220.dp, max = 360.dp),
         shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
         ) {
         Column(
             modifier = Modifier.padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Icon(
-                imageVector = Icons.Filled.Brightness6,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(22.dp),
-            )
+            androidx.compose.material3.FilledTonalIconToggleButton(
+                checked = automaticBrightness,
+                onCheckedChange = onBrightnessModeChanged,
+                modifier = Modifier.size(48.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Brightness6,
+                    contentDescription = stringResource(R.string.comic_viewer_setting_panel_brightness_auto),
+                    modifier = Modifier.size(22.dp),
+                )
+            }
             ReaderBrightnessSlider(
                 brightness = brightness,
                 onBrightnessChanged = onBrightnessChanged,
@@ -248,11 +346,13 @@ private fun ReaderBrightnessSlider(
     onBrightnessChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val brightnessLabel = stringResource(R.string.comic_viewer_setting_panel_brightness_title)
     Slider(
         value = brightness,
         onValueChange = { onBrightnessChanged(it.toInt()) },
         valueRange = 0f..255f,
         modifier = modifier
+            .semantics { contentDescription = brightnessLabel }
             .layout { measurable, constraints ->
                 val placeable = measurable.measure(
                     constraints.copy(
@@ -284,23 +384,33 @@ private fun ReaderQuickActions(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            ReaderIconButton(Icons.Filled.GridView, onSelectEpisode)
+            ReaderIconButton(
+                Icons.Filled.GridView,
+                stringResource(R.string.comic_viewer_setting_panel_select_episode),
+                onSelectEpisode,
+            )
             ReaderIconButton(
                 icon = Icons.Filled.Nightlight,
+                label = stringResource(R.string.setting_comic_viewer_night_mode),
                 onClick = onNightMode,
                 selected = isNightMode,
             )
-            ReaderIconButton(Icons.Filled.ChatBubbleOutline, onComment)
+            ReaderIconButton(
+                Icons.Filled.ChatBubbleOutline,
+                stringResource(R.string.comic_viewer_setting_panel_comment),
+                onComment,
+            )
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ReaderBottomBar(
     pageLabel: String,
@@ -321,7 +431,7 @@ private fun ReaderBottomBar(
             .widthIn(max = maxWidth)
             .fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
         tonalElevation = 8.dp,
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
@@ -337,23 +447,29 @@ private fun ReaderBottomBar(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.width(64.dp),
                 )
+                val pageLabel = stringResource(R.string.comic_viewer_page_slider)
                 Slider(
                     value = pageProgress.toFloat(),
                     onValueChange = { onPageChanged(it.toInt()) },
                     valueRange = 0f..pageMax.coerceAtLeast(1).toFloat(),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).semantics { contentDescription = pageLabel },
                 )
             }
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                ReaderActionButton(Icons.Filled.ScreenRotation, "亮屏", onScreenOrientation)
-                ReaderActionButton(Icons.Filled.Flip, "翻页", onScrollOrientation)
-                ReaderActionButton(Icons.Filled.Timer, autoPagingSeconds, onAutoPaging)
-                ReaderActionButton(Icons.Filled.Settings, "设置", onSettings)
-                ReaderActionButton(Icons.Filled.ExpandMore, "隐藏", onHide)
+                ReaderActionButton(Icons.Filled.ScreenRotation, stringResource(R.string.comic_viewer_setting_panel_screen_orientation), onScreenOrientation)
+                ReaderActionButton(Icons.Filled.Flip, stringResource(R.string.comic_viewer_setting_panel_scroll_orientation), onScrollOrientation)
+                ReaderActionButton(
+                    Icons.Filled.Timer,
+                    autoPagingSeconds,
+                    onAutoPaging,
+                    accessibilityLabel = stringResource(R.string.comic_viewer_setting_panel_auto_paging) + " " + autoPagingSeconds,
+                )
+                ReaderActionButton(Icons.Filled.Settings, stringResource(R.string.comic_viewer_setting_panel_setting_menu), onSettings)
+                ReaderActionButton(Icons.Filled.ExpandMore, stringResource(R.string.comic_viewer_setting_panel_hide), onHide)
             }
         }
     }
@@ -362,14 +478,25 @@ private fun ReaderBottomBar(
 @Composable
 private fun ReaderIconButton(
     icon: ImageVector,
+    label: String,
     onClick: () -> Unit,
-    selected: Boolean = false,
+    selected: Boolean? = null,
 ) {
-    IconButton(onClick = onClick, modifier = Modifier.size(PicaControlTokens.IconButtonSize)) {
+    val colors = MaterialTheme.colorScheme
+    val state = selected
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.size(PicaControlTokens.IconButtonSize).then(
+            if (state == null) Modifier else Modifier.semantics { this.selected = state },
+        ),
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = if (state == true) colors.secondaryContainer else Color.Transparent,
+            contentColor = if (state == true) colors.onSecondaryContainer else colors.onSurface,
+        ),
+    ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
-            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            contentDescription = label,
         )
     }
 }
@@ -379,26 +506,30 @@ private fun ReaderActionButton(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
+    accessibilityLabel: String = label,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(56.dp)
-            .background(Color.Transparent, CircleShape),
+            .clip(CircleShape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = accessibilityLabel }
+            .padding(vertical = 8.dp),
     ) {
-        IconButton(onClick = onClick) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(24.dp),
-            )
-        }
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(24.dp),
+        )
         Text(
             text = label,
+            modifier = Modifier.clearAndSetSemantics {},
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelSmall,
-            maxLines = 1,
+            textAlign = TextAlign.Start,
+            maxLines = 2,
         )
     }
 }

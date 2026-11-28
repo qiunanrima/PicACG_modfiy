@@ -2,7 +2,6 @@ package com.picacomic.fregata.compose.screens
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -11,6 +10,8 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.activities.ImageCropActivity
+import androidx.compose.ui.res.stringArrayResource
+import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaImageUrl
 import com.picacomic.fregata.compose.components.PicaRemoteImage
@@ -76,6 +79,7 @@ fun ProfileEditScreen(
     val activity = context as? Activity
     val inPreview = LocalInspectionMode.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var showPhotoSource by rememberSaveable { mutableStateOf(false) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
     var sloganText by rememberSaveable { mutableStateOf("") }
     val screenViewModel = previewAwareViewModel(viewModel)
@@ -127,47 +131,32 @@ fun ProfileEditScreen(
         }
     }
 
-    val onAvatarClick: () -> Unit = click@{
-        if (inPreview) return@click
-        val hasCameraPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasCameraPermission) {
-            (activity as? BaseActivity)?.requestCameraPermission()
+    val selectPhotoSource: (Int) -> Unit = select@{ source ->
+        if (source == 0) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                (activity as? BaseActivity)?.requestCameraPermission()
+                return@select
+            }
+            val photoFile = FileProviderHelper.getCameraOutputFile(context)
+            val photoUri = FileProviderHelper.getUriForFile(context, photoFile)
+            pendingCameraUri = photoUri.toString()
+            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            }
+            cameraLauncher?.launch(cameraIntent)
         } else {
-            AlertDialog.Builder(context)
-                .setTitle(R.string.alert_dialog_select_title)
-                .setSingleChoiceItems(
-                    context.resources.getStringArray(R.array.alert_dialog_photo_chooser),
-                    0,
-                    null
-                )
-                .setPositiveButton(R.string.ok) { dialogInterface, _ ->
-                    val checked = (dialogInterface as AlertDialog).listView.checkedItemPosition
-                    if (checked == 0) {
-                        val photoFile = FileProviderHelper.getCameraOutputFile(context)
-                        val photoUri = FileProviderHelper.getUriForFile(context, photoFile)
-                        pendingCameraUri = photoUri.toString()
-                        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                        }
-                        cameraLauncher?.launch(cameraIntent)
-                    } else {
-                        val pickIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            Intent(MediaStore.ACTION_PICK_IMAGES)
-                        } else {
-                            Intent(Intent.ACTION_PICK).apply {
-                                type = "image/*"
-                            }
-                        }
-                        galleryLauncher?.launch(pickIntent)
-                    }
-                }
-                .show()
+            val pickIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Intent(MediaStore.ACTION_PICK_IMAGES)
+            } else {
+                Intent(Intent.ACTION_PICK).setType("image/*")
+            }
+            galleryLauncher?.launch(pickIntent)
         }
+    }
+
+    val onAvatarClick: () -> Unit = {
+        if (!inPreview) showPhotoSource = true
     }
 
     LaunchedEffect(Unit) {
@@ -221,6 +210,15 @@ fun ProfileEditScreen(
     }
 
     PicaComposeTheme {
+        if (showPhotoSource) {
+            PicaSingleChoiceDialog(
+                title = stringResource(R.string.alert_dialog_select_title),
+                options = stringArrayResource(R.array.alert_dialog_photo_chooser).toList(),
+                selectedIndex = -1,
+                onSelect = selectPhotoSource,
+                onDismiss = { showPhotoSource = false },
+            )
+        }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -257,6 +255,8 @@ fun ProfileEditScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .imePadding()
             ) {
                 val userProfile = if (inPreview) previewProfile else screenViewModel?.userProfile
                 val avatarPreviewUri = if (inPreview) null else screenViewModel?.avatarPreviewUri

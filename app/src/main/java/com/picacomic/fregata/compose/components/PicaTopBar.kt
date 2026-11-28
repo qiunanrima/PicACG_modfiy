@@ -14,6 +14,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import com.picacomic.fregata.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,13 +36,13 @@ fun PicaTopBar(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = stringResource(R.string.back)
                 )
             }
         }
     }
     TopAppBar(
-        title = { Text(text = title) },
+        title = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         modifier = modifier,
         navigationIcon = navigationIcon,
         actions = actions,

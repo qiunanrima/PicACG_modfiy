@@ -262,17 +262,11 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         loadData()
     }
 
-    fun setAdvancedCategorySelected(index: Int, selected: Boolean) {
-        if (index !in advancedCategorySelections.indices) return
-        val updatedSelections = advancedCategorySelections.toMutableList()
-        updatedSelections[index] = selected
-        advancedCategorySelections = updatedSelections
-        selectedAdvancedCategories = updatedSelections.mapIndexedNotNull { itemIndex, isSelected ->
-            if (isSelected) advancedCategoryTitles.getOrNull(itemIndex) else null
+    fun applyAdvancedCategorySelection(selections: BooleanArray) {
+        advancedCategorySelections = advancedCategoryTitles.indices.map { selections.getOrElse(it) { false } }
+        selectedAdvancedCategories = advancedCategoryTitles.filterIndexed { index, _ ->
+            advancedCategorySelections[index]
         }
-    }
-
-    fun applyAdvancedCategorySelection() {
         resetState()
         loadData()
     }

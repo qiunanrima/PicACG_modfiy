@@ -1,5 +1,7 @@
 package com.picacomic.fregata.compose.components
 
+import androidx.compose.foundation.selection.selectableGroup
+
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -46,8 +48,8 @@ fun PicaConfirmDialog(
         title = { Text(text = title) },
         text = body?.let { { Text(text = it) } },
         shape = MaterialTheme.shapes.extraLarge,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 4.dp,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        tonalElevation = 0.dp,
         confirmButton = {
             TextButton(onClick = {
                 onConfirm()
@@ -85,6 +87,7 @@ fun PicaSingleChoiceDialog(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     onDismiss: () -> Unit,
+    optionLeadingContent: (@Composable (Int) -> Unit)? = null,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -94,6 +97,7 @@ fun PicaSingleChoiceDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 360.dp)
+                    .selectableGroup()
                     .verticalScroll(rememberScrollState())
                     .animateContentSize(animationSpec = PicaExpressiveMotion.contentResizeSpec()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -102,6 +106,8 @@ fun PicaSingleChoiceDialog(
                     PicaRadioListItem(
                         label = option,
                         selected = selectedIndex == index,
+                        segmentShape = picaSegmentShape(index, options.lastIndex),
+                        leadingContent = optionLeadingContent?.let { content -> { content(index) } },
                         onClick = {
                             onSelect(index)
                             onDismiss()
@@ -111,14 +117,14 @@ fun PicaSingleChoiceDialog(
             }
         },
         shape = MaterialTheme.shapes.extraLarge,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 6.dp,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+        tonalElevation = 0.dp,
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(
                     text = stringResource(R.string.cancel),
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         },

@@ -1,5 +1,8 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.ui.draw.clip
+import com.picacomic.fregata.compose.PicaExpressiveType
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -28,8 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import com.picacomic.fregata.compose.components.PicaImageUrl
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
@@ -180,7 +181,7 @@ private fun AnnouncementListItem(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
@@ -201,9 +202,9 @@ private fun AnnouncementListItem(
             ) {
                 Text(
                     text = item.title.orEmpty(),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = PicaExpressiveType.SectionEmphasized,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
@@ -224,19 +225,10 @@ private fun AnnouncementThumb(
     imageUrl: String?,
     size: Dp,
 ) {
-    val context = LocalContext.current
-    AsyncImage(
-        model = ImageRequest.Builder(context)
-            .data(imageUrl)
-            .placeholder(R.drawable.placeholder_avatar_2)
-            .error(R.drawable.placeholder_avatar_2)
-            .fallback(R.drawable.placeholder_avatar_2)
-            .allowHardware(false)
-            .crossfade(true)
-            .build(),
+    PicaImageUrl(
+        imageUrl = imageUrl,
         contentDescription = null,
-        modifier = Modifier.size(size),
-        contentScale = ContentScale.Crop
+        modifier = Modifier.size(size).clip(MaterialTheme.shapes.medium),
     )
 }
 

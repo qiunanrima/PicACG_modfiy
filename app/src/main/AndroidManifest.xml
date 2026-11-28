@@ -59,10 +59,6 @@
             android:value="com.picacomic.fregata" />
 
         <activity
-            android:name="com.picacomic.fregata.DemoLoginActivity"
-            android:exported="false"
-            android:label="@string/app_name" />
-        <activity
             android:name="com.picacomic.fregata.activities.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
             android:exported="false"

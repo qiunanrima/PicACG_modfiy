@@ -86,8 +86,6 @@ internal class SettingsPreviewProvider : PreviewParameterProvider<SettingsState>
             autoPagingDraftIntervalMs = 1200,
             imageQualityIndex = 3,
             imageQualityValue = "高",
-            designLanguageIndex = 1,
-            designLanguageValue = "MD3E",
             themeColorIndex = 2,
             themeColorValue = "Miracle Neon",
             coilCacheSizeValue = "128 MB",
@@ -112,8 +110,6 @@ internal class SettingsPreviewProvider : PreviewParameterProvider<SettingsState>
             autoPagingDraftIntervalMs = 1800,
             imageQualityIndex = 1,
             imageQualityValue = "中",
-            designLanguageIndex = 0,
-            designLanguageValue = "MD3",
             themeColorIndex = 1,
             themeColorValue = "迷红黑",
             coilCacheSizeValue = "256 MB",
@@ -175,7 +171,7 @@ internal fun PreviewListPanel(
                                 .width(56.dp)
                                 .height(12.dp)
                                 .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
                                     shape = RoundedCornerShape(999.dp)
                                 )
                         )
@@ -219,7 +215,7 @@ internal fun PreviewGridPanel(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(88.dp)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -264,15 +260,20 @@ internal fun PreviewChatPanel(
                         modifier = Modifier
                             .background(
                                 color = if (isMine) {
-                                    MaterialTheme.colorScheme.primaryContainer
+                                    MaterialTheme.colorScheme.tertiaryContainer
                                 } else {
-                                    MaterialTheme.colorScheme.surfaceVariant
+                                    MaterialTheme.colorScheme.surfaceContainer
                                 },
                                 shape = RoundedCornerShape(16.dp)
                             )
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
-                        Text(text = text, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isMine) MaterialTheme.colorScheme.onTertiaryContainer
+                            else MaterialTheme.colorScheme.onSurface,
+                        )
                     }
                 }
             }

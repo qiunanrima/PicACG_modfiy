@@ -185,8 +185,8 @@ private fun LockPinDigitField(
         else -> colorScheme.outlineVariant
     }
     val containerColor = when {
-        hasError -> colorScheme.errorContainer.copy(alpha = 0.30f)
-        value.isNotEmpty() -> colorScheme.primaryContainer.copy(alpha = 0.46f)
+        hasError -> colorScheme.errorContainer
+        value.isNotEmpty() -> colorScheme.primaryContainer
         else -> colorScheme.surfaceContainerHighest
     }
 
@@ -196,7 +196,11 @@ private fun LockPinDigitField(
         singleLine = true,
         textStyle = MaterialTheme.typography.titleLarge.copy(
             textAlign = TextAlign.Center,
-            color = if (hasError) colorScheme.error else colorScheme.onSurface,
+            color = when {
+                hasError -> colorScheme.onErrorContainer
+                value.isNotEmpty() -> colorScheme.onPrimaryContainer
+                else -> colorScheme.onSurface
+            },
         ),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         cursorBrush = SolidColor(colorScheme.primary),

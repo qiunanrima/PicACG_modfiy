@@ -1,8 +1,11 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -10,9 +13,9 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -27,10 +30,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,9 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -67,6 +67,8 @@ import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.BaseActivity
 import com.picacomic.fregata.activities.ImageCropActivity
 import com.picacomic.fregata.b.c
+import androidx.compose.ui.res.stringArrayResource
+import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaComicListCard
@@ -106,6 +108,7 @@ fun ProfileScreen(
     val activity = context as? Activity
     val lifecycleOwner = LocalLifecycleOwner.current
     val inPreview = LocalInspectionMode.current
+    var showPhotoSource by rememberSaveable { mutableStateOf(false) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedTab by rememberSaveable { mutableStateOf(0) }
     val screenViewModel = previewAwareViewModel(viewModel)
@@ -155,46 +158,33 @@ fun ProfileScreen(
         }
     }
 
-    val onAvatarClick: () -> Unit = click@{
-        if (inPreview || offlineMode) return@click
-        val hasCameraPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CAMERA,
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasCameraPermission) {
-            (activity as? BaseActivity)?.requestCameraPermission()
-            return@click
-        }
-
-        AlertDialog.Builder(context)
-            .setTitle(R.string.alert_dialog_select_title)
-            .setSingleChoiceItems(context.resources.getStringArray(R.array.alert_dialog_photo_chooser), 0, null)
-            .setPositiveButton(R.string.ok) { dialogInterface, _ ->
-                val checked = (dialogInterface as AlertDialog).listView.checkedItemPosition
-                if (checked == 0) {
-                    val photoFile = FileProviderHelper.getCameraOutputFile(context)
-                    val photoUri = FileProviderHelper.getUriForFile(context, photoFile)
-                    pendingCameraUri = photoUri.toString()
-                    cameraLauncher?.launch(
-                        Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                        },
-                    )
-                } else {
-                    galleryLauncher?.launch(
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            Intent(MediaStore.ACTION_PICK_IMAGES)
-                        } else {
-                            Intent(Intent.ACTION_PICK).apply {
-                                type = "image/*"
-                            }
-                        },
-                    )
-                }
+    val selectPhotoSource: (Int) -> Unit = select@{ source ->
+        if (source == 0) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                (activity as? BaseActivity)?.requestCameraPermission()
+                return@select
             }
-            .show()
+            val photoFile = FileProviderHelper.getCameraOutputFile(context)
+            val photoUri = FileProviderHelper.getUriForFile(context, photoFile)
+            pendingCameraUri = photoUri.toString()
+            cameraLauncher?.launch(
+                Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                    putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                },
+            )
+        } else {
+            val pickIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Intent(MediaStore.ACTION_PICK_IMAGES)
+            } else {
+                Intent(Intent.ACTION_PICK).setType("image/*")
+            }
+            galleryLauncher?.launch(pickIntent)
+        }
+    }
+
+    val onAvatarClick: () -> Unit = {
+        if (!inPreview && !offlineMode) showPhotoSource = true
     }
 
     LaunchedEffect(refreshEvent) {
@@ -264,11 +254,20 @@ fun ProfileScreen(
     }
 
     PicaComposeTheme {
+        if (showPhotoSource) {
+            PicaSingleChoiceDialog(
+                title = stringResource(R.string.alert_dialog_select_title),
+                options = stringArrayResource(R.array.alert_dialog_photo_chooser).toList(),
+                selectedIndex = -1,
+                onSelect = selectPhotoSource,
+                onDismiss = { showPhotoSource = false },
+            )
+        }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                CenterAlignedTopAppBar(
+                TopAppBar(
                     title = {
                         Text(
                             text = stringResource(R.string.title_profile),
@@ -282,20 +281,21 @@ fun ProfileScreen(
                             Text(text = stringResource(R.string.edit))
                         }
                     },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             val profile = if (inPreview) previewProfile else screenViewModel?.userProfile
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
             ) {
                 val useTwoPane = maxWidth >= 840.dp && maxWidth > maxHeight
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -489,117 +489,96 @@ private fun ProfileHeader(
     onAvatarClick: () -> Unit,
     onPunchIn: () -> Unit,
 ) {
+    val colors = MaterialTheme.colorScheme
+    val editAvatarLabel = stringResource(R.string.profile_edit_avatar_action)
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
+        color = colors.surfaceContainer,
+        contentColor = colors.onSurface,
         shape = MaterialTheme.shapes.large,
-        tonalElevation = 1.dp,
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            PicaRemoteImage(
-                thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
-                contentDescription = null,
-                modifier = Modifier
-                    .matchParentSize()
-                    .blur(18.dp),
-            )
-            if (!avatarPreviewUri.isNullOrBlank()) {
-                PicaImageUrl(
-                    imageUrl = avatarPreviewUri,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .matchParentSize()
-                        .blur(18.dp),
-                )
-            }
             Box(
                 modifier = Modifier
-                    .matchParentSize()
-                    .background(Color.Black.copy(alpha = 0.46f)),
-            )
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .size(128.dp)
+                    .clickable(role = Role.Button, onClick = onAvatarClick)
+                    .semantics { contentDescription = editAvatarLabel },
+                contentAlignment = Alignment.Center,
             ) {
+                if (!profile?.character.isNullOrBlank()) {
+                    PicaImageUrl(
+                        imageUrl = profile?.character,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(128.dp)
+                            .align(Alignment.Center),
+                        contentScale = ContentScale.Fit,
+                    )
+                }
                 Box(
                     modifier = Modifier
-                        .size(128.dp)
-                        .clickable(onClick = onAvatarClick),
-                    contentAlignment = Alignment.Center,
+                        .size(104.dp)
+                        .clip(MaterialTheme.shapes.medium),
                 ) {
-                    if (!profile?.character.isNullOrBlank()) {
+                    if (!avatarPreviewUri.isNullOrBlank()) {
                         PicaImageUrl(
-                            imageUrl = profile?.character,
-                            contentDescription = profile?.role,
-                            modifier = Modifier
-                                .size(128.dp)
-                                .align(Alignment.Center),
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(104.dp)
-                            .clip(MaterialTheme.shapes.medium),
-                    ) {
-                        PicaRemoteImage(
-                            thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
-                            contentDescription = profile?.name,
+                            imageUrl = avatarPreviewUri,
+                            contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                         )
-                        if (!avatarPreviewUri.isNullOrBlank()) {
-                            PicaImageUrl(
-                                imageUrl = avatarPreviewUri,
-                                contentDescription = profile?.name,
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        }
-                    }
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = displayName(profile),
-                        style = PicaExpressiveType.HeadlineEmphasized,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                    )
-                    if (profile?.isVerified == true) {
-                        Image(
-                            painter = painterResource(R.drawable.verified_icon),
+                    } else {
+                        PicaRemoteImage(
+                            thumbnail = profile?.avatar,
                             contentDescription = null,
-                            modifier = Modifier.size(22.dp),
+                            modifier = Modifier.fillMaxSize(),
                         )
                     }
                 }
-                val title = profile?.title.orEmpty().trim()
-                if (title.isNotEmpty()) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.82f),
-                        textAlign = TextAlign.Center,
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = displayName(profile),
+                    style = PicaExpressiveType.HeadlineEmphasized,
+                    color = colors.tertiary,
+                    textAlign = TextAlign.Center,
+                )
+                if (profile?.isVerified == true) {
+                    Image(
+                        painter = painterResource(R.drawable.verified_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
                     )
                 }
-                PicaMetricRow(
-                    metrics = listOf(
-                        "Level" to (profile?.level ?: 0).toString(),
-                        "EXP" to "${profile?.exp ?: 0}/${expForLevel((profile?.level ?: 0) + 1)}",
-                        "Role" to profile?.role.orEmpty().ifBlank { "-" },
-                    ),
+            }
+            val title = profile?.title.orEmpty().trim()
+            if (title.isNotEmpty()) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
-                if (profile?.isPunched != true) {
-                    Button(
-                        onClick = onPunchIn,
-                        enabled = !isPunchingIn && profile != null,
-                    ) {
-                        Text(text = stringResource(R.string.profile_punch_in))
-                    }
+            }
+            PicaMetricRow(
+                metrics = listOf(
+                    "Level" to (profile?.level ?: 0).toString(),
+                    "EXP" to "${profile?.exp ?: 0}/${expForLevel((profile?.level ?: 0) + 1)}",
+                    "Role" to profile?.role.orEmpty().ifBlank { "-" },
+                ),
+            )
+            if (profile?.isPunched != true) {
+                Button(
+                    onClick = onPunchIn,
+                    enabled = !isPunchingIn && profile != null,
+                ) {
+                    Text(text = stringResource(R.string.profile_punch_in))
                 }
             }
         }

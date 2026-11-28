@@ -2,6 +2,8 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -105,6 +107,8 @@ fun SearchScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
+                    .consumeWindowInsets(padding)
+                    .imePadding()
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -121,19 +125,22 @@ fun SearchScreen(
                 )
 
                 if (keywords.isNotEmpty()) {
-                    Text(stringResource(R.string.category_keywords_list_title), style = PicaExpressiveType.SectionEmphasized)
-                    // Two fixed rows keep the popular section compact; overflow continues horizontally.
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
-                        val visibleKeywords = keywords.take(40)
-                        listOf(visibleKeywords.filterIndexed { index, _ -> index % 2 == 0 }, visibleKeywords.filterIndexed { index, _ -> index % 2 == 1 }).forEach { rowItems ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                                rowItems.forEach { item ->
+                    Text(
+                        text = stringResource(R.string.category_keywords_list_title),
+                        style = PicaExpressiveType.SectionEmphasized,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                    val visibleKeywords = keywords.take(40)
+                    Column(
+                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        repeat(minOf(2, visibleKeywords.size)) { row ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                for (index in row until visibleKeywords.size step 2) {
+                                    val item = visibleKeywords[index]
                                     PicaInfoChip(
                                         text = item,
-                                        modifier = Modifier.height(38.dp),
                                         onClick = { query = item; submit(item) },
                                     )
                                 }

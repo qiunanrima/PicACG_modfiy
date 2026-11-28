@@ -1,9 +1,8 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,7 +49,6 @@ fun GameScreen(
     val inPreview = LocalInspectionMode.current
     val gridState = rememberLazyGridState()
     val screenViewModel = previewAwareViewModel(viewModel)
-    val previewGames = if (inPreview) gamePreviewList() else emptyList()
 
     LaunchedEffect(refreshEvent) {
         if (!inPreview) {
@@ -110,71 +109,30 @@ fun GameScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
             ) {
-                if (inPreview) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
+                val games = if (inPreview) gamePreviewList() else screenViewModel?.games.orEmpty()
+                val loading = !inPreview && screenViewModel?.isLoading != false
+                when {
+                    games.isEmpty() && loading -> PicaLoadingIndicator()
+                    games.isEmpty() -> PicaEmptyState(message = "暂无内容")
+                    else -> LazyVerticalGrid(
+                        columns = GridCells.Adaptive(156.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
+                        state = gridState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        PreviewGridPanel(
-                            title = stringResource(R.string.title_game_list),
-                            items = previewGames.map { "${it.title} ${it.version}" },
-                            columns = 2
-                        )
-                        PreviewListPanel(
-                            title = "游戏标签",
-                            items = previewGames.map {
-                                "${it.title} · ${if (it.isAdult) "成人" else "全年龄"}"
-                            }
-                        )
-                    }
-                } else {
-                    val vm = screenViewModel
-                    when {
-                        vm == null || (vm.games.isEmpty() && vm.isLoading) -> {
-                            PicaLoadingIndicator()
+                        itemsIndexed(
+                            items = games,
+                            key = { index, item -> stableLazyKey("game", index, item.gameId, item.title) },
+                        ) { _, item ->
+                            GameGridItem(item = item) { item.gameId?.let(onGameClick) }
                         }
-
-                        vm.games.isEmpty() -> {
-                            PicaEmptyState(message = "暂无内容")
-                        }
-
-                        else -> {
-                            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                                val columnCount = if (maxWidth > maxHeight) {
-                                    if (maxWidth >= 1100.dp) 4 else 3
-                                } else {
-                                    2
-                                }
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(columnCount),
-                                    state = gridState,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(4.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    itemsIndexed(
-                                        items = vm.games,
-                                        key = { index, item ->
-                                            stableLazyKey("game", index, item.gameId, item.title)
-                                        }
-                                    ) { _, item ->
-                                        GameGridItem(item = item) {
-                                            item.gameId?.let(onGameClick)
-                                        }
-                                    }
-
-                                    if (vm.isLoading) {
-                                        item(
-                                            key = "loading",
-                                            span = { GridItemSpan(maxLineSpan) }
-                                        ) {
-                                            ListLoadingFooter()
-                                        }
-                                    }
-                                }
+                        if (loading) {
+                            item(key = "loading", span = { GridItemSpan(maxLineSpan) }) {
+                                ListLoadingFooter()
                             }
                         }
                     }

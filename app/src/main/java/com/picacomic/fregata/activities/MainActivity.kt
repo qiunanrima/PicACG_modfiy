@@ -1,31 +1,33 @@
 package com.picacomic.fregata.activities
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.RelativeLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
@@ -33,10 +35,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.google.gson.Gson
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.picacomic.fregata.R
@@ -49,8 +53,6 @@ import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.utils.f
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-import com.picacomic.fregata.utils.views.BannerWebview
-import com.picacomic.fregata.utils.views.PopupWebview
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -60,6 +62,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.picacomic.fregata.utils.ThemeColorHelper
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.resolvePicaDarkTheme
 import com.picacomic.fregata.compose.components.PicaNavigationBar
@@ -79,12 +82,12 @@ class MainActivity : BaseActivity() {
     // Compose State
     private var selectedTabIndex by mutableIntStateOf(0)
     private var tabRefreshEvent by mutableIntStateOf(0)
-    private var bannerVisible by mutableStateOf(false)
-    private var popupVisible by mutableStateOf(false)
     private var expButtonsVisible by mutableStateOf(false)
+    private var expAdjustmentTarget by mutableStateOf<Pair<String?, String?>?>(null)
     private var forceOneTimeUpdate by mutableStateOf(false)
     private var pendingExternalComicId by mutableStateOf<String?>(null)
     private var pendingExternalGameId by mutableStateOf<String?>(null)
+    private var themeColorIndex by mutableIntStateOf(0)
     private var nightModeEnabled by mutableStateOf(false)
     private var navControllerRef: NavHostController? = null
     private var offlineMode by mutableStateOf(false)
@@ -106,6 +109,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(bundle)
         enableEdgeToEdge()
         offlineMode = intent?.getBooleanExtra(EXTRA_OFFLINE_MODE, false) == true
+        themeColorIndex = ThemeColorHelper.resolveStoredThemeIndex(this)
         nightModeEnabled = e.L(this)
         consumePopupOpenExtras(intent)
 
@@ -223,7 +227,12 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        PicaComposeTheme(darkTheme = resolvePicaDarkTheme(forceNightMode = nightModeEnabled)) {
+        PicaComposeTheme(darkTheme = resolvePicaDarkTheme(nightModeEnabled, themeColorIndex), themeColorIndex = themeColorIndex) {
+            expAdjustmentTarget?.let { target ->
+                key(target) {
+                    ExpAdjustmentDialog(target.first, target.second)
+                }
+            }
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 // M3 adaptive navigation switches from a bottom bar to a rail at the
                 // compact/medium width boundary. Orientation is not a reliable proxy on
@@ -474,16 +483,8 @@ class MainActivity : BaseActivity() {
                                 onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
                                 onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
                                 onThemeColorSelected = { index ->
-                                    val previous = settingsViewModel.state.themeColorIndex
                                     settingsViewModel.selectThemeColorIndex(index)
-                                    if (previous != index) {
-                                        startActivity(
-                                            Intent(this@MainActivity, MainActivity::class.java).apply {
-                                                putExtra(EXTRA_OFFLINE_MODE, offlineMode)
-                                            }
-                                        )
-                                        finish()
-                                    }
+                                    themeColorIndex = ThemeColorHelper.resolveStoredThemeIndex(this@MainActivity)
                                 },
                                 onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
                                 onLandscapeCommentsSideSelected = settingsViewModel::selectLandscapeCommentsSide,
@@ -761,30 +762,6 @@ class MainActivity : BaseActivity() {
                         }
                     }
 
-                    // Global overlays preserved as Compose components
-                    if (bannerVisible) {
-                        AndroidView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(androidx.compose.ui.Alignment.BottomCenter),
-                            factory = { context ->
-                                com.picacomic.fregata.utils.views.BannerWebview(context).apply {
-                                    id = R.id.bannerWebview
-                                }
-                            }
-                        )
-                    }
-
-                    if (popupVisible) {
-                        AndroidView(
-                            modifier = Modifier.fillMaxSize(),
-                            factory = { context ->
-                                com.picacomic.fregata.utils.views.PopupWebview(context).apply {
-                                    id = R.id.popupWebview
-                                }
-                            }
-                        )
-                        }
                     }
                         }
                     }
@@ -823,6 +800,8 @@ class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        themeColorIndex = ThemeColorHelper.resolveStoredThemeIndex(this)
+        nightModeEnabled = e.L(this)
     }
 
     override fun onStop() {
@@ -1009,35 +988,55 @@ class MainActivity : BaseActivity() {
     // -------------------------------------------------------------
     // Legacy support functions for Fragment compatibility during migration
     // -------------------------------------------------------------
-    fun bV() {
-        bannerVisible = false
-    }
-
     fun bY() {
         expButtonsVisible = !expButtonsVisible
     }
 
     fun i(str: String?, str2: String?) {
-        // Shows EXP adjustment dialog
-        val viewInflate = (getSystemService("layout_inflater") as LayoutInflater).inflate(
-            R.layout.dialog_exp_content_view,
-            findViewById<View?>(android.R.id.content) as ViewGroup?,
-            false
-        )
-        val textView = viewInflate.findViewById<TextView>(R.id.textView_exp_content_view_username)
-        val editText = viewInflate.findViewById<EditText>(R.id.editText_exp_content_view_exp)
-        textView.text = "$str\nID: $str2"
-        AlertDialog.Builder(this, R.style.MyAlertDialogStyle).setTitle(str).setView(viewInflate)
-            .setPositiveButton(R.string.ok) { dialogInterface, _ ->
-                if (!editText?.text.isNullOrEmpty()) {
-                    a(editText!!.text.toString().toInt(), str2)
+        expAdjustmentTarget = str to str2
+    }
+
+    @Composable
+    private fun ExpAdjustmentDialog(username: String?, userId: String?) {
+        var input by rememberSaveable { mutableStateOf("") }
+        val adjustment = input.toIntOrNull()?.takeIf { it in -100_000..100_000 }
+        val dismiss = {
+            expAdjustmentTarget = null
+            l(false)
+        }
+        AlertDialog(
+            onDismissRequest = dismiss,
+            title = username?.let { { Text(it) } },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("ID: $userId")
+                    OutlinedTextField(
+                        value = input,
+                        onValueChange = { input = it },
+                        label = { Text("經驗調整") },
+                        supportingText = { Text("-100,000 至 100,000") },
+                        isError = input.isNotEmpty() && input != "-" && adjustment == null,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
-                l(false)
-                dialogInterface.dismiss()
-            }.setNegativeButton(R.string.cancel) { dialogInterface, _ ->
-                l(false)
-                dialogInterface.dismiss()
-            }.show()
+            },
+            shape = MaterialTheme.shapes.extraLarge,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            tonalElevation = 0.dp,
+            confirmButton = {
+                TextButton(
+                    enabled = adjustment != null,
+                    onClick = {
+                        adjustment?.let { a(it, userId) }
+                        dismiss()
+                    },
+                ) { Text(stringResource(R.string.ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = dismiss) { Text(stringResource(R.string.cancel)) }
+            },
+        )
     }
 
     companion object {

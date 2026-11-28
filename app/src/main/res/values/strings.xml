@@ -256,6 +256,8 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="category_title_ads">点击救哔咔</string>
     <string name="category_title_end">已完结</string>
     <string name="category_title_game">游戏推荐</string>
+    <string name="game_tag_recommended">推荐</string>
+    <string name="game_tag_adult">成人</string>
     <string name="category_title_latest">最新更新</string>
     <string name="category_title_leaderboard">哔咔排行榜</string>
     <string name="category_title_least_viewed">最冷门</string>
@@ -291,6 +293,10 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="chatroom_reply_me_short">回应我</string>
     <string name="chatroom_send_ads">发送了一个广告</string>
     <string name="chatroom_send_audio">发送了一段录音</string>
+    <string name="chatroom_show_emoji">显示表情</string>
+    <string name="chatroom_hide_emoji">收起表情</string>
+    <string name="chatroom_start_recording">开始录音</string>
+    <string name="chatroom_stop_recording">停止录音</string>
     <string name="chatroom_send_image">发送了一张图片</string>
     <string name="chatroom_service_send_mode_off">取消发表</string>
     <string name="chatroom_service_send_mode_on">发表讯息</string>
@@ -385,6 +391,12 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
 一
 页"</string>
     <string name="comic_viewer_setting_panel_night_mode">夜间</string>
+    <string name="comic_viewer_page_image_unavailable">此页图片不可用</string>
+    <string name="comic_viewer_page_label">第 %1$d 页</string>
+    <string name="comic_viewer_page_slider">阅读页码</string>
+    <string name="notification_unread_action">通知，有未读消息</string>
+    <string name="notification_view_image">查看通知图片</string>
+    <string name="comic_viewer_page_image_load_failed">第 %1$d 页图片加载失败</string>
     <string name="comic_viewer_setting_panel_previous_episode">"到
 顶
 了
@@ -402,6 +414,7 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="comic_viewer_setting_panel_screen_orientation">屏幕方向</string>
     <string name="comic_viewer_setting_panel_scroll_orientation">翻页方向</string>
     <string name="comic_viewer_setting_panel_select_episode">选集</string>
+    <string name="reader_load_more_episodes">加载更多章节</string>
     <string name="comic_viewer_setting_panel_setting">设置</string>
     <string name="comic_viewer_setting_panel_setting_menu">设定</string>
     <string name="comic_viewer_setting_panel_share">分享</string>
@@ -436,7 +449,16 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="crop__wait">Please wait…</string>
     <string name="define_roundedimageview"></string>
     <string name="download">下载</string>
+    <string name="comic_action_like">点赞</string>
+    <string name="comic_action_bookmark">收藏</string>
     <string name="downloaded">已下载</string>
+    <string name="comic_episode_last_read">上次阅读</string>
+    <string name="comic_list_likes">%1$s 赞</string>
+    <string name="comic_list_pages">%1$d 页</string>
+    <string name="comic_list_episodes">%1$d 话</string>
+    <string name="count_wan">%1$s万</string>
+    <string name="count_yi">%1$s亿</string>
+    <string name="comic_episode_downloading">下载中</string>
     <string name="edit">编辑</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_incorrect_password">This password is incorrect</string>
@@ -524,6 +546,8 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
     <string name="pica_id_error_message_1">字符太少（2-30）</string>
     <string name="pica_id_error_message_2">. 不能在最前／最后／多于一个</string>
     <string name="profile_edit_avatar">头像</string>
+    <string name="profile_edit_avatar_action">更换头像</string>
+    <string name="profile_new_title">新称号</string>
     <string name="profile_edit_birthday">出生日期</string>
     <string name="profile_edit_category">类别</string>
     <string name="profile_edit_email">哔咔账号</string>
@@ -700,4 +724,7 @@ http://line.me/ti/p/%40ztj0743u"</string>
     <string name="toast_remove_all_comment_success">已删除此用户的所有留言</string>
     <string name="update">更新</string>
     <string name="back">返回</string>
+    <string name="crop_rotate_left">向左旋转</string>
+    <string name="crop_rotate_right">向右旋转</string>
+    <string name="theme_color_moyuki">MoYuki · 雪昼 / 森夜</string>
 </resources>

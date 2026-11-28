@@ -3,15 +3,20 @@ package com.picacomic.fregata.compose.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaProgressIndicator
@@ -32,11 +37,13 @@ fun ProgressDialogContent(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 PicaProgressIndicator(
-                    modifier = Modifier.size(96.dp),
+                    modifier = Modifier.size(48.dp),
                 )
                 Text(
-                    text = message.orEmpty(),
+                    text = message?.takeIf { it.isNotBlank() }
+                        ?: stringResource(R.string.loading_general),
                     style = PicaExpressiveType.BodyEmphasized,
+                    textAlign = TextAlign.Start,
                 )
             }
         }
@@ -49,11 +56,11 @@ fun ProgressLoadingContent() {
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 30.dp),
+            modifier = Modifier.safeDrawingPadding().padding(top = 16.dp),
         ) {
-            PicaProgressIndicator(
-                modifier = Modifier.size(48.dp),
-            )
+            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHighest) {
+                PicaProgressIndicator(modifier = Modifier.padding(8.dp).size(48.dp))
+            }
         }
     }
 }

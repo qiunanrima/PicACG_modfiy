@@ -1,9 +1,15 @@
 package com.picacomic.fregata.compose.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.WideNavigationRailItemDefaults
 import androidx.compose.material3.ShortNavigationBarItemDefaults
@@ -26,24 +32,32 @@ fun PicaNavigationBar(
     onItemClick: (Screen) -> Unit,
     vertical: Boolean = false,
 ) {
+    val colors = MaterialTheme.colorScheme
     if (vertical) {
         WideNavigationRail(
-            modifier = Modifier.fillMaxHeight().safeDrawingPadding(),
-            windowInsets = WindowInsets(0, 0, 0, 0),
+            modifier = Modifier.fillMaxHeight(),
+            windowInsets = WindowInsets.safeDrawing.only(
+                WindowInsetsSides.Start + WindowInsetsSides.Vertical,
+            ),
         ) {
-            items.forEach { screen ->
-                WideNavigationRailItem(
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    selected = currentRoute == screen.route,
-                    onClick = { onItemClick(screen) },
-                    icon = { PicaNavigationIcon(screen, currentRoute) },
-                    label = { Text(stringResource(id = screen.titleRes)) },
-                    railExpanded = false,
-                    colors = WideNavigationRailItemDefaults.colors(
-                        selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    ),
-                )
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                items.forEach { screen ->
+                    WideNavigationRailItem(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        selected = currentRoute == screen.route,
+                        onClick = { onItemClick(screen) },
+                        icon = { PicaNavigationIcon(screen, currentRoute) },
+                        label = { Text(stringResource(id = screen.titleRes)) },
+                        railExpanded = false,
+                        colors = WideNavigationRailItemDefaults.colors(
+                            selectedIndicatorColor = colors.secondaryContainer,
+                            selectedIconColor = colors.onSecondaryContainer,
+                        ),
+                    )
+                }
             }
         }
         return
@@ -53,8 +67,8 @@ fun PicaNavigationBar(
         items.forEach { screen ->
             ShortNavigationBarItem(
                 colors = ShortNavigationBarItemDefaults.colors(
-                    selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    selectedIndicatorColor = colors.secondaryContainer,
+                    selectedIconColor = colors.onSecondaryContainer,
                 ),
                 selected = currentRoute == screen.route,
                 onClick = { onItemClick(screen) },
@@ -70,12 +84,13 @@ private fun PicaNavigationIcon(
     screen: Screen,
     currentRoute: String?,
 ) {
+    val icon = if (currentRoute == screen.route) {
+        screen.selectedIcon ?: screen.unselectedIcon
+    } else {
+        screen.unselectedIcon ?: screen.selectedIcon
+    } ?: return
     Icon(
-        imageVector = if (currentRoute == screen.route) {
-            screen.selectedIcon!!
-        } else {
-            screen.unselectedIcon!!
-        },
-        contentDescription = stringResource(id = screen.titleRes),
+        imageVector = icon,
+        contentDescription = null,
     )
 }

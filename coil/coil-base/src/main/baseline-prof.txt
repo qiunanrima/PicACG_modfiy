@@ -1002,11 +1002,11 @@ PLcoil/network/CacheStrategy$Factory;->compute()Lcoil/network/CacheStrategy;
 Lcoil/network/NetworkObserver;
 Lcoil/network/NetworkObserver$Listener;
 Lcoil/network/NetworkObserverKt;
-HSPLcoil/network/NetworkObserverKt;->NetworkObserver(Landroid/content/Context;Lcoil/network/NetworkObserver$Listener;Lcoil/util/Logger;)Lcoil/network/NetworkObserver;
-PLcoil/network/NetworkObserverKt;->NetworkObserver(Landroid/content/Context;Lcoil/network/NetworkObserver$Listener;Lcoil/util/Logger;)Lcoil/network/NetworkObserver;
+HSPLcoil/network/NetworkObserverKt;->NetworkObserver(Landroid/content/Context;Lcoil/network/NetworkObserver$Listener;Lcoil/util/Logger;Z)Lcoil/network/NetworkObserver;
+PLcoil/network/NetworkObserverKt;->NetworkObserver(Landroid/content/Context;Lcoil/network/NetworkObserver$Listener;Lcoil/util/Logger;Z)Lcoil/network/NetworkObserver;
 Lcoil/network/RealNetworkObserver;
-HSPLcoil/network/RealNetworkObserver;-><init>(Landroid/net/ConnectivityManager;Lcoil/network/NetworkObserver$Listener;)V
-PLcoil/network/RealNetworkObserver;-><init>(Landroid/net/ConnectivityManager;Lcoil/network/NetworkObserver$Listener;)V
+HSPLcoil/network/RealNetworkObserver;-><init>(Landroid/net/ConnectivityManager;Lcoil/network/NetworkObserver$Listener;Z)V
+PLcoil/network/RealNetworkObserver;-><init>(Landroid/net/ConnectivityManager;Lcoil/network/NetworkObserver$Listener;Z)V
 HSPLcoil/network/RealNetworkObserver;->access$onConnectivityChange(Lcoil/network/RealNetworkObserver;Landroid/net/Network;Z)V
 PLcoil/network/RealNetworkObserver;->access$onConnectivityChange(Lcoil/network/RealNetworkObserver;Landroid/net/Network;Z)V
 HSPLcoil/network/RealNetworkObserver;->isOnline()Z

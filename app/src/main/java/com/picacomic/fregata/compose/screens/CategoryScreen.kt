@@ -3,6 +3,7 @@ package com.picacomic.fregata.compose.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -156,11 +158,12 @@ fun CategoryScreen(
             )
 
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 156.dp),
+                columns = GridCells.Adaptive(minSize = 156.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
                 state = gridState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -234,13 +237,13 @@ private fun CategoryActionCard(
     Card(
         onClick = item.onClick,
         modifier = modifier
-            .width(112.dp),
+            .width(112.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(108.dp)
+                .heightIn(min = 108.dp)
                 .padding(10.dp),
             contentAlignment = Alignment.Center,
         ) {
@@ -248,15 +251,23 @@ private fun CategoryActionCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Image(
-                    painter = painterResource(item.iconRes),
-                    contentDescription = item.title,
-                    modifier = Modifier.size(42.dp),
-                )
+                Surface(
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                ) {
+                    Box(modifier = Modifier.size(56.dp), contentAlignment = Alignment.Center) {
+                        Image(
+                            painter = painterResource(item.iconRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(42.dp),
+                        )
+                    }
+                }
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.labelMedium,
                     textAlign = TextAlign.Center,
+                    minLines = 2,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -274,7 +285,7 @@ private fun RemoteCategoryCard(
     Card(
         onClick = onClick,
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(
             modifier = Modifier.padding(10.dp),
@@ -282,7 +293,7 @@ private fun RemoteCategoryCard(
         ) {
             PicaRemoteImage(
                 thumbnail = category.thumb,
-                contentDescription = category.title,
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1.22f)
@@ -291,19 +302,20 @@ private fun RemoteCategoryCard(
             )
             Text(
                 text = category.title.orEmpty(),
-                style = PicaExpressiveType.TitleSmallEmphasized,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = category.description.orEmpty(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                // Keep cards in each adaptive-grid row the same height.
-                modifier = Modifier.heightIn(min = 40.dp),
+                style = MaterialTheme.typography.titleMedium,
+                minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
+            if (!category.description.isNullOrBlank()) {
+                Text(
+                    text = category.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
 }

@@ -1,8 +1,19 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import com.picacomic.fregata.compose.picaColorScheme
+import com.picacomic.fregata.compose.resolvePicaDarkTheme
+
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +30,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +44,7 @@ import com.picacomic.fregata.compose.components.PicaConfirmDialog
 import com.picacomic.fregata.compose.components.PicaPrimaryButton
 import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
 import com.picacomic.fregata.compose.components.PicaValueListItem
+import com.picacomic.fregata.compose.components.picaSegmentShape
 import com.picacomic.fregata.compose.components.PicaSwitchListItem
 import com.picacomic.fregata.utils.ThemeColorHelper
 import androidx.compose.material3.TopAppBar
@@ -156,6 +170,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
                     .verticalScroll(rememberScrollState())
                     .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -362,6 +377,23 @@ fun SettingsScreen(
                 selectedIndex = state.themeColorIndex,
                 onSelect = onThemeColorSelected,
                 onDismiss = onDialogDismiss,
+                optionLeadingContent = { index ->
+                    val themeIndex = ThemeColorHelper.toStoredThemeIndex(index)
+                    val scheme = picaColorScheme(
+                        LocalContext.current,
+                        themeIndex,
+                        resolvePicaDarkTheme(themeIndex = themeIndex),
+                    )
+                    Row(
+                        Modifier.size(width = 48.dp, height = 22.dp)
+                            .clip(CircleShape)
+                            .border(1.dp, scheme.outline, CircleShape),
+                    ) {
+                        Box(Modifier.weight(1f).size(22.dp).background(scheme.primaryContainer))
+                        Box(Modifier.weight(1f).size(22.dp).background(scheme.secondaryContainer))
+                        Box(Modifier.weight(1f).size(22.dp).background(scheme.tertiaryContainer))
+                    }
+                },
             )
 
             SettingsDialog.LauncherIcon -> PicaSingleChoiceDialog(
@@ -418,6 +450,7 @@ private fun AutoPagingDialog(
 ) {
     val progress = ((intervalMs - 1000) / 100f).coerceIn(0f, 100f)
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(R.string.setting_comic_viewer_auto_paging_interval)) },
         text = {
@@ -462,13 +495,11 @@ private fun SettingsSection(
             text = title,
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 12.dp),
+            modifier = Modifier.padding(horizontal = 12.dp).semantics { heading() },
         )
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             rows.forEachIndexed { index, row ->
-                val top = if (index == 0) 20.dp else 4.dp
-                val bottom = if (index == rows.lastIndex) 20.dp else 4.dp
-                row(RoundedCornerShape(topStart = top, topEnd = top, bottomStart = bottom, bottomEnd = bottom))
+                row(picaSegmentShape(index, rows.lastIndex))
             }
         }
     }
@@ -484,10 +515,14 @@ private fun CoilCacheSizeDialog(
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismissRequest = onDismiss,
         title = { Text(text = title) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 Text(text = body)
                 OutlinedTextField(
                     value = value,

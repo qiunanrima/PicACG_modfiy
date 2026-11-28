@@ -5,6 +5,12 @@ package com.picacomic.fregata.compose.screens
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +18,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -259,6 +266,7 @@ fun CommentScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
             ) {
                 if (inPreview) {
                     Column(
@@ -441,6 +449,7 @@ private fun CommentJumpPageDialog(
     val targetPage = parsedPage?.coerceIn(1, totalPages.coerceAtLeast(1))
 
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.action_comment_page)) },
         text = {
@@ -611,8 +620,8 @@ private fun CommentCard(
             if (item.isTop || index < 0) {
                 Surface(
                     shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 ) {
                     Text(
                         text = stringResource(R.string.comment_top_comment_title_prefix) +
@@ -750,7 +759,7 @@ private fun ReplyRow(
     var profileExpanded by rememberSaveable(reply.commentId, user.name) { mutableStateOf(false) }
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = MaterialTheme.shapes.small,
     ) {
         Column(
@@ -1050,6 +1059,7 @@ private fun CommentActionDialog(
         CommentActionKind.Top -> stringResource(R.string.comment_tool_top)
     }
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismissRequest = onDismiss,
         title = { Text(text = title) },
         text = { Text(text = message) },
@@ -1118,6 +1128,7 @@ private fun CommentInputBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically

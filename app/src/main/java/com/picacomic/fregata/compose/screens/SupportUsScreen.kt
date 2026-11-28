@@ -7,6 +7,7 @@ import android.webkit.WebView
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,6 +98,7 @@ fun SupportUsScreen(
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         if (showIntro && !inPreview) {
             AlertDialog(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 onDismissRequest = { showIntro = false },
                 title = { Text(stringResource(R.string.alert_support_us_title)) },
                 text = { Text(stringResource(R.string.alert_support_us)) },
@@ -138,7 +140,7 @@ fun SupportUsScreen(
                         selectedTabIndex = selectedTab,
                         tabs = tabs,
                         onTabSelected = { selectedTab = it },
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        topAppBarState = scrollBehavior.state,
                     )
                 }
             },
@@ -147,7 +149,8 @@ fun SupportUsScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
             ) {
                 when (selectedTab) {
                     0 -> SupportUsQqAlipayTab(context)
@@ -216,25 +219,24 @@ private fun SupportUsGroupTab(context: Context) {
     ) {
         item {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        com.picacomic.fregata.utils.views.AlertDialogCenter.showFaqAlertDialog(
-                            context,
-                            "https://www.picacomic.com/faq",
-                            null,
-                        )
-                    },
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    com.picacomic.fregata.utils.views.AlertDialogCenter.showFaqAlertDialog(
+                        context,
+                        "https://www.picacomic.com/faq",
+                        null,
+                    )
+                },
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
             ) {
                 Text(
                     text = stringResource(R.string.support_us_offical_group_warning),
                     modifier = Modifier.padding(16.dp),
                     style = PicaExpressiveType.TitleSmallEmphasized,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Start,
                 )
             }
         }
@@ -383,7 +385,7 @@ private fun SelectableBlock(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyLarge,
-        textAlign = TextAlign.Center,
+        textAlign = TextAlign.Start,
         modifier = Modifier.fillMaxWidth(),
     )
 }

@@ -1,18 +1,18 @@
 package com.picacomic.fregata.compose.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -129,16 +130,20 @@ fun HomeScreen(
                     },
                     actions = {
                         IconButton(onClick = onNotification) {
+                            val hasUnread = screenViewModel?.hasNotification == true
                             BadgedBox(
                                 badge = {
-                                    if (screenViewModel?.hasNotification == true) {
-                                        Badge()
+                                    if (hasUnread) {
+                                        Badge(containerColor = MaterialTheme.colorScheme.tertiary)
                                     }
                                 },
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Notifications,
-                                    contentDescription = stringResource(R.string.title_notification),
+                                    contentDescription = stringResource(
+                                        if (hasUnread) R.string.notification_unread_action
+                                        else R.string.title_notification,
+                                    ),
                                 )
                             }
                         }
@@ -156,7 +161,8 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
             ) {
                 when {
                     !inPreview && screenViewModel?.isLoading == true && collections.isEmpty() -> {
@@ -204,25 +210,28 @@ private fun HomeCollectionRow(
             actionLabel = stringResource(R.string.more),
             onActionClick = { onMoreClick(collection.title.orEmpty()) },
         )
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            comics.forEach { comic ->
-                PicaComicListCard(
-                    title = comic.title.orEmpty(),
-                    subtitle = comic.author.orEmpty(),
-                    thumbnail = comic.thumb,
-                    likes = comic.likesCount,
-                    pages = comic.pagesCount,
-                    episodes = comic.episodeCount,
-                    categories = comic.categories.orEmpty(),
-                    onClick = {
-                        val comicId = comic.comicId
-                        if (!comicId.isNullOrBlank()) onComicClick(comicId)
-                    },
-                    modifier = Modifier.width(240.dp),
-                )
+        BoxWithConstraints {
+            val cardWidth = (240.dp * LocalDensity.current.fontScale.coerceAtLeast(1f)).coerceAtMost(maxWidth)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                itemsIndexed(
+                    items = comics,
+                    key = { index, comic -> stableLazyKey("home_comic", index, comic.comicId, comic.title) },
+                ) { _, comic ->
+                    PicaComicListCard(
+                        title = comic.title.orEmpty(),
+                        subtitle = comic.author.orEmpty(),
+                        thumbnail = comic.thumb,
+                        likes = comic.likesCount,
+                        pages = comic.pagesCount,
+                        episodes = comic.episodeCount,
+                        categories = comic.categories.orEmpty(),
+                        onClick = {
+                            val comicId = comic.comicId
+                            if (!comicId.isNullOrBlank()) onComicClick(comicId)
+                        },
+                        modifier = Modifier.width(cardWidth),
+                    )
+                }
             }
         }
     }

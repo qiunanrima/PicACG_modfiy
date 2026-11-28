@@ -15,7 +15,7 @@ android {
         applicationId 'com.picacomic.fregata'
         minSdk = 23
         targetSdk = 35
-        versionCode 44
+        versionCode 45
         versionName '2.2.1.3.3.4'
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
@@ -44,7 +44,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 
@@ -54,7 +54,6 @@ android {
     }
 
     buildFeatures {
-        viewBinding true
         compose true
     }
 
@@ -67,6 +66,7 @@ android {
 
 kotlin {
     compilerOptions {
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
@@ -82,7 +82,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     // implementation 'androidx.cardview:cardview:1.0.0' // 未使用
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0' // 替代 legacy-support-v4
-    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'com.google.android.material:material:1.14.0'
     implementation 'androidx.compose.foundation:foundation'
     implementation 'androidx.compose.material3:material3:1.5.0-alpha21'
     implementation 'androidx.compose.ui:ui-tooling-preview'

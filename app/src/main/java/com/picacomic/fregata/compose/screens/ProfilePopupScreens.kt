@@ -1,5 +1,9 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +13,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -78,15 +83,15 @@ fun ProfilePopupDialogContent(
         ) {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 420.dp),
-                shape = MaterialTheme.shapes.large,
+                    .widthIn(max = 420.dp)
+                    .fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 ),
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.verticalScroll(rememberScrollState()).padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -180,6 +185,7 @@ private fun ProfilePopupBody(
 ) {
     Row(
         modifier = Modifier
+            .heightIn(min = 48.dp)
             .clickable(onClick = onLevelClick)
             .padding(horizontal = 10.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -255,27 +261,33 @@ private fun ProfilePopupBody(
     )
 
     val gender = profile.gender?.let { g.E(LocalContext.current, it) }.orEmpty()
-    Text(
-        text = buildString {
-            append(profile.title.orEmpty())
-            if (gender.isNotBlank()) append(" ($gender)")
-        },
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clickable(onClick = onTitleClick)
             .padding(vertical = 4.dp),
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.primary,
-        textAlign = TextAlign.Center,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = buildString {
+                append(profile.title.orEmpty())
+                if (gender.isNotBlank()) append(" ($gender)")
+            },
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 
     Text(
         text = profile.slogan.orEmpty(),
+        modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
+        textAlign = TextAlign.Start,
     )
 }
 
@@ -290,18 +302,19 @@ fun TitleEditDialogContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .imePadding()
                 .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
             Card(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 420.dp),
-                shape = MaterialTheme.shapes.large,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    .widthIn(max = 420.dp)
+                    .fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.verticalScroll(rememberScrollState()).padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -326,7 +339,7 @@ fun TitleEditDialogContent(
                     PicaTextField(
                         value = viewModel.newTitle,
                         onValueChange = viewModel::updateNewTitle,
-                        label = "NEW TITLE",
+                        label = stringResource(R.string.profile_new_title),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     )
                     Row(
@@ -363,6 +376,7 @@ private fun ConfirmAdminDialog(
     onConfirm: () -> Unit,
 ) {
     AlertDialog(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(text) },

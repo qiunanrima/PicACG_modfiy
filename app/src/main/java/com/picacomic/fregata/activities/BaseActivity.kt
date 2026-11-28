@@ -31,6 +31,7 @@ import com.picacomic.fregata.compose.screens.ImagePopupDialogContent
 import com.picacomic.fregata.compose.screens.LockDialogContent
 import com.picacomic.fregata.compose.screens.ProgressDialogContent
 import com.picacomic.fregata.compose.screens.ProgressLoadingContent
+import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.screens.ProfilePopupDialogContent
 import com.picacomic.fregata.compose.screens.TitleEditDialogContent
 import com.picacomic.fregata.compose.viewmodels.ProfilePopupViewModel
@@ -107,7 +108,7 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createProgressDialog(cancelable = true, canceledOnTouchOutside = true)
             progressLoadingDialog = dialog
             dialog.setContentView(
-                createDialogComposeView {
+                dialog.createDialogComposeView {
                     ProgressLoadingContent()
                 }
             )
@@ -140,7 +141,7 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createProgressDialog(cancelable = false, canceledOnTouchOutside = true)
             progressDialog = dialog
             dialog.setContentView(
-                createDialogComposeView {
+                dialog.createDialogComposeView {
                     ProgressDialogContent(message = message)
                 }
             )
@@ -200,7 +201,7 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createComposePopupDialog()
             imagePopupDialog = dialog
             dialog.setContentView(
-                createDialogComposeView {
+                dialog.createDialogComposeView {
                     ImagePopupDialogContent(
                         imageUrl = str,
                         onDismiss = { dialog.dismiss() },
@@ -241,7 +242,7 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createComposePopupDialog()
             titleEditDialog = dialog
             dialog.setContentView(
-                createDialogComposeView {
+                dialog.createDialogComposeView {
                     TitleEditDialogContent(
                         viewModel = viewModel,
                         onDismiss = { dialog.dismiss() },
@@ -265,7 +266,7 @@ open class BaseActivity : AppCompatActivity() {
             val dialog = createComposePopupDialog()
             profilePopupDialog = dialog
             dialog.setContentView(
-                createDialogComposeView {
+                dialog.createDialogComposeView {
                     ProfilePopupDialogContent(
                         viewModel = viewModel,
                         onDismiss = { dialog.dismiss() },
@@ -325,7 +326,7 @@ open class BaseActivity : AppCompatActivity() {
             dialog.setCancelable(false)
             dialog.setCanceledOnTouchOutside(false)
             dialog.setContentView(
-                createDialogComposeView {
+                dialog.createDialogComposeView {
                     LockDialogContent(
                         pin = pin,
                         onUnlock = { dialog.dismiss() },
@@ -346,13 +347,14 @@ open class BaseActivity : AppCompatActivity() {
         }
     }
 
-    private fun createDialogComposeView(content: @Composable () -> Unit): ComposeView {
-        return ComposeView(this).apply {
+    private fun Dialog.createDialogComposeView(content: @Composable () -> Unit): ComposeView {
+        val dialogWindow = window
+        return ComposeView(this@BaseActivity).apply {
             setViewTreeLifecycleOwner(this@BaseActivity)
             setViewTreeViewModelStoreOwner(this@BaseActivity)
             setViewTreeSavedStateRegistryOwner(this@BaseActivity)
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
-            setContent(content)
+            setContent { PicaComposeTheme(hostWindow = dialogWindow, content = content) }
         }
     }
 

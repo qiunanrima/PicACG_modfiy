@@ -1,22 +1,34 @@
 package com.picacomic.fregata.activities
 
-import android.app.AlertDialog
-import android.app.DatePickerDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.components.PicaConfirmDialog
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +44,8 @@ import com.picacomic.fregata.compose.viewmodels.RegisterValidationError
 import com.picacomic.fregata.compose.viewmodels.RegisterViewModel
 import com.picacomic.fregata.objects.NetworkErrorObject
 import com.picacomic.fregata.utils.views.AlertDialogCenter
+import java.util.Calendar
+import java.util.TimeZone
 
 class LoginActivity : BaseActivity() {
     private val viewModel: LoginViewModel by viewModels()
@@ -44,7 +58,10 @@ class LoginActivity : BaseActivity() {
         viewModel.initialize()
 
         setContent {
+            var accountDialog by remember { mutableStateOf<AccountDialog?>(null) }
             var showingRegister by rememberSaveable { mutableStateOf(false) }
+            var showBirthdayPicker by rememberSaveable { mutableStateOf(false) }
+            var registerSignInError by remember { mutableStateOf<NetworkErrorObject?>(null) }
 
             if (showingRegister) {
                 RegisterScreen(
@@ -76,7 +93,7 @@ class LoginActivity : BaseActivity() {
                     onQuestion3Change = registerViewModel::updateQuestion3,
                     onAnswer3Change = registerViewModel::updateAnswer3,
                     onGenderChange = registerViewModel::aa,
-                    onBirthdayClick = ::showBirthdayPicker,
+                    onBirthdayClick = { showBirthdayPicker = true },
                     onSubmit = registerViewModel::dI,
                     onBack = { showingRegister = false },
                 )
@@ -96,9 +113,31 @@ class LoginActivity : BaseActivity() {
                         }
                     },
                     onRegister = { showingRegister = true },
-                    onForgotPassword = ::showForgotPasswordDialog,
-                    onResendActivation = ::showResendActivationDialog,
+                    onForgotPassword = { accountDialog = AccountDialog.ForgotPassword },
+                    onResendActivation = { accountDialog = AccountDialog.ResendActivation },
                 )
+            }
+
+            if (showingRegister && showBirthdayPicker) {
+                BirthdayPicker(onDismiss = { showBirthdayPicker = false })
+            }
+
+            registerSignInError?.let { error ->
+                PicaComposeTheme {
+                    PicaConfirmDialog(
+                        title = error.error.orEmpty(),
+                        body = "${error.message}\n${error.detail}",
+                        dismissText = null,
+                        onConfirm = {},
+                        onDismiss = { registerSignInError = null },
+                    )
+                }
+            }
+
+            accountDialog?.let { step ->
+                key(step) {
+                    AccountInputDialog(step, onDismiss = { accountDialog = null })
+                }
             }
 
             LaunchedEffect(viewModel.navigateToMainEvent) {
@@ -115,7 +154,7 @@ class LoginActivity : BaseActivity() {
 
             LaunchedEffect(viewModel.securityQuestionEvent) {
                 if (viewModel.securityQuestionEvent > 0) {
-                    showAnswerDialog()
+                    accountDialog = AccountDialog.SecurityAnswer
                 }
             }
 
@@ -198,13 +237,7 @@ class LoginActivity : BaseActivity() {
                                             AlertDialogCenter.generalError(this@LoginActivity)
                                             return
                                         }
-                                        AlertDialog.Builder(this@LoginActivity)
-                                            .setTitle(networkErrorObject.error)
-                                            .setMessage(
-                                                networkErrorObject.message + "\n" + networkErrorObject.detail,
-                                            )
-                                            .setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
-                                            .show()
+                                        registerSignInError = networkErrorObject
                                     }
                                 },
                             ).dN()
@@ -226,94 +259,114 @@ class LoginActivity : BaseActivity() {
         finish()
     }
 
-    private fun showBirthdayPicker() {
-        DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth ->
-                registerViewModel.setBirthday(year, month, dayOfMonth)
-            },
-            registerViewModel.selectedYear,
-            registerViewModel.selectedMonth,
-            registerViewModel.selectedDay,
-        ).show()
+    @Composable
+    private fun BirthdayPicker(onDismiss: () -> Unit) {
+        val utc = TimeZone.getTimeZone("UTC")
+        val initialDate = Calendar.getInstance(utc).apply {
+            clear()
+            set(registerViewModel.selectedYear, registerViewModel.selectedMonth, registerViewModel.selectedDay)
+        }
+        val picker = rememberDatePickerState(initialSelectedDateMillis = initialDate.timeInMillis)
+        PicaComposeTheme {
+            DatePickerDialog(
+                onDismissRequest = onDismiss,
+                confirmButton = {
+                    TextButton(
+                        enabled = picker.selectedDateMillis != null,
+                        onClick = {
+                            picker.selectedDateMillis?.let { selected ->
+                                val date = Calendar.getInstance(utc).apply { timeInMillis = selected }
+                                registerViewModel.setBirthday(
+                                    date.get(Calendar.YEAR),
+                                    date.get(Calendar.MONTH),
+                                    date.get(Calendar.DAY_OF_MONTH),
+                                )
+                            }
+                            onDismiss()
+                        },
+                    ) { Text(stringResource(R.string.ok)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+                },
+            ) { DatePicker(state = picker) }
+        }
     }
 
-    private fun showForgotPasswordDialog() {
-        val viewInflate = (getSystemService("layout_inflater") as LayoutInflater).inflate(
-            R.layout.dialog_forgot_password_content_view,
-            window.decorView as ViewGroup?,
-            false,
-        )
-        val forgotPasswordEditText: EditText =
-            viewInflate.findViewById(R.id.editText_dialog_forgot_password_content_email)
-        forgotPasswordEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(editable: Editable) {
-                val errorRes = viewModel.validatePicaId(editable.toString())
-                forgotPasswordEditText.error = errorRes?.let(::getString)
-            }
-        })
-        AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
-            .setTitle(R.string.login_forget_password)
-            .setView(viewInflate)
-            .setCancelable(false)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                val picaId = forgotPasswordEditText.text.toString()
-                if (viewModel.validatePicaId(picaId) == null) {
-                    viewModel.requestForgotPassword(picaId)
-                } else {
-                    Toast.makeText(this, R.string.alert_pica_id_wrong, Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-            .show()
-    }
+    private enum class AccountDialog { ForgotPassword, SecurityAnswer, ResendActivation }
 
-    private fun showAnswerDialog() {
-        val prompt = viewModel.securityQuestionPrompt ?: return
-        val viewInflate = (getSystemService("layout_inflater") as LayoutInflater).inflate(
-            R.layout.dialog_forgot_password_content_view,
-            window.decorView as ViewGroup?,
-            false,
-        )
-        val titleView: TextView = viewInflate.findViewById(R.id.textView_dialog_forgot_password_title)
-        val answerEdit: EditText = viewInflate.findViewById(R.id.editText_dialog_forgot_password_content_email)
-        titleView.text = prompt.questionText
-        answerEdit.hint = "Answer ${prompt.questionNumber}"
-        AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
-            .setTitle(R.string.login_forget_password)
-            .setView(viewInflate)
-            .setCancelable(false)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                if (answerEdit.text.isNotEmpty()) {
-                    viewModel.submitSecurityAnswer(answerEdit.text.toString())
-                }
-            }
-            .setNegativeButton(R.string.cancel) { dialog, _ ->
-                viewModel.dismissSecurityQuestionPrompt()
-                dialog.dismiss()
-            }
-            .show()
-    }
+    @Composable
+    private fun AccountInputDialog(
+        step: AccountDialog,
+        onDismiss: () -> Unit,
+    ) {
+        val prompt = viewModel.securityQuestionPrompt
+        if (step == AccountDialog.SecurityAnswer && prompt == null) return
 
-    private fun showResendActivationDialog() {
-        val viewInflate = (getSystemService("layout_inflater") as LayoutInflater).inflate(
-            R.layout.dialog_forgot_password_content_view,
-            window.decorView as ViewGroup?,
-            false,
-        )
-        val resendEdit: EditText = viewInflate.findViewById(R.id.editText_dialog_forgot_password_content_email)
-        AlertDialog.Builder(this, R.style.MyAlertDialogStyle)
-            .setTitle(R.string.login_resend_activation)
-            .setView(viewInflate)
-            .setCancelable(false)
-            .setPositiveButton(R.string.ok) { _, _ ->
-                if (viewModel.validateEmail(resendEdit.text.toString()) != null) {
-                    Toast.makeText(this, R.string.alert_empty_email, Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-            .show()
+        var input by remember { mutableStateOf("") }
+        val error = when (step) {
+            AccountDialog.ForgotPassword -> viewModel.validatePicaId(input)
+            AccountDialog.SecurityAnswer -> null
+            AccountDialog.ResendActivation -> viewModel.validateEmail(input)
+        }
+        val title = if (step == AccountDialog.ResendActivation) {
+            R.string.login_resend_activation
+        } else {
+            R.string.login_forget_password
+        }
+        val label = when (step) {
+            AccountDialog.ForgotPassword -> stringResource(R.string.register_pica_id)
+            AccountDialog.SecurityAnswer -> "Answer ${prompt?.questionNumber}"
+            AccountDialog.ResendActivation -> stringResource(R.string.prompt_email)
+        }
+        val showError = input.isNotEmpty() && error != null
+
+        PicaComposeTheme {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+                title = { Text(stringResource(title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        if (step == AccountDialog.SecurityAnswer && prompt != null) {
+                            Text(prompt.questionText)
+                        }
+                        OutlinedTextField(
+                            value = input,
+                            onValueChange = { input = it.take(100) },
+                            label = { Text(label) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            isError = showError,
+                            supportingText = error?.takeIf { showError }?.let { res ->
+                                { Text(stringResource(res)) }
+                            },
+                        )
+                    }
+                },
+                shape = MaterialTheme.shapes.extraLarge,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                tonalElevation = 0.dp,
+                confirmButton = {
+                    TextButton(
+                        enabled = input.isNotBlank() && error == null,
+                        onClick = {
+                            when (step) {
+                                AccountDialog.ForgotPassword -> viewModel.requestForgotPassword(input)
+                                AccountDialog.SecurityAnswer -> viewModel.submitSecurityAnswer(input)
+                                AccountDialog.ResendActivation -> Unit
+                            }
+                            onDismiss()
+                        },
+                    ) { Text(stringResource(R.string.ok)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        if (step == AccountDialog.SecurityAnswer) viewModel.dismissSecurityQuestionPrompt()
+                        onDismiss()
+                    }) { Text(stringResource(R.string.cancel)) }
+                },
+            )
+        }
     }
 }

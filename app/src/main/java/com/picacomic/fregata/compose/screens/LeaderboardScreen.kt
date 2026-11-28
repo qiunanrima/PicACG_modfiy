@@ -1,5 +1,6 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
-import androidx.compose.material3.FilterChip
+import com.picacomic.fregata.compose.components.PicaTag
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaRankBadge
+import com.picacomic.fregata.compose.components.compactCount
 import com.picacomic.fregata.compose.components.PicaRemoteImage
 import com.picacomic.fregata.compose.components.PicaTabRow
 import com.picacomic.fregata.compose.components.PicaTwoLineCard
@@ -107,7 +109,7 @@ fun LeaderboardScreen(
                             stringResource(R.string.leaderboard_tab_knight),
                         ),
                         onTabSelected = { selectedTab = it },
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        topAppBarState = scrollBehavior.state,
                     )
                     if (selectedTab == 0) {
                         Row(
@@ -144,6 +146,7 @@ fun LeaderboardScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
             ) {
                 val vm = screenViewModel
                 if (inPreview) {
@@ -160,7 +163,7 @@ fun LeaderboardScreen(
                             },
                             items = if (selectedTab == 0) {
                                 previewPopular.mapIndexed { index, item ->
-                                    "${index + 1}. ${item.title} · ${item.leaderboardCount}"
+                                    "${index + 1}. ${item.title} · ${compactCount(item.leaderboardCount)}"
                                 }
                             } else {
                                 previewKnights.mapIndexed { index, item ->
@@ -275,7 +278,8 @@ private fun LeaderboardPopularItem(
     PicaTwoLineCard(
         title = item.title.orEmpty(),
         body = item.author.orEmpty(),
-        supporting = "${item.categories?.joinToString(" / ").orEmpty()} · $countLabel ${item.leaderboardCount}",
+        supporting = "$countLabel ${compactCount(item.leaderboardCount)}",
+        categories = item.categories.orEmpty(),
         onClick = onClick,
         leading = {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -299,8 +303,8 @@ private fun LeaderboardKnightItem(
 ) {
     PicaTwoLineCard(
         title = item.name.orEmpty(),
-        body = "Lv.${item.level} · ${item.exp} EXP",
-        supporting = "${item.comicsUploaded} comics",
+        body = "Lv.${item.level} · ${compactCount(item.exp)} EXP",
+        supporting = "${compactCount(item.comicsUploaded)} comics",
         onClick = onClick,
         leading = {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -322,10 +326,10 @@ private fun LeaderboardTimeButton(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    FilterChip(
+    PicaTag(
+        text = text,
         selected = selected,
         onClick = onClick,
-        label = { Text(text = text) },
     )
 }
 

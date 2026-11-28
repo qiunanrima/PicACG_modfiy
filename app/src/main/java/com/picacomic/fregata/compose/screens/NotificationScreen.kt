@@ -1,5 +1,6 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
@@ -104,6 +106,7 @@ fun NotificationScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
             ) {
                 if (inPreview) {
                     Column(
@@ -236,11 +239,11 @@ private fun NotificationListItem(
             {
                 PicaRemoteImage(
                     thumbnail = item.cover,
-                    contentDescription = item.title,
+                    contentDescription = stringResource(R.string.notification_view_image),
                     modifier = Modifier
                         .size(64.dp)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable(onClick = onCoverClick),
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable(role = Role.Button, onClick = onCoverClick),
                 )
             }
         },

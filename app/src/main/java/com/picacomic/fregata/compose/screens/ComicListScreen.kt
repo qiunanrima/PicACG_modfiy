@@ -1,9 +1,9 @@
 package com.picacomic.fregata.compose.screens
 
-import android.app.AlertDialog
-import android.content.DialogInterface
 import android.widget.Toast
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -34,8 +35,7 @@ import com.picacomic.fregata.compose.components.PicaInfoChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import com.picacomic.fregata.compose.components.PicaTag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +57,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.semantics.Role
+import com.picacomic.fregata.compose.components.PicaConfirmDialog
+import com.picacomic.fregata.compose.components.PicaSingleChoiceDialog
+import com.picacomic.fregata.compose.components.picaSegmentShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,7 +80,6 @@ import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.viewmodels.ComicListViewModel
 import com.picacomic.fregata.objects.ComicListObject
 import com.picacomic.fregata.objects.ThumbnailObject
-import com.picacomic.fregata.utils.views.AlertDialogCenter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -156,7 +165,91 @@ fun ComicListScreen(
         }
     }
 
+    var showSorting by rememberSaveable { mutableStateOf(false) }
+    var showCategories by rememberSaveable { mutableStateOf(false) }
+    var categoryDraft by rememberSaveable { mutableStateOf(booleanArrayOf()) }
+    var confirmClearRecent by rememberSaveable { mutableStateOf(false) }
+
     PicaComposeTheme {
+        val vm = screenViewModel
+        if (showSorting && vm != null) {
+            PicaSingleChoiceDialog(
+                title = stringResource(R.string.sorting_title),
+                options = stringArrayResource(
+                    if (isFavourite) R.array.sorting_favourite else R.array.sorting_advanced
+                ).toList(),
+                selectedIndex = if (isFavourite) vm.favouriteSortingIndex else vm.advancedSortingIndex,
+                onSelect = { index ->
+                    if (isFavourite) vm.setFavouriteSorting(index) else vm.setAdvancedSorting(index)
+                },
+                onDismiss = { showSorting = false },
+            )
+        }
+        if (showCategories && vm != null) {
+            val colors = MaterialTheme.colorScheme
+            AlertDialog(
+                onDismissRequest = { showCategories = false },
+                title = { Text(stringResource(R.string.title_category)) },
+                text = {
+                    Column(
+                        Modifier.verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        vm.advancedCategoryTitles.forEachIndexed { index, title ->
+                            val checked = categoryDraft.getOrElse(index) { false }
+                            Surface(
+                                shape = picaSegmentShape(index, vm.advancedCategoryTitles.lastIndex),
+                                color = colors.surfaceContainer,
+                                contentColor = colors.onSurface,
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
+                                        .toggleable(value = checked, role = Role.Checkbox) { selected ->
+                                            categoryDraft = BooleanArray(vm.advancedCategoryTitles.size) { item ->
+                                                if (item == index) selected else categoryDraft.getOrElse(item) { false }
+                                            }
+                                        }
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalAlignment = Alignment.Top,
+                                ) {
+                                    Checkbox(
+                                        checked = checked,
+                                        onCheckedChange = null,
+                                        colors = CheckboxDefaults.colors(
+                                            checkedColor = colors.primary,
+                                            checkmarkColor = colors.onPrimary,
+                                            uncheckedColor = colors.onSurfaceVariant,
+                                        ),
+                                    )
+                                    Text(title, modifier = Modifier.padding(top = 2.dp))
+                                }
+                            }
+                        }
+                    }
+                },
+                shape = MaterialTheme.shapes.extraLarge,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                tonalElevation = 0.dp,
+                confirmButton = {
+                    TextButton(onClick = {
+                        vm.applyAdvancedCategorySelection(categoryDraft)
+                        showCategories = false
+                    }) { Text(stringResource(R.string.ok)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCategories = false }) { Text(stringResource(R.string.cancel)) }
+                },
+            )
+        }
+        if (confirmClearRecent && vm != null) {
+            PicaConfirmDialog(
+                title = stringResource(R.string.alert_clear_recent_title),
+                body = stringResource(R.string.alert_clear_recent_message),
+                onConfirm = { vm.clearRecentView() },
+                onDismiss = { confirmClearRecent = false },
+            )
+        }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -178,26 +271,7 @@ fun ComicListScreen(
                     actions = {
                         if (canSort) {
                             IconButton(
-                                onClick = {
-                                    val vm = screenViewModel ?: return@IconButton
-                                    if (isFavourite) {
-                                        AlertDialogCenter.sortingFavouriteOptions(
-                                            context,
-                                            vm.favouriteSortingIndex,
-                                        ) { dialog: DialogInterface, which: Int ->
-                                            vm.setFavouriteSorting(which)
-                                            dialog.dismiss()
-                                        }
-                                    } else {
-                                        AlertDialogCenter.sortingAdvancedOptions(
-                                            context,
-                                            vm.advancedSortingIndex,
-                                        ) { dialog: DialogInterface, which: Int ->
-                                            vm.setAdvancedSorting(which)
-                                            dialog.dismiss()
-                                        }
-                                    }
-                                },
+                                onClick = { showSorting = true },
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.sorting_title))
                             }
@@ -205,33 +279,15 @@ fun ComicListScreen(
                         if (isAdvancedSearch && screenViewModel?.advancedCategoryTitles?.isNotEmpty() == true) {
                             IconButton(
                                 onClick = {
-                                    val vm = screenViewModel
-                                    AlertDialogCenter.sortingAdvancedCategoriesOptions(
-                                        context,
-                                        vm.advancedCategoryTitles.toTypedArray(),
-                                        vm.advancedCategorySelections.toBooleanArray(),
-                                        { _, which, isChecked ->
-                                            vm.setAdvancedCategorySelected(which, isChecked)
-                                        },
-                                        { dialog, _ ->
-                                            vm.applyAdvancedCategorySelection()
-                                            dialog.dismiss()
-                                        },
-                                    )
+                                    categoryDraft = screenViewModel.advancedCategorySelections.toBooleanArray()
+                                    showCategories = true
                                 },
                             ) {
                                 Icon(Icons.Filled.FilterAlt, contentDescription = stringResource(R.string.title_category))
                             }
                         }
                         if (isRecent) {
-                            IconButton(onClick = {
-                                AlertDialog.Builder(context, R.style.MyAlertDialogStyle)
-                                    .setTitle(R.string.alert_clear_recent_title)
-                                    .setMessage(R.string.alert_clear_recent_message)
-                                    .setNegativeButton(R.string.cancel, null)
-                                    .setPositiveButton(R.string.ok) { _, _ -> screenViewModel?.clearRecentView() }
-                                    .show()
-                            }) {
+                            IconButton(onClick = { confirmClearRecent = true }) {
                                 Icon(Icons.Filled.ClearAll, contentDescription = stringResource(R.string.action_clear_recent))
                             }
                         }
@@ -250,7 +306,9 @@ fun ComicListScreen(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .imePadding(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -367,32 +425,11 @@ private fun ComicListControlPanel(
             ) {
                 filterLabels.forEachIndexed { index, label ->
                     val selected = filterStates.getOrNull(index) == true
-                    FilterChip(
+                    PicaTag(
+                        text = label,
                         selected = selected,
                         onClick = { onToggleFilter(index) },
-                        label = {
-                            Text(
-                                text = label,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                        leadingIcon = if (selected) {
-                            {
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
-                                )
-                            }
-                        } else {
-                            null
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        ),
+                        selectedIcon = Icons.Filled.Close,
                     )
                 }
             }

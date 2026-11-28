@@ -11,6 +11,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -74,6 +77,7 @@ import com.picacomic.fregata.compose.components.PicaEmptyState
 import com.picacomic.fregata.compose.components.PicaInfoChip
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
 import com.picacomic.fregata.compose.components.PicaMetricRow
+import com.picacomic.fregata.compose.components.compactCount
 import com.picacomic.fregata.compose.components.PicaRemoteImage
 import com.picacomic.fregata.compose.components.PicaSectionHeader
 import com.picacomic.fregata.compose.viewmodels.GameDetailViewModel
@@ -152,7 +156,8 @@ fun GameDetailScreen(
                         screenshots = screenshots,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(innerPadding),
+                            .padding(innerPadding)
+                            .consumeWindowInsets(innerPadding),
                         onDownload = {
                             val link = detail.androidLinks?.firstOrNull()
                             if (link.isNullOrBlank()) AlertDialogCenter.downloadNotReady(context) else g.A(context, link)
@@ -234,7 +239,7 @@ private fun GameDetailContent(
                         )
                         Column(modifier = Modifier.weight(1f)) {
                             if (detail.isSuggest) {
-                                PicaInfoChip("推荐")
+                                PicaInfoChip(stringResource(R.string.game_tag_recommended))
                             }
                             Text(
                                 text = detail.title.orEmpty(),
@@ -247,48 +252,65 @@ private fun GameDetailContent(
                             )
                             if (detail.isAdult) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    PicaInfoChip("Adult")
+                                    PicaInfoChip(stringResource(R.string.game_tag_adult))
                                 }
                             }
                         }
                     }
                     PicaMetricRow(
                         metrics = listOf(
-                            "Likes" to detail.likesCount.toString(),
-                            "Comments" to detail.commentsCount.toString(),
-                            "Downloads" to detail.downloadsCount.toString(),
-                        ).filter { (_, value) -> value.toIntOrNull()?.let { it > 0 } == true },
+                            "Likes" to detail.likesCount,
+                            "Comments" to detail.commentsCount,
+                            "Downloads" to detail.downloadsCount,
+                        ).filter { (_, count) -> count > 0 }.map { (label, count) -> label to compactCount(count) },
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(shapes = ButtonDefaults.shapes(), onClick = onDownload, modifier = Modifier.weight(1f)) {
-                            Icon(
-                                Icons.Filled.Download,
-                                contentDescription = stringResource(R.string.download),
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Button(
+                            shapes = ButtonDefaults.shapes(),
+                            onClick = onDownload,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Filled.Download, contentDescription = null)
+                            Text(
+                                text = stringResource(R.string.download),
+                                modifier = Modifier.padding(start = 8.dp),
                             )
                         }
-                        IconButton(onClick = onGift) {
-                            Icon(
-                                imageVector = Icons.Filled.CardGiftcard,
-                                contentDescription = "Gift",
-                            )
-                        }
-                        IconButton(onClick = onComment) {
-                            Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringResource(R.string.title_comment))
-                        }
-                        IconButton(onClick = onLike) {
-                            Icon(
-                                Icons.Filled.Favorite,
-                                contentDescription = "Like",
-                                tint = if (detail.isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.graphicsLayer {
-                                    scaleX = likeScale
-                                    scaleY = likeScale
-                                },
-                            )
-                        }
-                        if (!detail.videoLink.isNullOrBlank()) {
-                            IconButton(onClick = onVideo) {
-                                Icon(Icons.Filled.PlayArrow, contentDescription = "Video")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            IconButton(onClick = onGift) {
+                                Icon(
+                                    imageVector = Icons.Filled.CardGiftcard,
+                                    contentDescription = "Gift",
+                                )
+                            }
+                            IconButton(onClick = onComment) {
+                                Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = stringResource(R.string.title_comment))
+                            }
+                            IconToggleButton(
+                                checked = detail.isLiked,
+                                onCheckedChange = { onLike() },
+                                colors = IconButtonDefaults.iconToggleButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    checkedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    checkedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                ),
+                            ) {
+                                Icon(
+                                    Icons.Filled.Favorite,
+                                    contentDescription = stringResource(R.string.comic_action_like),
+                                    modifier = Modifier.graphicsLayer {
+                                        scaleX = likeScale
+                                        scaleY = likeScale
+                                    },
+                                )
+                            }
+                            if (!detail.videoLink.isNullOrBlank()) {
+                                IconButton(onClick = onVideo) {
+                                    Icon(Icons.Filled.PlayArrow, contentDescription = "Video")
+                                }
                             }
                         }
                     }

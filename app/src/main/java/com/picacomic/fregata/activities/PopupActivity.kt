@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.picacomic.fregata.utils.ThemeColorHelper
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.resolvePicaDarkTheme
 import com.picacomic.fregata.compose.screens.ApkVersionListScreen
@@ -83,7 +84,11 @@ class PopupActivity : BaseActivity() {
 
         when (page) {
             PopupSettingsPage.Settings -> {
-                PicaComposeTheme(darkTheme = resolvePicaDarkTheme(forceNightMode = settingsViewModel.state.nightModeEnabled)) {
+                val themeIndex = ThemeColorHelper.toStoredThemeIndex(settingsViewModel.state.themeColorIndex)
+                PicaComposeTheme(
+                    darkTheme = resolvePicaDarkTheme(settingsViewModel.state.nightModeEnabled, themeIndex),
+                    themeColorIndex = themeIndex,
+                ) {
                     SettingsScreen(
                         state = settingsViewModel.state,
                         onScreenOrientation = settingsViewModel::openScreenOrientationDialog,
@@ -119,16 +124,7 @@ class PopupActivity : BaseActivity() {
                         onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
                         onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
                         onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
-                        onThemeColorSelected = { index ->
-                            val previous = settingsViewModel.state.themeColorIndex
-                            settingsViewModel.selectThemeColorIndex(index)
-                            if (previous != index) {
-                                startActivity(Intent(this@PopupActivity, PopupActivity::class.java).apply {
-                                    putExtra(EXTRA_KEY_TYPE, TYPE_KEY_SETTING)
-                                })
-                                finish()
-                            }
-                        },
+                        onThemeColorSelected = settingsViewModel::selectThemeColorIndex,
                         onLauncherIconSelected = settingsViewModel::selectLauncherIconIndex,
                         onLandscapeCommentsSideSelected = settingsViewModel::selectLandscapeCommentsSide,
                         onCoilCacheSizeDraftChanged = settingsViewModel::updateCoilCacheDraftValue,

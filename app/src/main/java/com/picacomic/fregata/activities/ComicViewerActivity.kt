@@ -6,13 +6,62 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.RippleDrawable
-import android.content.res.ColorStateList
-import com.google.android.material.color.MaterialColors
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.ui.res.colorResource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets as ComposeWindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button as ComposeButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
+import kotlin.math.roundToInt
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.picacomic.fregata.compose.picaColorScheme
+import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.resolvePicaDarkTheme
+import com.picacomic.fregata.utils.ThemeColorHelper
 import com.google.android.material.R as MaterialR
-import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -21,8 +70,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.provider.Settings
-import android.text.SpannableString
-import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -34,36 +81,20 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.AbsListView
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemClickListener
-import android.widget.BaseAdapter
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.FrameLayout
-import android.widget.GridView
-import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
-import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.screens.ComicViewerComposeHostView
 import com.picacomic.fregata.compose.screens.ComicViewerControlsOverlayView
 import com.picacomic.fregata.compose.screens.ReaderCommentSidebar
 import com.picacomic.fregata.compose.viewmodels.CommentViewModel
-import com.picacomic.fregata.databinding.ActivityComicViewerBinding
 import com.picacomic.fregata.objects.ComicEpisodeObject
 import com.picacomic.fregata.objects.ComicPageObject
 import com.picacomic.fregata.objects.databaseTable.DbComicViewRecordObject
@@ -78,7 +109,6 @@ import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.utils.f
 import com.picacomic.fregata.utils.g
 import com.picacomic.fregata.utils.views.AlertDialogCenter
-import com.picacomic.fregata.utils.views.VerticalSeekBar
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -96,92 +126,16 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         val total: Int
     )
 
-    private inner class EpisodeGridAdapter : BaseAdapter() {
-        override fun getCount(): Int = this@ComicViewerActivity.episodeList?.size ?: 0
 
-        override fun getItem(position: Int): ComicEpisodeObject? {
-            return this@ComicViewerActivity.episodeList?.getOrNull(position)
-        }
-
-        override fun getItemId(position: Int): Long = getItem(position)?.getOrder()?.toLong() ?: position.toLong()
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val textView = (convertView as? TextView) ?: TextView(this@ComicViewerActivity).apply {
-                minHeight = resources.getDimensionPixelSize(R.dimen.size_message_bar_button_height)
-                setPadding(
-                    resources.getDimensionPixelSize(R.dimen.padding_1),
-                    resources.getDimensionPixelSize(R.dimen.padding_1),
-                    resources.getDimensionPixelSize(R.dimen.padding_1),
-                    resources.getDimensionPixelSize(R.dimen.padding_1)
-                )
-                gravity = Gravity.CENTER
-                maxLines = 2
-                textSize = 12f
-            }
-            val episode = getItem(position)
-            val order = episode?.getOrder() ?: (position + 1)
-            textView.text = episode?.getTitle()?.takeIf { it.isNotBlank() } ?: "第 $order 话"
-            val selected = order == this@ComicViewerActivity.episodeOrder
-            textView.applyEpisodeStyle(selected)
-            return textView
-        }
-
-        private fun TextView.applyEpisodeStyle(selected: Boolean) {
-            val fillRole = if (selected) MaterialR.attr.colorSecondaryContainer else MaterialR.attr.colorSurfaceContainer
-            val textRole = if (selected) MaterialR.attr.colorOnSecondaryContainer else MaterialR.attr.colorOnSurface
-            val textColor = MaterialColors.getColor(this, textRole)
-            val cornerRadius = 16 * resources.displayMetrics.density
-            val shape = GradientDrawable().apply {
-                setColor(MaterialColors.getColor(this@applyEpisodeStyle, fillRole))
-                setCornerRadius(cornerRadius)
-            }
-
-            isSelected = selected
-            setTextColor(textColor)
-            background = RippleDrawable(
-                ColorStateList.valueOf(MaterialColors.compositeARGBWithAlpha(textColor, 31)),
-                shape,
-                null,
-            )
-        }
-
-    }
-
-    var binding: ActivityComicViewerBinding? = null
     var comicViewerHostView: ComicViewerComposeHostView? = null
     var comicViewerControlsOverlayView: ComicViewerControlsOverlayView? = null
     private var readerCommentSidebarView: ComposeView? = null
     private var readerCommentSidebarComicId by mutableStateOf<String?>(null)
-    var button_autoPaging: Button? = null
-    var button_comment: Button? = null
-    var button_dialogAutoPagingStart: Button? = null
-    var button_download: Button? = null
-    var button_hide: Button? = null
-    var button_hint: Button? = null
-    var button_nextEpisode: Button? = null
-    var button_nextPageBottom: Button? = null
-    var button_nextPageRight: Button? = null
-    var button_nightMode: Button? = null
-    var button_panel: Button? = null
-    var button_panelLeftCorner: Button? = null
-    var button_previousEpisode: Button? = null
-    var button_previousPage: Button? = null
-    var button_screenOrientation: Button? = null
-    var button_scrollOrientation: Button? = null
-    var button_selectEpisode: Button? = null
-    var button_setting: Button? = null
-    var button_share: Button? = null
-    var button_twoPageViewMode: Button? = null
-    var checkBox_brightnessSystem: CheckBox? = null
     var comicId: String? = null
     var currentPage: Int = 0
     var episodeOrder: Int = 0
     var episodeTotal: Int = 0
 
-    var frameLayout_gestureArea: FrameLayout? = null
-    var frameLayout_nightModeMask: FrameLayout? = null
-    var gridView_episodeDialog: GridView? = null
-    private var episodeGridAdapter: EpisodeGridAdapter? = null
     var isLandscape: Boolean = false
     var isVerticalScroll: Boolean = false
     var isSystemBrightness: Boolean = false
@@ -206,8 +160,14 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     private var readerLandscapeCommentsEnabled by mutableStateOf(false)
     private var readerLandscapeCommentsOnLeft: Boolean = false
     private var readerCommentSidebarHasContent: Boolean = false
-    private var pendingBrightnessSettingsPermission = false
     var autoPagingTimer: CountDownTimer? = null
+    private var readerTheme by mutableStateOf(0 to false)
+    private lateinit var readerRoot: RelativeLayout
+    private var showNextEpisodeAction by mutableStateOf(false)
+    private var showPreviousEpisodeAction by mutableStateOf(false)
+    private var nextEpisodeHintVisible by mutableStateOf(false)
+    private var previousEpisodeHintVisible by mutableStateOf(false)
+    private var readerNightMaskVisible by mutableStateOf(false)
     var episodeButtonFadeTimer: CountDownTimer? = null
     var comicPagesCall: Call<GeneralResponse<ComicPagesResponse?>?>? = null
     var leftPanelEnterAnimation: Animation? = null
@@ -220,33 +180,21 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     var bottomPanelExitAnimation: Animation? = null
     var comicStatusChangeListener: com.picacomic.fregata.a_pkg.c? = null
     var episodeListCall: Call<GeneralResponse<ComicEpisodeResponse?>?>? = null
-    var panelButtonClickListener: View.OnClickListener? = null
-    var nextPageClickListener: View.OnClickListener? = null
-    var pagingSeekBarChangeListener: OnSeekBarChangeListener? = null
 
     /* JADX INFO: renamed from: if, reason: not valid java name */
     var pageList: ArrayList<ComicPageObject?>? = null
     var episodeList: ArrayList<ComicEpisodeObject?>? = null
 
-    var imageButton_back: ImageButton? = null
-    var linearLayout_bottomPanel: LinearLayout? = null
-    var linearLayout_dialogAutoPaging: LinearLayout? = null
-    var linearLayout_horizontalPagingScrollbar: LinearLayout? = null
-    var linearLayout_rightPanel: LinearLayout? = null
-    var linearLayout_verticalPagingScrollbar: LinearLayout? = null
-    var relativeLayout_leftPanel: RelativeLayout? = null
-    var relativeLayout_toolbar: RelativeLayout? = null
 
-    var seekBar_dialogAutoPaging: SeekBar? = null
-    var seekBar_horizontalPaging: SeekBar? = null
-    var seekBar_verticalPaging: SeekBar? = null
 
-    var textView_dialogAutoPagingTitle: TextView? = null
-    var textView_horizontalPage: TextView? = null
-    var textView_page: TextView? = null
-    var textView_title: TextView? = null
-    var textView_verticalPage: TextView? = null
-    var verticalSeekBar_brightness: VerticalSeekBar? = null
+    private var readerStatusText by mutableStateOf("")
+    private var gesturePanelState by mutableStateOf(GesturePanelState.HIDDEN)
+    private var showEpisodeDialog by mutableStateOf(false)
+    private var episodeChoices by mutableStateOf<List<ComicEpisodeObject>>(emptyList())
+    private var canLoadMoreEpisodes by mutableStateOf(false)
+    private var loadingEpisodes by mutableStateOf(false)
+    private var showAutoPagingDialog by mutableStateOf(false)
+    private var readerPageLabel = ""
     var batteryLevelText: String = "不明"
     private val ih: BroadcastReceiver? = object : BroadcastReceiver() {
         // from class: com.picacomic.fregata.activities.ComicViewerActivity.1
@@ -270,79 +218,106 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     protected override fun onCreate(bundle: Bundle?) {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(bundle)
-        this.binding = ActivityComicViewerBinding.inflate(getLayoutInflater())
-        setContentView(this.binding!!.getRoot())
-        enterReaderFullscreen()
-
-        this.button_autoPaging = this.binding!!.layoutBottomPanel.buttonComicViewerAutoPaging
-        this.button_comment = this.binding!!.layoutRightPanel.buttonComicViewerComment
-        this.button_dialogAutoPagingStart =
-            this.binding!!.layoutAutoPaging.buttonComicViewerDialogAutoPagingStart
-        this.button_download = this.binding!!.layoutToolbar.buttonComicViewerDownload
-        this.button_hide = findViewById<Button>(R.id.button_comic_viewer_hide)
-        this.button_hint = this.binding!!.layoutToolbar.buttonComicViewerHint
-        this.button_nextEpisode = findViewById<Button?>(R.id.button_comic_viewer_next_episode)
-        this.button_nextPageBottom = findViewById<Button>(R.id.button_comic_viewer_next_page_bottom)
-        this.button_nextPageRight = findViewById<Button>(R.id.button_comic_viewer_next_page_right)
-        this.button_nightMode = this.binding!!.layoutRightPanel.buttonComicViewerNightMode
-        this.button_panel = findViewById<Button>(R.id.button_comic_viewer_panel)
-        this.button_panelLeftCorner =
-            findViewById<Button>(R.id.button_comic_viewer_panel_left_corner)
-        this.button_previousEpisode =
-            findViewById<Button?>(R.id.button_comic_viewer_previous_episode)
-        this.button_previousPage = findViewById<Button>(R.id.button_comic_viewer_previous_page)
-        this.button_screenOrientation =
-            findViewById<Button>(R.id.button_comic_viewer_screen_orientation)
-        this.button_scrollOrientation =
-            findViewById<Button>(R.id.button_comic_viewer_scroll_orientation)
-        this.button_selectEpisode = this.binding!!.layoutRightPanel.buttonComicViewerSelectEpisode
-        this.button_setting = findViewById<Button>(R.id.button_comic_viewer_setting)
-        this.button_share = this.binding!!.layoutToolbar.buttonComicViewerShare
-        this.button_twoPageViewMode =
-            findViewById<Button?>(R.id.button_comic_viewer_two_page_view_mode)
-        this.checkBox_brightnessSystem =
-            this.binding!!.layoutLeftPanel.checkBoxComicViewerSystemBrightness
-        this.frameLayout_gestureArea =
-            findViewById<FrameLayout>(R.id.frameLayout_comic_viewer_gesture_area)
-        this.frameLayout_nightModeMask = this.binding!!.frameLayoutComicViewerNightModeMask
-        this.gridView_episodeDialog = this.binding!!.gridViewComicViewerDialogSelectEpisode.apply {
-            background = GradientDrawable().apply {
-                setColor(MaterialColors.getColor(this@ComicViewerActivity, MaterialR.attr.colorSurfaceContainerHighest, Color.BLACK))
-                setCornerRadius(22 * resources.displayMetrics.density)
+        readerTheme = ThemeColorHelper.resolveStoredThemeIndex(this) to e.L(this)
+        val matchParent = RelativeLayout.LayoutParams.MATCH_PARENT
+        val wrapContent = RelativeLayout.LayoutParams.WRAP_CONTENT
+        readerRoot = RelativeLayout(this).apply {
+            setBackgroundColor(readerColorScheme().surface.toArgb())
+            addView(
+                FrameLayout(this@ComicViewerActivity).apply { id = R.id.container },
+                RelativeLayout.LayoutParams(matchParent, matchParent),
+            )
+        }
+        val readerStatus = ComposeView(this).apply {
+            consumeWindowInsets = false
+        }
+        readerRoot.addView(readerStatus, RelativeLayout.LayoutParams(wrapContent, wrapContent).apply {
+            addRule(RelativeLayout.ALIGN_PARENT_START)
+            addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+            val margin = resources.getDimensionPixelSize(R.dimen.padding_2)
+            marginStart = margin
+            bottomMargin = margin
+        })
+        val readerActions = ComposeView(this).apply {
+            consumeWindowInsets = false
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                ReaderTheme {
+                    Box(Modifier.fillMaxSize()) {
+                        if (gesturePanelState != GesturePanelState.HIDDEN) {
+                            ReaderGesturePanel(gesturePanelState == GesturePanelState.HINT)
+                        }
+                        val edge = dimensionResource(R.dimen.width_comic_viewer_setting_panel)
+                        val colors = MaterialTheme.colorScheme
+                        if (showPreviousEpisodeAction) {
+                            ReaderGestureZone(
+                                R.string.comic_viewer_setting_panel_previous_episode,
+                                previousEpisodeHintVisible, colors.secondaryContainer, colors.onSecondaryContainer,
+                                Modifier.align(androidx.compose.ui.AbsoluteAlignment.CenterLeft).width(edge).fillMaxHeight(),
+                                ::openPreviousEpisode,
+                            )
+                        }
+                        if (showNextEpisodeAction) {
+                            ReaderGestureZone(
+                                R.string.comic_viewer_setting_panel_next_episode,
+                                nextEpisodeHintVisible, colors.secondaryContainer, colors.onSecondaryContainer,
+                                Modifier.align(androidx.compose.ui.AbsoluteAlignment.CenterRight).width(edge).fillMaxHeight(),
+                                ::openNextEpisode,
+                            )
+                        }
+                        if (readerNightMaskVisible) {
+                            Box(Modifier.fillMaxSize().background(colorResource(R.color.night_mode_mask)))
+                        }
+                    }
+                }
             }
         }
-        this.imageButton_back = this.binding!!.layoutToolbar.imageButtonComicViewerBack
-        this.linearLayout_bottomPanel =
-            this.binding!!.layoutBottomPanel.linearLayoutComicViewerBottomPanel
-        this.linearLayout_dialogAutoPaging =
-            this.binding!!.layoutAutoPaging.linearLayoutComicViewerDialogAutoPaging
-        this.linearLayout_horizontalPagingScrollbar =
-            findViewById<LinearLayout>(R.id.linearLayout_comic_viewer_horizontal_paging_scrollbar)
-        this.linearLayout_rightPanel =
-            this.binding!!.layoutRightPanel.linearLayoutComicViewerRightPanel
-        this.linearLayout_verticalPagingScrollbar =
-            findViewById<LinearLayout>(R.id.linearLayout_comic_viewer_vertical_paging_scrollbar)
-        this.relativeLayout_leftPanel =
-            this.binding!!.layoutLeftPanel.relativeLayoutComicViewerLeftPanel
-        this.relativeLayout_toolbar = this.binding!!.layoutToolbar.relativeLayoutComicViewerToolbar
-        this.seekBar_dialogAutoPaging =
-            this.binding!!.layoutAutoPaging.seekBarComicViewerDialogAutoPaging
-        this.seekBar_horizontalPaging =
-            findViewById<SeekBar>(R.id.seekBar_comic_viewer_horizontal_page)
-        this.seekBar_verticalPaging = findViewById<SeekBar>(R.id.seekBar_comic_viewer_vertical_page)
-        this.textView_dialogAutoPagingTitle =
-            this.binding!!.layoutAutoPaging.textViewComicViewerDialogAutoPagingTitle
-        this.textView_horizontalPage =
-            findViewById<TextView>(R.id.textView_comic_viewer_horizontal_page)
-        this.textView_page = this.binding!!.textViewComicViewerPage
-        this.textView_title = this.binding!!.layoutToolbar.textViewComicViewerTitle
-        this.textView_verticalPage =
-            findViewById<TextView>(R.id.textView_comic_viewer_vertical_page)
-        this.verticalSeekBar_brightness =
-            this.binding!!.layoutLeftPanel.verticalSeekBarComicViewerBrightness
+        readerRoot.addView(readerActions, RelativeLayout.LayoutParams(matchParent, matchParent))
+        setContentView(readerRoot)
+        enterReaderFullscreen()
 
-        this.binding!!.layoutToolbar.toolbar.setVisibility(View.GONE)
-        this.relativeLayout_toolbar!!.setVisibility(View.GONE)
+        readerStatus.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                if (showEpisodeDialog) {
+                    ReaderTheme {
+                        ReaderEpisodeDialog()
+                    }
+                }
+                if (showAutoPagingDialog) {
+                    ReaderTheme {
+                        ReaderAutoPagingDialog()
+                    }
+                }
+                if (readerStatusText.isNotEmpty()) {
+                    ReaderTheme {
+                        val colors = MaterialTheme.colorScheme
+                        Surface(
+                            modifier = Modifier.windowInsetsPadding(
+                                ComposeWindowInsets.safeDrawing.only(WindowInsetsSides.Start + WindowInsetsSides.Bottom)
+                            ),
+                            color = colors.surfaceContainerHighest,
+                            shape = MaterialTheme.shapes.small,
+                            border = BorderStroke(1.dp, colors.outlineVariant),
+                        ) {
+                            Row(
+                                modifier = Modifier.heightIn(min = 28.dp).padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.ic_action_action_settings),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                    tint = colors.onSurfaceVariant,
+                                )
+                                Text(readerStatusText, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if (bundle == null) {
             this.comicViewerHostView = ComicViewerComposeHostView(this)
             findViewById<FrameLayout>(R.id.container).addView(
@@ -353,7 +328,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 )
             )
             this.comicViewerControlsOverlayView = ComicViewerControlsOverlayView(this)
-            this.binding!!.root.addView(
+            readerRoot.addView(
                 this.comicViewerControlsOverlayView,
                 RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -401,10 +376,12 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     private fun setupReaderCommentSidebar() {
         val commentViewModel = ViewModelProvider(this)[CommentViewModel::class.java]
         val sidebarView = ComposeView(this).apply {
+            consumeWindowInsets = false
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             visibility = View.GONE
             setContent {
-                ReaderCommentSidebar(
+                ReaderTheme {
+                    ReaderCommentSidebar(
                     comicId = this@ComicViewerActivity.readerCommentSidebarComicId,
                     enabled = this@ComicViewerActivity.readerLandscapeCommentsEnabled,
                     viewModel = commentViewModel,
@@ -412,11 +389,12 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                         this@ComicViewerActivity.readerCommentSidebarHasContent = hasContent
                         this@ComicViewerActivity.updateReaderCommentSidebarLayout()
                     },
-                )
+                    )
+                }
             }
         }
         this.readerCommentSidebarView = sidebarView
-        this.binding!!.root.addView(
+        readerRoot.addView(
             sidebarView,
             RelativeLayout.LayoutParams(
                 readerCommentSidebarWidthPx(),
@@ -522,377 +500,42 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     fun bF() {
-        setupEpisodeGrid()
-        setupToolbarButtons()
-        setupReaderOptionButtons()
-        setupPanelButtons()
-        setupSeekBars()
-        setupPagingButtons()
-        setupGestureOverlay()
+        if (episodeList == null) episodeList = ArrayList()
     }
 
-    private fun setupEpisodeGrid() {
-        if (this.episodeList == null) {
-            this.episodeList = ArrayList<ComicEpisodeObject?>()
-        }
-        this.episodeGridAdapter = EpisodeGridAdapter()
-        this.gridView_episodeDialog!!.adapter = this.episodeGridAdapter
-        this.gridView_episodeDialog!!.setOnItemClickListener(object : OnItemClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.12
-            // android.widget.AdapterView.OnItemClickListener
-            override fun onItemClick(adapterView: AdapterView<*>?, view: View?, i: Int, j: Long) {
-                if (this@ComicViewerActivity.episodeList == null || this@ComicViewerActivity.episodeList!!.size <= i) {
-                    return
-                }
-                this@ComicViewerActivity.episodeOrder =
-                    this@ComicViewerActivity.episodeList!!.get(i)!!.getOrder()
-                this@ComicViewerActivity.gridView_episodeDialog!!.setVisibility(View.GONE)
-                this@ComicViewerActivity.episodeGridAdapter?.notifyDataSetChanged()
-                this@ComicViewerActivity.b(this@ComicViewerActivity.episodeOrder, 0, true)
-            }
-        })
-        this.gridView_episodeDialog!!.setOnScrollListener(object : AbsListView.OnScrollListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.23
-            var im: Int = 0
-
-            /* JADX INFO: renamed from: io, reason: collision with root package name */
-            var f6io: Int = 0
-            var ip: Int = 0
-
-            // android.widget.AbsListView.OnScrollListener
-            override fun onScrollStateChanged(absListView: AbsListView?, i: Int) {
-                s(i)
-            }
-
-            // android.widget.AbsListView.OnScrollListener
-            override fun onScroll(absListView: AbsListView?, i: Int, i2: Int, i3: Int) {
-                this.im = i
-                this.f6io = i2
-                this.ip = i3
-            }
-
-            fun s(i: Int) {
-                if (this.im < this.ip - this.f6io || i != 0) {
-                    return
-                }
-                this@ComicViewerActivity.bN()
-            }
-        })
-        this.gridView_episodeDialog!!.setOnTouchListener { gridView, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                val childIndex = this@ComicViewerActivity.gridView_episodeDialog!!.pointToPosition(
-                    event.x.toInt(),
-                    event.y.toInt()
-                )
-                if (childIndex == AdapterView.INVALID_POSITION) {
-                    this@ComicViewerActivity.gridView_episodeDialog!!.visibility = View.GONE
-                    this@ComicViewerActivity.setGesturePanelState(GesturePanelState.TRANSPARENT)
-                    return@setOnTouchListener true
-                }
-            }
-            false
+    private fun openNextEpisode() {
+        if (episodeOrder < episodeTotal) {
+            episodeOrder++
+            b(episodeOrder, 0, true)
+        } else {
+            p(View.GONE)
+            Toast.makeText(this, R.string.comic_viewer_no_more_episode, Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun setupToolbarButtons() {
-        this.imageButton_back!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.26
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.onBackPressed()
-            }
-        })
-        this.button_hint!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.27
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
-                this@ComicViewerActivity.setGesturePanelState(GesturePanelState.HINT)
-                e.c(this@ComicViewerActivity as Context, true)
-            }
-        })
-        this.button_share!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.28
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                Toast.makeText(this@ComicViewerActivity, "Download and Share Image", Toast.LENGTH_SHORT).show()
-            }
-        })
-        this.button_download!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.29
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                Toast.makeText(this@ComicViewerActivity, "Download Current Image", android.widget.Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun setupReaderOptionButtons() {
-        this.button_screenOrientation!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.30
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.isLandscape) {
-                    this@ComicViewerActivity.isLandscape = false
-                    this@ComicViewerActivity.h(false)
-                } else {
-                    this@ComicViewerActivity.isLandscape = true
-                    this@ComicViewerActivity.h(true)
-                }
-                e.e(this@ComicViewerActivity, this@ComicViewerActivity.isLandscape)
-            }
-        })
-        this.button_scrollOrientation!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.31
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.isVerticalScroll) {
-                    this@ComicViewerActivity.isVerticalScroll = false
-                    this@ComicViewerActivity.i(false)
-                } else {
-                    this@ComicViewerActivity.isVerticalScroll = true
-                    this@ComicViewerActivity.i(true)
-                }
-                e.f(this@ComicViewerActivity, this@ComicViewerActivity.isVerticalScroll)
-            }
-        })
-    }
-
-    private fun setupPanelButtons() {
-        this.button_autoPaging!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.2
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.getVisibility() == View.VISIBLE) {
-                    this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.setVisibility(View.GONE)
-                    return
-                }
-                if (this@ComicViewerActivity.gridView_episodeDialog!!.getVisibility() == View.VISIBLE) {
-                    this@ComicViewerActivity.gridView_episodeDialog!!.setVisibility(View.GONE)
-                }
-                this@ComicViewerActivity.linearLayout_dialogAutoPaging!!.setVisibility(View.VISIBLE)
-            }
-        })
-        this.button_dialogAutoPagingStart!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.3
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
-                this@ComicViewerActivity.bO()
-            }
-        })
-        this.button_setting!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.4
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                val intent = Intent(this@ComicViewerActivity, PopupActivity::class.java as Class<*>)
-                intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_SETTING")
-                this@ComicViewerActivity.startActivity(intent)
-            }
-        })
-        this.button_hide!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.5
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
-            }
-        })
-        this.button_selectEpisode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.6
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.toggleEpisodeDialog()
-            }
-        })
-        this.button_nightMode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.7
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.isNightMode) {
-                    this@ComicViewerActivity.setNightModeEnabled(false)
-                } else {
-                    this@ComicViewerActivity.setNightModeEnabled(true)
-                }
-            }
-        })
-        this.button_comment!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.8
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.comicId != null) {
-                    val intent =
-                        Intent(this@ComicViewerActivity, PopupActivity::class.java as Class<*>)
-                    intent.putExtra("EXTRA_KEY_COMIC_ID", this@ComicViewerActivity.comicId)
-                    intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_COMMENT")
-                    this@ComicViewerActivity.startActivity(intent)
-                }
-            }
-        })
-        this.checkBox_brightnessSystem!!.setOnCheckedChangeListener(object :
-            CompoundButton.OnCheckedChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.9
-            // android.widget.CompoundButton.OnCheckedChangeListener
-            override fun onCheckedChanged(compoundButton: CompoundButton, z: Boolean) {
-                this@ComicViewerActivity.j(z)
-            }
-        })
-        this.panelButtonClickListener = object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.10
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.setReaderControlsVisibility(View.VISIBLE)
-                this@ComicViewerActivity.bP()
-            }
+    private fun openPreviousEpisode() {
+        if (episodeOrder > 1) {
+            episodeOrder--
+            b(episodeOrder, 0, true)
+        } else {
+            q(View.GONE)
+            Toast.makeText(this, R.string.comic_viewer_first_episode, Toast.LENGTH_SHORT).show()
         }
-        this.button_panel!!.setOnClickListener(this.panelButtonClickListener)
-        this.button_panelLeftCorner!!.setOnClickListener(this.panelButtonClickListener)
-    }
-
-    private fun setupSeekBars() {
-        this.verticalSeekBar_brightness!!.setOnSeekBarChangeListener(object :
-            OnSeekBarChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.11
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onProgressChanged(seekBar: SeekBar?, i: Int, z: Boolean) {
-                this@ComicViewerActivity.m(i)
-            }
-        })
-        this.pagingSeekBarChangeListener = object : OnSeekBarChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.13
-            var ik: Int = 0
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onProgressChanged(seekBar: SeekBar?, i: Int, z: Boolean) {
-                this.ik = i
-                if (z) {
-                    this@ComicViewerActivity.currentPage = this.ik
-                    this@ComicViewerActivity.comicStatusChangeListener!!.b(this.ik, false)
-                    this@ComicViewerActivity.r(this@ComicViewerActivity.currentPage)
-                }
-            }
-        }
-        this.seekBar_horizontalPaging!!.setOnSeekBarChangeListener(this.pagingSeekBarChangeListener)
-        this.seekBar_verticalPaging!!.setOnSeekBarChangeListener(this.pagingSeekBarChangeListener)
-        this.seekBar_dialogAutoPaging!!.setOnSeekBarChangeListener(object :
-            OnSeekBarChangeListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.14
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            // android.widget.SeekBar.OnSeekBarChangeListener
-            override fun onProgressChanged(seekBar: SeekBar?, i: Int, z: Boolean) {
-                this@ComicViewerActivity.autoPagingInterval = (i * 100) + 1000
-                this@ComicViewerActivity.comicViewerControlsOverlayView?.setAutoPagingInterval(
-                    this@ComicViewerActivity.autoPagingInterval
-                )
-                e.b(
-                    this@ComicViewerActivity as Context,
-                    this@ComicViewerActivity.autoPagingInterval
-                )
-                val textView = this@ComicViewerActivity.textView_dialogAutoPagingTitle!!
-                textView.setText(
-                    this@ComicViewerActivity.getResources()
-                        .getString(R.string.comic_viewer_setting_panel_auto_paging) + " 【 " + String.format(
-                        "%.1f",
-                        this@ComicViewerActivity.autoPagingInterval / 1000.0f
-                    ) + this@ComicViewerActivity.getResources().getString(R.string.second) + " 】"
-                )
-            }
-        })
-    }
-
-    private fun setupPagingButtons() {
-        this.nextPageClickListener = object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.15
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.bR()
-            }
-        }
-        this.button_nextPageBottom!!.setOnClickListener(this.nextPageClickListener)
-        this.button_nextPageRight!!.setOnClickListener(this.nextPageClickListener)
-        this.button_nextEpisode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.16
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.episodeOrder < this@ComicViewerActivity.episodeTotal) {
-                    this@ComicViewerActivity.episodeOrder++
-                    this@ComicViewerActivity.b(this@ComicViewerActivity.episodeOrder, 0, true)
-                } else {
-                    this@ComicViewerActivity.p(View.GONE)
-                    Toast.makeText(
-                        this@ComicViewerActivity,
-                        R.string.comic_viewer_no_more_episode,
-                        0
-                    ).show()
-                }
-            }
-        })
-        this.button_previousEpisode!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.17
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.episodeOrder > 1) {
-                    this@ComicViewerActivity.episodeOrder--
-                    this@ComicViewerActivity.b(this@ComicViewerActivity.episodeOrder, 0, true)
-                } else {
-                    this@ComicViewerActivity.q(View.GONE)
-                    Toast.makeText(this@ComicViewerActivity, R.string.comic_viewer_first_episode, 0)
-                        .show()
-                }
-            }
-        })
-        this.button_previousPage!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.18
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                this@ComicViewerActivity.bS()
-            }
-        })
-    }
-
-    private fun setupGestureOverlay() {
-        this.frameLayout_gestureArea!!.setOnClickListener(object : View.OnClickListener {
-            // from class: com.picacomic.fregata.activities.ComicViewerActivity.19
-            // android.view.View.OnClickListener
-            override fun onClick(view: View?) {
-                if (this@ComicViewerActivity.gridView_episodeDialog?.visibility == View.VISIBLE) {
-                    this@ComicViewerActivity.gridView_episodeDialog?.visibility = View.GONE
-                    this@ComicViewerActivity.setGesturePanelState(GesturePanelState.TRANSPARENT)
-                    return
-                }
-                this@ComicViewerActivity.setGesturePanelState(GesturePanelState.TRANSPARENT)
-                e.c(this@ComicViewerActivity as Context, false)
-            }
-        })
     }
 
     private fun setupComposeControlsOverlay() {
         this.comicViewerControlsOverlayView?.apply {
             setBrightnessValue(this@ComicViewerActivity.brightnessValue)
+            setBrightnessMode(this@ComicViewerActivity.isSystemBrightness)
+            onBrightnessModeChanged = { automatic -> this@ComicViewerActivity.j(automatic) }
             setAutoPagingInterval(this@ComicViewerActivity.autoPagingInterval)
             setNightModeValue(this@ComicViewerActivity.isNightMode)
+            onBack = { this@ComicViewerActivity.onBackPressed() }
+            onHint = {
+                this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
+                this@ComicViewerActivity.updateGesturePanel(GesturePanelState.HINT)
+                e.c(this@ComicViewerActivity, true)
+            }
             onHide = {
                 this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
             }
@@ -916,10 +559,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 }
                 e.f(this@ComicViewerActivity, this@ComicViewerActivity.isVerticalScroll)
             }
-            onAutoPaging = {
-                this@ComicViewerActivity.setReaderControlsVisibility(View.GONE)
-                this@ComicViewerActivity.bO()
-            }
+            onAutoPaging = { showAutoPagingDialog = true }
             onSettings = {
                 val intent = Intent(this@ComicViewerActivity, PopupActivity::class.java as Class<*>)
                 intent.putExtra("EXTRA_KEY_TYPE", "TYPE_KEY_SETTING")
@@ -952,47 +592,74 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     private fun toggleEpisodeDialog() {
-        if (this.gridView_episodeDialog!!.getVisibility() == View.VISIBLE) {
-            this.gridView_episodeDialog!!.setVisibility(View.GONE)
-            setGesturePanelState(GesturePanelState.TRANSPARENT)
-            return
-        }
-        if (this.linearLayout_dialogAutoPaging!!.getVisibility() == View.VISIBLE) {
-            this.linearLayout_dialogAutoPaging!!.setVisibility(View.GONE)
-        }
-        this.comicViewerControlsOverlayView?.updateControlsVisible(false)
-        setEpisodeDialogDismissLayerVisible()
-        this.episodeGridAdapter?.notifyDataSetChanged()
-        this.gridView_episodeDialog!!.setVisibility(View.VISIBLE)
-        this.gridView_episodeDialog!!.bringToFront()
-        scrollEpisodeDialogToCurrent()
+        showAutoPagingDialog = false
+        refreshEpisodeDialog()
+        showEpisodeDialog = true
         bN()
     }
 
-    private fun setEpisodeDialogDismissLayerVisible() {
-        this.button_nextPageRight!!.setVisibility(View.GONE)
-        this.button_nextPageBottom!!.setVisibility(View.GONE)
-        this.button_previousPage!!.setVisibility(View.GONE)
-        this.button_panel!!.setVisibility(View.GONE)
-        this.button_panelLeftCorner!!.setVisibility(View.GONE)
-        this.button_panel!!.setText("")
-        this.button_panelLeftCorner!!.setText("")
-        this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-        this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-        this.frameLayout_gestureArea!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-        this.frameLayout_gestureArea!!.setVisibility(View.VISIBLE)
-    }
-
     private fun refreshEpisodeDialog() {
-        this.episodeGridAdapter?.notifyDataSetChanged()
-        scrollEpisodeDialogToCurrent()
+        episodeChoices = episodeList.orEmpty().filterNotNull()
+        canLoadMoreEpisodes = !offlineMode && currentEpisodePagingPage < totalEpisodePagingPages
     }
 
-    private fun scrollEpisodeDialogToCurrent() {
-        val index = this.episodeList?.indexOfFirst { it?.getOrder() == this.episodeOrder } ?: -1
-        if (index >= 0) {
-            this.gridView_episodeDialog?.setSelection(index)
+    @Composable
+    private fun ReaderEpisodeDialog() {
+        val currentIndex = episodeChoices.indexOfFirst { it.getOrder() == episodeOrder }
+        val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = currentIndex.coerceAtLeast(0))
+        LaunchedEffect(currentIndex) {
+            if (currentIndex >= 0) gridState.scrollToItem(currentIndex)
         }
+        val dismiss = { showEpisodeDialog = false }
+        AlertDialog(
+            onDismissRequest = dismiss,
+            title = { Text(stringResource(R.string.comic_viewer_setting_panel_select_episode)) },
+            text = {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(88.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
+                    state = gridState,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    items(episodeChoices) { episode ->
+                        val order = episode.getOrder()
+                        FilterChip(
+                            selected = order == episodeOrder,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            ),
+                            onClick = {
+                                episodeOrder = order
+                                setReaderControlsVisibility(View.GONE)
+                                b(order, 0, true)
+                            },
+                            label = {
+                                Text(
+                                    episode.getTitle()?.takeIf { it.isNotBlank() } ?: "第 $order 话",
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                        )
+                    }
+                }
+            },
+            shape = MaterialTheme.shapes.extraLarge,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            tonalElevation = 0.dp,
+            confirmButton = {
+                if (canLoadMoreEpisodes) {
+                    TextButton(onClick = { bN() }, enabled = !loadingEpisodes) {
+                        Text(stringResource(R.string.reader_load_more_episodes))
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = dismiss) { Text(stringResource(R.string.cancel)) }
+            },
+        )
     }
 
     fun bG() {
@@ -1009,17 +676,12 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         h(this.isLandscape)
         i(this.isVerticalScroll)
         setNightModeEnabled(this.isNightMode)
-        if (this.autoPagingInterval + NotificationManagerCompat.IMPORTANCE_UNSPECIFIED < 0) {
-            this.seekBar_dialogAutoPaging!!.setProgress(0)
-        } else {
-            this.seekBar_dialogAutoPaging!!.setProgress((this.autoPagingInterval + NotificationManagerCompat.IMPORTANCE_UNSPECIFIED) / 100)
-        }
         if (e.K(this)) {
             setReaderControlsVisibility(View.GONE)
-            setGesturePanelState(GesturePanelState.HINT)
+            updateGesturePanel(GesturePanelState.HINT)
         } else {
             setReaderControlsVisibility(View.GONE)
-            setGesturePanelState(GesturePanelState.TRANSPARENT)
+            updateGesturePanel(GesturePanelState.TRANSPARENT)
         }
     }
 
@@ -1027,17 +689,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         p(View.GONE)
         q(View.GONE)
         n(this.currentPage)
-        if (this.currentEpisode != null) {
-            this.textView_title!!.setText("〖" + this.currentEpisode!!.getTitle() + "〗 ")
-            val spannableString = SpannableString(this.comicTitle)
-            spannableString.setSpan(
-                ForegroundColorSpan(getResources().getColor(R.color.white)),
-                0,
-                spannableString.length,
-                33
-            )
-            this.textView_title!!.append(spannableString)
-        }
+        comicViewerControlsOverlayView?.setReaderTitles(comicTitle.orEmpty(), currentEpisode?.getTitle().orEmpty())
     }
 
     fun bJ() {
@@ -1051,7 +703,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         ).show()
         val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS)
         intent.setData(Uri.parse("package:" + getPackageName()))
-        pendingBrightnessSettingsPermission = true
         startActivity(intent)
     }
 
@@ -1083,6 +734,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     // com.picacomic.fregata.activities.BaseActivity, androidx.fragment.app.FragmentActivity, android.app.Activity
     protected override fun onResume() {
         super.onResume()
+        refreshReaderTheme()
         enterReaderFullscreen()
         try {
             if (this.ih != null) {
@@ -1091,10 +743,13 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        if (pendingBrightnessSettingsPermission && (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.System.canWrite(this))) {
-            pendingBrightnessSettingsPermission = false
-            j(this.checkBox_brightnessSystem?.isChecked == true)
-        }
+        val resolver = contentResolver
+        isSystemBrightness = Settings.System.getInt(
+            resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
+        ) == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
+        brightnessValue = Settings.System.getInt(resolver, Settings.System.SCREEN_BRIGHTNESS, brightnessValue)
+        comicViewerControlsOverlayView?.setBrightnessMode(isSystemBrightness)
+        comicViewerControlsOverlayView?.setBrightnessValue(brightnessValue)
         this.readerLandscapeCommentsEnabled = e.readerLandscapeComments(this)
         this.readerLandscapeCommentsOnLeft = e.readerLandscapeCommentsOnLeft(this)
         updateReaderCommentSidebarLayout()
@@ -1283,7 +938,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         if (z) {
             try {
                 bG()
-                this.pageList!!.clear()
+                this.pageList?.clear()
             } catch (th: Throwable) {
                 throw th
             }
@@ -1362,18 +1017,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         this.isLoading = true
         C(getResources().getString(R.string.loading_comic_viewer))
         val dVar = com.picacomic.fregata.b.d(this)
-        val str: String = TAG
-        val sb = StringBuilder()
-        sb.append("Call Page api = ")
-        sb.append(e.z(this))
-        sb.append("  ")
-        sb.append(this.comicId)
-        sb.append("  ")
-        sb.append(i)
-        sb.append("  ")
         val i3 = i2 + 1
-        sb.append(i3)
-        f.D(str, sb.toString())
+        f.D(TAG, "Request comic pages: comicId=${this.comicId} episode=$i page=$i3")
         this.comicPagesCall = dVar.dO().a(e.z(this), this.comicId, i, i3)
         this.comicPagesCall!!.enqueue(object : Callback<GeneralResponse<ComicPagesResponse?>?> {
             // from class: com.picacomic.fregata.activities.ComicViewerActivity.20
@@ -1383,26 +1028,25 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 response: Response<GeneralResponse<ComicPagesResponse?>?>
             ) {
                 if (response.code() == 200) {
-                    f.aA(response.body()!!.data!!.getPages().toString())
-                    if (response.body()!!.data != null && response.body()!!.data!!.getPages()
-                            .getDocs() != null
-                    ) {
-                        hq = response.body()!!.data!!.getPages().getLimit()
+                    val data = response.body()?.data
+                    val pages = data?.getPages()
+                    val docs = pages?.getDocs()
+                    if (pages != null && !docs.isNullOrEmpty()) {
+                        hq = pages.getLimit().takeIf { it > 0 } ?: hq
                         if (z) {
                             this@ComicViewerActivity.bG()
-                            this@ComicViewerActivity.pageList!!.clear()
+                            this@ComicViewerActivity.pageList?.clear()
                         }
                         this@ComicViewerActivity.totalPages =
-                            response.body()!!.data!!.getPages().getTotal()
+                            pages.getTotal()
                         this@ComicViewerActivity.currentPagingPage =
-                            response.body()!!.data!!.getPages().getPage()
+                            pages.getPage()
                         this@ComicViewerActivity.totalPagingPages =
-                            response.body()!!.data!!.getPages().getPages()
-                        this@ComicViewerActivity.currentEpisode = response.body()!!.data!!.getEp()
+                            pages.getPages()
+                        this@ComicViewerActivity.currentEpisode = data.getEp()
                         if (this@ComicViewerActivity.pageList == null) {
                             this@ComicViewerActivity.pageList = ArrayList<ComicPageObject?>()
                         }
-                        val docs = response.body()!!.data!!.getPages().getDocs()
                         for (i4 in docs.indices) {
                             this@ComicViewerActivity.pageList!!.add(docs.get(i4))
                         }
@@ -1472,17 +1116,15 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                 response: Response<GeneralResponse<ComicPagesResponse?>?>
             ) {
                 if (response.code() == 200) {
-                    f.aA(response.body()!!.data!!.getPages().toString())
-                    if (response.body()!!.data != null && response.body()!!.data!!.getPages()
-                            .getDocs() != null
-                    ) {
-                        hq = response.body()!!.data!!.getPages().getLimit()
+                    val pages = response.body()?.data?.getPages()
+                    val docs = pages?.getDocs()
+                    if (pages != null && !docs.isNullOrEmpty()) {
+                        hq = pages.getLimit().takeIf { it > 0 } ?: hq
                         this@ComicViewerActivity.totalPages =
-                            response.body()!!.data!!.getPages().getTotal()
-                        val docs = response.body()!!.data!!.getPages().getDocs()
+                            pages.getTotal()
                         this@ComicViewerActivity.pageList!!.addAll(0, docs)
                         this@ComicViewerActivity.loadedPageOffset =
-                            (response.body()!!.data!!.getPages().getPage() - 1) * hq
+                            (pages.getPage() - 1) * hq
                         this@ComicViewerActivity.persistCachedEpisodePages(
                             docs,
                             this@ComicViewerActivity.currentEpisode,
@@ -1650,7 +1292,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             loadDownloadedEpisodeList()
             return
         }
-        if (this.currentEpisodePagingPage < this.totalEpisodePagingPages) {
+        if (!loadingEpisodes && this.currentEpisodePagingPage < this.totalEpisodePagingPages) {
+            loadingEpisodes = true
             bA()
             this.episodeListCall = com.picacomic.fregata.b.d(this).dO()
                 .b(e.z(this), this.comicId, this.currentEpisodePagingPage + 1)
@@ -1662,6 +1305,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                     call: Call<GeneralResponse<ComicEpisodeResponse?>?>,
                     response: Response<GeneralResponse<ComicEpisodeResponse?>?>
                 ) {
+                    loadingEpisodes = false
                     if (response.code() == 200) {
                         if (response.body()!!.data != null && response.body()!!.data!!.getEps() != null && response.body()!!.data!!.getEps()
                                 .getDocs() != null && response.body()!!.data!!.getEps()
@@ -1703,6 +1347,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
                     call: Call<GeneralResponse<ComicEpisodeResponse?>?>,
                     th: Throwable
                 ) {
+                    loadingEpisodes = false
                     th.printStackTrace()
                     this@ComicViewerActivity.bC()
                     com.picacomic.fregata.b.c(this@ComicViewerActivity).dN()
@@ -1826,27 +1471,7 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     }
 
     fun i(z: Boolean) {
-        if (this.comicStatusChangeListener != null) {
-            this.comicStatusChangeListener!!.B(z)
-            if (z) {
-                this.button_scrollOrientation!!.setCompoundDrawablesWithIntrinsicBounds(
-                    null as Drawable?,
-                    ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_flip),
-                    null as Drawable?,
-                    null as Drawable?
-                )
-            } else {
-                this.button_scrollOrientation!!.setCompoundDrawablesWithIntrinsicBounds(
-                    null as Drawable?,
-                    ContextCompat.getDrawable(
-                        getApplicationContext(),
-                        R.drawable.ic_action_flip_vert
-                    ),
-                    null as Drawable?,
-                    null as Drawable?
-                )
-            }
-        }
+        comicStatusChangeListener?.B(z)
     }
 
     fun a(cVar: com.picacomic.fregata.a_pkg.c?) {
@@ -1856,132 +1481,200 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     fun setReaderControlsVisibility(visibility: Int) {
         enterReaderFullscreen()
         ensurePanelAnimationsLoaded()
-        this.relativeLayout_leftPanel!!.setVisibility(View.GONE)
-        this.linearLayout_rightPanel!!.setVisibility(View.GONE)
-        this.relativeLayout_toolbar!!.setVisibility(View.GONE)
-        this.linearLayout_bottomPanel!!.setVisibility(View.GONE)
         this.comicViewerControlsOverlayView?.updateControlsVisible(visibility == View.VISIBLE)
         if (visibility == View.VISIBLE) {
             this.comicViewerControlsOverlayView?.bringToFront()
-            setGesturePanelState(GesturePanelState.HIDDEN)
+            updateGesturePanel(GesturePanelState.HIDDEN)
             return
         }
-        this.gridView_episodeDialog!!.setVisibility(View.GONE)
-        this.linearLayout_dialogAutoPaging!!.setVisibility(View.GONE)
-        setGesturePanelState(GesturePanelState.TRANSPARENT)
+        showEpisodeDialog = false
+        showAutoPagingDialog = false
+        updateGesturePanel(GesturePanelState.TRANSPARENT)
     }
 
-    private fun setGesturePanelState(state: GesturePanelState?) {
-        if (state == GesturePanelState.TRANSPARENT) {
-            this.button_nextPageRight!!.setVisibility(View.VISIBLE)
-            this.button_nextPageBottom!!.setVisibility(View.VISIBLE)
-            this.button_previousPage!!.setVisibility(View.VISIBLE)
-            this.button_panel!!.setVisibility(View.VISIBLE)
-            this.button_panelLeftCorner!!.setVisibility(View.VISIBLE)
-            this.button_nextPageRight!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_nextPageBottom!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_previousPage!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_nextPageRight!!.setText("")
-            this.button_nextPageBottom!!.setText("")
-            this.button_previousPage!!.setText("")
-            this.button_panel!!.setText("")
-            this.button_panelLeftCorner!!.setText("")
-            this.frameLayout_gestureArea!!.setVisibility(View.GONE)
+    private fun updateGesturePanel(state: GesturePanelState) {
+        gesturePanelState = state
+    }
+
+    @Composable
+    private fun ReaderGesturePanel(showHint: Boolean) {
+        val edge = dimensionResource(R.dimen.width_comic_viewer_setting_panel)
+        val colors = MaterialTheme.colorScheme
+        val openControls = {
+            setReaderControlsVisibility(View.VISIBLE)
+            bP()
+        }
+        val panelModifier = Modifier.fillMaxSize()
+        Column(if (showHint) panelModifier.safeDrawingPadding() else panelModifier) {
+            ReaderGestureZone(
+                R.string.comic_viewer_setting_panel_setting_menu, showHint,
+                colors.primaryContainer, colors.onPrimaryContainer,
+                Modifier.fillMaxWidth().height(edge), openControls,
+            )
+            Row(Modifier.weight(1f).fillMaxWidth()) {
+                ReaderGestureZone(
+                    R.string.comic_viewer_setting_panel_previous_page_vertical, showHint,
+                    colors.secondaryContainer, colors.onSecondaryContainer,
+                    Modifier.width(edge).fillMaxHeight(), ::bS,
+                )
+                if (showHint) {
+                    ReaderGestureZone(
+                        R.string.comic_viewer_setting_panel_gesture_area, true,
+                        colors.tertiaryContainer, colors.onTertiaryContainer,
+                        Modifier.weight(1f).fillMaxHeight(),
+                    ) {
+                        updateGesturePanel(GesturePanelState.TRANSPARENT)
+                        e.c(this@ComicViewerActivity, false)
+                    }
+                } else {
+                    Box(Modifier.weight(1f))
+                }
+                ReaderGestureZone(
+                    R.string.comic_viewer_setting_panel_next_page_vertical, showHint,
+                    colors.secondaryContainer, colors.onSecondaryContainer,
+                    Modifier.width(edge).fillMaxHeight(), ::bR,
+                )
+            }
+            Row(Modifier.fillMaxWidth().height(edge)) {
+                ReaderGestureZone(
+                    R.string.comic_viewer_setting_panel_setting_menu, showHint,
+                    colors.primaryContainer, colors.onPrimaryContainer,
+                    Modifier.width(edge).fillMaxHeight(), openControls,
+                )
+                ReaderGestureZone(
+                    R.string.comic_viewer_setting_panel_next_page, showHint,
+                    colors.secondaryContainer, colors.onSecondaryContainer,
+                    Modifier.weight(1f).fillMaxHeight(), ::bR,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ReaderGestureZone(
+        label: Int,
+        showHint: Boolean,
+        color: androidx.compose.ui.graphics.Color,
+        contentColor: androidx.compose.ui.graphics.Color,
+        modifier: Modifier,
+        onClick: () -> Unit,
+    ) {
+        val text = stringResource(label)
+        Box(
+            modifier.clickable(role = Role.Button, onClickLabel = text, onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (showHint) {
+                Surface(
+                    modifier = Modifier.fillMaxSize().padding(2.dp),
+                    color = color,
+                    contentColor = contentColor,
+                    shape = MaterialTheme.shapes.large,
+                ) {
+                    Box(Modifier.padding(6.dp), contentAlignment = Alignment.Center) {
+                        Text(text, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ReaderAutoPagingDialog() {
+        var seconds by remember { mutableStateOf((autoPagingInterval / 1000f).coerceIn(1f, 11f)) }
+        val dismiss = { showAutoPagingDialog = false }
+        AlertDialog(
+            onDismissRequest = dismiss,
+            title = { Text(stringResource(R.string.comic_viewer_setting_panel_auto_paging)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(String.format("%.1f", seconds) + " " + stringResource(R.string.second))
+                    Slider(
+                        value = seconds,
+                        onValueChange = { seconds = it },
+                        valueRange = 1f..11f,
+                        steps = 99,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        stringResource(R.string.comic_viewer_toast_auto_paging_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            },
+            shape = MaterialTheme.shapes.extraLarge,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            tonalElevation = 0.dp,
+            confirmButton = {
+                ComposeButton(onClick = {
+                    autoPagingInterval = (seconds * 10).roundToInt() * 100
+                    e.b(this@ComicViewerActivity, autoPagingInterval)
+                    comicViewerControlsOverlayView?.setAutoPagingInterval(autoPagingInterval)
+                    setReaderControlsVisibility(View.GONE)
+                    bO()
+                }) { Text(stringResource(R.string.comic_viewer_setting_panel_auto_start)) }
+            },
+            dismissButton = {
+                TextButton(onClick = dismiss) { Text(stringResource(R.string.cancel)) }
+            },
+        )
+    }
+
+    private fun refreshReaderTheme() {
+        readerTheme = ThemeColorHelper.resolveStoredThemeIndex(this) to e.L(this)
+        comicViewerHostView?.readerTheme = readerTheme
+        comicViewerControlsOverlayView?.readerTheme = readerTheme
+        readerRoot.setBackgroundColor(readerColorScheme().surface.toArgb())
+    }
+
+    @Composable
+    private fun ReaderTheme(content: @Composable () -> Unit) {
+        val (themeIndex, forceNightMode) = readerTheme
+        PicaComposeTheme(
+            darkTheme = resolvePicaDarkTheme(forceNightMode, themeIndex),
+            themeColorIndex = themeIndex,
+            content = content,
+        )
+    }
+
+    private fun readerColorScheme(): androidx.compose.material3.ColorScheme {
+        val themeIndex = ThemeColorHelper.resolveStoredThemeIndex(this)
+        return picaColorScheme(
+            this,
+            themeIndex,
+            ThemeColorHelper.isThemeIndexDarkForLegacyContent(this, themeIndex),
+        )
+    }
+
+    fun j(automatic: Boolean) {
+        if (!Settings.System.canWrite(this)) {
+            bJ()
             return
         }
-        if (state == GesturePanelState.HIDDEN) {
-            this.button_nextPageRight!!.setVisibility(View.GONE)
-            this.button_nextPageBottom!!.setVisibility(View.GONE)
-            this.button_previousPage!!.setVisibility(View.GONE)
-            this.button_panel!!.setVisibility(View.GONE)
-            this.button_panelLeftCorner!!.setVisibility(View.GONE)
-            this.button_panel!!.setText("")
-            this.button_panelLeftCorner!!.setText("")
-            this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.transparent))
-            this.frameLayout_gestureArea!!.setVisibility(View.GONE)
-            return
+        val mode = if (automatic) {
+            Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC
+        } else {
+            Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL
         }
-        if (state == GesturePanelState.HINT) {
-            this.button_nextPageRight!!.setVisibility(View.VISIBLE)
-            this.button_nextPageBottom!!.setVisibility(View.VISIBLE)
-            this.button_previousPage!!.setVisibility(View.VISIBLE)
-            this.button_panel!!.setVisibility(View.VISIBLE)
-            this.button_panelLeftCorner!!.setVisibility(View.VISIBLE)
-            this.button_nextPageRight!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_next_page_vertical))
-            this.button_nextPageBottom!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_next_page))
-            this.button_previousPage!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_previous_page_vertical))
-            this.button_panel!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu))
-            this.button_panelLeftCorner!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu))
-            val navigationColor = MaterialColors.getColor(this, MaterialR.attr.colorSecondaryContainer, Color.DKGRAY)
-            val navigationText = MaterialColors.getColor(this, MaterialR.attr.colorOnSecondaryContainer, Color.WHITE)
-            listOfNotNull(button_nextPageRight, button_nextPageBottom, button_previousPage).forEach { button ->
-                button.setBackgroundColor(navigationColor)
-                button.setTextColor(navigationText)
-            }
-            val actionColor = MaterialColors.getColor(this, MaterialR.attr.colorPrimaryContainer, Color.DKGRAY)
-            val actionText = MaterialColors.getColor(this, MaterialR.attr.colorOnPrimaryContainer, Color.WHITE)
-            listOfNotNull(button_panel, button_panelLeftCorner).forEach { button ->
-                button.setBackgroundColor(actionColor)
-                button.setTextColor(actionText)
-            }
-            this.frameLayout_gestureArea!!.setVisibility(View.VISIBLE)
+        if (Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, mode)) {
+            isSystemBrightness = automatic
+            comicViewerControlsOverlayView?.setBrightnessMode(automatic)
         }
     }
 
-    fun j(z: Boolean) {
-        try {
-            if (z) {
-                Settings.System.putInt(getContentResolver(), "screen_brightness_mode", 1)
-                this.checkBox_brightnessSystem!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_brightness_auto))
-            } else {
-                Settings.System.putInt(getContentResolver(), "screen_brightness_mode", 0)
-                this.checkBox_brightnessSystem!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_brightness_manual))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+    fun m(value: Int) {
+        if (!Settings.System.canWrite(this)) return
+        if (isSystemBrightness) j(false)
+        if (Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, value)) {
+            brightnessValue = value
+            comicViewerControlsOverlayView?.setBrightnessValue(value)
         }
-        this.isSystemBrightness = z
-    }
-
-    fun m(i: Int) {
-        try {
-            if (Settings.System.getInt(getContentResolver(), "screen_brightness_mode") == 1) {
-                this.checkBox_brightnessSystem!!.setChecked(false)
-            }
-            Settings.System.putInt(getContentResolver(), "screen_brightness", i)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        this.brightnessValue = i
-        this.comicViewerControlsOverlayView?.setBrightnessValue(i)
     }
 
     fun setNightModeEnabled(enabled: Boolean) {
+        readerNightMaskVisible = enabled
         if (enabled) {
-            this.frameLayout_nightModeMask!!.setVisibility(View.VISIBLE)
-            this.button_nightMode!!.setCompoundDrawablesWithIntrinsicBounds(
-                null as Drawable?,
-                ContextCompat.getDrawable(
-                    getApplicationContext(),
-                    R.drawable.icon_comicviewer_nightfilter_on
-                ),
-                null as Drawable?,
-                null as Drawable?
-            )
-            this.button_nightMode!!.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
-            Toast.makeText(this, R.string.comic_viewer_toast_night_mode_on, 0).show()
-        } else {
-            this.frameLayout_nightModeMask!!.setVisibility(View.GONE)
-            this.button_nightMode!!.setCompoundDrawablesWithIntrinsicBounds(
-                null as Drawable?,
-                ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_action_night),
-                null as Drawable?,
-                null as Drawable?
-            )
-            this.button_nightMode!!.setTextColor(ContextCompat.getColor(this, R.color.white))
+            Toast.makeText(this, R.string.comic_viewer_toast_night_mode_on, Toast.LENGTH_SHORT).show()
         }
         this.isNightMode = enabled
         this.comicViewerControlsOverlayView?.setNightModeValue(enabled)
@@ -2050,15 +1743,9 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     // androidx.appcompat.app.AppCompatActivity, androidx.fragment.app.FragmentActivity, android.app.Activity, android.content.ComponentCallbacks
     override fun onConfigurationChanged(configuration: Configuration) {
         super.onConfigurationChanged(configuration)
+        refreshReaderTheme()
         this.isTabletReader = isTabletDevice()
         enterReaderFullscreen()
-        if (configuration.orientation == 2) {
-            this.linearLayout_horizontalPagingScrollbar!!.setVisibility(View.VISIBLE)
-            this.linearLayout_verticalPagingScrollbar!!.setVisibility(View.GONE)
-        } else if (configuration.orientation == 1) {
-            this.linearLayout_horizontalPagingScrollbar!!.setVisibility(View.GONE)
-            this.linearLayout_verticalPagingScrollbar!!.setVisibility(View.VISIBLE)
-        }
         updateReaderCommentSidebarLayout()
         n(this.currentPage)
     }
@@ -2069,16 +1756,14 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             val i2 = this.totalPages
             val pageIndex = if (this.comicViewerHostView != null) i else g.ac(i)
             if (pageIndex + 1 > this.pageList!!.size) {
-                this.textView_horizontalPage!!.setText("完/" + i2)
-                this.textView_verticalPage!!.setText("完/" + i2)
-                this.textView_page!!.setText("完/" + i2 + " " + networkStatus + " 電量:" + this.batteryLevelText)
+                readerPageLabel = "完/$i2"
+                readerStatusText = "$readerPageLabel $networkStatus 電量:$batteryLevelText"
                 this.comicViewerControlsOverlayView?.setPage("完/$i2")
                 return
             }
             val pageText = (pageIndex + 1 + bU()).toString() + "/" + i2
-            this.textView_horizontalPage!!.setText(pageText)
-            this.textView_verticalPage!!.setText(pageText)
-            this.textView_page!!.setText("P." + (pageIndex + 1 + bU()) + "/" + i2 + " " + networkStatus + " 電量:" + this.batteryLevelText)
+            readerPageLabel = pageText
+            readerStatusText = "P.$pageText $networkStatus 電量:$batteryLevelText"
             this.comicViewerControlsOverlayView?.setPage(pageText)
         }
     }
@@ -2120,23 +1805,21 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         } else {
             g.ad(i)
         }
-        this.seekBar_verticalPaging!!.setMax(iAd)
-        this.seekBar_horizontalPaging!!.setMax(iAd)
         this.comicViewerControlsOverlayView?.setPage(
-            label = this.textView_page?.text?.toString()?.substringAfter("P.")?.substringBefore(" ") ?: "",
+            label = readerPageLabel,
             max = iAd
         )
     }
 
     fun p(i: Int) {
-        this.button_nextEpisode!!.setVisibility(i)
-        this.button_nextEpisode!!.setAlpha(1.0f)
+        showNextEpisodeAction = i == View.VISIBLE
+        nextEpisodeHintVisible = showNextEpisodeAction
         bQ()
     }
 
     fun q(i: Int) {
-        this.button_previousEpisode!!.setVisibility(i)
-        this.button_previousEpisode!!.setAlpha(1.0f)
+        showPreviousEpisodeAction = i == View.VISIBLE
+        previousEpisodeHintVisible = showPreviousEpisodeAction
         bQ()
     }
 
@@ -2153,12 +1836,8 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
 
             // android.os.CountDownTimer
             override fun onFinish() {
-                if (this@ComicViewerActivity.button_nextEpisode != null) {
-                    this@ComicViewerActivity.button_nextEpisode!!.setAlpha(0.0f)
-                }
-                if (this@ComicViewerActivity.button_previousEpisode != null) {
-                    this@ComicViewerActivity.button_previousEpisode!!.setAlpha(0.0f)
-                }
+                nextEpisodeHintVisible = false
+                previousEpisodeHintVisible = false
             }
         }.start()
     }
@@ -2167,11 +1846,6 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
     override fun r(i: Int) {
         f.D(TAG, "Current Page = " + this.currentPage + " pageNumber = " + i)
         if (this.pageList != null) {
-            if (this.isLandscape) {
-                this.seekBar_verticalPaging!!.setProgress(i)
-            } else {
-                this.seekBar_horizontalPaging!!.setProgress(i)
-            }
             this.comicViewerControlsOverlayView?.setPage(
                 label = "",
                 progress = i,

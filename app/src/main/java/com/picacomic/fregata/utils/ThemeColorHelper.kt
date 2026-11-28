@@ -31,31 +31,25 @@ object ThemeColorHelper {
     @JvmStatic
     fun resolveLegacyThemeResId(context: Context): Int {
         val themeIndex = resolveStoredThemeIndex(context)
-        if (themeIndex == MOYUKI_INDEX) {
-            return if (e.L(context) || isSystemInDarkTheme(context)) R.style.AppThemeMoYukiDark else R.style.AppThemeMoYukiLight
+        val dark = isThemeIndexDarkForLegacyContent(context, themeIndex)
+        return when (themeIndex) {
+            MOYUKI_INDEX -> if (dark) R.style.AppThemeMoYukiDark else R.style.AppThemeMoYukiLight
+            2 -> if (dark) R.style.AppThemeNeonDark else R.style.AppThemeNeon
+            else -> if (dark) R.style.AppThemeBlack else R.style.AppTheme
         }
-        if (themeIndex == 2) {
-            return if (isSystemInDarkTheme(context)) {
-                R.style.AppThemeNeonDark
-            } else {
-                R.style.AppThemeNeon
-            }
-        }
-        if (themeIndex == SYSTEM_DYNAMIC_INDEX) {
-            return if (isSystemInDarkTheme(context)) R.style.AppThemeBlack else R.style.AppTheme
-        }
-        return if (themeIndex == 0) R.style.AppTheme else R.style.AppThemeBlack
     }
 
     @JvmStatic
     fun isThemeIndexDarkForLegacyContent(context: Context, themeIndex: Int): Boolean {
-        return when (themeIndex) {
-            1, 2 -> true
-            MOYUKI_INDEX -> e.L(context) || isSystemInDarkTheme(context)
-            SYSTEM_DYNAMIC_INDEX -> isSystemInDarkTheme(context)
-            else -> false
-        }
+        return resolveDarkTheme(themeIndex, isSystemInDarkTheme(context), e.L(context))
     }
+
+    internal fun resolveDarkTheme(themeIndex: Int, systemDark: Boolean, forceNightMode: Boolean): Boolean =
+        forceNightMode || when (themeIndex) {
+            0 -> false
+            1 -> true
+            else -> systemDark
+        }
 
     private fun isSystemInDarkTheme(context: Context): Boolean {
         val nightMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK

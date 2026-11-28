@@ -118,10 +118,11 @@ private fun CropFab(
     primary: Boolean = false,
     onClick: () -> Unit,
 ) {
+    val colors = MaterialTheme.colorScheme
     FloatingActionButton(
         onClick = onClick,
-        containerColor = if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        containerColor = if (primary) colors.primary else colors.secondaryContainer,
+        contentColor = if (primary) colors.onPrimary else colors.onSecondaryContainer,
         modifier = Modifier.size(48.dp),
     ) {
         Icon(
@@ -140,6 +141,10 @@ class PicaCropImageView(context: Context) : View(context) {
         style = Paint.Style.STROKE
         strokeWidth = 3f
         color = android.graphics.Color.WHITE
+    }
+    private val frameContrastPaint = Paint(framePaint).apply {
+        strokeWidth = 6f
+        color = android.graphics.Color.BLACK
     }
     private val guidePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -394,6 +399,7 @@ class PicaCropImageView(context: Context) : View(context) {
         canvas.drawRect(0f, cropRect.bottom, width.toFloat(), height.toFloat(), overlayPaint)
         canvas.drawRect(0f, cropRect.top, cropRect.left, cropRect.bottom, overlayPaint)
         canvas.drawRect(cropRect.right, cropRect.top, width.toFloat(), cropRect.bottom, overlayPaint)
+        canvas.drawRect(cropRect, frameContrastPaint)
         canvas.drawRect(cropRect, framePaint)
     }
 

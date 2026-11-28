@@ -1,5 +1,15 @@
 package com.picacomic.fregata.compose.screens
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.runtime.remember
+
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
+import com.google.android.material.color.MaterialColors
+import com.google.android.material.R as MaterialR
+
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
@@ -15,8 +25,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -44,7 +56,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.imageLoader
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
@@ -54,15 +65,19 @@ import com.picacomic.fregata.a_pkg.c
 import com.picacomic.fregata.a_pkg.d
 import com.picacomic.fregata.activities.ComicViewerActivity
 import com.picacomic.fregata.compose.PicaComposeTheme
+import com.picacomic.fregata.compose.resolvePicaDarkTheme
+import com.picacomic.fregata.utils.ThemeColorHelper
+import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.objects.ComicPageObject
 import com.picacomic.fregata.utils.b
 import com.picacomic.fregata.utils.c as DirectoryHelper
-import com.picacomic.fregata.utils.e
 import com.picacomic.fregata.utils.f
 import com.picacomic.fregata.utils.g
 import java.io.File
 import java.util.ArrayList
 import kotlinx.coroutines.flow.distinctUntilChanged
+
+private class ReaderScrollRequest(val pageIndex: Int)
 
 class ComicViewerComposeHostView @JvmOverloads constructor(
     context: Context,
@@ -71,8 +86,10 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     private val testingListMode = e.w(context)
     private val performanceMode = e.x(context)
     private val pages = mutableStateListOf<ComicPageObject>()
+    internal var readerTheme by mutableStateOf(ThemeColorHelper.resolveStoredThemeIndex(context) to e.L(context))
+
     private var basePageOffset by mutableIntStateOf(0)
-    private var scrollTarget by mutableStateOf<Int?>(null)
+    private var scrollTarget by mutableStateOf<ReaderScrollRequest?>(null)
     private var verticalScroll by mutableStateOf(true)
     private var isOfflineReader by mutableStateOf(false)
     private var currentComicId by mutableStateOf<String?>(null)
@@ -80,12 +97,19 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
     private var lastLoadedOffset = 0
 
     init {
-        setBackgroundColor(android.graphics.Color.BLACK)
+        setBackgroundColor(MaterialColors.getColor(this, MaterialR.attr.colorSurface))
         addView(
             ComposeView(context).apply {
+                consumeWindowInsets = false
                 setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
                 setContent {
-                    PicaComposeTheme {
+                    val (themeIndex, forceNightMode) = readerTheme
+                    PicaComposeTheme(
+                        darkTheme = resolvePicaDarkTheme(forceNightMode, themeIndex),
+                        themeColorIndex = themeIndex,
+                    ) {
+                        val surfaceColor = MaterialTheme.colorScheme.surface.toArgb()
+                        SideEffect { this@ComicViewerComposeHostView.setBackgroundColor(surfaceColor) }
                         ComicViewerScreen(
                             pages = pages,
                             basePageOffset = basePageOffset,
@@ -95,7 +119,9 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
                             offlineMode = isOfflineReader,
                             comicId = currentComicId,
                             scrollTarget = scrollTarget,
-                            onScrollTargetConsumed = { scrollTarget = null },
+                            onScrollTargetConsumed = { request ->
+                                if (scrollTarget === request) scrollTarget = null
+                            },
                             onPageChanged = { page -> callback?.r(page) },
                         )
                     }
@@ -119,23 +145,25 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
         if (z2) {
             pages.clear()
             pages.addAll(arrayList)
-            scrollTarget = 0
+            scrollTarget = ReaderScrollRequest(0)
         } else if (prepended) {
             pages.addAll(0, arrayList)
-            scrollTarget = arrayList.size.coerceAtMost(pages.lastIndex.coerceAtLeast(0))
+            scrollTarget = ReaderScrollRequest(arrayList.size.coerceAtMost(pages.lastIndex.coerceAtLeast(0)))
         } else {
             pages.addAll(arrayList)
         }
         lastLoadedOffset = i
         basePageOffset = (i / ComicViewerActivity.hq) * ComicViewerActivity.hq
         if (z) {
-            scrollTarget = (i - basePageOffset).coerceAtLeast(0)
+            scrollTarget = ReaderScrollRequest((i - basePageOffset).coerceAtLeast(0))
         }
         prefetch(arrayList)
     }
 
     override fun b(i: Int, z: Boolean) {
-        scrollTarget = i.coerceIn(0, pages.lastIndex.coerceAtLeast(0))
+        if (pages.isNotEmpty()) {
+            scrollTarget = ReaderScrollRequest(i.coerceIn(pages.indices))
+        }
     }
 
     override fun M(i: Int) {
@@ -148,6 +176,7 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
 
     fun release() {
         callback = null
+        scrollTarget = null
         pages.clear()
     }
 
@@ -168,13 +197,8 @@ class ComicViewerComposeHostView @JvmOverloads constructor(
         }
     }
 
-    private fun virtualItemCount(): Int {
-        return pages.size + (pages.size / AD_INTERVAL) + 1
-    }
-
     companion object {
         private const val TAG = "ComicViewerComposeHostView"
-        private const val AD_INTERVAL = 20
         private const val PREFETCH_PAGE_LIMIT = 12
         private const val PERFORMANCE_PREFETCH_PAGE_LIMIT = 6
     }
@@ -189,51 +213,37 @@ private fun ComicViewerScreen(
     performanceMode: Boolean,
     offlineMode: Boolean,
     comicId: String?,
-    scrollTarget: Int?,
-    onScrollTargetConsumed: () -> Unit,
+    scrollTarget: ReaderScrollRequest?,
+    onScrollTargetConsumed: (ReaderScrollRequest) -> Unit,
     onPageChanged: (Int) -> Unit,
 ) {
     val listState = rememberLazyListState()
     val effectiveVerticalScroll = if (testingListMode) true else verticalScroll
     val itemCount = virtualItemCount(pages.size)
 
-    LaunchedEffect(effectiveVerticalScroll) {
-        onScrollTargetConsumed()
-    }
-
-    LaunchedEffect(scrollTarget, itemCount) {
+    LaunchedEffect(scrollTarget, effectiveVerticalScroll, itemCount) {
         val target = scrollTarget ?: return@LaunchedEffect
-        if (itemCount > 0) {
-            listState.scrollToItem(
-                pageIndexToVirtualIndex(target).coerceIn(0, itemCount.lastIndexCoerceAtLeastZero())
-            )
-        }
-        onScrollTargetConsumed()
+        if (pages.isEmpty()) return@LaunchedEffect
+        listState.scrollToItem(pageIndexToVirtualIndex(target.pageIndex.coerceIn(pages.indices)))
+        onScrollTargetConsumed(target)
     }
 
-    LaunchedEffect(listState, effectiveVerticalScroll, itemCount) {
+    LaunchedEffect(listState, effectiveVerticalScroll, itemCount, scrollTarget) {
+        if (scrollTarget != null) return@LaunchedEffect
         snapshotFlow {
-            val visibleItems = listState.layoutInfo.visibleItemsInfo.filter { it.size > 0 }
-            val firstVisiblePageIndex = visibleItems
-                .firstOrNull { !isAdvertisementItem(it.index, pages.size) }
-                ?.index
-                ?.let(::virtualIndexToPageIndex)
-            val lastVisibleIndex = visibleItems
-                .lastOrNull()
-                ?.index
-                ?: listState.firstVisibleItemIndex
-            if (firstVisiblePageIndex == 0) {
-                pageIndexToVirtualIndex(0)
-            } else {
-                lastVisibleIndex
+            val visiblePages = listState.layoutInfo.visibleItemsInfo.filter {
+                it.size > 0 && !isAdvertisementItem(it.index, pages.size)
             }
+            val first = visiblePages.firstOrNull() ?: return@snapshotFlow null
+            val visiblePage = if (first.index == 0 && listState.canScrollForward) {
+                first
+            } else {
+                visiblePages.last()
+            }
+            virtualIndexToPageIndex(visiblePage.index).takeIf { it in pages.indices }
         }
             .distinctUntilChanged()
-            .collect { virtualIndex ->
-                onPageChanged(
-                    virtualIndexToPageIndex(virtualIndex).coerceIn(0, pages.lastIndex.coerceAtLeast(0))
-                )
-            }
+            .collect { page -> if (page != null) onPageChanged(page) }
     }
 
     ZoomableReaderLayer(
@@ -430,24 +440,36 @@ private fun ComicViewerPage(
         } else {
             Modifier
                 .fillMaxHeight()
-                .fillMaxWidth()
+                .width(maxPageWidth)
         },
         contentAlignment = Alignment.Center,
     ) {
         if (imageSource == null) {
-            Text(
-                text = page.comicPageId.orEmpty(),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 60.sp,
+            Column(
                 modifier = Modifier.padding(24.dp),
-            )
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = pageNumber.toString(),
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = stringResource(R.string.comic_viewer_page_image_unavailable),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         } else {
-            Text(
-                text = pageNumber.toString(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 60.sp,
-                modifier = Modifier.align(Alignment.Center),
-            )
+            var loadFailed by remember(imageSource) { mutableStateOf(false) }
+            if (!loadFailed) {
+                Text(
+                    text = pageNumber.toString(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.displayMedium,
+                    modifier = Modifier.align(Alignment.Center).clearAndSetSemantics {},
+                )
+            }
             AsyncImage(
                 model = buildComicPageImageRequest(
                     context = context,
@@ -459,10 +481,23 @@ private fun ComicViewerPage(
                     .error(placeholderRes)
                     .fallback(placeholderRes)
                     .build(),
-                contentDescription = pageNumber.toString(),
+                contentDescription = if (loadFailed) null else stringResource(R.string.comic_viewer_page_label, pageNumber),
+                onLoading = { loadFailed = false },
+                onSuccess = { loadFailed = false },
+                onError = { loadFailed = true },
                 contentScale = if (vertical) ContentScale.FillWidth else ContentScale.Fit,
                 modifier = if (vertical) Modifier.fillMaxWidth() else Modifier.fillMaxSize(),
             )
+            if (loadFailed) {
+                Text(
+                    text = stringResource(R.string.comic_viewer_page_image_load_failed, pageNumber),
+                    modifier = Modifier.align(Alignment.Center)
+                        .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
+                        .padding(12.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
     }
 }
@@ -564,7 +599,3 @@ private fun virtualIndexToPageIndex(virtualIndex: Int): Int {
 
 private const val AD_INTERVAL = 20
 private val TABLET_VERTICAL_PAGE_MAX_WIDTH = 720.dp
-
-private fun Int.lastIndexCoerceAtLeastZero(): Int {
-    return (this - 1).coerceAtLeast(0)
-}

@@ -2,6 +2,12 @@ package com.picacomic.fregata.compose.screens
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -112,6 +118,7 @@ fun AnonymousChatScreen(
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
         if (showExitDialog) {
             AlertDialog(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 onDismissRequest = { showExitDialog = false },
                 title = { Text(stringResource(R.string.anonymous_chat_exit_title)) },
                 text = { Text(stringResource(R.string.anonymous_chat_exit_message)) },
@@ -186,7 +193,8 @@ fun AnonymousChatScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding),
+                        .padding(innerPadding)
+                        .consumeWindowInsets(innerPadding),
                     contentAlignment = Alignment.Center,
                 ) {
                     PicaLoadingIndicator()
@@ -196,6 +204,7 @@ fun AnonymousChatScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
+                        .consumeWindowInsets(innerPadding)
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -367,8 +376,8 @@ private fun AnonymousMessageBubble(
         Surface(
             modifier = Modifier.widthIn(max = 280.dp),
             shape = MaterialTheme.shapes.large,
-            color = if (mine) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainer,
-            contentColor = MaterialTheme.colorScheme.onSurface,
+            color = if (mine) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = if (mine) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurface,
         ) {
             Column(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -404,6 +413,7 @@ private fun AnonymousChatInputBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,

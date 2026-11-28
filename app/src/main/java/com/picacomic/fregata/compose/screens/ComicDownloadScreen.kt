@@ -1,6 +1,12 @@
 package com.picacomic.fregata.compose.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +59,7 @@ import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.PicaExpressiveType
 import com.picacomic.fregata.compose.components.PicaCardSection
 import com.picacomic.fregata.compose.components.PicaEmptyState
+import com.picacomic.fregata.compose.components.PicaEpisodeGrid
 import com.picacomic.fregata.compose.components.PicaEpisodeGridItem
 import com.picacomic.fregata.compose.components.PicaEpisodeGridItemState
 import com.picacomic.fregata.compose.components.PicaLoadingIndicator
@@ -160,7 +167,8 @@ fun ComicDownloadScreen(
             ComicDownloadContent(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
                 episodes = episodes,
                 total = total,
                 isLoading = isLoading,
@@ -175,6 +183,7 @@ fun ComicDownloadScreen(
 
         if (showDeleteConfirm) {
             AlertDialog(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                 onDismissRequest = { showDeleteConfirm = false },
                 title = { Text(stringResource(R.string.alert_delete_downloaded_comic_title)) },
                 text = { Text(stringResource(R.string.alert_delete_downloaded_comic)) },
@@ -185,7 +194,10 @@ fun ComicDownloadScreen(
                             showDeleteConfirm = false
                         }
                     ) {
-                        Text(stringResource(android.R.string.ok))
+                        Text(
+                            text = stringResource(android.R.string.ok),
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 },
                 dismissButton = {
@@ -258,26 +270,16 @@ private fun ComicDownloadContent(
                 if (episodes.isEmpty() && !isLoading) {
                     PicaEmptyState(message = "还没有可下载的章节")
                 } else {
-                    episodes.chunked(4).forEachIndexed { rowIndex, rowEpisodes ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        ) {
-                            rowEpisodes.forEachIndexed { columnIndex, episode ->
-                                val index = rowIndex * 4 + columnIndex
-                                PicaEpisodeGridItem(
-                                    title = episode.title?.takeIf { it.isNotBlank() } ?: "第 ${episode.order} 话",
-                                    subtitle = downloadStateLabel(episode, episodeProgress[episode.episodeId.orEmpty()]),
-                                    state = downloadState(episode),
-                                    onClick = { onEpisodeClick(index) },
-                                    enabled = episode.status != 1 && episode.status != 2,
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                            repeat(4 - rowEpisodes.size) {
-                                Box(modifier = Modifier.weight(1f))
-                            }
-                        }
+                    PicaEpisodeGrid(episodes) { index, episode, cellModifier ->
+                        PicaEpisodeGridItem(
+                            title = episode.title?.takeIf { it.isNotBlank() } ?: "第 ${episode.order} 话",
+                            subtitle = downloadStateLabel(episode, episodeProgress[episode.episodeId.orEmpty()]),
+                            state = downloadState(episode),
+                            onClick = { onEpisodeClick(index) },
+                            enabled = episode.status != 1 && episode.status != 2,
+                            selectionMode = true,
+                            modifier = cellModifier,
+                        )
                     }
                 }
             }
@@ -371,6 +373,7 @@ private fun ComicDownloadBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -408,7 +411,7 @@ private fun downloadState(episode: ComicEpisodeObject): PicaEpisodeGridItemState
 private fun downloadStateLabel(episode: ComicEpisodeObject, progress: String?): String? {
     return when {
         episode.isSelected -> "已选择"
-        episode.status == 1 -> progress ?: "下载中"
+        episode.status == 1 -> progress ?: stringResource(R.string.comic_episode_downloading)
         episode.status == 2 -> stringResource(R.string.downloaded)
         else -> null
     }

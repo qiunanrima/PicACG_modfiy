@@ -162,7 +162,12 @@ private fun SplashContent(
             )
         }
         if (showError) {
-            SplashCard {
+            SplashCard(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
+            ) {
                 Text(
                     text = stringResource(id = R.string.splash_error),
                     style = PicaExpressiveType.SectionEmphasized
@@ -245,10 +250,15 @@ private fun SplashContent(
 }
 
 @Composable
-private fun SplashCard(content: @Composable () -> Unit) {
+private fun SplashCard(
+    colors: androidx.compose.material3.CardColors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+    ),
+    content: @Composable () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = colors,
     ) {
         Column(
             modifier = Modifier
