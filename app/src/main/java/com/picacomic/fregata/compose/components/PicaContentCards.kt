@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
@@ -82,7 +83,7 @@ fun PicaImageUrl(
         if (safeUrl.isBlank()) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.surfaceContainerHighest,
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -123,7 +124,7 @@ fun PicaRankBadge(
             1 -> MaterialTheme.colorScheme.primary
             2 -> MaterialTheme.colorScheme.secondary
             3 -> MaterialTheme.colorScheme.tertiary
-            else -> MaterialTheme.colorScheme.surfaceVariant
+            else -> MaterialTheme.colorScheme.surfaceContainerHighest
         },
         contentColor = when (rank) {
             1 -> MaterialTheme.colorScheme.onPrimary
@@ -148,9 +149,28 @@ fun PicaInfoChip(
     icon: ImageVector? = null,
     onClick: (() -> Unit)? = null,
 ) {
+    if (onClick == null) {
+        Surface(
+            modifier = modifier,
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (icon != null) {
+                    Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
+                }
+                Text(text = text, style = MaterialTheme.typography.labelSmall)
+            }
+        }
+        return
+    }
     AssistChip(
-        onClick = onClick ?: {},
-        enabled = onClick != null,
+        onClick = onClick,
         label = {
             Text(
                 text = text,
@@ -168,7 +188,7 @@ fun PicaInfoChip(
             }
         },
         modifier = modifier,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     )
 }
 
@@ -338,17 +358,7 @@ fun PicaGameCard(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     badges.forEach { badge ->
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        ) {
-                            Text(
-                                text = badge,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            )
-                        }
+                        PicaInfoChip(text = badge)
                     }
                 }
             } else {
@@ -436,13 +446,14 @@ fun PicaMetricRow(
     metrics: List<Pair<String, String>>,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         metrics.forEach { (label, value) ->
             Surface(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.widthIn(min = 72.dp),
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
             ) {
@@ -460,8 +471,7 @@ fun PicaMetricRow(
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     )
                 }
             }

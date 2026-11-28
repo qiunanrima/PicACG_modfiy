@@ -21,10 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -243,15 +243,15 @@ fun ProfileEditScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         titleContentColor = MaterialTheme.colorScheme.onSurface,
                         navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
                     scrollBehavior = scrollBehavior
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.surface
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -327,6 +327,7 @@ fun ProfileEditScreen(
                                         enabled = !inPreview && screenViewModel?.isSubmitting != true,
                                     )
                                     Button(
+                                        shapes = ButtonDefaults.shapes(),
                                         onClick = { screenViewModel?.updateSlogan(sloganText) },
                                         enabled = !inPreview && screenViewModel?.isSubmitting != true,
                                         modifier = Modifier.fillMaxWidth(),

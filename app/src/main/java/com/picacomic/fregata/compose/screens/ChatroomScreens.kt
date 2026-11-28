@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.media.MediaPlayer
 import android.media.MediaRecorder
-import android.net.Uri
 import android.os.Build
 import android.speech.tts.TextToSpeech
 import android.widget.Toast
@@ -12,11 +11,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -48,6 +45,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,12 +55,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
@@ -137,13 +133,13 @@ fun ChatroomListScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { padding ->
             ChatroomListContent(
                 modifier = Modifier
@@ -258,8 +254,8 @@ fun ChatroomContainerScreen(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         ),
                         scrollBehavior = scrollBehavior,
                     )
@@ -269,11 +265,11 @@ fun ChatroomContainerScreen(
                             room.title.orEmpty().ifBlank { "Room ${index + 1}" }
                         },
                         onTabSelected = { selectedTab = it },
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
                     )
                 }
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { padding ->
             ChatroomContent(
                 roomUrl = currentRoom.url,
@@ -319,13 +315,13 @@ fun ChatroomScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { padding ->
             ChatroomContent(
                 roomUrl = roomUrl,
@@ -592,15 +588,11 @@ private fun ChatroomMessageBubble(
             shape = MaterialTheme.shapes.medium,
             colors = CardDefaults.cardColors(
                 containerColor = if (isMine) {
-                    MaterialTheme.colorScheme.primaryContainer
+                    MaterialTheme.colorScheme.surfaceContainerHigh
                 } else {
-                    MaterialTheme.colorScheme.surfaceContainerHighest
+                    MaterialTheme.colorScheme.surfaceContainer
                 },
-                contentColor = if (isMine) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
+                contentColor = MaterialTheme.colorScheme.onSurface,
             ),
         ) {
             Column(
@@ -697,7 +689,7 @@ private fun ChatroomInputBar(
 ) {
     var showEmoji by remember { mutableStateOf(false) }
     Surface(
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 2.dp,
     ) {
         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -886,12 +878,12 @@ private fun ChatroomAdminPanel(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Button(onClick = { titleDialog = true }) { Text(stringResource(R.string.alert_action_change_title)) }
-                Button(onClick = { onToggleTime(true) }) { Text("Time ON") }
-                Button(onClick = { onToggleTime(false) }) { Text("Time OFF") }
-                Button(onClick = { onToggleImage(true) }) { Text("Image ON") }
-                Button(onClick = { onToggleImage(false) }) { Text("Image OFF") }
-                Button(onClick = { aiDialog = true }) { Text(stringResource(R.string.alert_action_ai_script_title)) }
+                Button(shapes = ButtonDefaults.shapes(), onClick = { titleDialog = true }) { Text(stringResource(R.string.alert_action_change_title)) }
+                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleTime(true) }) { Text("Time ON") }
+                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleTime(false) }) { Text("Time OFF") }
+                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleImage(true) }) { Text("Image ON") }
+                Button(shapes = ButtonDefaults.shapes(), onClick = { onToggleImage(false) }) { Text("Image OFF") }
+                Button(shapes = ButtonDefaults.shapes(), onClick = { aiDialog = true }) { Text(stringResource(R.string.alert_action_ai_script_title)) }
                 TextButton(onClick = onStopAi) { Text("Stop AI") }
             }
         }

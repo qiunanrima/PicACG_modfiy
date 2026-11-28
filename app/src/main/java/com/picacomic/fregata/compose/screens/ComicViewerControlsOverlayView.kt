@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -157,7 +158,7 @@ private fun ComicViewerControlsOverlay(
     if (!visible) {
         return
     }
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         val isTabletWidth = maxWidth >= 600.dp
         val sidePadding = if (isTabletWidth) 28.dp else 12.dp
         val bottomHorizontalPadding = if (isTabletWidth) 32.dp else 14.dp
@@ -216,8 +217,7 @@ private fun ReaderBrightnessPanel(
             .fillMaxHeight(heightFraction)
             .heightIn(min = 220.dp, max = 360.dp),
         shape = RoundedCornerShape(26.dp),
-        color = Color.Black.copy(alpha = 0.58f),
-        tonalElevation = 6.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
         Column(
             modifier = Modifier.padding(vertical = 12.dp),
@@ -227,7 +227,7 @@ private fun ReaderBrightnessPanel(
             Icon(
                 imageVector = Icons.Filled.Brightness6,
                 contentDescription = null,
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(22.dp),
             )
             ReaderBrightnessSlider(
@@ -284,8 +284,7 @@ private fun ReaderQuickActions(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(28.dp),
-        color = Color.Black.copy(alpha = 0.58f),
-        tonalElevation = 6.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Column(
             modifier = Modifier.padding(vertical = 8.dp),
@@ -322,7 +321,7 @@ private fun ReaderBottomBar(
             .widthIn(max = maxWidth)
             .fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = Color.Black.copy(alpha = 0.62f),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 8.dp,
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
@@ -332,7 +331,7 @@ private fun ReaderBottomBar(
             ) {
                 Text(
                     text = pageLabel.ifBlank { "0/0" },
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = PicaExpressiveType.LabelEmphasized,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -370,7 +369,7 @@ private fun ReaderIconButton(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (selected) MaterialTheme.colorScheme.primary else Color.White,
+            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -391,13 +390,13 @@ private fun ReaderActionButton(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(24.dp),
             )
         }
         Text(
             text = label,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
         )

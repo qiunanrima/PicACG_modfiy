@@ -2,9 +2,7 @@ package com.picacomic.fregata.compose.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -125,8 +122,8 @@ fun LovePicaContainerScreen(
                                     }
                                 },
                                 colors = TopAppBarDefaults.topAppBarColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                                 ),
@@ -136,11 +133,11 @@ fun LovePicaContainerScreen(
                                 selectedTabIndex = selectedTab,
                                 tabs = tabs,
                                 onTabSelected = { selectedTab = it },
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                                containerColor = MaterialTheme.colorScheme.surface,
                             )
                         }
                     },
-                    containerColor = MaterialTheme.colorScheme.background,
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ) { innerPadding ->
                     when (selectedTab) {
                         0 -> LovePicaChatTab(
@@ -255,7 +252,7 @@ private fun LovePicaListItem(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),

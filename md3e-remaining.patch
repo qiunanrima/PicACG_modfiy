@@ -1,0 +1,288 @@
+diff --git a/README.md b/README.md
+index de3d308..4fa869e 100644
+--- a/README.md
++++ b/README.md
+@@ -10,4 +10,4 @@ Picacg官方app修改版，基于官方app二次开发，支持漫画推荐、
+ 
+-### 当前阶段：Screen 全部重写为 MD3 Compose ✅
+-- **主题基线**：已切到 `Miracle Neon` 主题，支持浅色/深色两套配色
++### 当前阶段：Screen 全部重写为 Material 3 Expressive Compose ✅
++- **主题基线**：应用统一使用 Material 3 Expressive，支持浅色、深色、自选主题色和系统动态色
+ - **组件层**：已抽出一批 Compose 通用组件（TopBar、Button、TextField 等）
+diff --git a/app/build.gradle b/app/build.gradle
+index 734648b..4016fd9 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -69,2 +69,3 @@ kotlin {
+     compilerOptions {
++        optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+@@ -84,3 +85,3 @@ dependencies {
+     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0' // 替代 legacy-support-v4
+-    implementation 'com.google.android.material:material:1.13.0'
++    implementation 'com.google.android.material:material:1.14.0'
+     implementation 'androidx.compose.foundation:foundation'
+diff --git a/app/src/main/java/com/picacomic/fregata/activities/LoginActivity.kt b/app/src/main/java/com/picacomic/fregata/activities/LoginActivity.kt
+index b2ff900..9546245 100644
+--- a/app/src/main/java/com/picacomic/fregata/activities/LoginActivity.kt
++++ b/app/src/main/java/com/picacomic/fregata/activities/LoginActivity.kt
+@@ -3,3 +3,2 @@ package com.picacomic.fregata.activities
+ import android.app.AlertDialog
+-import android.app.DatePickerDialog
+ import android.content.ClipData
+@@ -19,2 +18,9 @@ import androidx.activity.viewModels
+ import androidx.appcompat.app.AppCompatDelegate
++import androidx.compose.material3.DatePicker
++import androidx.compose.material3.DatePickerDialog
++import androidx.compose.material3.ExperimentalMaterial3Api
++import androidx.compose.material3.Text
++import androidx.compose.material3.TextButton
++import androidx.compose.material3.rememberDatePickerState
++import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.LaunchedEffect
+@@ -24,2 +30,3 @@ import androidx.compose.runtime.saveable.rememberSaveable
+ import androidx.compose.runtime.setValue
++import com.picacomic.fregata.compose.PicaComposeTheme
+ import com.picacomic.fregata.R
+@@ -34,2 +41,4 @@ import com.picacomic.fregata.objects.NetworkErrorObject
+ import com.picacomic.fregata.utils.views.AlertDialogCenter
++import java.util.Calendar
++import java.util.TimeZone
+ 
+@@ -47,2 +56,3 @@ class LoginActivity : BaseActivity() {
+             var showingRegister by rememberSaveable { mutableStateOf(false) }
++            var showingBirthdayPicker by rememberSaveable { mutableStateOf(false) }
+ 
+@@ -78,3 +88,3 @@ class LoginActivity : BaseActivity() {
+                     onGenderChange = registerViewModel::aa,
+-                    onBirthdayClick = ::showBirthdayPicker,
++                    onBirthdayClick = { showingBirthdayPicker = true },
+                     onSubmit = registerViewModel::dI,
+@@ -103,2 +113,6 @@ class LoginActivity : BaseActivity() {
+ 
++            if (showingRegister && showingBirthdayPicker) {
++                BirthdayPicker { showingBirthdayPicker = false }
++            }
++
+             LaunchedEffect(viewModel.navigateToMainEvent) {
+@@ -228,12 +242,37 @@ class LoginActivity : BaseActivity() {
+ 
+-    private fun showBirthdayPicker() {
+-        DatePickerDialog(
+-            this,
+-            { _, year, month, dayOfMonth ->
+-                registerViewModel.setBirthday(year, month, dayOfMonth)
+-            },
+-            registerViewModel.selectedYear,
+-            registerViewModel.selectedMonth,
+-            registerViewModel.selectedDay,
+-        ).show()
++    @OptIn(ExperimentalMaterial3Api::class)
++    @Composable
++    private fun BirthdayPicker(onDismiss: () -> Unit) {
++        val utc = TimeZone.getTimeZone("UTC")
++        val birthday = Calendar.getInstance(utc).apply {
++            clear()
++            set(registerViewModel.selectedYear, registerViewModel.selectedMonth, registerViewModel.selectedDay)
++        }
++        PicaComposeTheme {
++            val state = rememberDatePickerState(initialSelectedDateMillis = birthday.timeInMillis)
++            DatePickerDialog(
++                onDismissRequest = onDismiss,
++                confirmButton = {
++                    TextButton(
++                        enabled = state.selectedDateMillis != null,
++                        onClick = {
++                            state.selectedDateMillis?.let { millis ->
++                                birthday.timeInMillis = millis
++                                registerViewModel.setBirthday(
++                                    birthday.get(Calendar.YEAR),
++                                    birthday.get(Calendar.MONTH),
++                                    birthday.get(Calendar.DAY_OF_MONTH),
++                                )
++                            }
++                            onDismiss()
++                        },
++                    ) { Text(getString(android.R.string.ok)) }
++                },
++                dismissButton = {
++                    TextButton(onClick = onDismiss) { Text(getString(android.R.string.cancel)) }
++                },
++            ) {
++                DatePicker(state = state, showModeToggle = true)
++            }
++        }
+     }
+diff --git a/app/src/main/java/com/picacomic/fregata/compose/screens/ProfileScreen.kt b/app/src/main/java/com/picacomic/fregata/compose/screens/ProfileScreen.kt
+index 2316804..6a6d78b 100644
+--- a/app/src/main/java/com/picacomic/fregata/compose/screens/ProfileScreen.kt
++++ b/app/src/main/java/com/picacomic/fregata/compose/screens/ProfileScreen.kt
+@@ -12,3 +12,2 @@ import androidx.activity.result.contract.ActivityResultContracts
+ import androidx.compose.foundation.Image
+-import androidx.compose.foundation.background
+ import androidx.compose.foundation.clickable
+@@ -29,6 +28,6 @@ import androidx.compose.foundation.rememberScrollState
+ import androidx.compose.material3.Button
+-import androidx.compose.material3.CenterAlignedTopAppBar
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.TopAppBar
+ import androidx.compose.material3.ExperimentalMaterial3Api
+ import androidx.compose.material3.MaterialTheme
+-import androidx.compose.material3.surfaceColorAtElevation
+ import androidx.compose.material3.Scaffold
+@@ -47,5 +46,3 @@ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
+-import androidx.compose.ui.draw.blur
+ import androidx.compose.ui.draw.clip
+-import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.input.nestedscroll.nestedScroll
+@@ -270,3 +267,3 @@ fun ProfileScreen(
+             topBar = {
+-                CenterAlignedTopAppBar(
++                TopAppBar(
+                     title = {
+@@ -284,5 +281,5 @@ fun ProfileScreen(
+                     },
+-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
++                    colors = TopAppBarDefaults.topAppBarColors(
++                        containerColor = MaterialTheme.colorScheme.surface,
++                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                     ),
+@@ -291,3 +288,3 @@ fun ProfileScreen(
+             },
+-            containerColor = MaterialTheme.colorScheme.background,
++            containerColor = MaterialTheme.colorScheme.surface,
+         ) { innerPadding ->
+@@ -465,5 +462,4 @@ private fun ProfileSloganCard(profile: UserProfileObject?) {
+         modifier = Modifier.fillMaxWidth(),
+-        color = MaterialTheme.colorScheme.surface,
++        color = MaterialTheme.colorScheme.surfaceContainerLow,
+         shape = MaterialTheme.shapes.large,
+-        tonalElevation = 1.dp,
+     ) {
+@@ -493,5 +489,4 @@ private fun ProfileHeader(
+         modifier = Modifier.fillMaxWidth(),
+-        color = MaterialTheme.colorScheme.surface,
++        color = MaterialTheme.colorScheme.surfaceContainerLow,
+         shape = MaterialTheme.shapes.large,
+-        tonalElevation = 1.dp,
+     ) {
+@@ -500,23 +495,2 @@ private fun ProfileHeader(
+         ) {
+-            PicaRemoteImage(
+-                thumbnail = profile?.avatar.takeIf { avatarPreviewUri == null },
+-                contentDescription = null,
+-                modifier = Modifier
+-                    .matchParentSize()
+-                    .blur(18.dp),
+-            )
+-            if (!avatarPreviewUri.isNullOrBlank()) {
+-                PicaImageUrl(
+-                    imageUrl = avatarPreviewUri,
+-                    contentDescription = null,
+-                    modifier = Modifier
+-                        .matchParentSize()
+-                        .blur(18.dp),
+-                )
+-            }
+-            Box(
+-                modifier = Modifier
+-                    .matchParentSize()
+-                    .background(Color.Black.copy(alpha = 0.46f)),
+-            )
+             Column(
+@@ -568,3 +542,3 @@ private fun ProfileHeader(
+                         style = PicaExpressiveType.HeadlineEmphasized,
+-                        color = Color.White,
++                        color = MaterialTheme.colorScheme.onSurface,
+                         textAlign = TextAlign.Center,
+@@ -584,3 +558,3 @@ private fun ProfileHeader(
+                         style = MaterialTheme.typography.bodyMedium,
+-                        color = Color.White.copy(alpha = 0.82f),
++                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                         textAlign = TextAlign.Center,
+@@ -597,2 +571,3 @@ private fun ProfileHeader(
+                     Button(
++                        shapes = ButtonDefaults.shapes(),
+                         onClick = onPunchIn,
+@@ -620,5 +595,4 @@ private fun ProfileComicSection(
+         modifier = Modifier.fillMaxWidth(),
+-        color = MaterialTheme.colorScheme.surface,
++        color = MaterialTheme.colorScheme.surfaceContainerLow,
+         shape = MaterialTheme.shapes.large,
+-        tonalElevation = 1.dp,
+     ) {
+@@ -680,5 +654,4 @@ private fun ProfileCommentCard(
+         modifier = Modifier.fillMaxWidth(),
+-        color = MaterialTheme.colorScheme.surface,
++        color = MaterialTheme.colorScheme.surfaceContainerLow,
+         shape = MaterialTheme.shapes.large,
+-        tonalElevation = 1.dp,
+     ) {
+diff --git a/app/src/main/java/com/picacomic/fregata/compose/screens/ScreenPreviewSupport.kt b/app/src/main/java/com/picacomic/fregata/compose/screens/ScreenPreviewSupport.kt
+index 03035a4..3d05753 100644
+--- a/app/src/main/java/com/picacomic/fregata/compose/screens/ScreenPreviewSupport.kt
++++ b/app/src/main/java/com/picacomic/fregata/compose/screens/ScreenPreviewSupport.kt
+@@ -88,4 +88,2 @@ internal class SettingsPreviewProvider : PreviewParameterProvider<SettingsState>
+             imageQualityValue = "高",
+-            designLanguageIndex = 1,
+-            designLanguageValue = "MD3E",
+             themeColorIndex = 2,
+@@ -114,4 +112,2 @@ internal class SettingsPreviewProvider : PreviewParameterProvider<SettingsState>
+             imageQualityValue = "中",
+-            designLanguageIndex = 0,
+-            designLanguageValue = "MD3",
+             themeColorIndex = 1,
+@@ -177,3 +173,3 @@ internal fun PreviewListPanel(
+                                 .background(
+-                                    color = MaterialTheme.colorScheme.surfaceVariant,
++                                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                     shape = RoundedCornerShape(999.dp)
+@@ -221,3 +217,3 @@ internal fun PreviewGridPanel(
+                                     .height(88.dp)
+-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
++                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                 contentAlignment = Alignment.Center
+@@ -268,3 +264,3 @@ internal fun PreviewChatPanel(
+                                 } else {
+-                                    MaterialTheme.colorScheme.surfaceVariant
++                                    MaterialTheme.colorScheme.surfaceContainerHighest
+                                 },
+diff --git a/app/src/main/java/com/picacomic/fregata/utils/e.java b/app/src/main/java/com/picacomic/fregata/utils/e.java
+index 6613def..51a3926 100644
+--- a/app/src/main/java/com/picacomic/fregata/utils/e.java
++++ b/app/src/main/java/com/picacomic/fregata/utils/e.java
+@@ -404,10 +404,2 @@ public class e {
+ 
+-    public static int getDesignLanguage(Context context) {
+-        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).getInt("KEY_DESIGN_LANGUAGE", 0);
+-    }
+-
+-    public static boolean setDesignLanguage(Context context, int i) {
+-        return context.getSharedPreferences("PICACOMIC_FREGATA", 0).edit().putInt("KEY_DESIGN_LANGUAGE", i).commit();
+-    }
+-
+     public static String am(Context context) {
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index d75ac4a..69f477b 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -94,3 +94,2 @@
+ 
+-
+ "</string>
+@@ -432,2 +431,4 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
+     <string name="crop__cancel">CANCEL</string>
++    <string name="crop_rotate_left">向左旋转</string>
++    <string name="crop_rotate_right">向右旋转</string>
+     <string name="crop__done">DONE</string>
+@@ -598,3 +599,2 @@ QQ和163电邮君不想跟我们做朋友，所以请你用其他电邮服务商
+     <string name="setting_testing_title">测试中功能</string>
+-    <string name="setting_design_language">设计语言</string>
+     <string name="setting_theme_color">主题颜色</string>
+@@ -665,2 +665,3 @@ http://line.me/ti/p/%40ztj0743u"</string>
+     <string name="theme_color_system_dynamic">跟随系统</string>
++    <string name="theme_color_moyuki">MoYuki · 雪昼 / 森夜</string>
+     <string name="time_format_minute_before">分钟前</string>

@@ -9,7 +9,7 @@
         <item name="android:windowEnterAnimation">@anim/design_bottom_sheet_slide_in</item>
         <item name="android:windowExitAnimation">@anim/design_bottom_sheet_slide_out</item>
     </style>
-    <style name="AppTheme" parent="@style/Theme.Material3.Light.NoActionBar">
+    <style name="AppTheme" parent="@style/Theme.Material3Expressive.Light.NoActionBar">
         <item name="android:windowBackground">@color/theme_light_surface</item>
         <item name="android:statusBarColor">@color/theme_light_surface</item>
         <item name="android:navigationBarColor">@color/theme_light_surface_variant</item>
@@ -63,7 +63,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <style name="AppTheme.Toolbar" parent="@style/Theme.Material3.Light">
+    <style name="AppTheme.Toolbar" parent="@style/Theme.Material3Expressive.Light">
         <item name="android:textColor">?attr/custom_text_black_color</item>
         <item name="android:background">?attr/colorSurface</item>
         <item name="titleTextColor">?attr/custom_text_black_color</item>
@@ -72,7 +72,7 @@
         <item name="custom_background_color">?attr/colorSurface</item>
         <item name="custom_background_color_dark">?attr/colorSurfaceVariant</item>
     </style>
-    <style name="AppThemeBlack" parent="@style/Theme.Material3.Dark.NoActionBar">
+    <style name="AppThemeBlack" parent="@style/Theme.Material3Expressive.Dark.NoActionBar">
         <item name="android:windowBackground">@color/theme_dark_surface</item>
         <item name="android:statusBarColor">@color/theme_dark_surface</item>
         <item name="android:navigationBarColor">@color/theme_dark_surface_variant</item>
@@ -112,32 +112,32 @@
         <item name="custom_text_black_color_light">@color/theme_dark_on_surface_variant</item>
         <item name="custom_transparent_white">@color/transparent_white</item>
     </style>
-    <style name="AppThemeNeon" parent="@style/Theme.Material3.Light.NoActionBar">
-        <item name="android:windowBackground">@color/theme_neon_light_background</item>
-        <item name="android:statusBarColor">@color/theme_neon_light_background</item>
-        <item name="android:navigationBarColor">@color/theme_neon_light_surface</item>
-        <item name="android:textColorHint">@color/theme_neon_light_outline</item>
-        <item name="android:editTextColor">@color/theme_neon_light_on_surface</item>
-        <item name="android:actionMenuTextColor">@color/theme_neon_light_on_surface</item>
+    <style name="AppThemeNeon" parent="@style/Theme.Material3Expressive.Light.NoActionBar">
+        <item name="android:windowBackground">#FCF8FF</item>
+        <item name="android:statusBarColor">#FCF8FF</item>
+        <item name="android:navigationBarColor">#FCF8FF</item>
+        <item name="android:textColorHint">#7A7583</item>
+        <item name="android:editTextColor">#1C1A22</item>
+        <item name="android:actionMenuTextColor">#1C1A22</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
-        <item name="colorAccent">@color/theme_neon_light_tertiary</item>
-        <item name="colorControlNormal">@color/theme_neon_light_outline</item>
-        <item name="colorPrimary">@color/theme_neon_light_primary</item>
-        <item name="colorPrimaryDark">@color/theme_neon_light_primary_dark</item>
-        <item name="colorSecondary">@color/theme_neon_light_secondary</item>
-        <item name="colorTertiary">@color/theme_neon_light_tertiary</item>
-        <item name="colorSurface">@color/theme_neon_light_surface</item>
-        <item name="colorSurfaceVariant">@color/theme_neon_light_surface_variant</item>
-        <item name="colorOutline">@color/theme_neon_light_outline</item>
+        <item name="colorAccent">#6F2CD8</item>
+        <item name="colorControlNormal">#7A7583</item>
+        <item name="colorPrimary">#6F2CD8</item>
+        <item name="colorPrimaryDark">#ECDCFF</item>
+        <item name="colorSecondary">#8F3472</item>
+        <item name="colorTertiary">#006874</item>
+        <item name="colorSurface">#FCF8FF</item>
+        <item name="colorSurfaceVariant">#E8E0F0</item>
+        <item name="colorOutline">#7A7583</item>
         <item name="toolbarStyle">@style/AppTheme.PopupOverlay</item>
         <item name="chatroom_background">@drawable/chat_bg_image_dark</item>
         <item name="chatroom_bubble_background">@drawable/bubble_dark_9</item>
         <item name="chatroom_reply_color">@color/theme_neon_light_surface_variant</item>
-        <item name="custom_background_color">@color/theme_neon_light_surface</item>
-        <item name="custom_background_color_dark">@color/theme_neon_light_surface_variant</item>
-        <item name="custom_primary_container_color">@color/theme_neon_light_primary_container</item>
-        <item name="custom_secondary_container_color">@color/theme_neon_light_secondary_container</item>
+        <item name="custom_background_color">#FCF8FF</item>
+        <item name="custom_background_color_dark">#E8E0F0</item>
+        <item name="custom_primary_container_color">#ECDCFF</item>
+        <item name="custom_secondary_container_color">#FFD8EE</item>
         <item name="custom_primary_overlay_color">@color/theme_neon_light_primary_overlay</item>
         <item name="custom_secondary_overlay_color">@color/theme_neon_light_secondary_overlay</item>
         <item name="custom_episode_downloaded_color">@color/theme_neon_light_episode_downloaded</item>
@@ -151,33 +151,59 @@
         <item name="custom_text_black_color_dark">@color/theme_neon_light_on_surface</item>
         <item name="custom_text_black_color_light">@color/theme_neon_light_outline</item>
         <item name="custom_transparent_white">@color/transparent_white</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#ECDCFF</item>
+        <item name="colorOnPrimaryContainer">#24005A</item>
+        <item name="colorPrimaryInverse">#D5BAFF</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#FFD8EE</item>
+        <item name="colorOnSecondaryContainer">#3B002B</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorTertiaryContainer">#9EEFFD</item>
+        <item name="colorOnTertiaryContainer">#001F24</item>
+        <item name="colorOnSurface">#1C1A22</item>
+        <item name="colorOnSurfaceVariant">#494552</item>
+        <item name="colorSurfaceInverse">#312E38</item>
+        <item name="colorOnSurfaceInverse">#F4EFFA</item>
+        <item name="colorError">#BA1A1A</item>
+        <item name="colorOnError">#FFFFFF</item>
+        <item name="colorErrorContainer">#FFDAD6</item>
+        <item name="colorOnErrorContainer">#410002</item>
+        <item name="colorOutlineVariant">#CBC4D4</item>
+        <item name="colorSurfaceBright">#FCF8FF</item>
+        <item name="colorSurfaceDim">#DDD8E4</item>
+        <item name="colorSurfaceContainerLowest">#FFFFFF</item>
+        <item name="colorSurfaceContainerLow">#F6F1FC</item>
+        <item name="colorSurfaceContainer">#F0EBF6</item>
+        <item name="colorSurfaceContainerHigh">#EAE5F0</item>
+        <item name="colorSurfaceContainerHighest">#E4DFEB</item>
     </style>
-    <style name="AppThemeNeonDark" parent="@style/Theme.Material3.Dark.NoActionBar">
-        <item name="android:windowBackground">@color/theme_neon_dark_background</item>
-        <item name="android:statusBarColor">@color/theme_neon_dark_background</item>
-        <item name="android:navigationBarColor">@color/theme_neon_dark_surface</item>
-        <item name="android:textColorHint">@color/theme_neon_dark_outline</item>
-        <item name="android:editTextColor">@color/theme_neon_dark_on_surface</item>
-        <item name="android:actionMenuTextColor">@color/theme_neon_dark_on_surface</item>
+    <style name="AppThemeNeonDark" parent="@style/Theme.Material3Expressive.Dark.NoActionBar">
+        <item name="android:windowBackground">#131118</item>
+        <item name="android:statusBarColor">#131118</item>
+        <item name="android:navigationBarColor">#131118</item>
+        <item name="android:textColorHint">#948E9E</item>
+        <item name="android:editTextColor">#E6E0EC</item>
+        <item name="android:actionMenuTextColor">#E6E0EC</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
-        <item name="colorAccent">@color/theme_neon_dark_tertiary</item>
-        <item name="colorControlNormal">@color/theme_neon_dark_outline</item>
-        <item name="colorPrimary">@color/theme_neon_dark_primary</item>
-        <item name="colorPrimaryDark">@color/theme_neon_dark_primary_dark</item>
-        <item name="colorSecondary">@color/theme_neon_dark_secondary</item>
-        <item name="colorTertiary">@color/theme_neon_dark_tertiary</item>
-        <item name="colorSurface">@color/theme_neon_dark_surface</item>
-        <item name="colorSurfaceVariant">@color/theme_neon_dark_surface_variant</item>
-        <item name="colorOutline">@color/theme_neon_dark_outline</item>
+        <item name="colorAccent">#D5BAFF</item>
+        <item name="colorControlNormal">#948E9E</item>
+        <item name="colorPrimary">#D5BAFF</item>
+        <item name="colorPrimaryDark">#5610B8</item>
+        <item name="colorSecondary">#FFADE0</item>
+        <item name="colorTertiary">#56E1F4</item>
+        <item name="colorSurface">#131118</item>
+        <item name="colorSurfaceVariant">#494552</item>
+        <item name="colorOutline">#948E9E</item>
         <item name="toolbarStyle">@style/AppTheme.PopupOverlay</item>
         <item name="chatroom_background">@drawable/chat_bg_image_dark</item>
         <item name="chatroom_bubble_background">@drawable/bubble_dark_9</item>
         <item name="chatroom_reply_color">@color/theme_neon_dark_background</item>
-        <item name="custom_background_color">@color/theme_neon_dark_surface</item>
-        <item name="custom_background_color_dark">@color/theme_neon_dark_background</item>
-        <item name="custom_primary_container_color">@color/theme_neon_dark_primary_container</item>
-        <item name="custom_secondary_container_color">@color/theme_neon_dark_secondary_container</item>
+        <item name="custom_background_color">#131118</item>
+        <item name="custom_background_color_dark">#494552</item>
+        <item name="custom_primary_container_color">#5610B8</item>
+        <item name="custom_secondary_container_color">#5E204B</item>
         <item name="custom_primary_overlay_color">@color/theme_neon_dark_primary_overlay</item>
         <item name="custom_secondary_overlay_color">@color/theme_neon_dark_secondary_overlay</item>
         <item name="custom_episode_downloaded_color">@color/theme_neon_dark_episode_downloaded</item>
@@ -191,6 +217,32 @@
         <item name="custom_text_black_color_dark">@color/theme_neon_dark_on_surface</item>
         <item name="custom_text_black_color_light">@color/theme_neon_dark_outline</item>
         <item name="custom_transparent_white">@color/transparent_white</item>
+        <item name="colorOnPrimary">#3D008D</item>
+        <item name="colorPrimaryContainer">#5610B8</item>
+        <item name="colorOnPrimaryContainer">#ECDCFF</item>
+        <item name="colorPrimaryInverse">#6F2CD8</item>
+        <item name="colorOnSecondary">#580B41</item>
+        <item name="colorSecondaryContainer">#5E204B</item>
+        <item name="colorOnSecondaryContainer">#FFD8EE</item>
+        <item name="colorOnTertiary">#00363D</item>
+        <item name="colorTertiaryContainer">#004F58</item>
+        <item name="colorOnTertiaryContainer">#9EEFFD</item>
+        <item name="colorOnSurface">#E6E0EC</item>
+        <item name="colorOnSurfaceVariant">#CBC4D4</item>
+        <item name="colorSurfaceInverse">#E6E0EC</item>
+        <item name="colorOnSurfaceInverse">#312E38</item>
+        <item name="colorError">#FFB4AB</item>
+        <item name="colorOnError">#690005</item>
+        <item name="colorErrorContainer">#93000A</item>
+        <item name="colorOnErrorContainer">#FFDAD6</item>
+        <item name="colorOutlineVariant">#494552</item>
+        <item name="colorSurfaceBright">#393640</item>
+        <item name="colorSurfaceDim">#131118</item>
+        <item name="colorSurfaceContainerLowest">#0E0C13</item>
+        <item name="colorSurfaceContainerLow">#1B1921</item>
+        <item name="colorSurfaceContainer">#1F1D26</item>
+        <item name="colorSurfaceContainerHigh">#2A2731</item>
+        <item name="colorSurfaceContainerHighest">#35323C</item>
     </style>
     <style name="Base.AlertDialog.AppCompat" parent="@android:style/Widget">
         <item name="android:layout">@layout/abc_alert_dialog_material</item>

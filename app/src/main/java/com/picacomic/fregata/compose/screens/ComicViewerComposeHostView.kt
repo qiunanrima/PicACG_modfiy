@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -323,7 +324,7 @@ private fun ZoomableReaderLayer(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.surface)
             .onSizeChanged {
                 size = it
                 clampOffsets()
@@ -436,14 +437,14 @@ private fun ComicViewerPage(
         if (imageSource == null) {
             Text(
                 text = page.comicPageId.orEmpty(),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 60.sp,
                 modifier = Modifier.padding(24.dp),
             )
         } else {
             Text(
                 text = pageNumber.toString(),
-                color = Color.White.copy(alpha = 0.48f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 60.sp,
                 modifier = Modifier.align(Alignment.Center),
             )

@@ -196,7 +196,7 @@ These attrs are the current semantic bridge for XML pages:
 
 Typography now follows the same source-of-truth order as color:
 
-1. Compose semantic source: `PicaTypography.kt`
+1. Compose semantic source: `MaterialExpressiveTheme` and `PicaExpressiveTokens.kt`
 2. Compose binding: `PicaComposeTheme.kt`
 3. Legacy semantic text appearances: `styles.xml` `TextAppearance.Pica.*`
 4. Legacy compatibility wrappers: `TextBaseStyle*`

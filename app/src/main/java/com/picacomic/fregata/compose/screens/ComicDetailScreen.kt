@@ -29,13 +29,10 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -197,8 +194,8 @@ fun ComicDetailScreen(
                     },
                     // MD3: TopAppBar 颜色跟随 colorScheme，滚动后自动显示 surfaceContainer 背景
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         titleContentColor = MaterialTheme.colorScheme.onSurface,
                         navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                         actionIconContentColor = MaterialTheme.colorScheme.onSurface
@@ -207,7 +204,7 @@ fun ComicDetailScreen(
                 )
             },
             // MD3: Scaffold 自动处理背景色，无需手动 background modifier
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.surface
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -414,11 +411,10 @@ private fun ComicDetailContent(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        shownTags.forEachIndexed { index, tag ->
+                        shownTags.forEach { tag ->
                             PicaTag(
                                 text = tag,
                                 onClick = { onComicListClick(null, tag, null, null, null, null) },
-                                selected = index == 0,
                             )
                         }
                     }
@@ -671,30 +667,28 @@ private fun CollapsibleDescriptionRow(
     supportingText: String,
 ) {
     val shouldCollapse = description.length > 90 || description.count { it == '\n' } > 2
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
             .clickable(enabled = shouldCollapse, onClick = onToggle)
             .padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.Top,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
             text = "简介",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(0.8f),
         )
         Column(
-            modifier = Modifier.weight(1.2f),
-            horizontalAlignment = Alignment.End,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
         ) {
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                 maxLines = if (shouldCollapse && !expanded) 5 else Int.MAX_VALUE,
                 overflow = if (shouldCollapse && !expanded) TextOverflow.Ellipsis else TextOverflow.Clip,
             )
@@ -706,7 +700,7 @@ private fun CollapsibleDescriptionRow(
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = if (shouldCollapse) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Start,
             )
         }
     }

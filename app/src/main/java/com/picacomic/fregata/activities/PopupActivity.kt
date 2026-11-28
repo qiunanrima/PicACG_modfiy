@@ -5,14 +5,13 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.picacomic.fregata.compose.navigation.Screen
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.resolvePicaDarkTheme
 import com.picacomic.fregata.compose.screens.ApkVersionListScreen
@@ -91,7 +90,6 @@ class PopupActivity : BaseActivity() {
                         onScrollDirection = settingsViewModel::openScrollDirectionDialog,
                         onAutoPaging = settingsViewModel::openAutoPagingDialog,
                         onImageQuality = settingsViewModel::openImageQualityDialog,
-                        onDesignLanguage = settingsViewModel::openDesignLanguageDialog,
                         onThemeColor = settingsViewModel::openThemeColorDialog,
                         onLauncherIcon = settingsViewModel::openLauncherIconDialog,
                         onCoilCacheSize = settingsViewModel::openCoilCacheSizeDialog,
@@ -121,16 +119,6 @@ class PopupActivity : BaseActivity() {
                         onScreenOrientationSelected = settingsViewModel::selectScreenOrientationIndex,
                         onScrollDirectionSelected = settingsViewModel::selectScrollDirectionIndex,
                         onImageQualitySelected = settingsViewModel::selectImageQualityIndex,
-                        onDesignLanguageSelected = { index ->
-                            val previous = settingsViewModel.state.designLanguageIndex
-                            settingsViewModel.selectDesignLanguageIndex(index)
-                            if (previous != index) {
-                                startActivity(Intent(this@PopupActivity, PopupActivity::class.java).apply {
-                                    putExtra(EXTRA_KEY_TYPE, TYPE_KEY_SETTING)
-                                })
-                                finish()
-                            }
-                        },
                         onThemeColorSelected = { index ->
                             val previous = settingsViewModel.state.themeColorIndex
                             settingsViewModel.selectThemeColorIndex(index)

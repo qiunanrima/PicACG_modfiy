@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -73,7 +74,8 @@ fun LockDialogContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black),
+                .background(MaterialTheme.colorScheme.surface)
+                .safeDrawingPadding(),
             contentAlignment = Alignment.Center,
         ) {
             Surface(
@@ -82,9 +84,7 @@ fun LockDialogContent(
                     .widthIn(max = 360.dp)
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-                tonalElevation = 6.dp,
-                shadowElevation = 18.dp,
+                color = MaterialTheme.colorScheme.surfaceContainerHighest,
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 30.dp),
@@ -187,7 +187,7 @@ private fun LockPinDigitField(
     val containerColor = when {
         hasError -> colorScheme.errorContainer.copy(alpha = 0.30f)
         value.isNotEmpty() -> colorScheme.primaryContainer.copy(alpha = 0.46f)
-        else -> colorScheme.surfaceVariant.copy(alpha = 0.58f)
+        else -> colorScheme.surfaceContainerHighest
     }
 
     BasicTextField(

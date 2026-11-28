@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Report
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -333,6 +334,7 @@ fun TitleEditDialogContent(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Button(
+                            shapes = ButtonDefaults.shapes(),
                             modifier = Modifier.weight(1f),
                             enabled = !viewModel.isLoading,
                             onClick = { viewModel.aj(viewModel.newTitle) },

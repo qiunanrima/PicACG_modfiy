@@ -2,9 +2,9 @@ package com.picacomic.fregata.compose.viewmodels
 
 import android.app.Application
 import android.content.Intent
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.picacomic.fregata.R
 import com.picacomic.fregata.activities.LoginActivity
@@ -35,19 +35,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val orientations = app.resources.getStringArray(R.array.setting_options_screen_orientations)
         val directions = app.resources.getStringArray(R.array.setting_options_scroll_directions)
         val qualities = app.resources.getStringArray(R.array.setting_options_image_qualities)
-        val designLanguages = app.resources.getStringArray(R.array.setting_design_languages)
         val colors = app.resources.getStringArray(R.array.setting_theme_colors).toMutableList().apply {
             if (ThemeColorHelper.isSystemDynamicColorAvailable()) {
                 add(app.getString(R.string.theme_color_system_dynamic))
             }
+            add(app.getString(R.string.theme_color_moyuki))
         }
         val launcherIcons = listOf("默认图标", "Miracle Neon")
 
         val rx = if (e.M(app)) 0 else 1
         val rz = if (e.N(app)) 0 else 1
         val rB = e.R(app)
-        val designLanguageIndex = e.getDesignLanguage(app).coerceIn(0, designLanguages.lastIndex)
-        val rD = ThemeColorHelper.resolveStoredThemeIndex(app).coerceIn(0, colors.lastIndex)
+        val rD = ThemeColorHelper.toThemeOptionIndex(ThemeColorHelper.resolveStoredThemeIndex(app))
+            .coerceIn(0, colors.lastIndex)
         val launcherIconIndex = app.getSharedPreferences(PREFS_NAME, 0)
             .getInt(KEY_LAUNCHER_ICON, 0)
             .coerceIn(0, launcherIcons.lastIndex)
@@ -64,8 +64,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             autoPagingIntervalMs = hM,
             imageQualityValue = qualities.getOrElse(rB) { "" },
             imageQualityIndex = rB,
-            designLanguageValue = designLanguages.getOrElse(designLanguageIndex) { "" },
-            designLanguageIndex = designLanguageIndex,
             themeColorValue = colors.getOrElse(rD) { "" },
             themeColorIndex = rD,
             launcherIconValue = launcherIcons.getOrElse(launcherIconIndex) { "" },
@@ -114,10 +112,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         state = state.copy(activeDialog = SettingsDialog.ImageQuality)
     }
 
-    fun openDesignLanguageDialog() {
-        state = state.copy(activeDialog = SettingsDialog.DesignLanguage)
-    }
-
     fun openThemeColorDialog() {
         state = state.copy(activeDialog = SettingsDialog.ThemeColor)
     }
@@ -159,17 +153,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         loadSettings()
     }
 
-    fun selectDesignLanguageIndex(index: Int) {
-        state = state.copy(activeDialog = null)
-        e.setDesignLanguage(getApplication(), index.coerceIn(0, 1))
-        loadSettings()
-    }
-
     fun selectThemeColorIndex(index: Int) {
         val maxIndex = getApplication<Application>().resources.getStringArray(R.array.setting_theme_colors).lastIndex +
-            if (ThemeColorHelper.isSystemDynamicColorAvailable()) 1 else 0
+            if (ThemeColorHelper.isSystemDynamicColorAvailable()) 2 else 1
         state = state.copy(activeDialog = null)
-        e.h(getApplication(), index.coerceIn(0, maxIndex))
+        e.h(getApplication(), ThemeColorHelper.toStoredThemeIndex(index.coerceIn(0, maxIndex)))
         loadSettings()
     }
 

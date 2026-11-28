@@ -6,7 +6,6 @@ import android.content.Context
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,8 +26,8 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,16 +39,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -62,7 +59,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import androidx.compose.ui.viewinterop.AndroidView
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
@@ -133,8 +129,8 @@ fun SupportUsScreen(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                            scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         ),
                         scrollBehavior = scrollBehavior,
                     )
@@ -142,11 +138,11 @@ fun SupportUsScreen(
                         selectedTabIndex = selectedTab,
                         tabs = tabs,
                         onTabSelected = { selectedTab = it },
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
                     )
                 }
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -287,6 +283,7 @@ private fun SupportUsAdsGameTab(
         item {
             SupportSectionCard(title = stringResource(R.string.support_us_game_title)) {
                 Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = onGameClick,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -358,18 +355,13 @@ private fun SupportSectionCard(
     title: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val expressive = isPicaExpressiveTheme()
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (expressive) {
-                MaterialTheme.colorScheme.surfaceContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            },
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
-        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -404,19 +396,14 @@ private fun PayPalSupportCard(
     description: String,
     onClick: () -> Unit,
 ) {
-    val expressive = isPicaExpressiveTheme()
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (expressive) {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
-        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.extraLarge,
     ) {
         Row(
             modifier = Modifier.padding(14.dp),

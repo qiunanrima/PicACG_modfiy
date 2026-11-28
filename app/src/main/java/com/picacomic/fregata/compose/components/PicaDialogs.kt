@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.R
 import com.picacomic.fregata.compose.PicaComposeTheme
 import com.picacomic.fregata.compose.PicaExpressiveMotion
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 // ─── 确认 Dialog ────────────────────────────────────────────────────────────
 
@@ -42,18 +41,13 @@ fun PicaConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val expressive = isPicaExpressiveTheme()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = title) },
         text = body?.let { { Text(text = it) } },
-        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
-        containerColor = if (expressive) {
-            MaterialTheme.colorScheme.surfaceContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHighest
-        },
-        tonalElevation = if (expressive) 4.dp else 6.dp,
+        shape = MaterialTheme.shapes.extraLarge,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 4.dp,
         confirmButton = {
             TextButton(onClick = {
                 onConfirm()
@@ -92,7 +86,6 @@ fun PicaSingleChoiceDialog(
     onSelect: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val expressive = isPicaExpressiveTheme()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = title) },
@@ -117,13 +110,9 @@ fun PicaSingleChoiceDialog(
                 }
             }
         },
-        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
-        containerColor = if (expressive) {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHighest
-        },
-        tonalElevation = if (expressive) 6.dp else 8.dp,
+        shape = MaterialTheme.shapes.extraLarge,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 6.dp,
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {

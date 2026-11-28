@@ -10,8 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.picacomic.fregata.compose.PicaComposeTheme
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 // ─── 加载中 ──────────────────────────────────────────────────────────────────
 
@@ -36,11 +34,7 @@ import com.picacomic.fregata.compose.isPicaExpressiveTheme
 fun PicaProgressIndicator(
     modifier: Modifier = Modifier,
 ) {
-    if (isPicaExpressiveTheme()) {
-        CircularWavyProgressIndicator(modifier = modifier)
-    } else {
-        CircularProgressIndicator(modifier = modifier)
-    }
+    LoadingIndicator(modifier = modifier)
 }
 
 @Composable

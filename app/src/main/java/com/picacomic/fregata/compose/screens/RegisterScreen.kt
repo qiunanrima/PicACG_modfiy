@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -28,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,7 +96,7 @@ fun RegisterScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.extraSmall,
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                            containerColor = MaterialTheme.colorScheme.surface,
                         ),
                     ) {
                         Box(
@@ -114,7 +114,7 @@ fun RegisterScreen(
                         }
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.background,
+                containerColor = MaterialTheme.colorScheme.surface,
             ) { padding ->
                 LazyColumn(
                     modifier = Modifier
@@ -302,6 +302,7 @@ private fun GenderSelector(
             genders.forEachIndexed { index, label ->
                 if (selectedGenderIndex == index) {
                     Button(
+                        shapes = ButtonDefaults.shapes(),
                         onClick = { onGenderChange(index) },
                         modifier = Modifier.weight(1f),
                     ) {

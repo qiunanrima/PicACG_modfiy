@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -108,7 +107,7 @@ fun LeaderboardScreen(
                             stringResource(R.string.leaderboard_tab_knight),
                         ),
                         onTabSelected = { selectedTab = it },
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
                     )
                     if (selectedTab == 0) {
                         Row(
@@ -139,7 +138,7 @@ fun LeaderboardScreen(
                     }
                 }
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.surface
         ) { innerPadding ->
             Box(
                 modifier = Modifier

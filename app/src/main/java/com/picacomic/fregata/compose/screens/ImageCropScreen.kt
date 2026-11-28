@@ -16,8 +16,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FloatingActionButton
@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -51,6 +52,7 @@ fun ImageCropScreen(
 ) {
     PicaComposeTheme {
         val context = LocalContext.current
+        val colors = MaterialTheme.colorScheme
         val cropView = remember { PicaCropImageView(context) }
 
         LaunchedEffect(imageUriString, cropType) {
@@ -67,10 +69,15 @@ fun ImageCropScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(androidx.compose.ui.graphics.Color.Black),
+                .background(colors.surface)
+                .safeDrawingPadding(),
         ) {
             AndroidView(
                 factory = { cropView },
+                update = { view ->
+                    view.setBackgroundColor(colors.surface.toArgb())
+                    view.setOverlayColor(colors.scrim.copy(alpha = 0.67f).toArgb())
+                },
                 modifier = Modifier.fillMaxSize(),
             )
 
@@ -78,19 +85,22 @@ fun ImageCropScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
                     .padding(24.dp),
             ) {
                 CropFab(
                     iconRes = R.drawable.ic_rotate_left_black_24dp,
+                    description = stringResource(R.string.crop_rotate_left),
                     onClick = { cropView.rotateLeft() },
                 )
                 CropFab(
                     iconRes = R.drawable.ic_rotate_right_black_24dp,
+                    description = stringResource(R.string.crop_rotate_right),
                     onClick = { cropView.rotateRight() },
                 )
                 CropFab(
                     iconRes = R.drawable.ic_done_black_24dp,
+                    description = stringResource(R.string.crop__done),
+                    primary = true,
                     onClick = {
                         val uri = cropView.cropToCache()
                         if (uri != null) onCropped(uri) else onError()
@@ -104,17 +114,19 @@ fun ImageCropScreen(
 @Composable
 private fun CropFab(
     iconRes: Int,
+    description: String,
+    primary: Boolean = false,
     onClick: () -> Unit,
 ) {
     FloatingActionButton(
         onClick = onClick,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.primary,
+        containerColor = if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.size(48.dp),
     ) {
         Icon(
             painter = painterResource(iconRes),
-            contentDescription = null,
+            contentDescription = description,
         )
     }
 }
@@ -136,7 +148,6 @@ class PicaCropImageView(context: Context) : View(context) {
     }
     private val overlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = android.graphics.Color.argb(170, 0, 0, 0)
     }
     private val scaleDetector = ScaleGestureDetector(context, ScaleListener())
     private var bitmap: Bitmap? = null
@@ -146,6 +157,13 @@ class PicaCropImageView(context: Context) : View(context) {
     private var dragging = false
     private var touchMode = TouchMode.None
     private var resizeEdges = EDGE_NONE
+
+    fun setOverlayColor(color: Int) {
+        if (overlayPaint.color != color) {
+            overlayPaint.color = color
+            invalidate()
+        }
+    }
 
     fun load(uri: Uri, cropType: Int): Boolean {
         release()
@@ -209,7 +227,6 @@ class PicaCropImageView(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(Color.BLACK)
         val currentBitmap = bitmap ?: return
 
         canvas.drawBitmap(currentBitmap, imageMatrix, null)

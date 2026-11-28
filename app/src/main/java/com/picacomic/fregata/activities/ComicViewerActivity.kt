@@ -5,10 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
+import android.content.res.ColorStateList
+import com.google.android.material.color.MaterialColors
+import com.google.android.material.R as MaterialR
 import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
@@ -20,7 +23,6 @@ import android.os.CountDownTimer
 import android.provider.Settings
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -50,9 +52,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -120,74 +122,29 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             val order = episode?.getOrder() ?: (position + 1)
             textView.text = episode?.getTitle()?.takeIf { it.isNotBlank() } ?: "第 $order 话"
             val selected = order == this@ComicViewerActivity.episodeOrder
-            val expressive = e.getDesignLanguage(this@ComicViewerActivity).coerceIn(0, 1) == 1
-            textView.applyMd3EpisodeStyle(selected, expressive)
+            textView.applyEpisodeStyle(selected)
             return textView
         }
 
-        private fun TextView.applyMd3EpisodeStyle(selected: Boolean, expressive: Boolean) {
-            val cornerRadius = resources.getDimensionPixelSize(R.dimen.padding_1).toFloat()
-            val strokeWidth = resources.getDimensionPixelSize(R.dimen.size_card_style_edge_width)
-            val backgroundColor = resolveThemeColor(
-                if (selected && expressive) {
-                    R.attr.custom_secondary_overlay_color
-                } else if (selected) {
-                    R.attr.custom_primary_overlay_color
-                } else {
-                    R.attr.custom_transparent_white
-                },
-                R.attr.custom_transparent_white
-            )
-            val textColor = resolveThemeColor(
-                R.attr.custom_transparent_white,
-                R.attr.custom_text_black_color_light
-            )
-            val outlineColor = resolveThemeColor(
-                if (selected && expressive) {
-                    R.attr.custom_secondary_overlay_color
-                } else if (selected) {
-                    R.attr.custom_primary_overlay_color
-                } else {
-                    R.attr.custom_transparent_white
-                },
-                R.attr.custom_transparent_white
-            )
-
-            setTextColor(textColor)
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                setColor(if (selected) backgroundColor.withAlpha(0.48f) else Color.TRANSPARENT)
+        private fun TextView.applyEpisodeStyle(selected: Boolean) {
+            val fillRole = if (selected) MaterialR.attr.colorSecondaryContainer else MaterialR.attr.colorSurfaceContainer
+            val textRole = if (selected) MaterialR.attr.colorOnSecondaryContainer else MaterialR.attr.colorOnSurface
+            val textColor = MaterialColors.getColor(this, textRole)
+            val cornerRadius = 16 * resources.displayMetrics.density
+            val shape = GradientDrawable().apply {
+                setColor(MaterialColors.getColor(this@applyEpisodeStyle, fillRole))
                 setCornerRadius(cornerRadius)
-                setStroke(strokeWidth, if (selected) outlineColor.withAlpha(0.95f) else outlineColor.withAlpha(0.18f))
             }
-        }
 
-        private fun resolveThemeColor(attr: Int, fallbackAttr: Int): Int {
-            val typedValue = TypedValue()
-            return if (theme.resolveAttribute(attr, typedValue, true)) {
-                typedValue.toColor()
-            } else {
-                theme.resolveAttribute(fallbackAttr, typedValue, true)
-                typedValue.toColor()
-            }
-        }
-
-        private fun TypedValue.toColor(): Int {
-            return if (resourceId != 0) {
-                ContextCompat.getColor(this@ComicViewerActivity, resourceId)
-            } else {
-                data
-            }
-        }
-
-        private fun Int.withAlpha(alpha: Float): Int {
-            return Color.argb(
-                (alpha.coerceIn(0f, 1f) * 255).toInt(),
-                Color.red(this),
-                Color.green(this),
-                Color.blue(this)
+            isSelected = selected
+            setTextColor(textColor)
+            background = RippleDrawable(
+                ColorStateList.valueOf(MaterialColors.compositeARGBWithAlpha(textColor, 31)),
+                shape,
+                null,
             )
         }
+
     }
 
     var binding: ActivityComicViewerBinding? = null
@@ -348,7 +305,12 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
         this.frameLayout_gestureArea =
             findViewById<FrameLayout>(R.id.frameLayout_comic_viewer_gesture_area)
         this.frameLayout_nightModeMask = this.binding!!.frameLayoutComicViewerNightModeMask
-        this.gridView_episodeDialog = this.binding!!.gridViewComicViewerDialogSelectEpisode
+        this.gridView_episodeDialog = this.binding!!.gridViewComicViewerDialogSelectEpisode.apply {
+            background = GradientDrawable().apply {
+                setColor(MaterialColors.getColor(this@ComicViewerActivity, MaterialR.attr.colorSurfaceContainerHighest, Color.BLACK))
+                setCornerRadius(22 * resources.displayMetrics.density)
+            }
+        }
         this.imageButton_back = this.binding!!.layoutToolbar.imageButtonComicViewerBack
         this.linearLayout_bottomPanel =
             this.binding!!.layoutBottomPanel.linearLayoutComicViewerBottomPanel
@@ -1953,11 +1915,18 @@ class ComicViewerActivity : BaseActivity(), com.picacomic.fregata.a_pkg.d {
             this.button_previousPage!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_previous_page_vertical))
             this.button_panel!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu))
             this.button_panelLeftCorner!!.setText(getResources().getString(R.string.comic_viewer_setting_panel_setting_menu))
-            this.button_nextPageRight!!.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark))
-            this.button_nextPageBottom!!.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark))
-            this.button_previousPage!!.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark))
-            this.button_panel!!.setBackgroundColor(getResources().getColor(R.color.green_transparent_30))
-            this.button_panelLeftCorner!!.setBackgroundColor(getResources().getColor(R.color.green_transparent_30))
+            val navigationColor = MaterialColors.getColor(this, MaterialR.attr.colorSecondaryContainer, Color.DKGRAY)
+            val navigationText = MaterialColors.getColor(this, MaterialR.attr.colorOnSecondaryContainer, Color.WHITE)
+            listOfNotNull(button_nextPageRight, button_nextPageBottom, button_previousPage).forEach { button ->
+                button.setBackgroundColor(navigationColor)
+                button.setTextColor(navigationText)
+            }
+            val actionColor = MaterialColors.getColor(this, MaterialR.attr.colorPrimaryContainer, Color.DKGRAY)
+            val actionText = MaterialColors.getColor(this, MaterialR.attr.colorOnPrimaryContainer, Color.WHITE)
+            listOfNotNull(button_panel, button_panelLeftCorner).forEach { button ->
+                button.setBackgroundColor(actionColor)
+                button.setTextColor(actionText)
+            }
             this.frameLayout_gestureArea!!.setVisibility(View.VISIBLE)
         }
     }

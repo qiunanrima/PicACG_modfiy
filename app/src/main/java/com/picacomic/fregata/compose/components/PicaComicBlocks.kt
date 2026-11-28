@@ -30,8 +30,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -82,14 +80,6 @@ fun PicaTag(
         draggedElevation = 0.dp,
         disabledElevation = 0.dp,
     )
-    val flatSuggestionChipElevation = SuggestionChipDefaults.suggestionChipElevation(
-        elevation = 0.dp,
-        pressedElevation = 0.dp,
-        focusedElevation = 0.dp,
-        hoveredElevation = 0.dp,
-        draggedElevation = 0.dp,
-        disabledElevation = 0.dp,
-    )
     if (onClick != null) {
         FilterChip(
             selected = selected,
@@ -116,19 +106,7 @@ fun PicaTag(
             elevation = flatFilterChipElevation,
         )
     } else {
-        SuggestionChip(
-            onClick = {},
-            enabled = false,
-            label = {
-                Text(
-                    text = text,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
-            modifier = modifier,
-            elevation = flatSuggestionChipElevation,
-        )
+        PicaInfoChip(text = text, modifier = modifier)
     }
 }
 
@@ -172,14 +150,14 @@ fun PicaStatRow(
                 text = value,
                 style = PicaExpressiveType.BodyEmphasized,
                 color = valueColor,
-                textAlign = TextAlign.End,
+                textAlign = TextAlign.Start,
             )
             if (!supportingText.isNullOrBlank()) {
                 Text(
                     text = supportingText,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.End,
+                    textAlign = TextAlign.Start,
                 )
             }
         }
@@ -288,7 +266,7 @@ fun PicaEpisodeGridItem(
 ) {
     val shape = MaterialTheme.shapes.medium
     val containerColor = when (state) {
-        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)
+        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.surfaceContainerLow
         PicaEpisodeGridItemState.Downloading -> MaterialTheme.colorScheme.primaryContainer
         PicaEpisodeGridItemState.Downloaded -> MaterialTheme.colorScheme.primaryContainer
         PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.secondaryContainer
@@ -300,7 +278,7 @@ fun PicaEpisodeGridItem(
         PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.onSecondaryContainer
     }
     val borderColor = when (state) {
-        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+        PicaEpisodeGridItemState.Default -> MaterialTheme.colorScheme.outlineVariant
         PicaEpisodeGridItemState.Downloading -> MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
         PicaEpisodeGridItemState.Downloaded -> MaterialTheme.colorScheme.primary.copy(alpha = 0.32f)
         PicaEpisodeGridItemState.Selected -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.42f)
@@ -360,7 +338,7 @@ fun PicaRecommendationCard(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
             contentAlignment = Alignment.Center,
         ) {
             Text(

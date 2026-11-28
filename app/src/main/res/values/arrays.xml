@@ -110,10 +110,6 @@
         <item>左侧</item>
         <item>右侧</item>
     </string-array>
-    <string-array name="setting_design_languages">
-        <item>MD3</item>
-        <item>MD3E</item>
-    </string-array>
     <string-array name="sorting_advanced">
         <item>@string/sorting_dd</item>
         <item>@string/sorting_da</item>

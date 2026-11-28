@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -141,8 +140,8 @@ fun ComicDownloadScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     scrollBehavior = scrollBehavior,
                 )
@@ -156,7 +155,7 @@ fun ComicDownloadScreen(
                     },
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             ComicDownloadContent(
                 modifier = Modifier
@@ -367,7 +366,7 @@ private fun ComicDownloadBottomBar(
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(
             modifier = Modifier
@@ -376,6 +375,7 @@ private fun ComicDownloadBottomBar(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Button(
+                shapes = ButtonDefaults.shapes(),
                 onClick = onDownloadClick,
                 enabled = selectedCount > 0,
                 modifier = Modifier.weight(1f),

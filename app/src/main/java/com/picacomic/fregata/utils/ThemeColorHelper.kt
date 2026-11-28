@@ -7,6 +7,7 @@ import com.google.android.material.color.DynamicColors
 
 object ThemeColorHelper {
     const val SYSTEM_DYNAMIC_INDEX: Int = 9
+    const val MOYUKI_INDEX: Int = 10
 
     @JvmStatic
     fun isSystemDynamicColorAvailable(): Boolean = DynamicColors.isDynamicColorAvailable()
@@ -21,9 +22,18 @@ object ThemeColorHelper {
         }
     }
 
+    fun toThemeOptionIndex(storedIndex: Int): Int =
+        if (storedIndex == MOYUKI_INDEX && !isSystemDynamicColorAvailable()) SYSTEM_DYNAMIC_INDEX else storedIndex
+
+    fun toStoredThemeIndex(optionIndex: Int): Int =
+        if (optionIndex == SYSTEM_DYNAMIC_INDEX && !isSystemDynamicColorAvailable()) MOYUKI_INDEX else optionIndex
+
     @JvmStatic
     fun resolveLegacyThemeResId(context: Context): Int {
         val themeIndex = resolveStoredThemeIndex(context)
+        if (themeIndex == MOYUKI_INDEX) {
+            return if (e.L(context) || isSystemInDarkTheme(context)) R.style.AppThemeMoYukiDark else R.style.AppThemeMoYukiLight
+        }
         if (themeIndex == 2) {
             return if (isSystemInDarkTheme(context)) {
                 R.style.AppThemeNeonDark
@@ -41,6 +51,7 @@ object ThemeColorHelper {
     fun isThemeIndexDarkForLegacyContent(context: Context, themeIndex: Int): Boolean {
         return when (themeIndex) {
             1, 2 -> true
+            MOYUKI_INDEX -> e.L(context) || isSystemInDarkTheme(context)
             SYSTEM_DYNAMIC_INDEX -> isSystemInDarkTheme(context)
             else -> false
         }

@@ -26,6 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -306,7 +307,7 @@ private fun PicaUpdateApkCard(
         ) {
             TextButton(onClick = onClose) { Text(text = "Close") }
             OutlinedButton(onClick = onBrowserDownload) { Text(text = "Web") }
-            Button(onClick = onApkDownload) { Text(text = "APK") }
+            Button(shapes = ButtonDefaults.shapes(), onClick = onApkDownload) { Text(text = "APK") }
         }
     }
 }
@@ -441,7 +442,7 @@ private fun DialogButtons(
             }
         }
         if (positiveVisible) {
-            Button(onClick = onPositive) {
+            Button(shapes = ButtonDefaults.shapes(), onClick = onPositive) {
                 Text(text = positiveText)
             }
         }

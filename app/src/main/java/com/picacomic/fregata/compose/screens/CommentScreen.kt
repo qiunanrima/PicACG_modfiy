@@ -1,13 +1,16 @@
+@file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
 package com.picacomic.fregata.compose.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,16 +21,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -60,11 +60,20 @@ import com.picacomic.fregata.objects.UserProfileObject
 import com.picacomic.fregata.utils.g
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.automirrored.filled.Reply
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Alignment
@@ -208,8 +217,8 @@ fun CommentScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         titleContentColor = MaterialTheme.colorScheme.onSurface,
                         navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
@@ -244,7 +253,7 @@ fun CommentScreen(
                     )
                 }
             },
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.surface
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -368,10 +377,8 @@ fun ReaderCommentSidebar(
 
     PicaComposeTheme {
         Surface(
-            modifier = modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-            tonalElevation = 6.dp,
-            shadowElevation = 6.dp,
+            modifier = modifier.fillMaxSize().safeDrawingPadding(),
+            color = MaterialTheme.colorScheme.surface,
         ) {
             val vm = screenViewModel
             when {
@@ -514,9 +521,9 @@ private fun CommentCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = if (item.isTop) {
-                MaterialTheme.colorScheme.primaryContainer
+                MaterialTheme.colorScheme.surfaceContainerHigh
             } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
+                MaterialTheme.colorScheme.surfaceContainerLow
             },
         ),
     ) {
@@ -569,7 +576,7 @@ private fun CommentCard(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                    Row(
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -597,28 +604,24 @@ private fun CommentCard(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                IconButton(onClick = onReport) {
-                    Icon(
-                        imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.comment_option_title),
-                    )
-                }
             }
             if (profileExpanded) {
                 CommentProfilePanel(user = user)
             }
             if (item.isTop || index < 0) {
-                AssistChip(
-                    onClick = {},
-                    label = {
-                        Text(
-                            text = stringResource(R.string.comment_top_comment_title_prefix) +
-                                floor.coerceAtLeast(0) +
-                                stringResource(R.string.comment_top_comment_title_suffix),
-                        )
-                    },
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
-                )
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ) {
+                    Text(
+                        text = stringResource(R.string.comment_top_comment_title_prefix) +
+                            floor.coerceAtLeast(0) +
+                            stringResource(R.string.comment_top_comment_title_suffix),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
             }
             if (isProfileMode && !targetTitle.isNullOrBlank()) {
                 TextButton(onClick = onOpenTarget) {
@@ -636,19 +639,19 @@ private fun CommentCard(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 CommentActionButton(
                     text = if (item.isLiked) "已赞 ${item.likesCount}" else "赞好 ${item.likesCount}",
                     onClick = onLike,
-                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.ThumbUp,
                 )
                 CommentActionButton(
                     text = stringResource(R.string.comment_reply),
                     onClick = onReply,
-                    modifier = Modifier.weight(1f),
+                    icon = Icons.AutoMirrored.Filled.Reply,
                 )
                 CommentActionButton(
                     text = if (expanded) {
@@ -657,19 +660,17 @@ private fun CommentCard(
                         "展开 ${item.childsCount}"
                     },
                     onClick = onToggleReplies,
-                    modifier = Modifier.weight(1f),
+                    icon = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                 )
                 CommentActionButton(
                     text = stringResource(R.string.comment_option_title),
                     onClick = onReport,
-                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.MoreVert,
                 )
             }
             if (adminMode) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TextButton(onClick = onDirty) { Text(stringResource(R.string.comment_tool_dirty)) }
@@ -749,7 +750,7 @@ private fun ReplyRow(
     var profileExpanded by rememberSaveable(reply.commentId, user.name) { mutableStateOf(false) }
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
         shape = MaterialTheme.shapes.small,
     ) {
         Column(
@@ -801,7 +802,7 @@ private fun ReplyRow(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                    Row(
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -829,12 +830,6 @@ private fun ReplyRow(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                IconButton(onClick = onReport) {
-                    Icon(
-                        imageVector = Icons.Filled.MoreVert,
-                        contentDescription = stringResource(R.string.comment_option_title),
-                    )
-                }
             }
             if (profileExpanded) {
                 CommentProfilePanel(user = user)
@@ -844,26 +839,24 @@ private fun ReplyRow(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 CommentActionButton(
                     text = if (reply.isLiked) "已赞 ${reply.likesCount}" else "赞好 ${reply.likesCount}",
                     onClick = onLike,
-                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.ThumbUp,
                 )
                 CommentActionButton(
                     text = stringResource(R.string.comment_option_title),
                     onClick = onReport,
-                    modifier = Modifier.weight(1f),
+                    icon = Icons.Filled.MoreVert,
                 )
             }
             if (adminMode) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TextButton(onClick = onDirty) { Text(stringResource(R.string.comment_tool_dirty)) }
@@ -880,19 +873,20 @@ private fun ReplyRow(
 private fun CommentActionButton(
     text: String,
     onClick: () -> Unit,
+    icon: ImageVector,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
     TextButton(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+        modifier = modifier.heightIn(min = 48.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
     ) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(6.dp))
         Text(
             text = text,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -933,9 +927,9 @@ private fun CommentAvatar(
 private fun CommentProfilePanel(user: CommentDisplayUser) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.16f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -946,10 +940,10 @@ private fun CommentProfilePanel(user: CommentDisplayUser) {
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Row(
-                modifier = Modifier.horizontalScroll(rememberScrollState()),
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
                     text = "昵称 ${user.name.ifBlank { "Anonymous" }}",
@@ -1119,9 +1113,7 @@ private fun CommentInputBar(
     val submitText = stringResource(if (replyMode) R.string.comment_reply else R.string.comment_send)
     val hintText = stringResource(if (replyMode) R.string.comment_reply_edit_hint else R.string.comment_edit_hint)
     Surface(
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 2.dp,
-        shadowElevation = 2.dp
+        color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         Row(
             modifier = Modifier
@@ -1131,11 +1123,11 @@ private fun CommentInputBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (replyMode) {
-                TextButton(
+                IconButton(
                     onClick = onCancelReply,
                     enabled = !isPosting
                 ) {
-                    Text(text = stringResource(R.string.comment_reply_cancel))
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.comment_reply_cancel))
                 }
             }
             OutlinedTextField(
@@ -1157,17 +1149,15 @@ private fun CommentInputBar(
                     }
                 )
             )
-            Button(
+            FilledIconButton(
                 onClick = {
                     onSubmit()
                     focusManager.clearFocus()
                 },
                 enabled = !isPosting,
-                modifier = Modifier
-                    .width(88.dp)
-                    .heightIn(min = 56.dp),
+                modifier = Modifier.size(48.dp),
             ) {
-                Text(text = submitText)
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = submitText)
             }
         }
     }

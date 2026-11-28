@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,11 +34,11 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -54,7 +55,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
@@ -135,13 +135,13 @@ fun GameDetailScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             when {
                 !inPreview && screenViewModel?.isLoading == true && detail == null -> PicaLoadingIndicator()
@@ -260,7 +260,7 @@ private fun GameDetailContent(
                         ).filter { (_, value) -> value.toIntOrNull()?.let { it > 0 } == true },
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = onDownload, modifier = Modifier.weight(1f)) {
+                        Button(shapes = ButtonDefaults.shapes(), onClick = onDownload, modifier = Modifier.weight(1f)) {
                             Icon(
                                 Icons.Filled.Download,
                                 contentDescription = stringResource(R.string.download),
@@ -418,7 +418,8 @@ private fun GameDetailPopup(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.88f))
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.88f))
+            .safeDrawingPadding()
             .pointerInput(showVideo, screenshots, selectedIndex) {
                 if (showVideo || screenshots.size < 2) return@pointerInput
                 detectHorizontalDragGestures(
@@ -469,14 +470,18 @@ private fun GameDetailPopup(
                     }
                     .transformable(state = transformState),
             )
-            Text(
-                text = "${selectedIndex + 1} / ${screenshots.size}",
-                color = Color.White,
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 20.dp),
-            )
+            Surface(
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp),
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            ) {
+                Text(
+                    text = "${selectedIndex + 1} / ${screenshots.size}",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                )
+            }
         }
         IconButton(
             onClick = onClose,

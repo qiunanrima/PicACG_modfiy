@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.picacomic.fregata.compose.PicaControlTokens
 import com.picacomic.fregata.compose.PicaExpressiveType
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 
 @Composable
 fun PicaPrimaryButton(
@@ -19,12 +18,11 @@ fun PicaPrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val expressive = isPicaExpressiveTheme()
 
     Button(
         onClick = onClick,
         enabled = enabled,
-        shape = if (expressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
+        shapes = ButtonDefaults.shapes(),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -35,7 +33,7 @@ fun PicaPrimaryButton(
     ) {
         Text(
             text = text,
-            style = if (expressive) PicaExpressiveType.LabelEmphasized else MaterialTheme.typography.labelLarge,
+            style = PicaExpressiveType.LabelEmphasized,
         )
     }
 }

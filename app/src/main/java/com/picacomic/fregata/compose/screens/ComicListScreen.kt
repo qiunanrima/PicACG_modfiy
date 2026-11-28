@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
 import androidx.compose.material3.AssistChip
+import com.picacomic.fregata.compose.components.PicaInfoChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +39,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -237,13 +237,13 @@ fun ComicListScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     scrollBehavior = scrollBehavior,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             val comics = if (inPreview) previewState?.comics.orEmpty() else screenViewModel?.comics.orEmpty()
             LazyColumn(
@@ -273,7 +273,7 @@ fun ComicListScreen(
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             screenViewModel.selectedAdvancedCategories.forEach { category ->
-                                AssistChip(onClick = {}, label = { Text(category) })
+                                PicaInfoChip(text = category)
                             }
                         }
                     }
@@ -463,8 +463,8 @@ private fun ComicListControlPanel(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.48f),
                         cursorColor = MaterialTheme.colorScheme.primary,
@@ -478,8 +478,8 @@ private fun ComicListControlPanel(
                         .heightIn(min = 52.dp),
                 )
                 Button(
+                    shapes = ButtonDefaults.shapes(),
                     onClick = onJump,
-                    shape = MaterialTheme.shapes.large,
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,

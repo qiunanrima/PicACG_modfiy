@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -164,8 +164,8 @@ fun AnonymousChatScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     ),
                     scrollBehavior = scrollBehavior,
                 )
@@ -180,7 +180,7 @@ fun AnonymousChatScreen(
                     )
                 }
             },
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.surface,
         ) { innerPadding ->
             if (screenViewModel?.isLoadingProfile == true) {
                 Box(
@@ -279,6 +279,7 @@ private fun AnonymousMatchPanel(
                 label = { Text(stringResource(R.string.anonymous_chat_name_hint)) },
             )
             Button(
+                shapes = ButtonDefaults.shapes(),
                 onClick = {
                     if (connected) {
                         onMatch()
@@ -366,8 +367,8 @@ private fun AnonymousMessageBubble(
         Surface(
             modifier = Modifier.widthIn(max = 280.dp),
             shape = MaterialTheme.shapes.large,
-            color = if (mine) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
-            contentColor = if (mine) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+            color = if (mine) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
             Column(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -398,7 +399,7 @@ private fun AnonymousChatInputBar(
 ) {
     Surface(
         tonalElevation = 3.dp,
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(
             modifier = Modifier

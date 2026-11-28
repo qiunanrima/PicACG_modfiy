@@ -2,13 +2,14 @@ package com.picacomic.fregata.compose.components
 
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.WideNavigationRailItemDefaults
+import androidx.compose.material3.ShortNavigationBarItemDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailDefaults
-import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.WideNavigationRail
+import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
@@ -16,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.picacomic.fregata.compose.isPicaExpressiveTheme
 import com.picacomic.fregata.compose.navigation.Screen
 
 @Composable
@@ -27,46 +27,40 @@ fun PicaNavigationBar(
     vertical: Boolean = false,
 ) {
     if (vertical) {
-        NavigationRail(
-            modifier = Modifier.fillMaxHeight(),
-            containerColor = NavigationRailDefaults.ContainerColor,
+        WideNavigationRail(
+            modifier = Modifier.fillMaxHeight().safeDrawingPadding(),
+            windowInsets = WindowInsets(0, 0, 0, 0),
         ) {
             items.forEach { screen ->
-                NavigationRailItem(
+                WideNavigationRailItem(
                     modifier = Modifier.padding(vertical = 4.dp),
                     selected = currentRoute == screen.route,
                     onClick = { onItemClick(screen) },
                     icon = { PicaNavigationIcon(screen, currentRoute) },
                     label = { Text(stringResource(id = screen.titleRes)) },
-                    alwaysShowLabel = false,
+                    railExpanded = false,
+                    colors = WideNavigationRailItemDefaults.colors(
+                        selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
                 )
             }
         }
         return
     }
 
-    if (isPicaExpressiveTheme()) {
-        ShortNavigationBar {
-            items.forEach { screen ->
-                ShortNavigationBarItem(
-                    selected = currentRoute == screen.route,
-                    onClick = { onItemClick(screen) },
-                    icon = { PicaNavigationIcon(screen, currentRoute) },
-                    label = { Text(stringResource(id = screen.titleRes)) },
-                )
-            }
-        }
-    } else {
-        NavigationBar {
-            items.forEach { screen ->
-                NavigationBarItem(
-                    selected = currentRoute == screen.route,
-                    onClick = { onItemClick(screen) },
-                    icon = { PicaNavigationIcon(screen, currentRoute) },
-                    label = { Text(stringResource(id = screen.titleRes)) },
-                    alwaysShowLabel = false,
-                )
-            }
+    ShortNavigationBar {
+        items.forEach { screen ->
+            ShortNavigationBarItem(
+                colors = ShortNavigationBarItemDefaults.colors(
+                    selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
+                selected = currentRoute == screen.route,
+                onClick = { onItemClick(screen) },
+                icon = { PicaNavigationIcon(screen, currentRoute) },
+                label = { Text(stringResource(id = screen.titleRes)) },
+            )
         }
     }
 }
