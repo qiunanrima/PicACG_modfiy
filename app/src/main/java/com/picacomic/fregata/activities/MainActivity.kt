@@ -58,6 +58,13 @@ import retrofit2.Callback
 import retrofit2.Response
 import kotlin.math.abs
 import androidx.navigation.NavHostController
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import com.picacomic.fregata.compose.LocalPhysicalMotion
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -266,8 +273,14 @@ class MainActivity : BaseActivity() {
                             )
                         }
                         Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+                    val motion = androidx.compose.material3.MaterialTheme.motionScheme
+                    val animateNavigation = LocalPhysicalMotion.current
                     NavHost(
                         navController = navController,
+                        enterTransition = { if (animateNavigation) slideInHorizontally(motion.defaultSpatialSpec()) { it / 8 } + fadeIn(motion.fastEffectsSpec()) else EnterTransition.None },
+                        exitTransition = { if (animateNavigation) slideOutHorizontally(motion.defaultSpatialSpec()) { -it / 12 } + fadeOut(motion.fastEffectsSpec()) else ExitTransition.None },
+                        popEnterTransition = { if (animateNavigation) slideInHorizontally(motion.defaultSpatialSpec()) { -it / 12 } + fadeIn(motion.fastEffectsSpec()) else EnterTransition.None },
+                        popExitTransition = { if (animateNavigation) slideOutHorizontally(motion.defaultSpatialSpec()) { it / 8 } + fadeOut(motion.fastEffectsSpec()) else ExitTransition.None },
                         startDestination = if (offlineMode) Screen.Profile.route else Screen.Home.route,
                         modifier = Modifier.fillMaxSize()
                     ) {

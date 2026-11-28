@@ -492,8 +492,9 @@ private fun ChatroomContent(
                 }
             }
             androidx.compose.animation.AnimatedVisibility(visible && viewModel.connectionNotice != null, Modifier.align(Alignment.TopCenter).padding(top = 6.dp),
-                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { -it / 2 },
-                exit = androidx.compose.animation.fadeOut()) {
+                enter = androidx.compose.animation.fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()) +
+                    androidx.compose.animation.slideInVertically(MaterialTheme.motionScheme.fastSpatialSpec()) { -it / 2 },
+                exit = androidx.compose.animation.fadeOut(MaterialTheme.motionScheme.fastEffectsSpec())) {
                 Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
                     Text(viewModel.connectionNotice.orEmpty(), Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
                         style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

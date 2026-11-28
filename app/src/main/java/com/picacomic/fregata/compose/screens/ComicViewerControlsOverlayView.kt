@@ -119,31 +119,39 @@ class ComicViewerControlsOverlayView @JvmOverloads constructor(
                         darkTheme = resolvePicaDarkTheme(forceNightMode, themeIndex),
                         themeColorIndex = themeIndex,
                     ) {
-                        ComicViewerControlsOverlay(
+                        val motion = MaterialTheme.motionScheme
+                        androidx.compose.animation.AnimatedVisibility(
                             visible = controlsVisible,
-                            comicTitle = comicTitle,
-                            episodeTitle = episodeTitle,
-                            onBack = { onBack?.invoke() },
-                            onHint = { onHint?.invoke() },
-                            pageLabel = pageLabel,
-                            pageProgress = pageProgress,
-                            pageMax = pageMax,
-                            brightness = brightness,
-                            automaticBrightness = automaticBrightness,
-                            onBrightnessModeChanged = { onBrightnessModeChanged?.invoke(it) },
-                            autoPagingSeconds = autoPagingSeconds,
-                            isNightMode = isNightMode,
-                            onHide = { onHide?.invoke() },
-                            onScreenOrientation = { onScreenOrientation?.invoke() },
-                            onScrollOrientation = { onScrollOrientation?.invoke() },
-                            onAutoPaging = { onAutoPaging?.invoke() },
-                            onSettings = { onSettings?.invoke() },
-                            onSelectEpisode = { onSelectEpisode?.invoke() },
-                            onNightMode = { onNightMode?.invoke() },
-                            onComment = { onComment?.invoke() },
-                            onPageChanged = { onPageChanged?.invoke(it) },
-                            onBrightnessChanged = { onBrightnessChanged?.invoke(it) },
-                        )
+                            enter = androidx.compose.animation.fadeIn(motion.fastEffectsSpec()) +
+                                androidx.compose.animation.scaleIn(motion.fastSpatialSpec(), initialScale = 0.96f),
+                            exit = androidx.compose.animation.fadeOut(motion.fastEffectsSpec()) +
+                                androidx.compose.animation.scaleOut(motion.fastSpatialSpec(), targetScale = 0.96f),
+                        ) {
+                            ComicViewerControlsOverlay(
+                                comicTitle = comicTitle,
+                                episodeTitle = episodeTitle,
+                                onBack = { onBack?.invoke() },
+                                onHint = { onHint?.invoke() },
+                                pageLabel = pageLabel,
+                                pageProgress = pageProgress,
+                                pageMax = pageMax,
+                                brightness = brightness,
+                                automaticBrightness = automaticBrightness,
+                                onBrightnessModeChanged = { onBrightnessModeChanged?.invoke(it) },
+                                autoPagingSeconds = autoPagingSeconds,
+                                isNightMode = isNightMode,
+                                onHide = { onHide?.invoke() },
+                                onScreenOrientation = { onScreenOrientation?.invoke() },
+                                onScrollOrientation = { onScrollOrientation?.invoke() },
+                                onAutoPaging = { onAutoPaging?.invoke() },
+                                onSettings = { onSettings?.invoke() },
+                                onSelectEpisode = { onSelectEpisode?.invoke() },
+                                onNightMode = { onNightMode?.invoke() },
+                                onComment = { onComment?.invoke() },
+                                onPageChanged = { onPageChanged?.invoke(it) },
+                                onBrightnessChanged = { onBrightnessChanged?.invoke(it) },
+                            )
+                        }
                     }
                 }
             },
@@ -185,7 +193,6 @@ class ComicViewerControlsOverlayView @JvmOverloads constructor(
 
 @Composable
 private fun ComicViewerControlsOverlay(
-    visible: Boolean,
     comicTitle: String,
     episodeTitle: String,
     onBack: () -> Unit,
@@ -209,9 +216,6 @@ private fun ComicViewerControlsOverlay(
     onPageChanged: (Int) -> Unit,
     onBrightnessChanged: (Int) -> Unit,
 ) {
-    if (!visible) {
-        return
-    }
     BoxWithConstraints(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         val isTabletWidth = maxWidth >= 600.dp
         val sidePadding = if (isTabletWidth) 28.dp else 12.dp

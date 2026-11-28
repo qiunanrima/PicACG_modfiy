@@ -51,6 +51,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.remember
 import androidx.compose.animation.core.animateDpAsState
+import com.picacomic.fregata.compose.pressMotion
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -421,9 +422,11 @@ fun PicaRecommendationCard(
 ) {
     val recommendationContainer = MaterialTheme.colorScheme.surfaceContainerLow
 
+    val pressSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Card(
         onClick = onClick,
-        modifier = modifier,
+        interactionSource = pressSource,
+        modifier = modifier.pressMotion(pressSource),
         colors = CardDefaults.cardColors(
             containerColor = recommendationContainer,
             contentColor = MaterialTheme.colorScheme.onSurface,

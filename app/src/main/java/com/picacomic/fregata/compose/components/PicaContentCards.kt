@@ -42,6 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import com.picacomic.fregata.compose.pressMotion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -243,10 +244,12 @@ fun PicaComicListCard(
     quickAction: (@Composable () -> Unit)? = null,
     lastViewedAt: Long? = null,
 ) {
+    val pressSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     androidx.compose.material3.Card(
         onClick = onClick,
+        interactionSource = pressSource,
         shape = shape,
-        modifier = modifier
+        modifier = modifier.pressMotion(pressSource)
             .fillMaxWidth()
             .heightIn(min = 136.dp),
         colors = CardDefaults.cardColors(
@@ -376,10 +379,12 @@ fun PicaGameCard(
         if (adult) add(stringResource(R.string.game_tag_adult))
     }
 
+    val pressSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     OutlinedCard(
         onClick = onClick,
+        interactionSource = pressSource,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.pressMotion(pressSource).fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
@@ -462,9 +467,11 @@ fun PicaTwoLineCard(
     supporting: String? = null,
     categories: List<String> = emptyList(),
 ) {
+    val pressSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        interactionSource = pressSource,
+        modifier = modifier.pressMotion(pressSource).fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(

@@ -255,6 +255,15 @@ fun SettingsScreen(
 
                 SettingsSection(title = stringResource(R.string.setting_other_title), rows = listOf(
                     { shape ->
+                        val context = LocalContext.current
+                        PicaSwitchListItem(
+                            segmentShape = shape,
+                            label = "MD3E 物理动效",
+                            checked = com.picacomic.fregata.compose.LocalPhysicalMotion.current,
+                            onCheckedChange = { com.picacomic.fregata.compose.setPhysicalMotion(context, it) },
+                        )
+                    },
+                    { shape ->
                         PicaSwitchListItem(
                             segmentShape = shape,
                             label = stringResource(R.string.setting_performance_enhancement),

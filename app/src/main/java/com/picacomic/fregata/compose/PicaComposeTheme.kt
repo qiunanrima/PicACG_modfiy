@@ -52,6 +52,9 @@ fun PicaComposeTheme(
     }
 
     val context = LocalContext.current
+    val physicalMotion = rememberPhysicalMotion()
+    val motion = androidx.compose.runtime.remember(physicalMotion) { if (physicalMotion) MotionScheme.expressive() else InstantMotion }
+    val overscroll = androidx.compose.runtime.remember(motion) { if (physicalMotion) PicaOverscrollFactory(motion.defaultSpatialSpec()) else null }
     val view = LocalView.current
     val colorScheme = picaColorScheme(context, themeColorIndex, darkTheme)
 
@@ -68,10 +71,12 @@ fun PicaComposeTheme(
 
     CompositionLocalProvider(
         LocalPicaThemeApplied provides true,
+        LocalPhysicalMotion provides physicalMotion,
+        androidx.compose.foundation.LocalOverscrollFactory provides overscroll,
     ) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
-            motionScheme = MotionScheme.expressive(),
+            motionScheme = motion,
             shapes = PicaShapes,
             content = content,
         )
