@@ -94,7 +94,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
     var pageLimit by mutableIntStateOf(DEFAULT_PAGE_LIMIT)
         private set
 
-    var pageJumpBase by mutableIntStateOf(1)
+    var firstLoadedPage by mutableIntStateOf(1)
         private set
 
     var hasMore by mutableStateOf(true)
@@ -142,10 +142,31 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
     private var currentCall: Call<*>? = null
     private var requestKey: String? = null
     private var currentRequest: ComicListRequest? = null
-    private var recentOffset = 0
-    private var downloadedOffset = 0
-    private var downloadingOffset = 0
-    private var shouldResetOnNextLoad = false
+    private val loadedPages = sortedMapOf<Int, List<ComicListObject>>()
+    private val locations = mutableMapOf<ComicListObject, Pair<Int, Int>>()
+    var jumpEvent by mutableIntStateOf(0)
+        private set
+
+    fun comicPage(comic: ComicListObject) = locations[comic]?.first ?: 1
+
+    fun comicKey(comic: ComicListObject, index: Int): String {
+        val location = locations[comic]
+        return "comic_${location?.first ?: 1}_${location?.second ?: index}_${comic.comicId.orEmpty()}"
+    }
+
+    private fun acceptPage(number: Int, items: List<ComicListObject>, replace: Boolean) {
+        if (replace) {
+            loadedPages.clear()
+            locations.clear()
+        }
+        loadedPages[number] = items
+        items.forEachIndexed { index, comic -> locations[comic] = number to index }
+        comics = loadedPages.values.flatten()
+        firstLoadedPage = loadedPages.firstKey()
+        page = loadedPages.lastKey() + 1
+        hasMore = page <= totalPage
+        if (replace) jumpEvent++
+    }
 
     fun init(
         category: String? = null,
@@ -226,13 +247,18 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         }
 
         if (isLoading || !hasMore) return
+        requestPage(request, page)
+    }
+
+    private fun requestPage(request: ComicListRequest, number: Int, replace: Boolean = false) {
+        if (isLoading) return
         when (request.category) {
             "CATEGORY_RANDOM" -> fetchRandom()
-            "CATEGORY_RECENT_VIEW" -> loadRecentView()
-            "CATEGORY_DOWNLOADING" -> loadDownloading()
-            "CATEGORY_DOWNLOADED" -> loadDownloaded()
-            "CATEGORY_USER_FAVOURITE" -> fetchRemote(request, favourite = true)
-            else -> fetchRemote(request, favourite = false)
+            "CATEGORY_RECENT_VIEW" -> loadRecentView(number, replace)
+            "CATEGORY_DOWNLOADING" -> loadDownloading(number, replace)
+            "CATEGORY_DOWNLOADED" -> loadDownloaded(number, replace)
+            "CATEGORY_USER_FAVOURITE" -> fetchRemote(request, number, replace, favourite = true)
+            else -> fetchRemote(request, number, replace, favourite = false)
         }
     }
 
@@ -242,18 +268,13 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun jumpToPage(targetPage: Int) {
-        val safePage = targetPage.coerceAtLeast(1)
-        pageJumpBase = safePage
-        page = safePage
-        shouldResetOnNextLoad = true
-        if (currentRequest?.category == "CATEGORY_RECENT_VIEW") {
-            recentOffset = (safePage - 1) * pageLimit
-        } else if (currentRequest?.category == "CATEGORY_DOWNLOADING") {
-            downloadingOffset = (safePage - 1) * pageLimit
-        } else if (currentRequest?.category == "CATEGORY_DOWNLOADED") {
-            downloadedOffset = (safePage - 1) * pageLimit
-        }
-        loadData()
+        val request = currentRequest ?: return
+        requestPage(request, targetPage.coerceIn(1, totalPage.coerceAtLeast(1)), replace = true)
+    }
+
+    fun loadPreviousPage() {
+        val request = currentRequest ?: return
+        if (firstLoadedPage > 1) requestPage(request, firstLoadedPage - 1)
     }
 
     fun clearRecentView() {
@@ -319,7 +340,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         loadData()
     }
 
-    private fun fetchRemote(request: ComicListRequest, favourite: Boolean) {
+    private fun fetchRemote(request: ComicListRequest, number: Int, replace: Boolean, favourite: Boolean) {
         isLoading = true
 
         val context = getApplication<Application>()
@@ -331,7 +352,7 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             !request.keywords.isNullOrBlank() -> {
                 api.a(
                     auth,
-                    page,
+                    number,
                     SortingBody(
                         request.keywords,
                         request.sorting ?: c.uR[advancedSortingIndex],
@@ -341,13 +362,13 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             }
 
             favourite -> {
-                api.a(auth, c.uQ[favouriteSortingIndex], page) as Call<*>
+                api.a(auth, c.uQ[favouriteSortingIndex], number) as Call<*>
             }
 
             else -> {
                 api.a(
                     auth,
-                    page,
+                    number,
                     request.category,
                     request.tags,
                     request.author,
@@ -370,12 +391,8 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
                     val paging = response.body()?.data?.comics
                     val docs = (paging?.docs ?: emptyList()).filterNot(::isComicBlocked)
                     pageLimit = paging?.limit ?: pageLimit
-                    val base = if (shouldResetOnNextLoad) emptyList() else comics
-                    comics = base + docs
                     totalPage = paging?.pages ?: 1
-                    page = (paging?.page ?: page) + 1
-                    hasMore = page <= totalPage
-                    shouldResetOnNextLoad = false
+                    acceptPage(paging?.page ?: number, docs, replace)
                 } else {
                     emitHttpError(response.code(), safeErrorBody(response))
                 }
@@ -424,14 +441,14 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         })
     }
 
-    private fun loadRecentView() {
+    private fun loadRecentView(number: Int, replace: Boolean) {
         isLoading = true
         try {
             val records = DbComicViewRecordObject.findWithQuery(
                 DbComicViewRecordObject::class.java,
                 "SELECT * FROM db_comic_view_record_object WHERE last_view_timestamp > 0 ORDER BY last_view_timestamp DESC LIMIT ? OFFSET ?",
                 pageLimit.toString(),
-                recentOffset.toString()
+                ((number - 1L) * pageLimit).toString()
             ) ?: emptyList()
             val loaded = ArrayList<ComicListObject>()
             records.forEach { raw ->
@@ -454,29 +471,21 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             )
             totalPage = totalPagesFromCount(totalCount)
             val filtered = loaded.filterNot(::isComicBlocked)
-            comics = if (shouldResetOnNextLoad) filtered else comics + filtered
-            recentOffset += loaded.size
-            hasMore = recentOffset < totalCount
-            if (loaded.isNotEmpty()) {
-                page += 1
-            } else if (comics.isEmpty()) {
-                hasMore = false
-            }
-            shouldResetOnNextLoad = false
+            acceptPage(number, filtered, replace)
         } catch (_: Exception) {
             emitNetworkError()
         }
         isLoading = false
     }
 
-    private fun loadDownloaded() {
+    private fun loadDownloaded(number: Int, replace: Boolean) {
         isLoading = true
         try {
             val records = DbComicDetailObject.findWithQuery(
                 DbComicDetailObject::class.java,
                 "SELECT * FROM db_comic_detail_object WHERE download_status = 4 ORDER BY downloaded_at DESC LIMIT ? OFFSET ?",
                 pageLimit.toString(),
-                downloadedOffset.toString()
+                ((number - 1L) * pageLimit).toString()
             ) ?: emptyList<Any>()
             val loaded = records.mapNotNull { raw ->
                 (raw as? DbComicDetailObject)?.let { ComicListObject(it) }
@@ -488,29 +497,21 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             )
             totalPage = totalPagesFromCount(totalCount)
             val filtered = loaded.filterNot(::isComicBlocked)
-            comics = if (shouldResetOnNextLoad) filtered else comics + filtered
-            downloadedOffset += loaded.size
-            hasMore = downloadedOffset < totalCount
-            if (loaded.isNotEmpty()) {
-                page += 1
-            } else if (comics.isEmpty()) {
-                hasMore = false
-            }
-            shouldResetOnNextLoad = false
+            acceptPage(number, filtered, replace)
         } catch (_: Exception) {
             emitNetworkError()
         }
         isLoading = false
     }
 
-    private fun loadDownloading() {
+    private fun loadDownloading(number: Int, replace: Boolean) {
         isLoading = true
         try {
             val records = DbComicDetailObject.findWithQuery(
                 DbComicDetailObject::class.java,
                 "SELECT * FROM db_comic_detail_object WHERE download_status > 0 AND download_status < 4 ORDER BY downloaded_at DESC LIMIT ? OFFSET ?",
                 pageLimit.toString(),
-                downloadingOffset.toString()
+                ((number - 1L) * pageLimit).toString()
             ) ?: emptyList<Any>()
             val loaded = records.mapNotNull { raw ->
                 (raw as? DbComicDetailObject)?.let { ComicListObject(it) }
@@ -526,20 +527,12 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
             )
             totalPage = totalPagesFromCount(totalCount)
             val filtered = loaded.filterNot(::isComicBlocked)
-            comics = if (shouldResetOnNextLoad) filtered else comics + filtered
-            downloadingProgressText = if (shouldResetOnNextLoad) {
+            downloadingProgressText = if (replace) {
                 loadedProgress
             } else {
                 downloadingProgressText + loadedProgress
             }
-            downloadingOffset += loaded.size
-            hasMore = downloadingOffset < totalCount
-            if (loaded.isNotEmpty()) {
-                page += 1
-            } else if (comics.isEmpty()) {
-                hasMore = false
-            }
-            shouldResetOnNextLoad = false
+            acceptPage(number, filtered, replace)
         } catch (_: Exception) {
             emitNetworkError()
         }
@@ -553,13 +546,11 @@ class ComicListViewModel(application: Application) : AndroidViewModel(applicatio
         page = 1
         totalPage = 1
         pageLimit = DEFAULT_PAGE_LIMIT
-        pageJumpBase = 1
+        firstLoadedPage = 1
+        loadedPages.clear()
+        locations.clear()
         hasMore = true
         isLoading = false
-        recentOffset = 0
-        downloadedOffset = 0
-        downloadingOffset = 0
-        shouldResetOnNextLoad = false
     }
 
     private fun refreshPreferenceState() {

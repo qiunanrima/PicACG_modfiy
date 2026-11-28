@@ -73,6 +73,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.material3.AlertDialog
@@ -119,6 +123,24 @@ fun ComicListScreen(
     val context = LocalContext.current
     val screenViewModel = previewAwareViewModel(viewModel)
     val listState = rememberLazyListState()
+    val previousPageScroll = remember(listState, screenViewModel) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (source == NestedScrollSource.UserInput && available.y > 0f && listState.firstVisibleItemIndex <= 2) {
+                    screenViewModel?.loadPreviousPage()
+                }
+                return Offset.Zero
+            }
+        }
+    }
+    var handledJump by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(screenViewModel?.jumpEvent ?: 0) }
+    LaunchedEffect(screenViewModel?.jumpEvent) {
+        val vm = screenViewModel ?: return@LaunchedEffect
+        if (handledJump != vm.jumpEvent) {
+            handledJump = vm.jumpEvent
+            listState.scrollToItem(if (vm.comics.isEmpty()) 0 else 1)
+        }
+    }
     val scope = rememberCoroutineScope()
     val previewState = if (inPreview) comicListPreviewState(category, keywords, tags, author, translate, creatorName) else null
     val isFavourite = category == "CATEGORY_USER_FAVOURITE"
@@ -312,10 +334,10 @@ fun ComicListScreen(
             bottomBar = {
                 val pages = screenViewModel?.totalPage ?: previewState?.totalPage ?: 1
                 if (pages > 1) {
-                    val current = ((screenViewModel?.page ?: 2) - 1).coerceIn(1, pages)
+                    val index = (listState.firstVisibleItemIndex - 1).coerceAtLeast(0)
+                    val current = screenViewModel?.let { vm -> vm.comics.getOrNull(index)?.let(vm::comicPage) ?: vm.firstLoadedPage } ?: 1
                     PagePicker(current, pages, screenViewModel?.isLoading != true) { page ->
                         screenViewModel?.jumpToPage(page)
-                        scope.launch { listState.scrollToItem(0) }
                     }
                 }
             },
@@ -332,6 +354,7 @@ fun ComicListScreen(
             LazyColumn(
                 state = listState,
                 modifier = Modifier
+                    .nestedScroll(previousPageScroll)
                     .fillMaxSize()
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding)
@@ -372,7 +395,7 @@ fun ComicListScreen(
                     else -> {
                         itemsIndexed(
                             items = comics,
-                            key = { index, item -> stableLazyKey("comic", index, item.comicId, item.title) },
+                            key = { index, item -> screenViewModel?.comicKey(item, index) ?: stableLazyKey("comic", index, item.comicId, item.title) },
                         ) { index, item ->
                             val top = if (index == 0) 24.dp else 4.dp
                             val bottom = if (index == comics.lastIndex) 24.dp else 4.dp
@@ -487,7 +510,11 @@ private fun PagePicker(current: Int, total: Int, enabled: Boolean, onJump: (Int)
     var open by rememberSaveable { mutableStateOf(false) }
     var text by rememberSaveable(current) { mutableStateOf(current.toString()) }
     Box(Modifier.fillMaxWidth().navigationBarsPadding(), contentAlignment = Alignment.Center) {
-        FilledTonalButton(enabled = enabled, onClick = { text = current.toString(); open = true }) { Text("$current / $total") }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(enabled = enabled && current > 1, onClick = { onJump(current - 1) }) { Text("上一页") }
+            FilledTonalButton(enabled = enabled, onClick = { text = current.toString(); open = true }) { Text("$current / $total") }
+            TextButton(enabled = enabled && current < total, onClick = { onJump(current + 1) }) { Text("下一页") }
+        }
     }
     if (open) {
         val page = text.toIntOrNull()?.takeIf { it in 1..total }
